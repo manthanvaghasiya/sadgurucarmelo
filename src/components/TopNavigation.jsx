@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, Phone, MessageCircle } from 'lucide-react';
+import { Menu, X, Phone, MessageCircle, User } from 'lucide-react';
 
 export default function TopNavigation() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -63,6 +63,13 @@ export default function TopNavigation() {
               <MessageCircle className="w-4 h-4" />
               Live Chat
             </a>
+            <Link
+              to="/login"
+              className="border-2 border-primary text-primary hover:bg-primary hover:text-white px-5 py-2.5 rounded-lg font-body font-bold text-sm flex items-center gap-2 transition-colors"
+            >
+              <User className="w-4 h-4" />
+              Login
+            </Link>
           </div>
 
           {/* Mobile Menu Toggle Button */}
@@ -98,6 +105,13 @@ export default function TopNavigation() {
               <a href="https://wa.me/919913634447" target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-2 bg-accent hover:bg-accent-hover text-white py-3.5 rounded-xl font-body font-bold shadow-md shadow-accent/20 transition-colors">
                 <MessageCircle className="w-5 h-5" /> WhatsApp Chat
               </a>
+              <Link
+                to="/login"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="flex items-center justify-center gap-2 border-2 border-primary text-primary hover:bg-primary hover:text-white py-3.5 rounded-xl font-body font-bold transition-colors"
+              >
+                <User className="w-5 h-5" /> Login / Portal Access
+              </Link>
             </div>
           </div>
         </div>
