@@ -8,8 +8,8 @@ export default function TopNavigation() {
 
   const navLinks = [
     { name: 'Home', path: '/' },
-    { name: 'Our Inventory', path: '/inventory' },
-    { name: 'Services', path: '/services' },
+    { name: 'Catalog', path: '/inventory' },
+    { name: 'About Us', path: '/services' },
     { name: 'Contact', path: '/contact' },
   ];
 

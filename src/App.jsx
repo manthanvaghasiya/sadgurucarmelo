@@ -7,14 +7,22 @@ import Services from './pages/Services';
 import Contact from './pages/Contact';
 import CarDetails from './pages/CarDetails';
 
+// Unified Login
+import UnifiedLogin from './pages/Login';
+
 // Admin Panel Imports
 import AdminLayout from './components/admin/AdminLayout';
-import Login from './pages/admin/Login';
+import AdminLogin from './pages/admin/Login';
 import Dashboard from './pages/admin/Dashboard';
 import AddCar from './pages/admin/AddCar';
 import AdminInventory from './pages/admin/Inventory';
 import AdminLeads from './pages/admin/Leads';
 import AdminSettings from './pages/admin/Settings';
+
+// Sales Portal Imports
+import SalesLogin from './pages/sales/SalesLogin';
+import SalesDashboard from './pages/sales/SalesDashboard';
+import AddLead from './pages/sales/AddLead';
 
 function App() {
   return (
@@ -43,8 +51,11 @@ function App() {
           }
         />
 
+        {/* ── Unified Login ── */}
+        <Route path="/login" element={<UnifiedLogin />} />
+
         {/* ── Admin Routes ── */}
-        <Route path="/admin/login" element={<Login />} />
+        <Route path="/admin/login" element={<AdminLogin />} />
         <Route path="/admin" element={<AdminLayout />}>
           <Route index element={<Dashboard />} />
           <Route path="inventory" element={<AdminInventory />} />
@@ -52,6 +63,11 @@ function App() {
           <Route path="leads" element={<AdminLeads />} />
           <Route path="settings" element={<AdminSettings />} />
         </Route>
+
+        {/* ── Sales Portal Routes ── */}
+        <Route path="/sales/login" element={<SalesLogin />} />
+        <Route path="/sales" element={<SalesDashboard />} />
+        <Route path="/sales/add-lead" element={<AddLead />} />
       </Routes>
     </BrowserRouter>
   );
