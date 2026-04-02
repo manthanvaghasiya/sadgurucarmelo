@@ -46,10 +46,26 @@ const carSchema = new mongoose.Schema(
     transmission: {
       type: String,
       enum: {
-        values: ['Manual', 'Automatic', 'CVT', 'DCT', 'AMT', 'iMT'],
+        values: ['Manual', 'Automatic'],
         message: '{VALUE} is not a supported transmission',
       },
       required: [true, 'Transmission is required'],
+    },
+    bodyType: {
+      type: String,
+      trim: true,
+    },
+    color: {
+      type: String,
+      trim: true,
+    },
+    registration: {
+      type: String,
+      trim: true,
+    },
+    description: {
+      type: String,
+      trim: true,
     },
     owner: {
       type: String,
@@ -58,12 +74,32 @@ const carSchema = new mongoose.Schema(
     },
 
     // ── Badges & Certifications ──
+    features: {
+      type: [String],
+      default: [],
+    },
+    
+    // ── Comfort Features ──
+    airConditioner: { type: String, trim: true },
+    powerWindows: { type: String, trim: true },
+    sunroof: { type: String, trim: true },
+    parkingSensors: { type: String, trim: true },
+
+    // ── Engine & Performance ──
+    displacement: { type: String, trim: true },
+    maxPower: { type: String, trim: true },
+    driveType: { type: String, trim: true },
+    cylinders: { type: Number },
+
     badges: {
       type: [String],
       default: [],
     },
 
     // ── Media ──
+    image: {
+      type: String, // Single hero image
+    },
     images: {
       type: [String], // Array of image URLs
       default: [],
@@ -95,11 +131,10 @@ const carSchema = new mongoose.Schema(
 );
 
 // ── Virtual: Auto-generate title if not set ──
-carSchema.pre('save', function (next) {
+carSchema.pre('save', function () {
   if (!this.title) {
     this.title = `${this.year} ${this.make} ${this.model}`;
   }
-  next();
 });
 
 // ── Index for common queries ──

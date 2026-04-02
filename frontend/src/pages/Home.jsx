@@ -1,81 +1,15 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { 
   CheckCircle, Banknote, ShieldCheck, 
-  Search, Play, Star, Landmark, Headphones 
+  Search, Play, Star, Landmark, Headphones, Loader2
 } from 'lucide-react';
 import CarCard from '../components/CarCard';
+import { useCars } from '../context/CarContext';
 
 export default function Home() {
   const [inventoryTab, setInventoryTab] = useState('present'); // 'present' or 'soon'
-
-  const mockCars = [
-    {
-      id: 1,
-      image: "https://placehold.co/600x400/1e293b/94a3b8?text=2021+Hyundai+Venue",
-      title: "2021 Hyundai Venue SX",
-      price: "₹8.50 Lakhs",
-      transmission: "Manual",
-      fuel: "Petrol",
-      ownership: 1,
-      km: "25k",
-      status: "CERTIFIED"
-    },
-    {
-      id: 2,
-      image: "https://placehold.co/600x400/94a3b8/1e293b?text=2022+Maruti+Baleno",
-      title: "2022 Maruti Baleno Delta",
-      price: "₹6.75 Lakhs",
-      transmission: "AMT",
-      fuel: "Petrol",
-      ownership: 1,
-      km: "15k",
-      status: ""
-    },
-    {
-      id: 3,
-      image: "https://placehold.co/600x400/cbd5e1/475569?text=2023+Kia+Seltos",
-      title: "2023 Kia Seltos HTX",
-      price: "₹12.40 Lakhs",
-      transmission: "Manual",
-      fuel: "Diesel",
-      ownership: 2,
-      km: "45k",
-      status: "PRICE DROP"
-    },
-    {
-      id: 4,
-      image: "https://placehold.co/600x400/334155/cbd5e1?text=2019+Maruti+Swift",
-      title: "2019 Maruti Swift VXI",
-      price: "₹4.80 Lakhs",
-      transmission: "Manual",
-      fuel: "CNG",
-      ownership: 1,
-      km: "56k",
-      status: ""
-    },
-    {
-      id: 5,
-      image: "https://placehold.co/600x400/0f172a/94a3b8?text=2021+Toyota+Innova",
-      title: "2021 Toyota Innova Crysta",
-      price: "₹19.25 Lakhs",
-      transmission: "Auto",
-      fuel: "Diesel",
-      ownership: 1,
-      km: "67k",
-      status: "CERTIFIED"
-    },
-    {
-      id: 6,
-      image: "https://placehold.co/600x400/475569/cbd5e1?text=2022+Tata+Nexon",
-      title: "2022 Tata Nexon XZ+",
-      price: "₹9.85 Lakhs",
-      transmission: "Manual",
-      fuel: "Petrol",
-      ownership: 1,
-      km: "18k",
-      status: ""
-    }
-  ];
+  const { cars, isLoading } = useCars();
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -223,15 +157,27 @@ export default function Home() {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {mockCars.map((car) => (
-              <CarCard key={car.id} car={car} />
-            ))}
+            {isLoading ? (
+              <div className="col-span-full flex flex-col items-center justify-center py-20">
+                <Loader2 className="w-10 h-10 animate-spin text-primary mb-4" />
+                <p className="font-body text-text-muted font-semibold">Loading inventory...</p>
+              </div>
+            ) : (!cars || cars.length === 0) ? (
+              <div className="col-span-full flex flex-col items-center justify-center py-20 text-center bg-white rounded-2xl border border-dashed border-gray-300">
+                <p className="font-heading text-lg text-text font-bold mb-2">Our inventory is currently being updated.</p>
+                <p className="font-body text-text-muted">Check back soon for the latest arrivals!</p>
+              </div>
+            ) : (
+              cars.slice(0, 6).map((car) => (
+                <CarCard key={car._id} car={car} />
+              ))
+            )}
           </div>
 
           <div className="mt-12 text-center">
-            <button className="px-8 py-3 rounded-full border-2 border-primary text-primary font-heading font-bold hover:bg-primary hover:text-white transition-colors">
-              Load More Vehicles
-            </button>
+            <Link to="/inventory" className="inline-block px-8 py-3 rounded-full border-2 border-primary text-primary font-heading font-bold hover:bg-primary hover:text-white transition-colors cursor-pointer">
+              View Full Inventory
+            </Link>
           </div>
         </div>
       </section>

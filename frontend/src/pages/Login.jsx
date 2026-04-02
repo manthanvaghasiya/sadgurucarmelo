@@ -13,11 +13,25 @@ export default function Login() {
 
   const onSubmit = async (data) => {
     try {
-      await login(data.username, data.password);
+      const { default: axiosInstance } = await import('../api/axiosConfig');
+      // Backend auth endpoint expects 'employeeId'
+      const response = await axiosInstance.post('/auth/login', {
+        employeeId: data.username, 
+        password: data.password
+      });
+      
+      const userData = response.data.data;
+      // Properly hydrate the Context API
+      login(userData, userData.token);
       toast.success('Welcome to the Dashboard!');
-      navigate('/admin');
+      
+      if (userData.role === 'admin') {
+        navigate('/admin');
+      } else {
+        navigate('/sales');
+      }
     } catch (error) {
-      toast.error('Invalid Credentials. Please try again.');
+      toast.error(error.response?.data?.message || 'Invalid Credentials. Please try again.');
     }
   };
 

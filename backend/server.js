@@ -8,9 +8,9 @@
 //
 // ═══════════════════════════════════════════════════════
 
+import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
-import dotenv from 'dotenv';
 import connectDB from './config/db.js';
 
 // Route imports
@@ -19,7 +19,7 @@ import carRoutes from './routes/car.routes.js';
 import leadRoutes from './routes/lead.routes.js';
 
 // ── Load env variables ──
-dotenv.config();
+// (done automatically via 'dotenv/config' at top)
 
 // ── Connect to MongoDB ──
 connectDB();
@@ -66,7 +66,7 @@ app.use((_req, res) => {
 
 // ── Global Error Handler ──
 app.use((err, _req, res, _next) => {
-  console.error('❌ Server Error:', err.stack);
+  console.error('❌ Server Error:', err);
 
   const statusCode = err.statusCode || 500;
   res.status(statusCode).json({

@@ -67,6 +67,24 @@ function FormInput({ label, type = 'text', placeholder, prefix, register, error 
   );
 }
 
+// Reusable Textarea component
+function FormTextarea({ label, placeholder, register, error, rows = 4 }) {
+  return (
+    <div className="space-y-2">
+      <label className="font-body text-sm font-semibold text-text">
+        {label}
+      </label>
+      <textarea
+        {...register}
+        rows={rows}
+        placeholder={placeholder}
+        className={`w-full px-4 py-3 bg-background border ${error ? 'border-red-500' : 'border-transparent'} focus:border-primary/30 rounded-xl font-body text-sm text-text placeholder:text-text-muted/50 outline-none transition-all focus:ring-2 focus:ring-primary/10 resize-none`}
+      />
+      {error && <span className="text-red-500 text-xs font-body">{error.message}</span>}
+    </div>
+  );
+}
+
 // Toggle Switch component directly mapped to RHF watch bindings
 function ToggleSwitch({ label, description, checked, onChange }) {
   return (
@@ -261,6 +279,9 @@ export default function AddCar() {
     defaultValues: {
       make: '', model: '', year: '', price: '',
       kmDriven: '', fuelType: '', transmission: '', ownership: '',
+      bodyType: '', color: '', registration: '', description: '', features: '',
+      airConditioner: '', powerWindows: '', sunroof: '', parkingSensors: '',
+      displacement: '', maxPower: '', driveType: '', cylinders: '',
       isCertified: false, isPetipack: false, validVimo: false
     }
   });
@@ -285,7 +306,25 @@ export default function AddCar() {
       formData.append('fuelType', data.fuelType);
       formData.append('transmission', data.transmission);
       formData.append('owner', data.ownership);
+      formData.append('bodyType', data.bodyType);
+      formData.append('color', data.color);
+      formData.append('registration', data.registration);
+      formData.append('description', data.description);
       formData.append('status', 'Available');
+
+      formData.append('airConditioner', data.airConditioner);
+      formData.append('powerWindows', data.powerWindows);
+      formData.append('sunroof', data.sunroof);
+      formData.append('parkingSensors', data.parkingSensors);
+      formData.append('displacement', data.displacement);
+      formData.append('maxPower', data.maxPower);
+      formData.append('driveType', data.driveType);
+      formData.append('cylinders', data.cylinders);
+
+      if (data.features) {
+        const featureArr = data.features.split(',').map((f) => f.trim()).filter(Boolean);
+        featureArr.forEach((f) => formData.append('features', f));
+      }
 
       if (data.isCertified) formData.append('badges', 'Certified');
       if (data.isPetipack) formData.append('badges', 'Peti-pack');
@@ -390,7 +429,7 @@ export default function AddCar() {
               register={register('transmission', { required: 'Transmission is required' })}
               error={errors.transmission}
               placeholder="Select transmission"
-              options={['Manual', 'Automatic', 'CVT', 'DCT', 'AMT', 'iMT']}
+              options={['Manual', 'Automatic']}
             />
             <FormSelect
               label="Ownership"
@@ -399,14 +438,81 @@ export default function AddCar() {
               placeholder="Select ownership"
               options={['1st Owner', '2nd Owner', '3rd Owner', '4th Owner+', 'Unregistered']}
             />
+            <FormSelect
+              label="Body Type"
+              register={register('bodyType')}
+              error={errors.bodyType}
+              placeholder="e.g. SUV"
+              options={['SUV', 'Sedan', 'Hatchback', 'MUV', 'Coupe', 'Convertible']}
+            />
+            <FormInput
+              label="Color"
+              register={register('color')}
+              error={errors.color}
+              placeholder="e.g. Polar White"
+            />
+            <FormInput
+              label="Registration"
+              register={register('registration')}
+              error={errors.registration}
+              placeholder="e.g. GJ-05"
+            />
+          </div>
+          
+          <div className="grid grid-cols-1 gap-5 mt-5">
+            <FormInput
+              label="Features"
+              register={register('features')}
+              error={errors.features}
+              placeholder="Enter features separated by commas (e.g., Sunroof, Bluetooth, Airbags)"
+            />
+            <FormTextarea
+              label="Description"
+              register={register('description')}
+              error={errors.description}
+              placeholder="Detailed description of the car..."
+              rows={4}
+            />
           </div>
         </section>
 
-        {/* ── Section 2: Condition & Badges ── */}
-        <section className="bg-surface rounded-2xl border border-gray-100 p-6 sm:p-8">
+        {/* ── Section 2: Comfort Features ── */}
+        <section className="bg-surface rounded-2xl border border-gray-100 p-6 sm:p-8 mt-8">
           <div className="flex items-center gap-3 mb-6">
             <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center">
               <span className="font-heading font-bold text-sm text-primary">2</span>
+            </div>
+            <h2 className="font-heading font-bold text-lg text-text">Comfort Features</h2>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            <FormInput label="Air Conditioner" register={register('airConditioner')} placeholder="e.g. Automatic Climate Control" />
+            <FormInput label="Power Windows" register={register('powerWindows')} placeholder="e.g. Front & Rear" />
+            <FormInput label="Sunroof" register={register('sunroof')} placeholder="e.g. Panoramic" />
+            <FormInput label="Parking Sensors" register={register('parkingSensors')} placeholder="e.g. Rear with Camera" />
+          </div>
+        </section>
+
+        {/* ── Section 3: Engine & Performance ── */}
+        <section className="bg-surface rounded-2xl border border-gray-100 p-6 sm:p-8 mt-8">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center">
+              <span className="font-heading font-bold text-sm text-primary">3</span>
+            </div>
+            <h2 className="font-heading font-bold text-lg text-text">Engine & Performance</h2>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            <FormInput label="Displacement" register={register('displacement')} placeholder="e.g. 1493 cc" />
+            <FormInput label="Max Power" register={register('maxPower')} placeholder="e.g. 113.42bhp@4000rpm" />
+            <FormInput label="Drive Type" register={register('driveType')} placeholder="e.g. FWD" />
+            <FormInput type="number" label="No. of Cylinders" register={register('cylinders')} placeholder="e.g. 4" />
+          </div>
+        </section>
+
+        {/* ── Section 4: Condition & Badges ── */}
+        <section className="bg-surface rounded-2xl border border-gray-100 p-6 sm:p-8 mt-8">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center">
+              <span className="font-heading font-bold text-sm text-primary">4</span>
             </div>
             <h2 className="font-heading font-bold text-lg text-text">Condition & Badges</h2>
           </div>
