@@ -1,6 +1,7 @@
 import express from 'express';
 import Car from '../models/Car.js';
 import { upload } from '../config/cloudinary.js';
+import { protect, admin } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
@@ -56,9 +57,13 @@ router.get('/:id', async (req, res) => {
 // ═══════════════════════════════════════════════
 //  POST /api/cars — Add new car (Admin)
 // ═══════════════════════════════════════════════
-router.post('/', upload.single('image'), async (req, res) => {
+router.post('/', protect, admin, upload.single('image'), async (req, res) => {
   try {
     const carData = { ...req.body };
+    
+    if (typeof carData.features === 'string') {
+      carData.features = carData.features.split(',').map(f => f.trim()).filter(Boolean);
+    }
     
     if (req.file) {
       carData.image = req.file.path;
@@ -77,9 +82,15 @@ router.post('/', upload.single('image'), async (req, res) => {
 // ═══════════════════════════════════════════════
 //  PUT /api/cars/:id — Update car (Admin)
 // ═══════════════════════════════════════════════
-router.put('/:id', async (req, res) => {
+router.put('/:id', protect, admin, async (req, res) => {
   try {
-    const car = await Car.findByIdAndUpdate(req.params.id, req.body, {
+    const updateData = { ...req.body };
+    
+    if (typeof updateData.features === 'string') {
+      updateData.features = updateData.features.split(',').map(f => f.trim()).filter(Boolean);
+    }
+
+    const car = await Car.findByIdAndUpdate(req.params.id, updateData, {
       new: true,
       runValidators: true,
     });
@@ -95,13 +106,13 @@ router.put('/:id', async (req, res) => {
 // ═══════════════════════════════════════════════
 //  DELETE /api/cars/:id — Delete car (Admin)
 // ═══════════════════════════════════════════════
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', protect, admin, async (req, res) => {
   try {
-    const car = await Car.findByIdAndDelete(req.params.id);
+    const car = await Car.findByIdAndUpdate(req.params.id, { status: 'Sold' });
     if (!car) {
       return res.status(404).json({ success: false, message: 'Car not found' });
     }
-    res.json({ success: true, message: 'Car deleted' });
+    res.json({ success: true, message: 'Vehicle successfully marked as Sold.' });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Server error' });
   }

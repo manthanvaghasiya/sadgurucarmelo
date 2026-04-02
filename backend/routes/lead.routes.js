@@ -1,12 +1,13 @@
 import express from 'express';
 import Lead from '../models/Lead.js';
+import { protect } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
 // ═══════════════════════════════════════════════
 //  GET /api/leads — Get all leads (Admin/Sales)
 // ═══════════════════════════════════════════════
-router.get('/', async (req, res) => {
+router.get('/', protect, async (req, res) => {
   try {
     const { status, urgency, source, sort } = req.query;
 
@@ -39,7 +40,7 @@ router.get('/', async (req, res) => {
 // ═══════════════════════════════════════════════
 //  POST /api/leads — Create new lead
 // ═══════════════════════════════════════════════
-router.post('/', async (req, res) => {
+router.post('/', protect, async (req, res) => {
   try {
     const lead = await Lead.create(req.body);
     res.status(201).json({ success: true, data: lead });
@@ -52,7 +53,7 @@ router.post('/', async (req, res) => {
 // ═══════════════════════════════════════════════
 //  PUT /api/leads/:id — Update lead status/notes
 // ═══════════════════════════════════════════════
-router.put('/:id', async (req, res) => {
+router.put('/:id', protect, async (req, res) => {
   try {
     const lead = await Lead.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
@@ -70,7 +71,7 @@ router.put('/:id', async (req, res) => {
 // ═══════════════════════════════════════════════
 //  DELETE /api/leads/:id — Delete lead
 // ═══════════════════════════════════════════════
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', protect, async (req, res) => {
   try {
     const lead = await Lead.findByIdAndDelete(req.params.id);
     if (!lead) {

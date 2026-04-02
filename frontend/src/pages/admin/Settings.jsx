@@ -33,14 +33,7 @@ const TABS = [
 ];
 
 // ── Mock staff roster ──
-const initialStaff = [
-  { id: 'SGM-001', name: 'Ravi Kumar', phone: '+91 98765 43210', status: 'Active', joinDate: 'Jan 15, 2024', leads: 45 },
-  { id: 'SGM-002', name: 'Priya Mehta', phone: '+91 87654 32109', status: 'Active', joinDate: 'Feb 02, 2024', leads: 38 },
-  { id: 'SGM-003', name: 'Amit Sharma', phone: '+91 76543 21098', status: 'Suspended', joinDate: 'Mar 10, 2024', leads: 12 },
-  { id: 'SGM-004', name: 'Neha Patel', phone: '+91 65432 10987', status: 'Active', joinDate: 'Apr 22, 2024', leads: 61 },
-  { id: 'SGM-005', name: 'Vikram Singh', phone: '+91 54321 09876', status: 'Active', joinDate: 'May 05, 2024', leads: 27 },
-  { id: 'SGM-006', name: 'Kavita Joshi', phone: '+91 43210 98765', status: 'Suspended', joinDate: 'Jun 14, 2024', leads: 8 },
-];
+const initialStaff = [];
 
 const statusConfig = {
   Active: { bg: 'bg-accent/10', text: 'text-accent', ring: 'ring-accent/20', dot: 'bg-accent' },

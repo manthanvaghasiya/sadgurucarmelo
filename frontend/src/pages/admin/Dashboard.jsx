@@ -13,43 +13,6 @@ import {
   ChevronDown,
 } from 'lucide-react';
 
-// Mock data for stats
-const statsData = [
-  {
-    id: 'total-cars',
-    title: 'Total Cars in Stock',
-    value: '47',
-    change: '+3',
-    trend: 'up',
-    subtitle: 'from last month',
-    icon: Car,
-    iconBg: 'bg-primary/10',
-    iconColor: 'text-primary',
-  },
-  {
-    id: 'inventory-value',
-    title: 'Total Inventory Value',
-    value: '₹2.84 Cr',
-    change: '+12.5%',
-    trend: 'up',
-    subtitle: 'portfolio growth',
-    icon: DollarSign,
-    iconBg: 'bg-accent/10',
-    iconColor: 'text-accent',
-  },
-  {
-    id: 'recent-leads',
-    title: 'Recent Leads',
-    value: '23',
-    change: '-2',
-    trend: 'down',
-    subtitle: 'this week',
-    icon: Users,
-    iconBg: 'bg-[#8b5cf6]/10',
-    iconColor: 'text-[#8b5cf6]',
-  },
-];
-
 import { useCars } from '../../context/CarContext';
 
 const statusStyles = {
@@ -61,6 +24,49 @@ const statusStyles = {
 export default function Dashboard() {
   const { cars } = useCars();
   const [activeMenu, setActiveMenu] = useState(null);
+
+  const totalValue = cars.reduce((acc, car) => acc + (car.price || 0), 0);
+  const totalValueFormatted = totalValue >= 10000000 
+    ? `₹${(totalValue / 10000000).toFixed(2)} Cr` 
+    : totalValue >= 100000 
+      ? `₹${(totalValue / 100000).toFixed(2)} Lakhs` 
+      : `₹${totalValue.toLocaleString('en-IN')}`;
+
+  const statsData = [
+    {
+      id: 'total-cars',
+      title: 'Total Cars in Stock',
+      value: cars.length.toString(),
+      change: 'Active',
+      trend: 'up',
+      subtitle: 'Live Database',
+      icon: Car,
+      iconBg: 'bg-primary/10',
+      iconColor: 'text-primary',
+    },
+    {
+      id: 'inventory-value',
+      title: 'Total Inventory Value',
+      value: totalValueFormatted,
+      change: 'Live',
+      trend: 'up',
+      subtitle: 'Database total',
+      icon: DollarSign,
+      iconBg: 'bg-accent/10',
+      iconColor: 'text-accent',
+    },
+    {
+      id: 'recent-leads',
+      title: 'Recent Leads',
+      value: '0',
+      change: 'N/A',
+      trend: 'up',
+      subtitle: 'Awaiting database link',
+      icon: Users,
+      iconBg: 'bg-[#8b5cf6]/10',
+      iconColor: 'text-[#8b5cf6]',
+    },
+  ];
 
   // Map backend top 6 latest cars
   const inventoryData = cars.slice(0, 6).map((c) => ({
