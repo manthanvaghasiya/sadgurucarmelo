@@ -1,6 +1,7 @@
 import { useParams } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { Fuel, Settings2, User, Gauge, Calendar, MessageCircle, MapPin, Star, Tag, Check, ShieldCheck, Palette, FileText } from 'lucide-react';
+import axiosInstance from '../api/axiosConfig';
 
 export default function CarDetails() {
     const { id } = useParams();
@@ -11,15 +12,14 @@ export default function CarDetails() {
     useEffect(() => {
         const fetchCar = async () => {
             try {
-                const res = await fetch(`/api/cars/${id}`);
-                const json = await res.json();
-                if (json.success) {
-                    setCar(json.data);
+                const res = await axiosInstance.get(`/cars/${id}`);
+                if (res.data.success) {
+                    setCar(res.data.data);
                 } else {
-                    setError(json.message || 'Car not found');
+                    setError(res.data.message || 'Car not found');
                 }
             } catch (err) {
-                setError('Failed to fetch car details.');
+                setError(err.response?.data?.message || 'Failed to fetch car details.');
             } finally {
                 setLoading(false);
             }
@@ -255,10 +255,15 @@ export default function CarDetails() {
                                 </div>
 
                             <div className="flex flex-col gap-3">
-                                    <button className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl bg-[#25D366] text-white font-body font-bold text-sm hover:bg-[#128C7E] transition-colors shadow-md">
+                                    <a
+                                      href={`https://wa.me/919913634447?text=${encodeURIComponent(`Hi, I am interested in the ${car.year} ${car.make} ${car.model} listed at ₹${car.price?.toLocaleString('en-IN')}. Please share more details.`)}`}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl bg-[#25D366] text-white font-body font-bold text-sm hover:bg-[#128C7E] transition-colors shadow-md"
+                                    >
                                         <MessageCircle className="w-4 h-4 fill-current" />
                                         INQUIRE ON WHATSAPP
-                                    </button>
+                                    </a>
                                 </div>
                             </div>
 
@@ -269,9 +274,9 @@ export default function CarDetails() {
                                 </div>
                                 <div className="flex flex-col">
                                     <h4 className="font-heading font-bold text-text text-sm mb-1">Sadguru Car Melo</h4>
-                                    <p className="font-body text-xs text-text-muted mb-2">Vesu Road, Near SD Jain School, Surat</p>
+                                    <p className="font-body text-xs text-text-muted mb-2">Trimruti Compound, Opp. Yoginagar BRTS, Varachha Road, Surat</p>
                                     <div className="flex items-center gap-1 mb-3">
-                                        <span className="font-heading font-bold text-xs text-text">4.8</span>
+                                        <span className="font-heading font-bold text-xs text-text">4.9</span>
                                         <div className="flex">
                                             <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
                                             <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
@@ -279,9 +284,9 @@ export default function CarDetails() {
                                             <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
                                             <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
                                         </div>
-                                        <span className="font-body text-[10px] text-text-muted ml-1">(1.2k Reviews)</span>
+                                        <span className="font-body text-[10px] text-text-muted ml-1">Google Reviews</span>
                                     </div>
-                                    <a href="#" className="font-body text-[11px] font-bold text-primary flex items-center gap-1 hover:underline tracking-wide uppercase">
+                                    <a href="https://www.google.com/maps/place/Sadguru+Car+Melo/" target="_blank" rel="noopener noreferrer" className="font-body text-[11px] font-bold text-primary flex items-center gap-1 hover:underline tracking-wide uppercase">
                                         <MapPin className="w-3 h-3" /> Get Directions
                                     </a>
                                 </div>

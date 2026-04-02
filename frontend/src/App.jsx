@@ -19,8 +19,10 @@ import AdminLayout from './components/admin/AdminLayout';
 import AdminLogin from './pages/admin/Login';
 import Dashboard from './pages/admin/Dashboard';
 import AddCar from './pages/admin/AddCar';
+import EditCar from './pages/admin/EditCar';
 import AdminInventory from './pages/admin/Inventory';
 import AdminLeads from './pages/admin/Leads';
+import AdminMessages from './pages/admin/Messages';
 import AdminSettings from './pages/admin/Settings';
 
 // Sales Portal Imports
@@ -50,7 +52,7 @@ function App() {
                   <Route path="/inventory" element={<Inventory />} />
                   <Route path="/services" element={<Services />} />
                   <Route path="/contact" element={<Contact />} />
-                  <Route path="/car-details" element={<CarDetails />} />
+                  <Route path="/car-details/:id" element={<CarDetails />} />
                 </Routes>
               </main>
               <Footer />
@@ -71,7 +73,9 @@ function App() {
           <Route index element={<Dashboard />} />
           <Route path="inventory" element={<AdminInventory />} />
           <Route path="add-car" element={<AddCar />} />
+          <Route path="edit-car/:id" element={<EditCar />} />
           <Route path="leads" element={<AdminLeads />} />
+          <Route path="messages" element={<AdminMessages />} />
           <Route path="settings" element={<AdminSettings />} />
         </Route>
 

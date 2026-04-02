@@ -6,35 +6,135 @@ import { protect, admin } from '../middleware/authMiddleware.js';
 const router = express.Router();
 
 // ═══════════════════════════════════════════════
-//  GET /api/cars — Get all cars (Public)
+//  GET /api/cars — Get all cars (Public) with filtering + pagination
 // ═══════════════════════════════════════════════
 router.get('/', async (req, res) => {
   try {
-    const { status, fuelType, transmission, sort, limit } = req.query;
+    const {
+      status, fuelType, transmission, sort, limit,
+      make, model, bodyType, year, owner,
+      priceMin, priceMax, kmsMax,
+      page = 1,
+      search,
+    } = req.query;
 
     // Build filter
     const filter = {};
     if (status) filter.status = status;
     if (fuelType) filter.fuelType = fuelType;
     if (transmission) filter.transmission = transmission;
+    if (make) filter.make = { $regex: make, $options: 'i' };
+    if (model) filter.model = { $regex: model, $options: 'i' };
+    if (bodyType) filter.bodyType = { $regex: bodyType, $options: 'i' };
+    if (year) filter.year = parseInt(year);
+    if (owner) filter.owner = owner;
+
+    // Price range
+    if (priceMin || priceMax) {
+      filter.price = {};
+      if (priceMin) filter.price.$gte = parseInt(priceMin);
+      if (priceMax) filter.price.$lte = parseInt(priceMax);
+    }
+
+    // KMs max
+    if (kmsMax) {
+      filter.kms = { $lte: parseInt(kmsMax) };
+    }
+
+    // Full-text search across make, model, title
+    if (search) {
+      filter.$or = [
+        { make: { $regex: search, $options: 'i' } },
+        { model: { $regex: search, $options: 'i' } },
+        { title: { $regex: search, $options: 'i' } },
+      ];
+    }
 
     // Build sort
     let sortBy = { createdAt: -1 }; // newest first
     if (sort === 'price-low') sortBy = { price: 1 };
     if (sort === 'price-high') sortBy = { price: -1 };
     if (sort === 'km-low') sortBy = { kms: 1 };
+    if (sort === 'year-new') sortBy = { year: -1 };
 
-    const cars = await Car.find(filter)
-      .sort(sortBy)
-      .limit(parseInt(limit) || 50);
+    const pageNum = parseInt(page) || 1;
+    const perPage = parseInt(limit) || 12;
+    const skip = (pageNum - 1) * perPage;
+
+    const [cars, total] = await Promise.all([
+      Car.find(filter).sort(sortBy).skip(skip).limit(perPage),
+      Car.countDocuments(filter),
+    ]);
 
     res.json({
       success: true,
       count: cars.length,
+      total,
+      page: pageNum,
+      pages: Math.ceil(total / perPage),
       data: cars,
     });
   } catch (error) {
     console.error('Get cars error:', error);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+});
+
+// ═══════════════════════════════════════════════
+//  GET /api/cars/stats — Dashboard stats (Admin)
+// ═══════════════════════════════════════════════
+router.get('/stats', protect, admin, async (req, res) => {
+  try {
+    const now = new Date();
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+
+    const [totalCars, availableCars, soldThisMonth, totalValue] = await Promise.all([
+      Car.countDocuments(),
+      Car.countDocuments({ status: 'Available' }),
+      Car.countDocuments({ status: 'Sold', updatedAt: { $gte: startOfMonth } }),
+      Car.aggregate([
+        { $match: { status: { $in: ['Available', 'Booked', 'Coming Soon'] } } },
+        { $group: { _id: null, total: { $sum: '$price' } } },
+      ]),
+    ]);
+
+    res.json({
+      success: true,
+      data: {
+        totalCars,
+        availableCars,
+        soldThisMonth,
+        totalValue: totalValue[0]?.total || 0,
+      },
+    });
+  } catch (error) {
+    console.error('Stats error:', error);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+});
+
+// ═══════════════════════════════════════════════
+//  GET /api/cars/filters — Get unique filter values (Public)
+// ═══════════════════════════════════════════════
+router.get('/filters', async (req, res) => {
+  try {
+    const [makes, bodyTypes, years] = await Promise.all([
+      Car.distinct('make', { status: { $ne: 'Sold' } }),
+      Car.distinct('bodyType', { status: { $ne: 'Sold' } }),
+      Car.distinct('year', { status: { $ne: 'Sold' } }),
+    ]);
+
+    res.json({
+      success: true,
+      data: {
+        makes: makes.filter(Boolean).sort(),
+        bodyTypes: bodyTypes.filter(Boolean).sort(),
+        years: years.sort((a, b) => b - a),
+        fuelTypes: ['Petrol', 'Diesel', 'CNG', 'Electric', 'Hybrid'],
+        transmissions: ['Manual', 'Automatic'],
+      },
+    });
+  } catch (error) {
     res.status(500).json({ success: false, message: 'Server error' });
   }
 });

@@ -62,6 +62,12 @@ const leadSchema = new mongoose.Schema(
       maxlength: [1000, 'Notes cannot exceed 1000 characters'],
     },
 
+    // ── Follow-up Reminder ──
+    followUpDate: {
+      type: Date,
+      default: null,
+    },
+
     // ── Assignment ──
     assignedTo: {
       type: mongoose.Schema.Types.ObjectId,

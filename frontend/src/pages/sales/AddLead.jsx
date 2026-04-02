@@ -1,341 +1,253 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+import { useForm } from 'react-hook-form';
+import toast from 'react-hot-toast';
 import {
-  ArrowLeft,
-  User,
-  Phone,
-  Car,
-  IndianRupee,
-  Megaphone,
-  Flame,
-  Thermometer,
-  Snowflake,
-  StickyNote,
-  CheckCircle2,
-  MessageCircle,
-  ChevronDown,
-  Save,
+  User, Phone, MessageCircle, Car, MapPin, Flame,
+  Thermometer, Snowflake, ArrowLeft, CheckCircle2, Loader2,
+  CalendarClock,
 } from 'lucide-react';
-
-// ── WhatsApp inline icon ──
-function WhatsAppIcon({ className }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" fill="currentColor">
-      <path d="M12.031 0C5.385 0 .004 5.38.004 12.025c0 2.126.55 4.195 1.594 6.01L0 24l6.113-1.602a12.035 12.035 0 005.918 1.543h.005c6.643 0 12.028-5.385 12.028-12.025C24.062 5.378 18.675 0 12.031 0zm5.518 14.428c-.303-.152-1.792-.885-2.072-.986-.28-.101-.484-.152-.687.152-.204.303-.783.985-.961 1.189-.177.202-.355.228-.658.076-1.605-.815-2.864-1.879-3.957-3.414-.112-.158.112-.132.41-.726.076-.152.038-.285-.038-.436-.076-.152-.686-1.655-.941-2.264-.247-.59-.498-.51-.687-.52H7.5c-.203 0-.532.076-.811.38C6.409 6.273 5.545 7.085 5.545 8.73c0 1.646.888 3.242 1.015 3.419.127.177 2.316 3.655 5.679 4.972 2.37.934 3.256.784 3.864.654.764-.163 1.792-.733 2.046-1.442.253-.709.253-1.318.177-1.444-.076-.126-.28-.202-.583-.353z" />
-    </svg>
-  );
-}
-
-// ── Reusable Select ──
-function FormSelect({ label, icon: Icon, options, value, onChange, placeholder }) {
-  return (
-    <div className="space-y-2">
-      <label className="flex items-center gap-1.5 font-body text-sm font-semibold text-text">
-        {Icon && <Icon className="w-3.5 h-3.5 text-text-muted" />}
-        {label}
-      </label>
-      <div className="relative">
-        <select
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          className="w-full px-4 py-3 bg-background border border-transparent focus:border-primary/20 rounded-xl font-body text-sm text-text appearance-none cursor-pointer outline-none transition-all focus:ring-2 focus:ring-primary/10 pr-10"
-        >
-          <option value="" disabled>{placeholder}</option>
-          {options.map((opt) => (
-            <option key={typeof opt === 'string' ? opt : opt.value} value={typeof opt === 'string' ? opt : opt.value}>
-              {typeof opt === 'string' ? opt : opt.label}
-            </option>
-          ))}
-        </select>
-        <ChevronDown className="absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted pointer-events-none" />
-      </div>
-    </div>
-  );
-}
+import axiosInstance from '../../api/axiosConfig';
+import { useCars } from '../../context/CarContext';
 
 export default function AddLead() {
   const navigate = useNavigate();
+  const { cars } = useCars();
+  const [urgency, setUrgency] = useState('Warm');
 
-  // ── Form State ──
-  const [fullName, setFullName] = useState('');
-  const [mobile, setMobile] = useState('');
-  const [hasWhatsApp, setHasWhatsApp] = useState(true);
-  const [carInterest, setCarInterest] = useState('');
-  const [budgetRange, setBudgetRange] = useState('');
-  const [leadSource, setLeadSource] = useState('');
-  const [urgency, setUrgency] = useState('');
-  const [notes, setNotes] = useState('');
-  const [isSaving, setIsSaving] = useState(false);
-  const [saved, setSaved] = useState(false);
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm({
+    defaultValues: {
+      source: 'Walk-in',
+    },
+  });
 
-  const handleSave = (e) => {
-    e.preventDefault();
-    setIsSaving(true);
-    setTimeout(() => {
-      setIsSaving(false);
-      setSaved(true);
-      setTimeout(() => navigate('/sales'), 1500);
-    }, 1200);
+  const onSubmit = async (data) => {
+    try {
+      const payload = {
+        customerName: data.customerName,
+        phone: data.phone,
+        email: data.email || '',
+        source: data.source,
+        urgency,
+        notes: data.notes || '',
+        carOfInterest: data.carOfInterest || undefined,
+        followUpDate: data.followUpDate || undefined,
+      };
+
+      await axiosInstance.post('/leads', payload);
+      toast.success('Lead captured successfully!', {
+        icon: '✅',
+        style: { fontFamily: 'var(--font-body)' },
+      });
+      navigate('/sales');
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Failed to create lead');
+    }
   };
 
-  const urgencyIcons = {
-    hot: Flame,
-    warm: Thermometer,
-    cold: Snowflake,
-  };
-
-  if (saved) {
-    return (
-      <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4">
-        <div className="text-center space-y-4">
-          <div className="w-16 h-16 bg-accent/10 rounded-full flex items-center justify-center mx-auto">
-            <CheckCircle2 className="w-8 h-8 text-accent" />
-          </div>
-          <h2 className="font-heading font-bold text-xl text-text">Lead Saved!</h2>
-          <p className="font-body text-sm text-text-muted">
-            Redirecting to dashboard...
-          </p>
-        </div>
-      </div>
-    );
-  }
+  // Available cars for dropdown
+  const availableCars = cars.filter(c => c.status !== 'Sold');
 
   return (
-    <form onSubmit={handleSave} className="min-h-screen bg-background pb-24">
-      {/* ═══════════════════════════════════════
-          Header
-         ═══════════════════════════════════════ */}
-      <header className="bg-surface border-b border-gray-100 sticky top-0 z-30">
-        <div className="max-w-lg mx-auto px-4 py-3.5 flex items-center gap-3">
-          <Link
-            to="/sales"
-            className="p-2 -ml-2 text-text-muted hover:text-text hover:bg-background rounded-xl transition-colors"
+    <div className="min-h-screen bg-background">
+      {/* Header */}
+      <header className="bg-surface border-b border-gray-100 px-4 sm:px-6 py-4">
+        <div className="max-w-2xl mx-auto flex items-center gap-3">
+          <button
+            onClick={() => navigate('/sales')}
+            className="p-2 bg-background hover:bg-gray-100 rounded-lg transition-colors"
           >
-            <ArrowLeft className="w-5 h-5" />
-          </Link>
+            <ArrowLeft className="w-5 h-5 text-text" />
+          </button>
           <div>
-            <h1 className="font-heading font-bold text-base text-text leading-tight">
-              Log New Customer Inquiry
-            </h1>
-            <p className="font-body text-[11px] text-text-muted">
-              Capture walk-in or call details
-            </p>
+            <p className="font-body text-xs text-text-muted uppercase tracking-wider">New Lead</p>
+            <h1 className="font-heading font-bold text-lg text-text">Capture Walk-in</h1>
           </div>
         </div>
       </header>
 
-      {/* ═══════════════════════════════════════
-          Form Content
-         ═══════════════════════════════════════ */}
-      <div className="max-w-lg mx-auto px-4 py-5 space-y-5">
+      <div className="max-w-2xl mx-auto px-4 sm:px-6 py-6">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
 
-        {/* ── Section 1: Customer Details ── */}
-        <div className="bg-surface rounded-xl border border-gray-100 overflow-hidden">
-          <div className="px-4 py-3.5 border-b border-gray-100 flex items-center gap-2">
-            <div className="w-7 h-7 bg-primary/8 rounded-lg flex items-center justify-center">
-              <User className="w-3.5 h-3.5 text-primary" />
+          {/* ── Customer Info ── */}
+          <div className="bg-surface rounded-2xl border border-gray-100 p-5 sm:p-6 space-y-4">
+            <h2 className="font-heading font-bold text-sm text-text-muted uppercase tracking-widest mb-2">Customer Information</h2>
+
+            {/* Name */}
+            <div>
+              <label className="block font-body text-xs font-semibold text-text-muted mb-1.5 uppercase tracking-wide">
+                Full Name *
+              </label>
+              <div className="relative">
+                <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
+                <input
+                  {...register('customerName', { required: 'Customer name is required' })}
+                  placeholder="e.g. Rajesh Patel"
+                  className="w-full pl-11 pr-4 py-3 bg-background rounded-xl border border-gray-200 font-body text-sm text-text placeholder:text-text-muted/60 outline-none focus:border-primary/30 focus:ring-2 focus:ring-primary/10"
+                />
+              </div>
+              {errors.customerName && <p className="text-red-500 text-xs font-body mt-1">{errors.customerName.message}</p>}
             </div>
-            <h2 className="font-heading font-bold text-sm text-text">Customer Details</h2>
+
+            {/* Phone */}
+            <div>
+              <label className="block font-body text-xs font-semibold text-text-muted mb-1.5 uppercase tracking-wide">
+                Phone Number *
+              </label>
+              <div className="relative">
+                <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
+                <input
+                  type="tel"
+                  {...register('phone', {
+                    required: 'Phone number is required',
+                    pattern: { value: /^[6-9]\d{9}$/, message: 'Enter valid 10-digit phone' },
+                  })}
+                  placeholder="e.g. 9876543210"
+                  className="w-full pl-11 pr-4 py-3 bg-background rounded-xl border border-gray-200 font-body text-sm text-text placeholder:text-text-muted/60 outline-none focus:border-primary/30 focus:ring-2 focus:ring-primary/10"
+                />
+              </div>
+              {errors.phone && <p className="text-red-500 text-xs font-body mt-1">{errors.phone.message}</p>}
+            </div>
+
+            {/* Email */}
+            <div>
+              <label className="block font-body text-xs font-semibold text-text-muted mb-1.5 uppercase tracking-wide">
+                Email (Optional)
+              </label>
+              <input
+                type="email"
+                {...register('email')}
+                placeholder="e.g. rajesh@email.com"
+                className="w-full px-4 py-3 bg-background rounded-xl border border-gray-200 font-body text-sm text-text placeholder:text-text-muted/60 outline-none focus:border-primary/30 focus:ring-2 focus:ring-primary/10"
+              />
+            </div>
           </div>
-          <div className="p-4 space-y-4">
-            {/* Full Name */}
-            <div className="space-y-2">
-              <label className="flex items-center gap-1.5 font-body text-sm font-semibold text-text">
-                <User className="w-3.5 h-3.5 text-text-muted" />
-                Full Name <span className="text-red-400">*</span>
+
+          {/* ── Lead Details ── */}
+          <div className="bg-surface rounded-2xl border border-gray-100 p-5 sm:p-6 space-y-4">
+            <h2 className="font-heading font-bold text-sm text-text-muted uppercase tracking-widest mb-2">Lead Details</h2>
+
+            {/* Source */}
+            <div>
+              <label className="block font-body text-xs font-semibold text-text-muted mb-1.5 uppercase tracking-wide">
+                Lead Source *
               </label>
-              <input
-                type="text"
-                value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
-                placeholder="e.g. Rajesh Patel"
-                className="w-full px-4 py-3 bg-background border border-transparent focus:border-primary/20 rounded-xl font-body text-sm text-text placeholder:text-text-muted/50 outline-none transition-all focus:ring-2 focus:ring-primary/10"
-                required
-              />
+              <div className="relative">
+                <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
+                <select
+                  {...register('source', { required: 'Source is required' })}
+                  className="w-full pl-11 pr-4 py-3 bg-background rounded-xl border border-gray-200 font-body text-sm text-text outline-none focus:border-primary/30 focus:ring-2 focus:ring-primary/10 appearance-none cursor-pointer"
+                >
+                  <option value="Walk-in">🚶 Walk-in</option>
+                  <option value="WhatsApp">💬 WhatsApp</option>
+                  <option value="Phone">📞 Phone Call</option>
+                  <option value="Website">🌐 Website</option>
+                </select>
+              </div>
             </div>
 
-            {/* Mobile Number */}
-            <div className="space-y-2">
-              <label className="flex items-center gap-1.5 font-body text-sm font-semibold text-text">
-                <Phone className="w-3.5 h-3.5 text-text-muted" />
-                Mobile Number <span className="text-red-400">*</span>
+            {/* Car of Interest */}
+            <div>
+              <label className="block font-body text-xs font-semibold text-text-muted mb-1.5 uppercase tracking-wide">
+                Car of Interest
               </label>
-              <input
-                type="tel"
-                value={mobile}
-                onChange={(e) => setMobile(e.target.value)}
-                placeholder="+91 XXXXX XXXXX"
-                className="w-full px-4 py-3 bg-background border border-transparent focus:border-primary/20 rounded-xl font-body text-sm text-text placeholder:text-text-muted/50 outline-none transition-all focus:ring-2 focus:ring-primary/10"
-                required
-              />
+              <div className="relative">
+                <Car className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
+                <select
+                  {...register('carOfInterest')}
+                  className="w-full pl-11 pr-4 py-3 bg-background rounded-xl border border-gray-200 font-body text-sm text-text outline-none focus:border-primary/30 focus:ring-2 focus:ring-primary/10 appearance-none cursor-pointer"
+                >
+                  <option value="">Not specific / General inquiry</option>
+                  {availableCars.map((car) => (
+                    <option key={car._id || car.id} value={car._id || car.id}>
+                      {car.year} {car.make} {car.model} — ₹{car.price?.toLocaleString('en-IN')}
+                    </option>
+                  ))}
+                </select>
+              </div>
             </div>
 
-            {/* WhatsApp Checkbox */}
-            <label className="flex items-center gap-3 p-3 bg-background rounded-xl cursor-pointer group">
-              <div
-                onClick={() => setHasWhatsApp(!hasWhatsApp)}
-                className={`w-5 h-5 rounded-md border-2 flex items-center justify-center transition-all shrink-0 ${
-                  hasWhatsApp
-                    ? 'bg-accent border-accent'
-                    : 'bg-transparent border-gray-300 group-hover:border-gray-400'
-                }`}
-              >
-                {hasWhatsApp && (
-                  <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                  </svg>
-                )}
+            {/* Urgency */}
+            <div>
+              <label className="block font-body text-xs font-semibold text-text-muted mb-1.5 uppercase tracking-wide">
+                Urgency Level
+              </label>
+              <div className="grid grid-cols-3 gap-3">
+                {[
+                  { value: 'Hot', label: 'Hot', icon: Flame, color: 'red' },
+                  { value: 'Warm', label: 'Warm', icon: Thermometer, color: 'amber' },
+                  { value: 'Cold', label: 'Cold', icon: Snowflake, color: 'blue' },
+                ].map(({ value, label, icon: UIcon, color }) => {
+                  const isActive = urgency === value;
+                  const colorMap = {
+                    red: isActive ? 'border-red-400 bg-red-50 text-red-600' : 'border-gray-200 text-text-muted',
+                    amber: isActive ? 'border-amber-400 bg-amber-50 text-amber-600' : 'border-gray-200 text-text-muted',
+                    blue: isActive ? 'border-[#3b82f6] bg-[#3b82f6]/10 text-[#3b82f6]' : 'border-gray-200 text-text-muted',
+                  };
+                  return (
+                    <button
+                      key={value}
+                      type="button"
+                      onClick={() => setUrgency(value)}
+                      className={`flex items-center justify-center gap-2 p-3 rounded-xl border-2 font-body text-sm font-bold transition-all ${colorMap[color]}`}
+                    >
+                      <UIcon className="w-4 h-4" />
+                      {label}
+                    </button>
+                  );
+                })}
               </div>
-              <div className="flex items-center gap-1.5">
-                <WhatsAppIcon className="w-4 h-4 text-accent" />
-                <span className="font-body text-sm font-medium text-text">
-                  Has WhatsApp on this number?
-                </span>
+            </div>
+
+            {/* Follow-up Date */}
+            <div>
+              <label className="block font-body text-xs font-semibold text-text-muted mb-1.5 uppercase tracking-wide">
+                Follow-up Date (Optional)
+              </label>
+              <div className="relative">
+                <CalendarClock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
+                <input
+                  type="date"
+                  {...register('followUpDate')}
+                  min={new Date().toISOString().split('T')[0]}
+                  className="w-full pl-11 pr-4 py-3 bg-background rounded-xl border border-gray-200 font-body text-sm text-text outline-none focus:border-primary/30 focus:ring-2 focus:ring-primary/10"
+                />
               </div>
+            </div>
+          </div>
+
+          {/* ── Notes ── */}
+          <div className="bg-surface rounded-2xl border border-gray-100 p-5 sm:p-6">
+            <label className="block font-body text-xs font-semibold text-text-muted mb-1.5 uppercase tracking-wide">
+              Notes / Remarks
             </label>
-          </div>
-        </div>
-
-        {/* ── Section 2: Vehicle Interest ── */}
-        <div className="bg-surface rounded-xl border border-gray-100 overflow-hidden">
-          <div className="px-4 py-3.5 border-b border-gray-100 flex items-center gap-2">
-            <div className="w-7 h-7 bg-primary/8 rounded-lg flex items-center justify-center">
-              <Car className="w-3.5 h-3.5 text-primary" />
-            </div>
-            <h2 className="font-heading font-bold text-sm text-text">Vehicle Interest</h2>
-          </div>
-          <div className="p-4 space-y-4">
-            <FormSelect
-              label="Car of Interest"
-              icon={Car}
-              value={carInterest}
-              onChange={setCarInterest}
-              placeholder="Select a vehicle or category"
-              options={[
-                { value: '2020-creta', label: '2020 Hyundai Creta SX' },
-                { value: '2022-nexon', label: '2022 Tata Nexon EV' },
-                { value: '2023-city', label: '2023 Honda City V CVT' },
-                { value: '2022-swift', label: '2022 Maruti Swift VXI' },
-                { value: 'hatchback', label: 'Looking for Hatchback' },
-                { value: 'suv', label: 'Looking for SUV' },
-                { value: 'sedan', label: 'Looking for Sedan' },
-                { value: 'other', label: 'Other / Undecided' },
-              ]}
-            />
-
-            <FormSelect
-              label="Budget Range"
-              icon={IndianRupee}
-              value={budgetRange}
-              onChange={setBudgetRange}
-              placeholder="Select budget range"
-              options={[
-                { value: 'under-5', label: 'Under ₹5 Lakhs' },
-                { value: '5-10', label: '₹5 Lakhs – ₹10 Lakhs' },
-                { value: '10-15', label: '₹10 Lakhs – ₹15 Lakhs' },
-                { value: '15-25', label: '₹15 Lakhs – ₹25 Lakhs' },
-                { value: '25-plus', label: '₹25 Lakhs+' },
-              ]}
+            <textarea
+              {...register('notes')}
+              rows={3}
+              placeholder="e.g. Customer wants white SUV under ₹10 Lakh. Budget flexible. Test drive scheduled for tomorrow."
+              className="w-full px-4 py-3 bg-background rounded-xl border border-gray-200 font-body text-sm text-text placeholder:text-text-muted/60 outline-none focus:border-primary/30 focus:ring-2 focus:ring-primary/10 resize-none"
             />
           </div>
-        </div>
 
-        {/* ── Section 3: Lead Info ── */}
-        <div className="bg-surface rounded-xl border border-gray-100 overflow-hidden">
-          <div className="px-4 py-3.5 border-b border-gray-100 flex items-center gap-2">
-            <div className="w-7 h-7 bg-primary/8 rounded-lg flex items-center justify-center">
-              <Megaphone className="w-3.5 h-3.5 text-primary" />
-            </div>
-            <h2 className="font-heading font-bold text-sm text-text">Lead Info</h2>
-          </div>
-          <div className="p-4 space-y-4">
-            <FormSelect
-              label="Lead Source"
-              icon={Megaphone}
-              value={leadSource}
-              onChange={setLeadSource}
-              placeholder="How did the customer reach us?"
-              options={['Walk-in', 'Phone Call', 'Referral', 'Other']}
-            />
-
-            <FormSelect
-              label="Urgency"
-              icon={Flame}
-              value={urgency}
-              onChange={setUrgency}
-              placeholder="How likely are they to buy?"
-              options={[
-                { value: 'hot', label: '🔥 Hot — Buying this week' },
-                { value: 'warm', label: '🌡️ Warm — Exploring options' },
-                { value: 'cold', label: '❄️ Cold — Just looking' },
-              ]}
-            />
-
-            {/* Urgency Visual Indicator */}
-            {urgency && (
-              <div
-                className={`flex items-center gap-2 px-3 py-2 rounded-lg font-body text-xs font-bold ${
-                  urgency === 'hot'
-                    ? 'bg-red-50 text-red-500'
-                    : urgency === 'warm'
-                      ? 'bg-amber-50 text-amber-600'
-                      : 'bg-[#3b82f6]/10 text-[#3b82f6]'
-                }`}
-              >
-                {urgency === 'hot' && <Flame className="w-3.5 h-3.5" />}
-                {urgency === 'warm' && <Thermometer className="w-3.5 h-3.5" />}
-                {urgency === 'cold' && <Snowflake className="w-3.5 h-3.5" />}
-                {urgency === 'hot' && 'Priority lead — follow up immediately'}
-                {urgency === 'warm' && 'Good prospect — schedule a follow-up'}
-                {urgency === 'cold' && 'Low priority — add to nurture list'}
-              </div>
-            )}
-
-            {/* Notes */}
-            <div className="space-y-2">
-              <label className="flex items-center gap-1.5 font-body text-sm font-semibold text-text">
-                <StickyNote className="w-3.5 h-3.5 text-text-muted" />
-                Salesman Notes
-              </label>
-              <textarea
-                value={notes}
-                onChange={(e) => setNotes(e.target.value)}
-                rows={4}
-                placeholder="e.g. Customer wants to exchange their old Swift. Has finance pre-approval from HDFC Bank. Wants delivery within 10 days..."
-                className="w-full px-4 py-3 bg-background border border-transparent focus:border-primary/20 rounded-xl font-body text-sm text-text placeholder:text-text-muted/50 outline-none transition-all focus:ring-2 focus:ring-primary/10 resize-none"
-              />
-              <p className="font-body text-[11px] text-text-muted/50 text-right">
-                {notes.length} / 500
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* ═══════════════════════════════════════
-          Sticky Bottom Action Bar
-         ═══════════════════════════════════════ */}
-      <div className="fixed bottom-0 left-0 right-0 bg-surface/90 backdrop-blur-xl border-t border-gray-100 z-30">
-        <div className="max-w-lg mx-auto px-4 py-3.5">
+          {/* ── Submit ── */}
           <button
             type="submit"
-            disabled={isSaving || !fullName || !mobile}
-            className="w-full flex items-center justify-center gap-2 py-4 bg-primary hover:bg-primary-hover text-white rounded-xl font-body font-bold text-base transition-all shadow-lg shadow-primary/20 disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98]"
+            disabled={isSubmitting}
+            className="w-full flex items-center justify-center gap-2 py-4 bg-primary hover:bg-primary-hover text-white rounded-2xl font-heading font-bold text-base transition-all shadow-lg shadow-primary/15 disabled:opacity-50 active:scale-[0.99]"
           >
-            {isSaving ? (
-              <>
-                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                Saving...
-              </>
+            {isSubmitting ? (
+              <Loader2 className="w-5 h-5 animate-spin" />
             ) : (
-              <>
-                <Save className="w-5 h-5" />
-                Save Lead Data
-              </>
+              <CheckCircle2 className="w-5 h-5" />
             )}
+            {isSubmitting ? 'Saving Lead...' : 'Save Lead'}
           </button>
-        </div>
+        </form>
       </div>
-    </form>
+    </div>
   );
 }

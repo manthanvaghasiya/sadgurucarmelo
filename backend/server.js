@@ -17,6 +17,7 @@ import connectDB from './config/db.js';
 import authRoutes from './routes/auth.routes.js';
 import carRoutes from './routes/car.routes.js';
 import leadRoutes from './routes/lead.routes.js';
+import messageRoutes from './routes/message.routes.js';
 
 // ── Load env variables ──
 // (done automatically via 'dotenv/config' at top)
@@ -58,6 +59,7 @@ app.get('/api/health', (_req, res) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/cars', carRoutes);
 app.use('/api/leads', leadRoutes);
+app.use('/api/messages', messageRoutes);
 
 // ── 404 Handler ──
 app.use((_req, res) => {

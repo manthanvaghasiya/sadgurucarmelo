@@ -44,15 +44,15 @@ export default function Footer() {
             <ul className="space-y-4 font-body text-sm">
               <li className="flex gap-3">
                 <MapPin className="w-5 h-5 text-accent shrink-0" />
-                <span>10 & 11, Shri Balaji Plaza, Adajan Gam, Surat, Gujarat 395009</span>
+                <span>Trimruti Compound, Opp. Yoginagar BRTS, Simada Canal Road, Varachha Road, Surat, Gujarat 395006</span>
               </li>
               <li className="flex gap-3 items-center">
                 <Phone className="w-5 h-5 text-accent shrink-0" />
-                <span>+91 98765 43210</span>
+                <span>+91 98254 92573</span>
               </li>
               <li className="flex gap-3 items-center">
                 <Mail className="w-5 h-5 text-accent shrink-0" />
-                <span>contact@sadgurucarmelo.com</span>
+                <span>info@sadgurucarmelo.com</span>
               </li>
             </ul>
           </div>
@@ -60,10 +60,16 @@ export default function Footer() {
           <div className="space-y-4">
             <h3 className="font-heading font-semibold text-lg text-white">Location Map</h3>
             <div className="w-full h-32 bg-gray-800 rounded-xl overflow-hidden relative">
-              <img
-                src="https://placehold.co/400x300/333333/666666?text=Map+Placeholder"
-                alt="Showroom Map Location"
-                className="w-full h-full object-cover opacity-70 hover:opacity-100 transition-opacity"
+              <iframe
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3720.0!2d72.85!3d21.21!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2sSadguru+Car+Melo!5e0!3m2!1sen!2sin!4v1680000000000!5m2!1sen!2sin"
+                width="100%"
+                height="100%"
+                style={{ border: 0 }}
+                allowFullScreen=""
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+                title="Sadguru Car Melo Location"
+                className="rounded-xl"
               />
             </div>
           </div>

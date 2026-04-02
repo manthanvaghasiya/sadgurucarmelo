@@ -1,8 +1,30 @@
+import { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import SidebarFilter from '../components/SidebarFilter';
 import InventoryGrid from '../components/InventoryGrid';
 import PromoBanner from '../components/PromoBanner';
 
 export default function Inventory() {
+  const [searchParams] = useSearchParams();
+
+  // Initialize filters from URL query params (from Home page search)
+  const [filters, setFilters] = useState(() => {
+    const initial = { makes: [], fuelType: '', bodyType: '', priceMin: '', priceMax: '' };
+    const make = searchParams.get('make');
+    const fuelType = searchParams.get('fuelType');
+    const priceMin = searchParams.get('priceMin');
+    const priceMax = searchParams.get('priceMax');
+    const bodyType = searchParams.get('bodyType');
+
+    if (make) initial.makes = [make];
+    if (fuelType) initial.fuelType = fuelType;
+    if (priceMin) initial.priceMin = priceMin;
+    if (priceMax) initial.priceMax = priceMax;
+    if (bodyType) initial.bodyType = bodyType;
+
+    return initial;
+  });
+
   return (
     <div className="bg-background min-h-screen py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -10,9 +32,9 @@ export default function Inventory() {
         {/* Breadcrumbs */}
         <nav className="flex mb-4" aria-label="Breadcrumb">
           <ol className="flex items-center space-x-2 font-body text-[13px] font-medium text-text-muted">
-            <li><a href="#" className="hover:text-primary transition-colors">Home</a></li>
+            <li><a href="/" className="hover:text-primary transition-colors">Home</a></li>
             <li><span className="text-gray-300">/</span></li>
-            <li><a href="#" className="hover:text-primary transition-colors">Surat</a></li>
+            <li><a href="/" className="hover:text-primary transition-colors">Surat</a></li>
             <li><span className="text-gray-300">/</span></li>
             <li aria-current="page" className="text-text">Used Cars</li>
           </ol>
@@ -20,7 +42,7 @@ export default function Inventory() {
 
         {/* Page Header */}
         <h1 className="font-heading font-extrabold text-[36px] sm:text-[42px] text-primary leading-tight mb-10 tracking-tight">
-          Explore 120+ Verified Pre-Owned Cars
+          Explore Verified Pre-Owned Cars
         </h1>
 
         {/* Main Content Layout */}
@@ -28,12 +50,12 @@ export default function Inventory() {
           
           {/* Sidebar (Filters) - 1/4 Width Desktop */}
           <div className="w-full lg:w-1/4 shrink-0">
-            <SidebarFilter />
+            <SidebarFilter filters={filters} setFilters={setFilters} />
           </div>
 
           {/* Right Area (Grid + Top Bar) - 3/4 Width Desktop */}
           <div className="w-full lg:w-3/4">
-            <InventoryGrid />
+            <InventoryGrid filters={filters} />
           </div>
           
         </div>

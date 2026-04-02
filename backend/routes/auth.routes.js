@@ -1,6 +1,7 @@
 import express from 'express';
 import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
+import { protect, admin } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
@@ -69,7 +70,7 @@ router.post('/login', async (req, res) => {
 // ═══════════════════════════════════════════════
 //  POST /api/auth/register — Create Staff Account (Admin only)
 // ═══════════════════════════════════════════════
-router.post('/register', async (req, res) => {
+router.post('/register', protect, admin, async (req, res) => {
   try {
     const { name, employeeId, password, phone, email, role } = req.body;
 
@@ -98,6 +99,10 @@ router.post('/register', async (req, res) => {
         name: user.name,
         employeeId: user.employeeId,
         role: user.role,
+        phone: user.phone,
+        email: user.email,
+        isActive: user.isActive,
+        createdAt: user.createdAt,
       },
     });
   } catch (error) {
@@ -112,10 +117,91 @@ router.post('/register', async (req, res) => {
 // ═══════════════════════════════════════════════
 //  GET /api/auth/me — Get current user profile
 // ═══════════════════════════════════════════════
-router.get('/me', async (req, res) => {
+router.get('/me', protect, async (req, res) => {
   try {
-    // TODO: Extract user ID from JWT middleware
-    res.json({ success: true, message: 'Protected route — JWT middleware needed' });
+    const user = await User.findById(req.user.id);
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+    res.json({
+      success: true,
+      data: {
+        _id: user._id,
+        name: user.name,
+        employeeId: user.employeeId,
+        role: user.role,
+        phone: user.phone,
+        email: user.email,
+        isActive: user.isActive,
+      },
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+});
+
+// ═══════════════════════════════════════════════
+//  GET /api/auth/users — Get all staff (Admin only)
+// ═══════════════════════════════════════════════
+router.get('/users', protect, admin, async (req, res) => {
+  try {
+    const users = await User.find().sort({ createdAt: -1 });
+    res.json({
+      success: true,
+      count: users.length,
+      data: users,
+    });
+  } catch (error) {
+    console.error('Get users error:', error);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+});
+
+// ═══════════════════════════════════════════════
+//  PUT /api/auth/users/:id — Update staff (Admin only)
+// ═══════════════════════════════════════════════
+router.put('/users/:id', protect, admin, async (req, res) => {
+  try {
+    const { isActive, role, password } = req.body;
+    const user = await User.findById(req.params.id).select('+password');
+
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+
+    if (isActive !== undefined) user.isActive = isActive;
+    if (role) user.role = role;
+    if (password) user.password = password;
+
+    await user.save();
+
+    res.json({
+      success: true,
+      data: {
+        _id: user._id,
+        name: user.name,
+        employeeId: user.employeeId,
+        role: user.role,
+        isActive: user.isActive,
+        phone: user.phone,
+        email: user.email,
+      },
+    });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+});
+
+// ═══════════════════════════════════════════════
+//  DELETE /api/auth/users/:id — Delete staff (Admin only)
+// ═══════════════════════════════════════════════
+router.delete('/users/:id', protect, admin, async (req, res) => {
+  try {
+    const user = await User.findByIdAndDelete(req.params.id);
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+    res.json({ success: true, message: 'Staff account removed' });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Server error' });
   }

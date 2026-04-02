@@ -73,7 +73,7 @@ export default function CarCard({
         {/* Action Buttons */}
         <div className="flex gap-2 mt-auto pt-4 border-t border-gray-100">
           <Link
-            to="/car-details"
+            to={`/car-details/${id}`}
             className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-lg border border-primary text-primary font-body font-bold text-xs hover:bg-primary/5 transition-colors"
           >
             <Eye className="w-4 h-4" /> View

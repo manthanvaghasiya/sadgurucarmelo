@@ -1,8 +1,9 @@
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import { useCars } from '../../context/CarContext';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
+import axiosInstance from '../../api/axiosConfig';
 import {
   Upload,
   X,
@@ -85,7 +86,7 @@ function FormTextarea({ label, placeholder, register, error, rows = 4 }) {
   );
 }
 
-// Toggle Switch component directly mapped to RHF watch bindings
+// Toggle Switch component
 function ToggleSwitch({ label, description, checked, onChange }) {
   return (
     <label className="flex items-center justify-between p-4 bg-background rounded-xl cursor-pointer group hover:bg-background/80 transition-colors">
@@ -111,163 +112,13 @@ function ToggleSwitch({ label, description, checked, onChange }) {
   );
 }
 
-// Drag & Drop Zone component
-function DropZone({
-  title,
-  description,
-  icon: Icon,
-  files,
-  onFilesAdded,
-  onRemoveFile,
-  accept,
-  highlight = false,
-  id,
-}) {
-  const [isDragging, setIsDragging] = useState(false);
-  const inputRef = useRef(null);
-
-  const handleDrag = useCallback((e) => {
-    e.preventDefault();
-    e.stopPropagation();
-  }, []);
-
-  const handleDragIn = useCallback((e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsDragging(true);
-  }, []);
-
-  const handleDragOut = useCallback((e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsDragging(false);
-  }, []);
-
-  const handleDrop = useCallback(
-    (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      setIsDragging(false);
-      if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-        onFilesAdded([...e.dataTransfer.files]);
-      }
-    },
-    [onFilesAdded]
-  );
-
-  const handleFileSelect = (e) => {
-    if (e.target.files && e.target.files.length > 0) {
-      onFilesAdded([...e.target.files]);
-    }
-  };
-
-  return (
-    <div className="space-y-3">
-      <div className="flex items-center gap-2">
-        <Icon className={`w-5 h-5 ${highlight ? 'text-accent' : 'text-text-muted'}`} />
-        <h3 className={`font-heading font-bold text-base ${highlight ? 'text-accent' : 'text-text'}`}>
-          {title}
-        </h3>
-      </div>
-
-      <div
-        onDragEnter={handleDragIn}
-        onDragLeave={handleDragOut}
-        onDragOver={handleDrag}
-        onDrop={handleDrop}
-        onClick={() => inputRef.current?.click()}
-        className={`
-          relative cursor-pointer rounded-2xl border-2 border-dashed p-8
-          flex flex-col items-center justify-center text-center
-          transition-all duration-200
-          ${highlight
-            ? isDragging
-              ? 'border-accent bg-accent/10 scale-[1.01]'
-              : 'border-accent/40 bg-accent/5 hover:border-accent hover:bg-accent/8'
-            : isDragging
-              ? 'border-primary bg-primary/5 scale-[1.01]'
-              : 'border-gray-200 bg-background hover:border-primary/30 hover:bg-primary/[0.02]'
-          }
-        `}
-      >
-        <input
-          ref={inputRef}
-          type="file"
-          accept={accept}
-          multiple={!highlight}
-          onChange={handleFileSelect}
-          className="hidden"
-          id={id}
-        />
-
-        <div
-          className={`w-14 h-14 rounded-2xl flex items-center justify-center mb-4 ${
-            highlight ? 'bg-accent/15' : 'bg-primary/5'
-          }`}
-        >
-          <Upload className={`w-6 h-6 ${highlight ? 'text-accent' : 'text-primary'}`} />
-        </div>
-
-        <p className="font-body text-sm font-semibold text-text mb-1">
-          {isDragging ? 'Release to upload' : 'Drag & drop files here'}
-        </p>
-        <p className="font-body text-xs text-text-muted">
-          {description}
-        </p>
-
-        <button
-          type="button"
-          onClick={(e) => {
-            e.stopPropagation();
-            inputRef.current?.click();
-          }}
-          className={`mt-4 px-5 py-2 rounded-xl font-body text-sm font-bold transition-colors ${
-            highlight
-              ? 'bg-accent/15 text-accent hover:bg-accent/25'
-              : 'bg-primary/5 text-primary hover:bg-primary/10'
-          }`}
-        >
-          Browse Files
-        </button>
-      </div>
-
-      {/* File Preview Grid */}
-      {files.length > 0 && (
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 mt-3">
-          {files.map((file, index) => (
-            <div
-              key={index}
-              className="relative group bg-background rounded-xl overflow-hidden border border-gray-100 aspect-[4/3]"
-            >
-              <img
-                src={URL.createObjectURL(file)}
-                alt={file.name}
-                className="w-full h-full object-cover"
-              />
-              <div className="absolute inset-0 bg-primary/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                <button
-                  type="button"
-                  onClick={() => onRemoveFile(index)}
-                  className="p-2 bg-white/90 rounded-full text-red-500 hover:bg-white transition-colors"
-                >
-                  <X className="w-4 h-4" />
-                </button>
-              </div>
-              <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-2">
-                <p className="font-body text-[10px] text-white truncate">{file.name}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-}
-
-export default function AddCar() {
-  const { addCar } = useCars();
+export default function EditCar() {
+  const { id } = useParams();
+  const { updateCar } = useCars();
   const navigate = useNavigate();
-  
+  const [loading, setLoading] = useState(true);
+  const [existingImage, setExistingImage] = useState('');
+
   const {
     register,
     handleSubmit,
@@ -286,91 +137,132 @@ export default function AddCar() {
     }
   });
 
-  // Watch elements specifically for interactive UI conditional checks
+  // Fetch existing car data and populate form
+  useEffect(() => {
+    const fetchCar = async () => {
+      try {
+        const res = await axiosInstance.get(`/cars/${id}`);
+        const car = res.data.data || res.data;
+
+        setExistingImage(car.image || '');
+
+        const badges = car.badges || [];
+        reset({
+          make: car.make || '',
+          model: car.model || '',
+          year: car.year || '',
+          price: car.price || '',
+          kmDriven: car.kms || '',
+          fuelType: car.fuelType || '',
+          transmission: car.transmission || '',
+          ownership: car.owner || '',
+          bodyType: car.bodyType || '',
+          color: car.color || '',
+          registration: car.registration || '',
+          description: car.description || '',
+          features: (car.features || []).join(', '),
+          airConditioner: car.airConditioner || '',
+          powerWindows: car.powerWindows || '',
+          sunroof: car.sunroof || '',
+          parkingSensors: car.parkingSensors || '',
+          displacement: car.displacement || '',
+          maxPower: car.maxPower || '',
+          driveType: car.driveType || '',
+          cylinders: car.cylinders || '',
+          isCertified: badges.includes('Certified'),
+          isPetipack: badges.includes('Peti-pack'),
+          validVimo: badges.includes('Valid Vimo'),
+        });
+      } catch (err) {
+        toast.error('Failed to load car data.');
+        navigate('/admin/inventory');
+      } finally {
+        setLoading(false);
+      }
+    };
+    if (id) fetchCar();
+  }, [id, reset, navigate]);
+
   const isCertified = watch('isCertified');
   const isPetipack = watch('isPetipack');
   const validVimo = watch('validVimo');
 
-  // Files
-  const [photos, setPhotos] = useState([]);
-  const [vrImage, setVrImage] = useState([]);
-
   const onSubmit = async (data) => {
     try {
-      const formData = new FormData();
-      formData.append('make', data.make);
-      formData.append('model', data.model);
-      formData.append('year', data.year);
-      formData.append('price', data.price);
-      formData.append('kms', data.kmDriven);
-      formData.append('fuelType', data.fuelType);
-      formData.append('transmission', data.transmission);
-      formData.append('owner', data.ownership);
-      formData.append('bodyType', data.bodyType);
-      formData.append('color', data.color);
-      formData.append('registration', data.registration);
-      formData.append('description', data.description);
-      formData.append('status', 'Available');
+      const payload = {
+        make: data.make,
+        model: data.model,
+        year: data.year,
+        price: data.price,
+        kms: data.kmDriven,
+        fuelType: data.fuelType,
+        transmission: data.transmission,
+        owner: data.ownership,
+        bodyType: data.bodyType,
+        color: data.color,
+        registration: data.registration,
+        description: data.description,
+        airConditioner: data.airConditioner,
+        powerWindows: data.powerWindows,
+        sunroof: data.sunroof,
+        parkingSensors: data.parkingSensors,
+        displacement: data.displacement,
+        maxPower: data.maxPower,
+        driveType: data.driveType,
+        cylinders: data.cylinders,
+      };
 
-      formData.append('airConditioner', data.airConditioner);
-      formData.append('powerWindows', data.powerWindows);
-      formData.append('sunroof', data.sunroof);
-      formData.append('parkingSensors', data.parkingSensors);
-      formData.append('displacement', data.displacement);
-      formData.append('maxPower', data.maxPower);
-      formData.append('driveType', data.driveType);
-      formData.append('cylinders', data.cylinders);
-
-      // Send features as a single comma-separated string — backend parses it
+      // Features as comma-separated string — backend parses it
       if (data.features) {
-        formData.append('features', data.features);
+        payload.features = data.features;
       }
 
-      if (data.isCertified) formData.append('badges', 'Certified');
-      if (data.isPetipack) formData.append('badges', 'Peti-pack');
-      if (data.validVimo) formData.append('badges', 'Valid Vimo');
+      // Badges
+      const badges = [];
+      if (data.isCertified) badges.push('Certified');
+      if (data.isPetipack) badges.push('Peti-pack');
+      if (data.validVimo) badges.push('Valid Vimo');
+      payload.badges = badges;
 
-      // Inject the image file
-      if (photos.length > 0) {
-        formData.append('image', photos[0]);
-      } else {
-        toast.error('Please upload at least one image.');
-        return; 
-      }
-
-      await toast.promise(addCar(formData), {
-        loading: 'Publishing vehicle...',
-        success: 'Vehicle Published Successfully!',
-        error: 'Failed to publish vehicle. Please try again.',
+      await toast.promise(updateCar(id, payload), {
+        loading: 'Updating vehicle...',
+        success: 'Vehicle updated successfully!',
+        error: 'Failed to update vehicle.',
       });
 
-      // Reset form
-      reset();
-      setPhotos([]);
-      setVrImage([]);
-
-      // Instantly navigate — the car is already in global state
       navigate('/admin/inventory');
     } catch (error) {
-      console.error('Failed to publish car:', error);
+      console.error('Failed to update car:', error);
     }
   };
 
-  const addPhotos = (newFiles) => setPhotos((prev) => [...prev, ...newFiles]);
-  const removePhoto = (index) => setPhotos((prev) => prev.filter((_, i) => i !== index));
-
-  const addVrImage = (newFiles) => setVrImage(newFiles.slice(0, 1)); // Only 1 VR image
-  const removeVrImage = () => setVrImage([]);
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-32">
+        <div className="w-8 h-8 border-4 border-primary/30 border-t-primary rounded-full animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="pb-24">
       {/* Page Title */}
       <div className="mb-8">
-        <h1 className="font-heading font-bold text-2xl text-text">Add New Vehicle</h1>
+        <h1 className="font-heading font-bold text-2xl text-text">Edit Vehicle</h1>
         <p className="font-body text-sm text-text-muted mt-1">
-          Fill in the details below to list a new car in the inventory.
+          Update the details for this vehicle listing.
         </p>
       </div>
+
+      {/* Existing Image Preview */}
+      {existingImage && (
+        <div className="mb-6 bg-surface rounded-2xl border border-gray-100 p-4">
+          <p className="font-body text-sm font-semibold text-text mb-3">Current Image</p>
+          <div className="w-40 h-28 rounded-xl overflow-hidden bg-background ring-1 ring-gray-100">
+            <img src={existingImage} alt="Current car" className="w-full h-full object-cover" />
+          </div>
+        </div>
+      )}
 
       <div className="space-y-8">
         {/* ── Section 1: Basic Details ── */}
@@ -562,55 +454,6 @@ export default function AddCar() {
             </div>
           )}
         </section>
-
-        {/* ── Section 3: Media Upload ── */}
-        <section className="bg-surface rounded-2xl border border-gray-100 p-6 sm:p-8">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center">
-              <span className="font-heading font-bold text-sm text-primary">3</span>
-            </div>
-            <h2 className="font-heading font-bold text-lg text-text">Media Upload</h2>
-          </div>
-
-          <div className="space-y-8">
-            {/* Standard Photos */}
-            <DropZone
-              id="standard-photos"
-              title="Exterior & Interior Photos"
-              description="Upload high-quality JPG or PNG images. Recommended: 1200×800px or higher."
-              icon={ImageIcon}
-              files={photos}
-              onFilesAdded={addPhotos}
-              onRemoveFile={removePhoto}
-              accept="image/*"
-            />
-
-            {/* VR 360° Image - Highlighted */}
-            <div className="relative">
-              {/* Glow effect */}
-              <div className="absolute -inset-1 bg-gradient-to-r from-accent/20 via-accent/10 to-accent/20 rounded-3xl blur-sm" />
-              <div className="relative bg-surface rounded-2xl border-2 border-accent/20 p-6 sm:p-8">
-                <div className="flex items-center gap-2 mb-2">
-                  <AlertCircle className="w-4 h-4 text-accent" />
-                  <span className="font-body text-xs font-bold text-accent uppercase tracking-wider">
-                    Premium Feature — Heavy File Upload
-                  </span>
-                </div>
-                <DropZone
-                  id="vr-360-image"
-                  title="Upload 360° Interior VR Image"
-                  description="Upload a single high-res equirectangular panorama (JPG/PNG). File can be up to 50MB."
-                  icon={View}
-                  files={vrImage}
-                  onFilesAdded={addVrImage}
-                  onRemoveFile={removeVrImage}
-                  accept="image/*"
-                  highlight
-                />
-              </div>
-            </div>
-          </div>
-        </section>
       </div>
 
       {/* ── Sticky Bottom Bar ── */}
@@ -625,7 +468,7 @@ export default function AddCar() {
             ) : (
               <>
                 <AlertCircle className="w-4 h-4" />
-                <span>Fill all required fields before publishing.</span>
+                <span>Update the fields you need to change.</span>
               </>
             )}
           </div>
@@ -633,9 +476,10 @@ export default function AddCar() {
           <div className="flex items-center gap-3 ml-auto">
             <button
               type="button"
+              onClick={() => navigate('/admin/inventory')}
               className="px-6 py-3 bg-background border border-gray-200 rounded-xl font-body text-sm font-bold text-text-muted hover:text-text hover:border-primary/20 transition-colors"
             >
-              Save Draft
+              Cancel
             </button>
             <button
               type="submit"
@@ -645,12 +489,12 @@ export default function AddCar() {
               {isSubmitting ? (
                 <>
                   <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  Publishing...
+                  Saving...
                 </>
               ) : (
                 <>
                   <CheckCircle2 className="w-4 h-4" />
-                  Publish Vehicle
+                  Save Changes
                 </>
               )}
             </button>

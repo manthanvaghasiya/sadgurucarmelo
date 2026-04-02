@@ -11,6 +11,7 @@ import {
   Bell,
   ChevronLeft,
   Menu,
+  Mail,
 } from 'lucide-react';
 
 const navItems = [
@@ -18,6 +19,7 @@ const navItems = [
   { name: 'Inventory', path: '/admin/inventory', icon: Car },
   { name: 'Add New Car', path: '/admin/add-car', icon: PlusCircle },
   { name: 'Leads', path: '/admin/leads', icon: Users },
+  { name: 'Messages', path: '/admin/messages', icon: Mail },
   { name: 'Settings', path: '/admin/settings', icon: Settings },
 ];
 

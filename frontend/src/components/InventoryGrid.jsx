@@ -1,5 +1,6 @@
-import { useState, useMemo, useEffect } from 'react';
-import { useCars } from '../context/CarContext';
+import { useState, useEffect, useCallback } from 'react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
+import axiosInstance from '../api/axiosConfig';
 import CarCard from './CarCard';
 
 // ── Format helpers ──
@@ -12,39 +13,60 @@ function formatKm(num) {
   return `${num.toLocaleString('en-IN')} KM`;
 }
 
-export default function InventoryGrid() {
-  const { cars, isLoading, error, fetchCars } = useCars();
+export default function InventoryGrid({ filters = {} }) {
+  const [cars, setCars] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
   const [stockTab, setStockTab] = useState('available');
   const [sortBy, setSortBy] = useState('newest');
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
+
+  const fetchCars = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const params = new URLSearchParams();
+      params.set('page', page);
+      params.set('limit', '12');
+      params.set('status', stockTab === 'available' ? 'Available' : 'Coming Soon');
+
+      if (sortBy !== 'newest') params.set('sort', sortBy);
+      if (filters.fuelType) params.set('fuelType', filters.fuelType);
+      if (filters.bodyType) params.set('bodyType', filters.bodyType);
+      if (filters.priceMin) params.set('priceMin', filters.priceMin);
+      if (filters.priceMax) params.set('priceMax', filters.priceMax);
+      if (filters.makes && filters.makes.length === 1) {
+        params.set('make', filters.makes[0]);
+      }
+
+      const res = await axiosInstance.get(`/cars?${params.toString()}`);
+      let data = res.data.data || [];
+
+      // Client-side multi-make filter (if more than 1 make selected)
+      if (filters.makes && filters.makes.length > 1) {
+        data = data.filter(c => filters.makes.includes(c.make));
+      }
+
+      setCars(data);
+      setTotalPages(res.data.pages || 1);
+      setTotalCount(res.data.total || data.length);
+    } catch (err) {
+      setError(err.response?.data?.message || err.message || 'Failed to fetch cars');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [page, stockTab, sortBy, filters]);
 
   useEffect(() => {
     fetchCars();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [fetchCars]);
 
-  // ── Filter by status tab ──
-  const filtered = useMemo(() => {
-    if (stockTab === 'available') {
-      return cars.filter((c) => c.status === 'Available');
-    }
-    return cars.filter((c) => c.status === 'Coming Soon');
-  }, [cars, stockTab]);
-
-  // ── Sort ──
-  const sorted = useMemo(() => {
-    const arr = [...filtered];
-    switch (sortBy) {
-      case 'price-low':
-        return arr.sort((a, b) => a.price - b.price);
-      case 'price-high':
-        return arr.sort((a, b) => b.price - a.price);
-      case 'km-low':
-        return arr.sort((a, b) => a.kms - b.kms);
-      case 'newest':
-      default:
-        return arr; // already newest-first from context
-    }
-  }, [filtered, sortBy]);
+  // Reset to page 1 when filters or sort change
+  useEffect(() => {
+    setPage(1);
+  }, [stockTab, sortBy, filters]);
 
   return (
     <div className="flex flex-col gap-6">
@@ -76,9 +98,11 @@ export default function InventoryGrid() {
           </button>
         </div>
 
-        {/* Sort By */}
+        {/* Sort By + Count */}
         <div className="flex items-center gap-3 w-full sm:w-auto justify-end">
-          <span className="font-heading font-semibold text-xs text-text-muted uppercase tracking-widest">Sort By:</span>
+          <span className="font-body text-sm text-text-muted">
+            <span className="font-semibold text-text">{totalCount}</span> cars found
+          </span>
           <select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value)}
@@ -104,16 +128,16 @@ export default function InventoryGrid() {
           <p className="font-heading font-bold text-lg text-red-500">Error loading inventory</p>
           <p className="font-body text-sm text-text-muted mt-1">{error}</p>
         </div>
-      ) : sorted.length === 0 ? (
+      ) : cars.length === 0 ? (
         <div className="py-16 text-center">
           <p className="font-heading font-bold text-lg text-text-muted">No vehicles found</p>
           <p className="font-body text-sm text-text-muted/60 mt-1">
-            {stockTab === 'available' ? 'New stock is arriving soon!' : 'No upcoming vehicles at the moment.'}
+            {stockTab === 'available' ? 'Try adjusting your filters or check back soon!' : 'No upcoming vehicles at the moment.'}
           </p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {sorted.map((car) => (
+          {cars.map((car) => (
             <CarCard
               key={car._id || car.id}
               id={car._id || car.id}
@@ -127,6 +151,62 @@ export default function InventoryGrid() {
               badges={car.badges || []}
             />
           ))}
+        </div>
+      )}
+
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <div className="flex flex-col sm:flex-row items-center justify-between pt-4 border-t border-gray-100 gap-4">
+          <p className="font-body text-sm text-text-muted">
+            Page <span className="font-semibold text-text">{page}</span> of{' '}
+            <span className="font-semibold text-text">{totalPages}</span>
+            {' '}({totalCount} cars)
+          </p>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setPage(p => Math.max(1, p - 1))}
+              disabled={page === 1}
+              className="flex items-center gap-1 px-3.5 py-2 bg-background rounded-lg font-body text-sm font-semibold text-text-muted hover:text-text transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              <ChevronLeft className="w-4 h-4" />
+              Previous
+            </button>
+
+            {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
+              let pageNum;
+              if (totalPages <= 5) {
+                pageNum = i + 1;
+              } else if (page <= 3) {
+                pageNum = i + 1;
+              } else if (page >= totalPages - 2) {
+                pageNum = totalPages - 4 + i;
+              } else {
+                pageNum = page - 2 + i;
+              }
+              return (
+                <button
+                  key={pageNum}
+                  onClick={() => setPage(pageNum)}
+                  className={`w-9 h-9 rounded-lg font-body text-sm font-bold flex items-center justify-center transition-colors ${
+                    pageNum === page
+                      ? 'bg-primary text-white shadow-sm shadow-primary/20'
+                      : 'bg-background text-text-muted hover:text-text'
+                  }`}
+                >
+                  {pageNum}
+                </button>
+              );
+            })}
+
+            <button
+              onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+              disabled={page === totalPages}
+              className="flex items-center gap-1 px-3.5 py-2 bg-background rounded-lg font-body text-sm font-semibold text-text-muted hover:text-text transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              Next
+              <ChevronRight className="w-4 h-4" />
+            </button>
+          </div>
         </div>
       )}
 

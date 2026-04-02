@@ -1,6 +1,21 @@
 import { Phone, MapPin, Clock, Plus, Minus, Car, MessageCircle } from 'lucide-react';
+import { useForm } from 'react-hook-form';
+import toast from 'react-hot-toast';
+import axiosInstance from '../api/axiosConfig';
 
 export default function Contact() {
+  const { register, handleSubmit, reset, formState: { errors, isSubmitting } } = useForm();
+
+  const onSubmit = async (data) => {
+    try {
+      await axiosInstance.post('/messages', data);
+      toast.success('Message sent! We will contact you soon.');
+      reset();
+    } catch (error) {
+      toast.error('Failed to send message. Please try again.');
+    }
+  };
+
   return (
     <div className="bg-background min-h-screen py-10 px-4">
       <div className="max-w-7xl mx-auto">
@@ -84,36 +99,71 @@ export default function Contact() {
             <div className="bg-surface rounded-2xl shadow-sm border border-gray-100 p-8">
               <h2 className="font-heading font-bold text-2xl text-text mb-8">Send us a Message</h2>
               
-              <form className="flex flex-col gap-6" onSubmit={(e) => e.preventDefault()}>
+              <form className="flex flex-col gap-6" onSubmit={handleSubmit(onSubmit)}>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                   <div className="flex flex-col gap-2">
-                    <label className="font-heading font-semibold text-[11px] uppercase tracking-widest text-text-muted">First Name</label>
-                    <input type="text" placeholder="John Doe" className="w-full bg-[#f1f5f9] text-text font-body text-sm rounded-xl px-4 py-3.5 focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all placeholder:text-gray-400" />
+                    <label className="font-heading font-semibold text-[11px] uppercase tracking-widest text-text-muted">Name</label>
+                    <input 
+                      type="text" 
+                      placeholder="John Doe" 
+                      className={`w-full bg-[#f1f5f9] text-text font-body text-sm rounded-xl px-4 py-3.5 focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all placeholder:text-gray-400 ${errors.name ? 'border border-red-500' : ''}`}
+                      {...register("name", { required: "Name is required" })}
+                    />
+                    {errors.name && <span className="text-red-500 text-[11px] block">{errors.name.message}</span>}
                   </div>
                   <div className="flex flex-col gap-2">
-                    <label className="font-heading font-semibold text-[11px] uppercase tracking-widest text-text-muted">Phone Number</label>
-                    <input type="tel" placeholder="+91 00000 00000" className="w-full bg-[#f1f5f9] text-text font-body text-sm rounded-xl px-4 py-3.5 focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all placeholder:text-gray-400" />
+                    <label className="font-heading font-semibold text-[11px] uppercase tracking-widest text-text-muted">Email</label>
+                    <input 
+                      type="email" 
+                      placeholder="john@example.com" 
+                      className={`w-full bg-[#f1f5f9] text-text font-body text-sm rounded-xl px-4 py-3.5 focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all placeholder:text-gray-400 ${errors.email ? 'border border-red-500' : ''}`}
+                      {...register("email", { 
+                        pattern: {
+                          value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                          message: "Invalid email address"
+                        }
+                      })}
+                    />
+                    {errors.email && <span className="text-red-500 text-[11px] block">{errors.email.message}</span>}
                   </div>
                 </div>
 
-                <div className="flex flex-col gap-2">
-                  <label className="font-heading font-semibold text-[11px] uppercase tracking-widest text-text-muted">Inquiry Type</label>
-                  <select className="w-full bg-[#f1f5f9] text-text font-body text-sm rounded-xl px-4 py-3.5 focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all appearance-none cursor-pointer">
-                    <option>Buy a Car</option>
-                    <option>Sell a Car</option>
-                    <option>Exchange</option>
-                    <option>Finance inquiry</option>
-                    <option>Other</option>
-                  </select>
+                <div className="grid grid-cols-1 gap-6">
+                  <div className="flex flex-col gap-2">
+                    <label className="font-heading font-semibold text-[11px] uppercase tracking-widest text-text-muted">Phone Number</label>
+                    <input 
+                      type="tel" 
+                      placeholder="+91 00000 00000" 
+                      className={`w-full bg-[#f1f5f9] text-text font-body text-sm rounded-xl px-4 py-3.5 focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all placeholder:text-gray-400 ${errors.phone ? 'border border-red-500' : ''}`}
+                      {...register("phone", { 
+                        required: "Phone number is required",
+                        pattern: {
+                          value: /^[0-9+\-\s()]+$/,
+                          message: "Please enter a valid phone number"
+                        }
+                      })}
+                    />
+                    {errors.phone && <span className="text-red-500 text-[11px] block">{errors.phone.message}</span>}
+                  </div>
                 </div>
 
                 <div className="flex flex-col gap-2">
                   <label className="font-heading font-semibold text-[11px] uppercase tracking-widest text-text-muted">Your Message</label>
-                  <textarea placeholder="How can we help you today?" rows="4" className="w-full bg-[#f1f5f9] text-text font-body text-sm rounded-xl px-4 py-3.5 focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all placeholder:text-gray-400 resize-none"></textarea>
+                  <textarea 
+                    placeholder="How can we help you today?" 
+                    rows="4" 
+                    className={`w-full bg-[#f1f5f9] text-text font-body text-sm rounded-xl px-4 py-3.5 focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all placeholder:text-gray-400 resize-none ${errors.message ? 'border border-red-500' : ''}`}
+                    {...register("message", { required: "Message is required" })}
+                  ></textarea>
+                  {errors.message && <span className="text-red-500 text-[11px] block">{errors.message.message}</span>}
                 </div>
 
-                <button type="submit" className="w-full mt-2 bg-primary text-white font-body font-bold text-sm py-4 rounded-xl hover:bg-primary-hover shadow-md transition-colors">
-                  Send Inquiry
+                <button 
+                  type="submit" 
+                  disabled={isSubmitting}
+                  className="w-full mt-2 bg-primary text-white font-body font-bold text-sm py-4 rounded-xl hover:bg-primary-hover shadow-md transition-colors disabled:opacity-70 flex justify-center items-center"
+                >
+                  {isSubmitting ? 'Sending...' : 'Send Inquiry'}
                 </button>
               </form>
             </div>

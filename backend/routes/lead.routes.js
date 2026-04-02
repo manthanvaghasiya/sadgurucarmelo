@@ -5,17 +5,55 @@ import { protect } from '../middleware/authMiddleware.js';
 const router = express.Router();
 
 // ═══════════════════════════════════════════════
+//  GET /api/leads/stats — Lead KPIs (Protected)
+// ═══════════════════════════════════════════════
+router.get('/stats', protect, async (req, res) => {
+  try {
+    const now = new Date();
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const endOfToday = new Date(startOfToday);
+    endOfToday.setDate(endOfToday.getDate() + 1);
+
+    const [total, newCount, contacted, followUp, todayFollowUps] = await Promise.all([
+      Lead.countDocuments(),
+      Lead.countDocuments({ status: 'New' }),
+      Lead.countDocuments({ status: 'Contacted' }),
+      Lead.countDocuments({ status: 'Follow-up' }),
+      Lead.countDocuments({
+        followUpDate: { $gte: startOfToday, $lt: endOfToday },
+      }),
+    ]);
+
+    res.json({
+      success: true,
+      data: {
+        total,
+        newCount,
+        contacted,
+        followUp,
+        todayFollowUps,
+      },
+    });
+  } catch (error) {
+    console.error('Lead stats error:', error);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+});
+
+// ═══════════════════════════════════════════════
 //  GET /api/leads — Get all leads (Admin/Sales)
 // ═══════════════════════════════════════════════
 router.get('/', protect, async (req, res) => {
   try {
-    const { status, urgency, source, sort } = req.query;
+    const { status, urgency, source, sort, assignedTo } = req.query;
 
     // Build filter
     const filter = {};
     if (status) filter.status = status;
     if (urgency) filter.urgency = urgency;
     if (source) filter.source = source;
+    if (assignedTo) filter.assignedTo = assignedTo;
 
     // Build sort
     let sortBy = { createdAt: -1 };

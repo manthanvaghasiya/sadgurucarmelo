@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Car,
   DollarSign,
@@ -10,22 +11,43 @@ import {
   MoreVertical,
   Eye,
   Filter,
-  ChevronDown,
+  ShoppingCart,
 } from 'lucide-react';
-
+import axiosInstance from '../../api/axiosConfig';
 import { useCars } from '../../context/CarContext';
 
 const statusStyles = {
   Available: 'bg-[#10b981]/10 text-[#059669] ring-[#10b981]/20',
+  Booked: 'bg-amber-50 text-amber-600 ring-amber-500/20',
   Sold: 'bg-red-50 text-red-600 ring-red-500/20',
-  Reserved: 'bg-amber-50 text-amber-600 ring-amber-500/20',
+  'Coming Soon': 'bg-[#3b82f6]/10 text-[#2563eb] ring-[#3b82f6]/20',
 };
 
 export default function Dashboard() {
   const { cars } = useCars();
+  const navigate = useNavigate();
   const [activeMenu, setActiveMenu] = useState(null);
+  const [leadStats, setLeadStats] = useState({ total: 0, newCount: 0, followUp: 0 });
+  const [carStats, setCarStats] = useState({ totalCars: 0, soldThisMonth: 0, totalValue: 0 });
 
-  const totalValue = cars.reduce((acc, car) => acc + (car.price || 0), 0);
+  // Fetch live stats
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const [leadRes, carRes] = await Promise.all([
+          axiosInstance.get('/leads/stats'),
+          axiosInstance.get('/cars/stats'),
+        ]);
+        if (leadRes.data.success) setLeadStats(leadRes.data.data);
+        if (carRes.data.success) setCarStats(carRes.data.data);
+      } catch (err) {
+        console.error('Failed to fetch stats:', err);
+      }
+    };
+    fetchStats();
+  }, []);
+
+  const totalValue = carStats.totalValue || 0;
   const totalValueFormatted = totalValue >= 10000000 
     ? `₹${(totalValue / 10000000).toFixed(2)} Cr` 
     : totalValue >= 100000 
@@ -36,7 +58,7 @@ export default function Dashboard() {
     {
       id: 'total-cars',
       title: 'Total Cars in Stock',
-      value: cars.length.toString(),
+      value: (carStats.availableCars || cars.length).toString(),
       change: 'Active',
       trend: 'up',
       subtitle: 'Live Database',
@@ -57,14 +79,25 @@ export default function Dashboard() {
     },
     {
       id: 'recent-leads',
-      title: 'Recent Leads',
-      value: '0',
-      change: 'N/A',
-      trend: 'up',
-      subtitle: 'Awaiting database link',
+      title: 'Total Leads',
+      value: leadStats.total.toString(),
+      change: `${leadStats.newCount} new`,
+      trend: leadStats.newCount > 0 ? 'up' : 'up',
+      subtitle: `${leadStats.followUp} follow-ups pending`,
       icon: Users,
       iconBg: 'bg-[#8b5cf6]/10',
       iconColor: 'text-[#8b5cf6]',
+    },
+    {
+      id: 'sold-month',
+      title: 'Sold This Month',
+      value: carStats.soldThisMonth.toString(),
+      change: 'This month',
+      trend: 'up',
+      subtitle: 'Completed deals',
+      icon: ShoppingCart,
+      iconBg: 'bg-[#f59e0b]/10',
+      iconColor: 'text-[#d97706]',
     },
   ];
 
@@ -90,21 +123,10 @@ export default function Dashboard() {
             Welcome back — here's your inventory overview.
           </p>
         </div>
-        <div className="flex items-center gap-3">
-          <button className="flex items-center gap-2 px-4 py-2.5 bg-surface border border-gray-200 rounded-xl font-body text-sm font-semibold text-text-muted hover:border-primary/30 hover:text-text transition-colors">
-            <Filter className="w-4 h-4" />
-            Filters
-          </button>
-          <select className="px-4 py-2.5 bg-surface border border-gray-200 rounded-xl font-body text-sm font-semibold text-text-muted appearance-none cursor-pointer hover:border-primary/30 outline-none pr-8 transition-colors">
-            <option>Last 30 Days</option>
-            <option>Last 7 Days</option>
-            <option>Last 90 Days</option>
-          </select>
-        </div>
       </div>
 
       {/* ── Stats Row ── */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
         {statsData.map((stat) => {
           const Icon = stat.icon;
           return (
@@ -152,15 +174,21 @@ export default function Dashboard() {
               Current Inventory
             </h2>
             <p className="font-body text-sm text-text-muted mt-0.5">
-              {inventoryData.length} vehicles in database
+              {inventoryData.length} recent vehicles from database
             </p>
           </div>
           <div className="flex items-center gap-3">
-            <button className="flex items-center gap-2 px-4 py-2 bg-background rounded-xl font-body text-sm font-semibold text-text-muted hover:text-text transition-colors">
+            <button 
+              onClick={() => navigate('/admin/inventory')}
+              className="flex items-center gap-2 px-4 py-2 bg-background rounded-xl font-body text-sm font-semibold text-text-muted hover:text-text transition-colors"
+            >
               <Eye className="w-4 h-4" />
               View All
             </button>
-            <button className="flex items-center gap-2 px-4 py-2 bg-accent text-white rounded-xl font-body text-sm font-bold hover:bg-accent-hover transition-colors shadow-sm shadow-accent/20">
+            <button 
+              onClick={() => navigate('/admin/add-car')}
+              className="flex items-center gap-2 px-4 py-2 bg-accent text-white rounded-xl font-body text-sm font-bold hover:bg-accent-hover transition-colors shadow-sm shadow-accent/20"
+            >
               + Add Vehicle
             </button>
           </div>
@@ -195,12 +223,10 @@ export default function Dashboard() {
               </tr>
             </thead>
             <tbody>
-              {inventoryData.map((car, index) => (
+              {inventoryData.map((car) => (
                 <tr
                   key={car.id}
-                  className={`border-t border-gray-50 hover:bg-background/50 transition-colors ${
-                    index === inventoryData.length - 1 ? '' : ''
-                  }`}
+                  className="border-t border-gray-50 hover:bg-background/50 transition-colors"
                 >
                   {/* Vehicle Cell */}
                   <td className="px-6 py-4">
@@ -244,7 +270,7 @@ export default function Dashboard() {
                   {/* Status */}
                   <td className="px-4 py-4">
                     <span
-                      className={`inline-flex items-center px-2.5 py-1 rounded-full font-body text-[11px] font-bold ring-1 ${statusStyles[car.status]}`}
+                      className={`inline-flex items-center px-2.5 py-1 rounded-full font-body text-[11px] font-bold ring-1 ${statusStyles[car.status] || statusStyles['Available']}`}
                     >
                       {car.status}
                     </span>
@@ -253,39 +279,12 @@ export default function Dashboard() {
                   <td className="px-6 py-4">
                     <div className="flex items-center justify-end gap-1">
                       <button
+                        onClick={() => navigate(`/admin/edit-car/${car.id}`)}
                         className="p-2 text-text-muted hover:text-primary hover:bg-primary/5 rounded-lg transition-colors"
                         title="Edit"
                       >
                         <Edit3 className="w-4 h-4" />
                       </button>
-                      <button
-                        className="p-2 text-text-muted hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
-                        title="Delete"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                      <div className="relative">
-                        <button
-                          onClick={() => setActiveMenu(activeMenu === car.id ? null : car.id)}
-                          className="p-2 text-text-muted hover:text-text hover:bg-background rounded-lg transition-colors"
-                          title="More"
-                        >
-                          <MoreVertical className="w-4 h-4" />
-                        </button>
-                        {activeMenu === car.id && (
-                          <div className="absolute right-0 top-full mt-1 w-40 bg-surface rounded-xl shadow-xl shadow-primary/10 border border-gray-100 py-1.5 z-20">
-                            <button className="w-full text-left px-4 py-2 font-body text-sm text-text hover:bg-background transition-colors">
-                              View Details
-                            </button>
-                            <button className="w-full text-left px-4 py-2 font-body text-sm text-text hover:bg-background transition-colors">
-                              Mark as Sold
-                            </button>
-                            <button className="w-full text-left px-4 py-2 font-body text-sm text-red-500 hover:bg-red-50 transition-colors">
-                              Remove Listing
-                            </button>
-                          </div>
-                        )}
-                      </div>
                     </div>
                   </td>
                 </tr>
@@ -294,29 +293,18 @@ export default function Dashboard() {
           </table>
         </div>
 
-        {/* Table Footer / Pagination */}
+        {/* Table Footer */}
         <div className="flex flex-col sm:flex-row items-center justify-between p-6 pt-4 border-t border-gray-100 gap-4">
           <p className="font-body text-sm text-text-muted">
             Showing <span className="font-semibold text-text">1-{inventoryData.length}</span> of{' '}
             <span className="font-semibold text-text">{cars.length}</span> vehicles
           </p>
-          <div className="flex items-center gap-2">
-            <button className="px-3.5 py-2 bg-background rounded-lg font-body text-sm font-semibold text-text-muted hover:text-text transition-colors">
-              Previous
-            </button>
-            <button className="w-9 h-9 bg-primary text-white rounded-lg font-body text-sm font-bold flex items-center justify-center">
-              1
-            </button>
-            <button className="w-9 h-9 bg-background rounded-lg font-body text-sm font-semibold text-text-muted hover:text-text transition-colors flex items-center justify-center">
-              2
-            </button>
-            <button className="w-9 h-9 bg-background rounded-lg font-body text-sm font-semibold text-text-muted hover:text-text transition-colors flex items-center justify-center">
-              3
-            </button>
-            <button className="px-3.5 py-2 bg-background rounded-lg font-body text-sm font-semibold text-text-muted hover:text-text transition-colors">
-              Next
-            </button>
-          </div>
+          <button
+            onClick={() => navigate('/admin/inventory')}
+            className="px-4 py-2 bg-primary text-white rounded-lg font-body text-sm font-bold hover:bg-primary-hover transition-colors"
+          >
+            View Full Inventory →
+          </button>
         </div>
       </div>
     </div>

@@ -1,8 +1,7 @@
 import { useState, useMemo } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import {
   Search,
-  Eye,
   Edit3,
   Trash2,
   Plus,
@@ -47,6 +46,7 @@ const statusConfig = {
 
 export default function Inventory() {
   const { cars, deleteCar } = useCars();
+  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
   const [currentPage, setCurrentPage] = useState(1);
@@ -100,7 +100,7 @@ export default function Inventory() {
     }
 
     return list;
-  }, [searchQuery, statusFilter, sortField, sortDir]);
+  }, [allCars, searchQuery, statusFilter, sortField, sortDir]);
 
   // ── Pagination ──
   const totalPages = Math.max(1, Math.ceil(filtered.length / ITEMS_PER_PAGE));
@@ -418,12 +418,7 @@ export default function Inventory() {
                       <td className="px-6 py-4">
                         <div className="flex items-center justify-end gap-1 opacity-60 group-hover:opacity-100 transition-opacity">
                           <button
-                            className="p-2 text-text-muted hover:text-primary hover:bg-primary/5 rounded-lg transition-colors"
-                            title="View Details"
-                          >
-                            <Eye className="w-4 h-4" />
-                          </button>
-                          <button
+                            onClick={() => navigate(`/admin/edit-car/${car.id}`)}
                             className="p-2 text-text-muted hover:text-primary hover:bg-primary/5 rounded-lg transition-colors"
                             title="Edit"
                           >
@@ -495,10 +490,10 @@ export default function Inventory() {
                           {car.price}
                         </span>
                         <div className="flex items-center gap-1">
-                          <button className="p-1.5 text-text-muted hover:text-primary rounded-md transition-colors">
-                            <Eye className="w-3.5 h-3.5" />
-                          </button>
-                          <button className="p-1.5 text-text-muted hover:text-primary rounded-md transition-colors">
+                          <button
+                            onClick={() => navigate(`/admin/edit-car/${car.id}`)}
+                            className="p-1.5 text-text-muted hover:text-primary rounded-md transition-colors"
+                          >
                             <Edit3 className="w-3.5 h-3.5" />
                           </button>
                           <button
