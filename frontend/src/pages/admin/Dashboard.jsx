@@ -50,69 +50,7 @@ const statsData = [
   },
 ];
 
-// Mock data for inventory table
-const inventoryData = [
-  {
-    id: 1,
-    image: 'https://placehold.co/120x80/e2e8f0/64748b?text=Swift',
-    name: 'Maruti Suzuki Swift VXI',
-    year: 2022,
-    price: '₹5,85,000',
-    km: '23,000 KM',
-    fuel: 'Petrol',
-    status: 'Available',
-  },
-  {
-    id: 2,
-    image: 'https://placehold.co/120x80/e2e8f0/64748b?text=Creta',
-    name: 'Hyundai Creta SX(O)',
-    year: 2021,
-    price: '₹13,50,000',
-    km: '35,400 KM',
-    fuel: 'Diesel',
-    status: 'Available',
-  },
-  {
-    id: 3,
-    image: 'https://placehold.co/120x80/e2e8f0/64748b?text=City',
-    name: 'Honda City V CVT',
-    year: 2023,
-    price: '₹11,25,000',
-    km: '12,000 KM',
-    fuel: 'Petrol',
-    status: 'Sold',
-  },
-  {
-    id: 4,
-    image: 'https://placehold.co/120x80/e2e8f0/64748b?text=Nexon',
-    name: 'Tata Nexon EV Max',
-    year: 2023,
-    price: '₹14,75,000',
-    km: '8,500 KM',
-    fuel: 'Electric',
-    status: 'Available',
-  },
-  {
-    id: 5,
-    image: 'https://placehold.co/120x80/e2e8f0/64748b?text=Fortuner',
-    name: 'Toyota Fortuner 4X4 AT',
-    year: 2020,
-    price: '₹32,00,000',
-    km: '45,000 KM',
-    fuel: 'Diesel',
-    status: 'Reserved',
-  },
-  {
-    id: 6,
-    image: 'https://placehold.co/120x80/e2e8f0/64748b?text=Baleno',
-    name: 'Maruti Suzuki Baleno Zeta',
-    year: 2022,
-    price: '₹7,20,000',
-    km: '18,600 KM',
-    fuel: 'Petrol',
-    status: 'Available',
-  },
-];
+import { useCars } from '../../context/CarContext';
 
 const statusStyles = {
   Available: 'bg-[#10b981]/10 text-[#059669] ring-[#10b981]/20',
@@ -121,7 +59,20 @@ const statusStyles = {
 };
 
 export default function Dashboard() {
+  const { cars } = useCars();
   const [activeMenu, setActiveMenu] = useState(null);
+
+  // Map backend top 6 latest cars
+  const inventoryData = cars.slice(0, 6).map((c) => ({
+    id: c._id || c.id,
+    image: c.image || 'https://placehold.co/120x80/e2e8f0/64748b?text=Car',
+    name: `${c.make} ${c.model}`,
+    year: c.year,
+    price: c.price >= 100000 ? `₹${(c.price / 100000).toFixed(2)} Lakhs` : `₹${(c.price || 0).toLocaleString('en-IN')}`,
+    km: `${(c.kms || 0).toLocaleString('en-IN')} KM`,
+    fuel: c.fuelType,
+    status: c.status || 'Available',
+  }));
 
   return (
     <div className="space-y-6">
@@ -340,8 +291,8 @@ export default function Dashboard() {
         {/* Table Footer / Pagination */}
         <div className="flex flex-col sm:flex-row items-center justify-between p-6 pt-4 border-t border-gray-100 gap-4">
           <p className="font-body text-sm text-text-muted">
-            Showing <span className="font-semibold text-text">1-6</span> of{' '}
-            <span className="font-semibold text-text">47</span> vehicles
+            Showing <span className="font-semibold text-text">1-{inventoryData.length}</span> of{' '}
+            <span className="font-semibold text-text">{cars.length}</span> vehicles
           </p>
           <div className="flex items-center gap-2">
             <button className="px-3.5 py-2 bg-background rounded-lg font-body text-sm font-semibold text-text-muted hover:text-text transition-colors">

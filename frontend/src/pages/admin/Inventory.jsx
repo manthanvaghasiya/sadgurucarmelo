@@ -18,165 +18,8 @@ import {
   AlertTriangle,
 } from 'lucide-react';
 
-// ── Mock inventory data ──
-const allCars = [
-  {
-    id: 'SCM-001',
-    image: 'https://placehold.co/120x80/e2e8f0/64748b?text=Creta',
-    title: '2020 Hyundai Creta SX',
-    make: 'Hyundai',
-    model: 'Creta',
-    km: '35,400 KM',
-    price: '₹12.75 Lakhs',
-    priceRaw: 1275000,
-    status: 'Available',
-    dateAdded: 'Oct 24, 2023',
-    fuel: 'Diesel',
-  },
-  {
-    id: 'SCM-002',
-    image: 'https://placehold.co/120x80/e2e8f0/64748b?text=Swift',
-    title: '2022 Maruti Swift VXI',
-    make: 'Maruti',
-    model: 'Swift',
-    km: '23,000 KM',
-    price: '₹5.85 Lakhs',
-    priceRaw: 585000,
-    status: 'Available',
-    dateAdded: 'Nov 02, 2023',
-    fuel: 'Petrol',
-  },
-  {
-    id: 'SCM-003',
-    image: 'https://placehold.co/120x80/e2e8f0/64748b?text=City',
-    title: '2023 Honda City V CVT',
-    make: 'Honda',
-    model: 'City',
-    km: '12,000 KM',
-    price: '₹11.25 Lakhs',
-    priceRaw: 1125000,
-    status: 'Sold',
-    dateAdded: 'Sep 15, 2023',
-    fuel: 'Petrol',
-  },
-  {
-    id: 'SCM-004',
-    image: 'https://placehold.co/120x80/e2e8f0/64748b?text=Nexon',
-    title: '2023 Tata Nexon EV Max',
-    make: 'Tata',
-    model: 'Nexon',
-    km: '8,500 KM',
-    price: '₹14.75 Lakhs',
-    priceRaw: 1475000,
-    status: 'Available',
-    dateAdded: 'Dec 01, 2023',
-    fuel: 'Electric',
-  },
-  {
-    id: 'SCM-005',
-    image: 'https://placehold.co/120x80/e2e8f0/64748b?text=Fortuner',
-    title: '2020 Toyota Fortuner 4X4',
-    make: 'Toyota',
-    model: 'Fortuner',
-    km: '45,000 KM',
-    price: '₹32.00 Lakhs',
-    priceRaw: 3200000,
-    status: 'Available',
-    dateAdded: 'Aug 20, 2023',
-    fuel: 'Diesel',
-  },
-  {
-    id: 'SCM-006',
-    image: 'https://placehold.co/120x80/e2e8f0/64748b?text=Baleno',
-    title: '2022 Maruti Baleno Zeta',
-    make: 'Maruti',
-    model: 'Baleno',
-    km: '18,600 KM',
-    price: '₹7.20 Lakhs',
-    priceRaw: 720000,
-    status: 'Sold',
-    dateAdded: 'Jul 10, 2023',
-    fuel: 'Petrol',
-  },
-  {
-    id: 'SCM-007',
-    image: 'https://placehold.co/120x80/e2e8f0/64748b?text=Seltos',
-    title: '2021 Kia Seltos HTX+',
-    make: 'Kia',
-    model: 'Seltos',
-    km: '28,200 KM',
-    price: '₹14.50 Lakhs',
-    priceRaw: 1450000,
-    status: 'Coming Soon',
-    dateAdded: 'Jan 05, 2024',
-    fuel: 'Petrol',
-  },
-  {
-    id: 'SCM-008',
-    image: 'https://placehold.co/120x80/e2e8f0/64748b?text=Polo',
-    title: '2019 Volkswagen Polo GT',
-    make: 'Volkswagen',
-    model: 'Polo',
-    km: '52,300 KM',
-    price: '₹6.90 Lakhs',
-    priceRaw: 690000,
-    status: 'Available',
-    dateAdded: 'Jun 18, 2023',
-    fuel: 'Petrol',
-  },
-  {
-    id: 'SCM-009',
-    image: 'https://placehold.co/120x80/e2e8f0/64748b?text=XUV700',
-    title: '2023 Mahindra XUV700 AX7',
-    make: 'Mahindra',
-    model: 'XUV700',
-    km: '11,000 KM',
-    price: '₹21.50 Lakhs',
-    priceRaw: 2150000,
-    status: 'Available',
-    dateAdded: 'Feb 12, 2024',
-    fuel: 'Diesel',
-  },
-  {
-    id: 'SCM-010',
-    image: 'https://placehold.co/120x80/e2e8f0/64748b?text=i20',
-    title: '2021 Hyundai i20 Asta',
-    make: 'Hyundai',
-    model: 'i20',
-    km: '31,500 KM',
-    price: '₹8.40 Lakhs',
-    priceRaw: 840000,
-    status: 'Sold',
-    dateAdded: 'May 05, 2023',
-    fuel: 'Petrol',
-  },
-  {
-    id: 'SCM-011',
-    image: 'https://placehold.co/120x80/e2e8f0/64748b?text=Verna',
-    title: '2022 Hyundai Verna SX(O)',
-    make: 'Hyundai',
-    model: 'Verna',
-    km: '19,800 KM',
-    price: '₹13.20 Lakhs',
-    priceRaw: 1320000,
-    status: 'Available',
-    dateAdded: 'Mar 22, 2024',
-    fuel: 'Petrol',
-  },
-  {
-    id: 'SCM-012',
-    image: 'https://placehold.co/120x80/e2e8f0/64748b?text=Brezza',
-    title: '2023 Maruti Brezza ZXI+',
-    make: 'Maruti',
-    model: 'Brezza',
-    km: '9,200 KM',
-    price: '₹11.80 Lakhs',
-    priceRaw: 1180000,
-    status: 'Coming Soon',
-    dateAdded: 'Apr 01, 2024',
-    fuel: 'Petrol',
-  },
-];
+import { useCars } from '../../context/CarContext';
+import toast from 'react-hot-toast';
 
 const ITEMS_PER_PAGE = 10;
 
@@ -203,12 +46,30 @@ const statusConfig = {
 };
 
 export default function Inventory() {
+  const { cars, deleteCar } = useCars();
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
   const [currentPage, setCurrentPage] = useState(1);
-  const [sortField, setSortField] = useState(null); // 'price' | 'date' | null
+  const [sortField, setSortField] = useState(null);
   const [sortDir, setSortDir] = useState('asc');
-  const [deleteTarget, setDeleteTarget] = useState(null); // car id or null
+  const [deleteTarget, setDeleteTarget] = useState(null);
+
+  // Map backend cars to the local unified format dynamically
+  const allCars = useMemo(() => {
+    return cars.map((c) => ({
+      id: c._id || c.id,
+      image: c.image || 'https://placehold.co/120x80/e2e8f0/64748b?text=Car',
+      title: `${c.year} ${c.make} ${c.model}`,
+      make: c.make || '',
+      model: c.model || '',
+      km: `${(c.kms || 0).toLocaleString('en-IN')} KM`,
+      price: c.price >= 100000 ? `₹${(c.price / 100000).toFixed(2)} Lakhs` : `₹${(c.price || 0).toLocaleString('en-IN')}`,
+      priceRaw: c.price || 0,
+      status: c.status || 'Available',
+      dateAdded: new Date(c.createdAt || Date.now()).toLocaleDateString('en-IN', { month: 'short', day: '2-digit', year: 'numeric' }),
+      fuel: c.fuelType || 'Unknown',
+    }));
+  }, [cars]);
 
   // ── Filtering ──
   const filtered = useMemo(() => {
@@ -276,7 +137,7 @@ export default function Inventory() {
       if (c[car.status] !== undefined) c[car.status]++;
     });
     return c;
-  }, []);
+  }, [allCars]);
 
   return (
     <div className="space-y-6">
@@ -309,7 +170,15 @@ export default function Inventory() {
                 Cancel
               </button>
               <button
-                onClick={() => setDeleteTarget(null)}
+                onClick={async () => {
+                  try {
+                    await deleteCar(deleteTarget);
+                    toast.success('Vehicle deleted successfully.');
+                  } catch (error) {
+                    toast.error('Failed to delete vehicle.');
+                  }
+                  setDeleteTarget(null);
+                }}
                 className="px-5 py-2.5 bg-red-500 hover:bg-red-600 text-white rounded-xl font-body text-sm font-bold transition-colors shadow-sm shadow-red-500/20"
               >
                 Yes, Delete
