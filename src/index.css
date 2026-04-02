@@ -1,27 +1,64 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800;900&display=swap');
 @import "tailwindcss";
 
 @theme {
-  --color-primary: #001F60;
-  --color-primary-hover: #003399;
-  --color-accent: #00735C;
-  --color-accent-hover: #00997A;
-  --color-surface: #FFFFFF;
-  --color-surface-hover: #F8F9FA;
-  --color-background: #F4F6F8;
-  --color-text: #2D3748;
-  --color-text-muted: #718096;
+  /* Global Color Variables */
+  --color-primary: #0f172a;
+  /* Deep Slate/Navy for Headers & Main branding */
+  --color-primary-hover: #1e293b;
+  --color-accent: #25D366;
+  /* WhatsApp Green for high-conversion CTAs */
+  --color-accent-hover: #128C7E;
+  --color-surface: #ffffff;
+  /* White for cards */
+  --color-surface-hover: #f8fafc;
+  --color-background: #f1f5f9;
+  /* Light gray for the app background */
+  --color-text: #0f172a;
+  /* Dark text for readability */
+  --color-text-muted: #64748b;
+  /* Muted text for specs and labels */
 
+  /* Dual-Font Typography System */
   --font-heading: 'Outfit', sans-serif;
   --font-body: 'Inter', sans-serif;
 }
 
 @layer base {
+
+  html,
   body {
-    background-color: var(--color-background);
-    color: var(--color-text);
     font-family: var(--font-body);
+    color: var(--color-text);
+    background-color: var(--color-background);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: var(--font-heading);
+  }
+}
+
+/* Custom Scrollbar for a premium feel */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-background);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-text-muted);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-primary);
 }
