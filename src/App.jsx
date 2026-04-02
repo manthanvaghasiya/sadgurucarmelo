@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { CarProvider } from './context/CarContext';
 import TopNavigation from './components/TopNavigation';
 import Footer from './components/Footer';
 import Home from './pages/Home';
@@ -27,6 +28,7 @@ import AddLead from './pages/sales/AddLead';
 function App() {
   return (
     <BrowserRouter>
+    <CarProvider>
       {/* This wrapper ensures the Footer is always pushed to the bottom 
         even if the page content is short.
       */}
@@ -69,6 +71,7 @@ function App() {
         <Route path="/sales" element={<SalesDashboard />} />
         <Route path="/sales/add-lead" element={<AddLead />} />
       </Routes>
+    </CarProvider>
     </BrowserRouter>
   );
 }

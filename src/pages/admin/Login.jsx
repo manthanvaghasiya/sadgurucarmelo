@@ -12,10 +12,19 @@ export default function Login() {
   const handleLogin = (e) => {
     e.preventDefault();
     setIsLoading(true);
-    // Simulate login delay
+
     setTimeout(() => {
       setIsLoading(false);
-      navigate('/admin');
+
+      // CHECK THE ID AND PASSWORD HERE
+      if (username === 'admin@gmail.com' && password === 'Sadguru@123') {
+        // Success! Go to dashboard
+        navigate('/admin');
+      } else {
+        // Fail! Show an alert
+        alert('Invalid Username or Password. Please try again.');
+      }
+
     }, 1200);
   };
 

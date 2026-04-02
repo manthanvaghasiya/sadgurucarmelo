@@ -1,4 +1,5 @@
 import { useState, useRef, useCallback } from 'react';
+import { useCars } from '../../context/CarContext';
 import {
   Upload,
   X,
@@ -266,11 +267,55 @@ export default function AddCar() {
 
   // Submission state
   const [isPublishing, setIsPublishing] = useState(false);
+  const [published, setPublished] = useState(false);
+
+  const { addCar } = useCars();
 
   const handlePublish = (e) => {
     e.preventDefault();
     setIsPublishing(true);
-    setTimeout(() => setIsPublishing(false), 2000);
+
+    setTimeout(() => {
+      // Build badges array from toggles
+      const badges = [];
+      if (isCertified) badges.push('Certified');
+      if (isPetipack) badges.push('Peti-pack');
+      if (validVimo) badges.push('Valid Vimo');
+
+      // Build the car object
+      addCar({
+        make,
+        model,
+        year: parseInt(year, 10),
+        price: parseInt(price, 10),
+        kms: parseInt(kmDriven, 10),
+        fuelType,
+        transmission,
+        owner: ownership,
+        badges,
+        image: 'https://placehold.co/600x400/e2e8f0/64748b?text=' + encodeURIComponent(`${make} ${model}`),
+        status: 'Available',
+      });
+
+      // Reset form
+      setMake('');
+      setModel('');
+      setYear('');
+      setPrice('');
+      setKmDriven('');
+      setFuelType('');
+      setTransmission('');
+      setOwnership('');
+      setIsCertified(false);
+      setIsPetipack(false);
+      setValidVimo(false);
+      setPhotos([]);
+      setVrImage([]);
+
+      setIsPublishing(false);
+      setPublished(true);
+      setTimeout(() => setPublished(false), 4000);
+    }, 1200);
   };
 
   const addPhotos = (newFiles) => setPhotos((prev) => [...prev, ...newFiles]);
@@ -475,10 +520,17 @@ export default function AddCar() {
       <div className="fixed bottom-0 left-0 right-0 bg-surface/80 backdrop-blur-xl border-t border-gray-100 z-30">
         <div className="max-w-screen-xl mx-auto px-6 py-4 flex items-center justify-between gap-4">
           <div className="hidden sm:flex items-center gap-2 font-body text-sm text-text-muted">
-            <AlertCircle className="w-4 h-4" />
-            <span>
-              Fill all required fields before publishing.
-            </span>
+            {published ? (
+              <span className="flex items-center gap-2 text-accent font-semibold">
+                <CheckCircle2 className="w-4 h-4" />
+                Vehicle published to inventory!
+              </span>
+            ) : (
+              <>
+                <AlertCircle className="w-4 h-4" />
+                <span>Fill all required fields before publishing.</span>
+              </>
+            )}
           </div>
 
           <div className="flex items-center gap-3 ml-auto">
