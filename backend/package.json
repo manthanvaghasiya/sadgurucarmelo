@@ -1,0 +1,14 @@
+{
+  "name": "sadguru-carmelo-api",
+  "version": "1.0.0",
+  "description": "Backend API for Sadguru Car Melo dealership platform",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js"
+  },
+  "keywords": [],
+  "author": "Sadguru Car Melo",
+  "license": "ISC"
+}
