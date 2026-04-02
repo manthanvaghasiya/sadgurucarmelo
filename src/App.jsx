@@ -12,6 +12,9 @@ import AdminLayout from './components/admin/AdminLayout';
 import Login from './pages/admin/Login';
 import Dashboard from './pages/admin/Dashboard';
 import AddCar from './pages/admin/AddCar';
+import AdminInventory from './pages/admin/Inventory';
+import AdminLeads from './pages/admin/Leads';
+import AdminSettings from './pages/admin/Settings';
 
 function App() {
   return (
@@ -44,10 +47,10 @@ function App() {
         <Route path="/admin/login" element={<Login />} />
         <Route path="/admin" element={<AdminLayout />}>
           <Route index element={<Dashboard />} />
-          <Route path="inventory" element={<Dashboard />} />
+          <Route path="inventory" element={<AdminInventory />} />
           <Route path="add-car" element={<AddCar />} />
-          <Route path="leads" element={<Dashboard />} />
-          <Route path="settings" element={<Dashboard />} />
+          <Route path="leads" element={<AdminLeads />} />
+          <Route path="settings" element={<AdminSettings />} />
         </Route>
       </Routes>
     </BrowserRouter>
