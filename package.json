@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "react-hook-form": "^7.72.0",
+    "react-hot-toast": "^2.6.0"
+  }
+}

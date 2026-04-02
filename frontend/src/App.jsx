@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { Toaster } from 'react-hot-toast';
 import { CarProvider } from './context/CarContext';
 import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -32,6 +33,7 @@ function App() {
     <AuthProvider>
     <BrowserRouter>
     <CarProvider>
+      <Toaster position="top-right" toastOptions={{ style: { fontFamily: 'var(--font-body)' } }} />
       {/* This wrapper ensures the Footer is always pushed to the bottom 
         even if the page content is short.
       */}

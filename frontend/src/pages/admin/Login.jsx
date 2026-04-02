@@ -1,31 +1,22 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useForm } from 'react-hook-form';
+import toast from 'react-hot-toast';
 import { Eye, EyeOff, Lock, User, ArrowRight } from 'lucide-react';
 
 export default function Login() {
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
+  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm();
   const [showPassword, setShowPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
-  const handleLogin = (e) => {
-    e.preventDefault();
-    setIsLoading(true);
-
-    setTimeout(() => {
-      setIsLoading(false);
-
-      // CHECK THE ID AND PASSWORD HERE
-      if (username === 'admin@gmail.com' && password === 'Sadguru@123') {
-        // Success! Go to dashboard
-        navigate('/admin');
-      } else {
-        // Fail! Show an alert
-        alert('Invalid Username or Password. Please try again.');
-      }
-
-    }, 1200);
+  const onSubmit = async (data) => {
+    // Simulated credential check
+    if (data.username === 'admin@gmail.com' && data.password === 'Sadguru@123') {
+      toast.success('Welcome back, Admin!');
+      navigate('/admin');
+    } else {
+      toast.error('Invalid Credentials. Please try again.');
+    }
   };
 
   return (
@@ -52,23 +43,22 @@ export default function Login() {
 
         {/* Login Card */}
         <div className="bg-surface rounded-2xl shadow-xl shadow-primary/5 border border-gray-100 p-8">
-          <form onSubmit={handleLogin} className="space-y-5">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
             {/* Username Field */}
             <div className="space-y-2">
               <label className="font-body text-sm font-semibold text-text">
                 Username
               </label>
               <div className="relative">
-                <User className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
+                <User className={`absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 ${errors.username ? 'text-red-500' : 'text-text-muted'}`} />
                 <input
                   type="text"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
+                  {...register('username', { required: 'Username is required' })}
                   placeholder="Enter your username"
-                  className="w-full pl-10 pr-4 py-3 bg-background border border-transparent focus:border-primary/30 rounded-xl font-body text-sm text-text placeholder:text-text-muted/50 outline-none transition-all focus:ring-2 focus:ring-primary/10"
-                  required
+                  className={`w-full pl-10 pr-4 py-3 bg-background border ${errors.username ? 'border-red-500 ring-1 ring-red-500/20' : 'border-transparent'} focus:border-primary/30 rounded-xl font-body text-sm text-text placeholder:text-text-muted/50 outline-none transition-all focus:ring-2 focus:ring-primary/10`}
                 />
               </div>
+              {errors.username && <span className="text-red-500 text-xs font-body">{errors.username.message}</span>}
             </div>
 
             {/* Password Field */}
@@ -77,14 +67,12 @@ export default function Login() {
                 Password
               </label>
               <div className="relative">
-                <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
+                <Lock className={`absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 ${errors.password ? 'text-red-500' : 'text-text-muted'}`} />
                 <input
                   type={showPassword ? 'text' : 'password'}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  {...register('password', { required: 'Password is required' })}
                   placeholder="••••••••"
-                  className="w-full pl-10 pr-12 py-3 bg-background border border-transparent focus:border-primary/30 rounded-xl font-body text-sm text-text placeholder:text-text-muted/50 outline-none transition-all focus:ring-2 focus:ring-primary/10"
-                  required
+                  className={`w-full pl-10 pr-12 py-3 bg-background border ${errors.password ? 'border-red-500 ring-1 ring-red-500/20' : 'border-transparent'} focus:border-primary/30 rounded-xl font-body text-sm text-text placeholder:text-text-muted/50 outline-none transition-all focus:ring-2 focus:ring-primary/10`}
                 />
                 <button
                   type="button"
@@ -94,6 +82,7 @@ export default function Login() {
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
               </div>
+              {errors.password && <span className="text-red-500 text-xs font-body">{errors.password.message}</span>}
             </div>
 
             {/* Remember + Forgot */}
@@ -113,10 +102,10 @@ export default function Login() {
             {/* Submit Button */}
             <button
               type="submit"
-              disabled={isLoading}
+              disabled={isSubmitting}
               className="w-full flex items-center justify-center gap-2 bg-primary hover:bg-primary-hover text-white py-3.5 rounded-xl font-body font-bold text-sm transition-all shadow-lg shadow-primary/20 disabled:opacity-70 disabled:cursor-not-allowed group"
             >
-              {isLoading ? (
+              {isSubmitting ? (
                 <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
               ) : (
                 <>

@@ -1,6 +1,8 @@
 import { useState, useRef, useCallback } from 'react';
 import { useCars } from '../../context/CarContext';
 import { useNavigate } from 'react-router-dom';
+import { useForm } from 'react-hook-form';
+import toast from 'react-hot-toast';
 import {
   Upload,
   X,
@@ -13,18 +15,16 @@ import {
 } from 'lucide-react';
 
 // Reusable Select component
-function FormSelect({ label, options, value, onChange, placeholder, required }) {
+function FormSelect({ label, options, placeholder, register, error }) {
   return (
     <div className="space-y-2">
       <label className="font-body text-sm font-semibold text-text">
-        {label} {required && <span className="text-red-400">*</span>}
+        {label}
       </label>
       <div className="relative">
         <select
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          className="w-full px-4 py-3 bg-background border border-transparent focus:border-primary/30 rounded-xl font-body text-sm text-text outline-none transition-all focus:ring-2 focus:ring-primary/10 appearance-none cursor-pointer pr-10"
-          required={required}
+          {...register}
+          className={`w-full px-4 py-3 bg-background border ${error ? 'border-red-500' : 'border-transparent'} focus:border-primary/30 rounded-xl font-body text-sm text-text outline-none transition-all focus:ring-2 focus:ring-primary/10 appearance-none cursor-pointer pr-10`}
         >
           <option value="" disabled>
             {placeholder}
@@ -37,16 +37,17 @@ function FormSelect({ label, options, value, onChange, placeholder, required }) 
         </select>
         <ChevronDown className="absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted pointer-events-none" />
       </div>
+      {error && <span className="text-red-500 text-xs font-body">{error.message}</span>}
     </div>
   );
 }
 
 // Reusable Text Input component
-function FormInput({ label, type = 'text', value, onChange, placeholder, required, prefix }) {
+function FormInput({ label, type = 'text', placeholder, prefix, register, error }) {
   return (
     <div className="space-y-2">
       <label className="font-body text-sm font-semibold text-text">
-        {label} {required && <span className="text-red-400">*</span>}
+        {label}
       </label>
       <div className="relative">
         {prefix && (
@@ -56,18 +57,17 @@ function FormInput({ label, type = 'text', value, onChange, placeholder, require
         )}
         <input
           type={type}
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
+          {...register}
           placeholder={placeholder}
-          className={`w-full ${prefix ? 'pl-8' : 'pl-4'} pr-4 py-3 bg-background border border-transparent focus:border-primary/30 rounded-xl font-body text-sm text-text placeholder:text-text-muted/50 outline-none transition-all focus:ring-2 focus:ring-primary/10`}
-          required={required}
+          className={`w-full ${prefix ? 'pl-8' : 'pl-4'} pr-4 py-3 bg-background border ${error ? 'border-red-500' : 'border-transparent'} focus:border-primary/30 rounded-xl font-body text-sm text-text placeholder:text-text-muted/50 outline-none transition-all focus:ring-2 focus:ring-primary/10`}
         />
       </div>
+      {error && <span className="text-red-500 text-xs font-body">{error.message}</span>}
     </div>
   );
 }
 
-// Toggle Switch component
+// Toggle Switch component directly mapped to RHF watch bindings
 function ToggleSwitch({ label, description, checked, onChange }) {
   return (
     <label className="flex items-center justify-between p-4 bg-background rounded-xl cursor-pointer group hover:bg-background/80 transition-colors">
@@ -247,84 +247,73 @@ function DropZone({
 }
 
 export default function AddCar() {
-  // Form state
-  const [make, setMake] = useState('');
-  const [model, setModel] = useState('');
-  const [year, setYear] = useState('');
-  const [price, setPrice] = useState('');
-  const [kmDriven, setKmDriven] = useState('');
-  const [fuelType, setFuelType] = useState('');
-  const [transmission, setTransmission] = useState('');
-  const [ownership, setOwnership] = useState('');
+  const { addCar } = useCars();
+  const navigate = useNavigate();
+  
+  const {
+    register,
+    handleSubmit,
+    reset,
+    watch,
+    setValue,
+    formState: { errors, isSubmitting }
+  } = useForm({
+    defaultValues: {
+      make: '', model: '', year: '', price: '',
+      kmDriven: '', fuelType: '', transmission: '', ownership: '',
+      isCertified: false, isPetipack: false, validVimo: false
+    }
+  });
 
-  // Toggles
-  const [isCertified, setIsCertified] = useState(false);
-  const [isPetipack, setIsPetipack] = useState(false);
-  const [validVimo, setValidVimo] = useState(false);
+  // Watch elements specifically for interactive UI conditional checks
+  const isCertified = watch('isCertified');
+  const isPetipack = watch('isPetipack');
+  const validVimo = watch('validVimo');
 
   // Files
   const [photos, setPhotos] = useState([]);
   const [vrImage, setVrImage] = useState([]);
 
-  // Submission state
-  const [isPublishing, setIsPublishing] = useState(false);
-  const [published, setPublished] = useState(false);
-
-  const { addCar } = useCars();
-  const navigate = useNavigate();
-
-  const handlePublish = async (e) => {
-    e.preventDefault();
-    setIsPublishing(true);
-
+  const onSubmit = async (data) => {
     try {
       const formData = new FormData();
-      formData.append('make', make);
-      formData.append('model', model);
-      formData.append('year', year);
-      formData.append('price', price);
-      formData.append('kms', kmDriven);
-      formData.append('fuelType', fuelType);
-      formData.append('transmission', transmission);
-      formData.append('owner', ownership);
+      formData.append('make', data.make);
+      formData.append('model', data.model);
+      formData.append('year', data.year);
+      formData.append('price', data.price);
+      formData.append('kms', data.kmDriven);
+      formData.append('fuelType', data.fuelType);
+      formData.append('transmission', data.transmission);
+      formData.append('owner', data.ownership);
       formData.append('status', 'Available');
 
-      if (isCertified) formData.append('badges', 'Certified');
-      if (isPetipack) formData.append('badges', 'Peti-pack');
-      if (validVimo) formData.append('badges', 'Valid Vimo');
+      if (data.isCertified) formData.append('badges', 'Certified');
+      if (data.isPetipack) formData.append('badges', 'Peti-pack');
+      if (data.validVimo) formData.append('badges', 'Valid Vimo');
 
       // Inject the file if available
       if (photos.length > 0) {
         formData.append('image', photos[0]);
+      } else {
+        toast.error('Please upload at least one image.');
+        return; 
       }
 
       await addCar(formData);
 
-      // Reset form
-      setMake('');
-      setModel('');
-      setYear('');
-      setPrice('');
-      setKmDriven('');
-      setFuelType('');
-      setTransmission('');
-      setOwnership('');
-      setIsCertified(false);
-      setIsPetipack(false);
-      setValidVimo(false);
+      toast.success('Vehicle Published Successfully!');
+
+      // Reset form natively
+      reset();
       setPhotos([]);
       setVrImage([]);
 
-      setPublished(true);
       setTimeout(() => {
-        setPublished(false);
         navigate('/admin/inventory');
       }, 2000);
     } catch (error) {
       console.error('Failed to publish car:', error);
-      alert('Failed to publish vehicle. Please verify the connection and try again.');
-    } finally {
-      setIsPublishing(false);
+      toast.error('Failed to publish vehicle. Please verify the connection and try again.');
     }
   };
 
@@ -335,7 +324,7 @@ export default function AddCar() {
   const removeVrImage = () => setVrImage([]);
 
   return (
-    <form onSubmit={handlePublish} className="pb-24">
+    <form onSubmit={handleSubmit(onSubmit)} className="pb-24">
       {/* Page Title */}
       <div className="mb-8">
         <h1 className="font-heading font-bold text-2xl text-text">Add New Vehicle</h1>
@@ -357,66 +346,58 @@ export default function AddCar() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
             <FormInput
               label="Make"
-              value={make}
-              onChange={setMake}
+              register={register('make', { required: 'Make is required' })}
+              error={errors.make}
               placeholder="e.g. Maruti Suzuki"
-              required
             />
             <FormInput
               label="Model"
-              value={model}
-              onChange={setModel}
+              register={register('model', { required: 'Model is required' })}
+              error={errors.model}
               placeholder="e.g. Swift VXI"
-              required
             />
             <FormInput
               label="Year"
               type="number"
-              value={year}
-              onChange={setYear}
+              register={register('year', { required: 'Year is required', min: { value: 1990, message: 'Invalid year' } })}
+              error={errors.year}
               placeholder="e.g. 2022"
-              required
             />
             <FormInput
               label="Price"
               type="number"
-              value={price}
-              onChange={setPrice}
+              register={register('price', { required: 'Price is required', min: { value: 1000, message: 'Invalid price' } })}
+              error={errors.price}
               placeholder="e.g. 585000"
               prefix="₹"
-              required
             />
             <FormInput
               label="KMs Driven"
               type="number"
-              value={kmDriven}
-              onChange={setKmDriven}
+              register={register('kmDriven', { required: 'KMs Driven is required' })}
+              error={errors.kmDriven}
               placeholder="e.g. 23000"
-              required
             />
             <FormSelect
               label="Fuel Type"
-              value={fuelType}
-              onChange={setFuelType}
+              register={register('fuelType', { required: 'Fuel Type is required' })}
+              error={errors.fuelType}
               placeholder="Select fuel type"
               options={['Petrol', 'Diesel', 'CNG', 'Electric', 'Hybrid']}
-              required
             />
             <FormSelect
               label="Transmission"
-              value={transmission}
-              onChange={setTransmission}
+              register={register('transmission', { required: 'Transmission is required' })}
+              error={errors.transmission}
               placeholder="Select transmission"
               options={['Manual', 'Automatic', 'CVT', 'DCT', 'AMT', 'iMT']}
-              required
             />
             <FormSelect
               label="Ownership"
-              value={ownership}
-              onChange={setOwnership}
+              register={register('ownership', { required: 'Ownership is required' })}
+              error={errors.ownership}
               placeholder="Select ownership"
               options={['1st Owner', '2nd Owner', '3rd Owner', '4th Owner+', 'Unregistered']}
-              required
             />
           </div>
         </section>
@@ -435,19 +416,19 @@ export default function AddCar() {
               label="Is Certified?"
               description="Vehicle has passed our multi-point inspection"
               checked={isCertified}
-              onChange={setIsCertified}
+              onChange={(val) => setValue('isCertified', val)}
             />
             <ToggleSwitch
               label="Is Peti-pack?"
               description="All body panels are original with no dent or paint"
               checked={isPetipack}
-              onChange={setIsPetipack}
+              onChange={(val) => setValue('isPetipack', val)}
             />
             <ToggleSwitch
               label="Valid Vimo?"
               description="Vehicle has valid insurance coverage"
               checked={validVimo}
-              onChange={setValidVimo}
+              onChange={(val) => setValue('validVimo', val)}
             />
           </div>
 
@@ -530,10 +511,10 @@ export default function AddCar() {
       <div className="fixed bottom-0 left-0 right-0 bg-surface/80 backdrop-blur-xl border-t border-gray-100 z-30">
         <div className="max-w-screen-xl mx-auto px-6 py-4 flex items-center justify-between gap-4">
           <div className="hidden sm:flex items-center gap-2 font-body text-sm text-text-muted">
-            {published ? (
-              <span className="flex items-center gap-2 text-accent font-semibold">
-                <CheckCircle2 className="w-4 h-4" />
-                Vehicle published to inventory!
+            {Object.keys(errors).length > 0 ? (
+              <span className="flex items-center gap-2 text-red-500 font-semibold">
+                <AlertCircle className="w-4 h-4" />
+                Missing required fields.
               </span>
             ) : (
               <>
@@ -552,10 +533,10 @@ export default function AddCar() {
             </button>
             <button
               type="submit"
-              disabled={isPublishing}
+              disabled={isSubmitting}
               className="flex items-center gap-2 px-8 py-3 bg-accent hover:bg-accent-hover text-white rounded-xl font-body text-sm font-bold transition-all shadow-lg shadow-accent/25 disabled:opacity-70 disabled:cursor-not-allowed"
             >
-              {isPublishing ? (
+              {isSubmitting ? (
                 <>
                   <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                   Publishing...
