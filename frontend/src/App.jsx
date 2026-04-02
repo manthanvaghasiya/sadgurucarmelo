@@ -1,5 +1,7 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { CarProvider } from './context/CarContext';
+import { AuthProvider } from './context/AuthContext';
+import ProtectedRoute from './components/ProtectedRoute';
 import TopNavigation from './components/TopNavigation';
 import Footer from './components/Footer';
 import Home from './pages/Home';
@@ -27,6 +29,7 @@ import AddLead from './pages/sales/AddLead';
 
 function App() {
   return (
+    <AuthProvider>
     <BrowserRouter>
     <CarProvider>
       {/* This wrapper ensures the Footer is always pushed to the bottom 
@@ -58,7 +61,11 @@ function App() {
 
         {/* ── Admin Routes ── */}
         <Route path="/admin/login" element={<AdminLogin />} />
-        <Route path="/admin" element={<AdminLayout />}>
+        <Route path="/admin" element={
+          <ProtectedRoute allowedRoles={['admin']}>
+            <AdminLayout />
+          </ProtectedRoute>
+        }>
           <Route index element={<Dashboard />} />
           <Route path="inventory" element={<AdminInventory />} />
           <Route path="add-car" element={<AddCar />} />
@@ -68,11 +75,20 @@ function App() {
 
         {/* ── Sales Portal Routes ── */}
         <Route path="/sales/login" element={<SalesLogin />} />
-        <Route path="/sales" element={<SalesDashboard />} />
-        <Route path="/sales/add-lead" element={<AddLead />} />
+        <Route path="/sales" element={
+          <ProtectedRoute allowedRoles={['admin', 'salesman']}>
+            <SalesDashboard />
+          </ProtectedRoute>
+        } />
+        <Route path="/sales/add-lead" element={
+          <ProtectedRoute allowedRoles={['admin', 'salesman']}>
+            <AddLead />
+          </ProtectedRoute>
+        } />
       </Routes>
     </CarProvider>
     </BrowserRouter>
+    </AuthProvider>
   );
 }
 

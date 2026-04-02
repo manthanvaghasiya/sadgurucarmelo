@@ -1,5 +1,6 @@
 import express from 'express';
 import Car from '../models/Car.js';
+import { upload } from '../config/cloudinary.js';
 
 const router = express.Router();
 
@@ -55,9 +56,17 @@ router.get('/:id', async (req, res) => {
 // ═══════════════════════════════════════════════
 //  POST /api/cars — Add new car (Admin)
 // ═══════════════════════════════════════════════
-router.post('/', async (req, res) => {
+router.post('/', upload.single('image'), async (req, res) => {
   try {
-    const car = await Car.create(req.body);
+    const carData = { ...req.body };
+    
+    if (req.file) {
+      carData.image = req.file.path;
+    } else {
+      carData.image = 'https://placehold.co/600x400/e2e8f0/64748b?text=' + encodeURIComponent(`${carData.make || 'Car'} ${carData.model || ''}`);
+    }
+
+    const car = await Car.create(carData);
     res.status(201).json({ success: true, data: car });
   } catch (error) {
     console.error('Create car error:', error);

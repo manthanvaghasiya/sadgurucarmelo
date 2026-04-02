@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useCars } from '../context/CarContext';
 import CarCard from './CarCard';
 
@@ -13,9 +13,14 @@ function formatKm(num) {
 }
 
 export default function InventoryGrid() {
-  const { cars } = useCars();
+  const { cars, isLoading, error, fetchCars } = useCars();
   const [stockTab, setStockTab] = useState('available');
   const [sortBy, setSortBy] = useState('newest');
+
+  useEffect(() => {
+    fetchCars();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // ── Filter by status tab ──
   const filtered = useMemo(() => {
@@ -89,7 +94,17 @@ export default function InventoryGrid() {
       </div>
 
       {/* Grid */}
-      {sorted.length === 0 ? (
+      {isLoading ? (
+        <div className="py-24 flex flex-col items-center justify-center">
+          <div className="w-10 h-10 border-4 border-primary/20 border-t-primary rounded-full animate-spin"></div>
+          <p className="mt-4 font-heading font-semibold text-text-muted">Loading stock...</p>
+        </div>
+      ) : error ? (
+        <div className="py-16 text-center">
+          <p className="font-heading font-bold text-lg text-red-500">Error loading inventory</p>
+          <p className="font-body text-sm text-text-muted mt-1">{error}</p>
+        </div>
+      ) : sorted.length === 0 ? (
         <div className="py-16 text-center">
           <p className="font-heading font-bold text-lg text-text-muted">No vehicles found</p>
           <p className="font-body text-sm text-text-muted/60 mt-1">
@@ -100,8 +115,8 @@ export default function InventoryGrid() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {sorted.map((car) => (
             <CarCard
-              key={car.id}
-              id={car.id}
+              key={car._id || car.id}
+              id={car._id || car.id}
               image={car.image}
               title={`${car.year} ${car.make} ${car.model}`}
               price={formatPrice(car.price)}

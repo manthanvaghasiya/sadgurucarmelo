@@ -1,5 +1,6 @@
 import { useState, useRef, useCallback } from 'react';
 import { useCars } from '../../context/CarContext';
+import { useNavigate } from 'react-router-dom';
 import {
   Upload,
   X,
@@ -270,32 +271,34 @@ export default function AddCar() {
   const [published, setPublished] = useState(false);
 
   const { addCar } = useCars();
+  const navigate = useNavigate();
 
-  const handlePublish = (e) => {
+  const handlePublish = async (e) => {
     e.preventDefault();
     setIsPublishing(true);
 
-    setTimeout(() => {
-      // Build badges array from toggles
-      const badges = [];
-      if (isCertified) badges.push('Certified');
-      if (isPetipack) badges.push('Peti-pack');
-      if (validVimo) badges.push('Valid Vimo');
+    try {
+      const formData = new FormData();
+      formData.append('make', make);
+      formData.append('model', model);
+      formData.append('year', year);
+      formData.append('price', price);
+      formData.append('kms', kmDriven);
+      formData.append('fuelType', fuelType);
+      formData.append('transmission', transmission);
+      formData.append('owner', ownership);
+      formData.append('status', 'Available');
 
-      // Build the car object
-      addCar({
-        make,
-        model,
-        year: parseInt(year, 10),
-        price: parseInt(price, 10),
-        kms: parseInt(kmDriven, 10),
-        fuelType,
-        transmission,
-        owner: ownership,
-        badges,
-        image: 'https://placehold.co/600x400/e2e8f0/64748b?text=' + encodeURIComponent(`${make} ${model}`),
-        status: 'Available',
-      });
+      if (isCertified) formData.append('badges', 'Certified');
+      if (isPetipack) formData.append('badges', 'Peti-pack');
+      if (validVimo) formData.append('badges', 'Valid Vimo');
+
+      // Inject the file if available
+      if (photos.length > 0) {
+        formData.append('image', photos[0]);
+      }
+
+      await addCar(formData);
 
       // Reset form
       setMake('');
@@ -312,10 +315,17 @@ export default function AddCar() {
       setPhotos([]);
       setVrImage([]);
 
-      setIsPublishing(false);
       setPublished(true);
-      setTimeout(() => setPublished(false), 4000);
-    }, 1200);
+      setTimeout(() => {
+        setPublished(false);
+        navigate('/admin/inventory');
+      }, 2000);
+    } catch (error) {
+      console.error('Failed to publish car:', error);
+      alert('Failed to publish vehicle. Please verify the connection and try again.');
+    } finally {
+      setIsPublishing(false);
+    }
   };
 
   const addPhotos = (newFiles) => setPhotos((prev) => [...prev, ...newFiles]);
