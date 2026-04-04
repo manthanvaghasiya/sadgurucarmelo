@@ -209,42 +209,7 @@ export default function Inventory() {
         </Link>
       </div>
 
-      {/* ═══════════════════════════════════════════════
-          Status Filter Pills
-         ═══════════════════════════════════════════════ */}
-      <div className="flex items-center gap-2 overflow-x-auto pb-1 -mb-1 scrollbar-none">
-        {['All', 'Available', 'Sold', 'Coming Soon'].map((status) => {
-          const active = statusFilter === status;
-          const cfg = statusConfig[status];
-          return (
-            <button
-              key={status}
-              onClick={() => handleStatusFilter(status)}
-              className={`
-                flex items-center gap-2 px-4 py-2 rounded-xl font-body text-sm font-semibold
-                transition-all duration-200 whitespace-nowrap shrink-0
-                ${active
-                  ? 'bg-primary text-white shadow-md shadow-primary/15'
-                  : 'bg-surface text-text-muted border border-gray-100 hover:border-primary/20 hover:text-text'
-                }
-              `}
-            >
-              {status !== 'All' && cfg && (
-                <span className={`w-2 h-2 rounded-full ${active ? 'bg-white' : cfg.dot}`} />
-              )}
-              {status}
-              <span
-                className={`
-                  text-[11px] font-bold px-1.5 py-0.5 rounded-md
-                  ${active ? 'bg-white/20 text-white' : 'bg-background text-text-muted'}
-                `}
-              >
-                {counts[status]}
-              </span>
-            </button>
-          );
-        })}
-      </div>
+
 
       {/* ═══════════════════════════════════════════════
           Search & Sort Bar

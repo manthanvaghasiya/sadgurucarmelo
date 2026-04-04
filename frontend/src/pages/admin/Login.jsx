@@ -3,19 +3,29 @@ import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import { Eye, EyeOff, Lock, User, ArrowRight } from 'lucide-react';
+import axiosInstance from '../../api/axiosConfig';
+import { useAuth } from '../../context/AuthContext';
 
 export default function Login() {
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm();
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   const onSubmit = async (data) => {
-    // Simulated credential check
-    if (data.username === 'admin@gmail.com' && data.password === 'Sadguru@123') {
-      toast.success('Welcome back, Admin!');
-      navigate('/admin');
-    } else {
-      toast.error('Invalid Credentials. Please try again.');
+    try {
+      const res = await axiosInstance.post('/auth/login', {
+        employeeId: data.username,
+        password: data.password,
+      });
+      if (res.data.success) {
+        const userData = res.data.data;
+        login(userData, userData.token);
+        toast.success(`Welcome back, ${userData.name}!`);
+        navigate('/admin');
+      }
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Invalid Credentials. Please try again.');
     }
   };
 

@@ -88,17 +88,6 @@ export default function Dashboard() {
       iconBg: 'bg-[#8b5cf6]/10',
       iconColor: 'text-[#8b5cf6]',
     },
-    {
-      id: 'sold-month',
-      title: 'Sold This Month',
-      value: carStats.soldThisMonth.toString(),
-      change: 'This month',
-      trend: 'up',
-      subtitle: 'Completed deals',
-      icon: ShoppingCart,
-      iconBg: 'bg-[#f59e0b]/10',
-      iconColor: 'text-[#d97706]',
-    },
   ];
 
   // Map backend top 6 latest cars
@@ -126,7 +115,7 @@ export default function Dashboard() {
       </div>
 
       {/* ── Stats Row ── */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
         {statsData.map((stat) => {
           const Icon = stat.icon;
           return (

@@ -12,6 +12,7 @@ import {
   ChevronLeft,
   Menu,
   Mail,
+  Image as ImageIcon,
 } from 'lucide-react';
 
 const navItems = [
@@ -20,6 +21,7 @@ const navItems = [
   { name: 'Add New Car', path: '/admin/add-car', icon: PlusCircle },
   { name: 'Leads', path: '/admin/leads', icon: Users },
   { name: 'Messages', path: '/admin/messages', icon: Mail },
+  { name: 'Posters', path: '/admin/posters', icon: ImageIcon },
   { name: 'Settings', path: '/admin/settings', icon: Settings },
 ];
 

@@ -28,7 +28,7 @@ export default function Inventory() {
   return (
     <div className="bg-background min-h-screen py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        
+
         {/* Breadcrumbs */}
         <nav className="flex mb-4" aria-label="Breadcrumb">
           <ol className="flex items-center space-x-2 font-body text-[13px] font-medium text-text-muted">
@@ -47,7 +47,7 @@ export default function Inventory() {
 
         {/* Main Content Layout */}
         <div className="flex flex-col lg:flex-row gap-8">
-          
+
           {/* Sidebar (Filters) - 1/4 Width Desktop */}
           <div className="w-full lg:w-1/4 shrink-0">
             <SidebarFilter filters={filters} setFilters={setFilters} />
@@ -57,7 +57,7 @@ export default function Inventory() {
           <div className="w-full lg:w-3/4">
             <InventoryGrid filters={filters} />
           </div>
-          
+
         </div>
 
         {/* Promotional Banner */}

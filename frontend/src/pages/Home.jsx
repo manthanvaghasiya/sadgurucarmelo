@@ -7,6 +7,8 @@ import {
 } from 'lucide-react';
 import CarCard from '../components/CarCard';
 import { useCars } from '../context/CarContext';
+import HeroSection from '../components/HeroSection';
+import ArrivingShortly from '../components/ArrivingShortly';
 
 // ── Real Google Reviews Data ──
 const GOOGLE_REVIEWS = [
@@ -203,71 +205,7 @@ export default function Home() {
   return (
     <div className="min-h-screen flex flex-col">
       {/* 1. Hero Section */}
-      <section className="relative h-[600px] sm:h-[700px] flex items-center justify-center pt-20">
-        <div className="absolute inset-0 z-0">
-          <img 
-            src="https://placehold.co/1920x800/001a4d/ffffff?text=Premium+Audi+Sedan" 
-            alt="Premium Showroom Background" 
-            className="w-full h-full object-cover"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/60 to-transparent"></div>
-        </div>
-        
-        <div className="relative z-10 text-center px-4 max-w-4xl mx-auto -mt-32">
-          <h1 className="font-heading text-4xl sm:text-5xl md:text-6xl font-extrabold text-white leading-tight mb-6 drop-shadow-lg">
-            Surat's Most Trusted & Verified Pre-Owned Cars
-          </h1>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <div className="flex items-center gap-2 bg-yellow-500/90 text-yellow-950 px-4 py-2 rounded-full font-heading font-bold text-sm shadow-md">
-              <Star className="w-4 h-4 fill-current" />
-              <span>4.9/5 Rating on Google Reviews</span>
-            </div>
-            <div className="flex items-center gap-2 bg-white/10 backdrop-blur-md text-white px-4 py-2 rounded-full font-body font-medium text-sm border border-white/20">
-              <span>📍 Varachha Road, Surat</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Quick Search Overlapping Card */}
-        <div className="absolute -bottom-16 left-0 right-0 px-4 z-20">
-          <div className="max-w-6xl mx-auto bg-surface rounded-2xl shadow-xl p-6 sm:p-8 flex flex-col lg:flex-row gap-4 lg:items-end border border-gray-100">
-            <div className="flex-1 w-full">
-              <label className="block text-xs font-heading font-semibold text-text-muted mb-2 uppercase tracking-wide">Select Brand</label>
-              <select value={searchMake} onChange={(e) => setSearchMake(e.target.value)} className="w-full h-12 px-4 rounded-xl border border-gray-200 bg-gray-50 focus:ring-2 focus:ring-primary focus:border-primary font-body text-text shadow-sm outline-none">
-                <option value="">All Brands</option>
-                {uniqueMakes.map(m => <option key={m} value={m}>{m}</option>)}
-              </select>
-            </div>
-            <div className="flex-1 w-full">
-              <label className="block text-xs font-heading font-semibold text-text-muted mb-2 uppercase tracking-wide">Select Budget</label>
-              <select value={searchBudget} onChange={(e) => setSearchBudget(e.target.value)} className="w-full h-12 px-4 rounded-xl border border-gray-200 bg-gray-50 focus:ring-2 focus:ring-primary focus:border-primary font-body text-text shadow-sm outline-none">
-                <option value="">Any Budget</option>
-                <option value="0-500000">Under ₹5 Lakh</option>
-                <option value="500000-1000000">₹5L - ₹10L</option>
-                <option value="1000000-2000000">₹10L - ₹20L</option>
-                <option value="2000000-">₹20L+</option>
-              </select>
-            </div>
-            <div className="flex-1 w-full">
-              <label className="block text-xs font-heading font-semibold text-text-muted mb-2 uppercase tracking-wide">Fuel Type</label>
-              <select value={searchFuel} onChange={(e) => setSearchFuel(e.target.value)} className="w-full h-12 px-4 rounded-xl border border-gray-200 bg-gray-50 focus:ring-2 focus:ring-primary focus:border-primary font-body text-text shadow-sm outline-none">
-                <option value="">All Types</option>
-                <option>Petrol</option>
-                <option>Diesel</option>
-                <option>CNG</option>
-                <option>Electric</option>
-                <option>Hybrid</option>
-              </select>
-            </div>
-            <div className="w-full lg:w-auto">
-              <button onClick={handleQuickSearch} className="w-full lg:w-48 h-12 bg-primary hover:bg-primary-hover text-white rounded-xl font-heading font-bold text-lg flex items-center justify-center gap-2 transition-all shadow-md">
-                <Search className="w-5 h-5" />
-                Search
-              </button>
-            </div>
-          </div>
-        </div>
-      </section>
+      <HeroSection />
 
       {/* 2. Core Services Section */}
       <section className="pt-32 pb-20 px-4 bg-background">
@@ -352,7 +290,18 @@ export default function Home() {
               </div>
             ) : (
               cars.slice(0, 6).map((car) => (
-                <CarCard key={car._id} car={car} />
+                <CarCard
+                  key={car._id}
+                  id={car._id}
+                  image={car.image}
+                  title={`${car.year} ${car.make} ${car.model}`}
+                  price={car.price >= 100000 ? `₹${(car.price / 100000).toFixed(2)} Lakhs` : `₹${(car.price || 0).toLocaleString('en-IN')}`}
+                  badges={car.badges || []}
+                  fuel={car.fuelType}
+                  transmission={car.transmission}
+                  owner={car.owner || '1st Owner'}
+                  kms={`${(car.kms || 0).toLocaleString('en-IN')} KM`}
+                />
               ))
             )}
           </div>
@@ -365,39 +314,8 @@ export default function Home() {
         </div>
       </section>
 
-      {/* 4. Highlight Banner Section */}
-      <section className="py-20 bg-background px-4">
-        <div className="max-w-7xl mx-auto">
-          <h2 className="font-heading text-2xl font-bold text-gray-400 uppercase tracking-widest mb-8">Arriving Shortly</h2>
-          
-          <div className="relative rounded-3xl overflow-hidden shadow-2xl bg-primary flex flex-col md:flex-row min-h-[400px]">
-            <div className="md:w-[60%] relative h-64 md:h-auto">
-              <img 
-                src="https://placehold.co/1000x800/1a1a1a/444444?text=2023+KIA+SELTOS" 
-                alt="Incoming Kia Seltos" 
-                className="absolute inset-0 w-full h-full object-cover"
-              />
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary/20 to-primary md:to-primary"></div>
-            </div>
-            
-            <div className="md:w-[40%] p-10 md:p-16 flex flex-col justify-center relative z-10 bg-surface md:bg-transparent rounded-t-3xl md:rounded-l-none md:rounded-r-3xl text-left shadow-lg md:shadow-none -mt-6 md:mt-0 ml-0 md:-ml-8">
-              <span className="inline-block bg-primary/20 text-primary md:text-white md:bg-white/20 px-4 py-1.5 rounded-full text-xs font-heading font-bold uppercase tracking-wider mb-6 self-start backdrop-blur-sm border md:border-white/20 border-primary/20">
-                Join Waitlist
-              </span>
-              <h2 className="font-heading text-4xl sm:text-5xl font-extrabold text-primary md:text-white leading-tight mb-4">
-                <span className="italic block font-light text-2xl sm:text-3xl mb-1 text-gray-500 md:text-gray-300">HYPE ALERT:</span>
-                2023 KIA SELTOS
-              </h2>
-              <div className="flex items-center gap-3 mb-8 border-l-4 border-accent pl-4 text-text-muted md:text-blue-100">
-                <p className="font-body text-lg">Coming to lot this Thursday</p>
-              </div>
-              <button className="bg-primary hover:bg-primary-hover text-white px-8 py-4 rounded-xl font-heading font-bold text-lg inline-flex items-center self-start gap-3 shadow-xl transition-all hover:-translate-y-1">
-                Get Early Access → 
-              </button>
-            </div>
-          </div>
-        </div>
-      </section>
+      {/* 4. Highlight Banner (Dynamic) */}
+      <ArrivingShortly />
 
       {/* 5. Why Choose Us */}
       <section className="py-24 px-4 bg-surface border-t border-gray-100">

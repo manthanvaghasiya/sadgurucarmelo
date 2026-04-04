@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import axiosInstance from '../api/axiosConfig';
 
-export default function PromoBanner() {
+export default function ArrivingShortly() {
   const [poster, setPoster] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -27,21 +27,21 @@ export default function PromoBanner() {
   }, []);
 
   if (isLoading || !poster) {
-    return null;
+    return null; // Return empty space or soft skeleton if desired. Returning null for seamless failure.
   }
 
   return (
-    <section className="mt-20 mb-12">
+    <section className="py-20 bg-background px-4">
       <div className="max-w-7xl mx-auto">
         
         {/* Section Heading */}
-        <div className="flex items-center gap-3 mb-6">
+        <div className="flex items-center gap-3 mb-8">
           <div className="relative flex items-center justify-center">
             <div className="w-3 h-3 rounded-full bg-accent animate-ping absolute"></div>
             <div className="w-2 h-2 rounded-full bg-accent relative"></div>
           </div>
           <h2 className="font-heading text-2xl md:text-3xl font-extrabold text-primary uppercase tracking-[0.15em]">
-            Exclusive Reveal
+            Arriving Shortly
           </h2>
         </div>
 
@@ -51,7 +51,7 @@ export default function PromoBanner() {
             <source media="(min-width: 768px)" srcSet={poster.desktopImageUrl} />
             <img 
               src={poster.mobileImageUrl} 
-              alt="Promotional Poster" 
+              alt="Arriving Shortly Promotional Poster" 
               className="w-full h-auto max-h-[80vh] md:max-h-[700px] object-cover transition-transform duration-1000 ease-[cubic-bezier(0.25,0.46,0.45,0.94)] group-hover:scale-105"
             />
           </picture>

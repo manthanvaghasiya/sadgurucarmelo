@@ -24,6 +24,7 @@ import AdminInventory from './pages/admin/Inventory';
 import AdminLeads from './pages/admin/Leads';
 import AdminMessages from './pages/admin/Messages';
 import AdminSettings from './pages/admin/Settings';
+import AdminPosters from './pages/admin/Posters';
 
 // Sales Portal Imports
 import SalesLogin from './pages/sales/SalesLogin';
@@ -77,6 +78,7 @@ function App() {
           <Route path="leads" element={<AdminLeads />} />
           <Route path="messages" element={<AdminMessages />} />
           <Route path="settings" element={<AdminSettings />} />
+          <Route path="posters" element={<AdminPosters />} />
         </Route>
 
         {/* ── Sales Portal Routes ── */}
