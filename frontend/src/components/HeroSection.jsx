@@ -10,16 +10,24 @@ export default function HeroSection() {
   const [selectedBudget, setSelectedBudget] = useState('');
   
   const [availableBrands, setAvailableBrands] = useState([]);
-  const [availableBodyTypes, setAvailableBodyTypes] = useState([]);
+  const [brandModelMap, setBrandModelMap] = useState([]);
+  const [availableModels, setAvailableModels] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const fetchMetadata = async () => {
       try {
-        const res = await axiosInstance.get('/cars/metadata');
+        const res = await axiosInstance.get('/cars/filters');
         if (res.data && res.data.data) {
-          setAvailableBrands(res.data.data.makes || res.data.data.brands || []);
-          setAvailableBodyTypes(res.data.data.bodyTypes || []);
+          const fetchedMakes = res.data.data.makes || [];
+          const fetchedMap = res.data.data.brandModelMap || [];
+          
+          setAvailableBrands(fetchedMakes);
+          setBrandModelMap(fetchedMap);
+          
+          // Populate default all models
+          const allModels = [...new Set(fetchedMap.flatMap(item => item.models))].filter(Boolean).sort();
+          setAvailableModels(allModels);
         }
       } catch (error) {
         console.error('Failed to fetch car metadata', error);
@@ -30,10 +38,25 @@ export default function HeroSection() {
     fetchMetadata();
   }, []);
 
+  const handleBrandChange = (e) => {
+    const newBrand = e.target.value;
+    setSelectedBrand(newBrand);
+    setSelectedModel(''); // Reset model match to prevent orphaned queries
+    
+    // Filter models downward
+    if (newBrand) {
+      const match = brandModelMap.find(m => m._id === newBrand);
+      setAvailableModels(match && match.models ? match.models.filter(Boolean).sort() : []);
+    } else {
+      const allModels = [...new Set(brandModelMap.flatMap(item => item.models))].filter(Boolean).sort();
+      setAvailableModels(allModels);
+    }
+  };
+
   const handleSearch = () => {
     const params = new URLSearchParams();
     if (selectedBrand) params.set('make', selectedBrand);
-    if (selectedModel) params.set('bodyType', selectedModel);
+    if (selectedModel) params.set('model', selectedModel);
 
     if (selectedBudget && selectedBudget.includes('-')) {
       const [minPrice, maxPrice] = selectedBudget.split('-');
@@ -95,7 +118,7 @@ export default function HeroSection() {
               </label>
               <select
                 value={selectedBrand}
-                onChange={(e) => setSelectedBrand(e.target.value)}
+                onChange={handleBrandChange}
                 disabled={isLoading}
                 className="w-full h-12 px-4 rounded-xl border border-slate-200 bg-slate-50 focus:ring-2 focus:ring-red-600 focus:border-red-600 text-slate-900 outline-none transition-all duration-300 disabled:opacity-50"
               >
@@ -106,21 +129,21 @@ export default function HeroSection() {
               </select>
             </div>
 
-            {/* Model -> Body Type */}
+            {/* Model (Dependent logic) */}
             <div className="flex flex-col">
               <label className="flex items-center gap-2 text-sm font-semibold text-slate-700 mb-2">
                 <Settings2 className="w-4 h-4" />
-                Body Type
+                Model
               </label>
               <select
                 value={selectedModel}
                 onChange={(e) => setSelectedModel(e.target.value)}
-                disabled={isLoading}
+                disabled={isLoading || availableModels.length === 0}
                 className="w-full h-12 px-4 rounded-xl border border-slate-200 bg-slate-50 focus:ring-2 focus:ring-red-600 focus:border-red-600 text-slate-900 outline-none transition-all duration-300 disabled:opacity-50"
               >
-                <option value="">{isLoading ? 'Loading...' : 'All Body Types'}</option>
-                {availableBodyTypes.map(type => (
-                  <option key={type} value={type}>{type}</option>
+                <option value="">{isLoading ? 'Loading...' : 'All Models'}</option>
+                {availableModels.map(model => (
+                  <option key={model} value={model}>{model}</option>
                 ))}
               </select>
             </div>

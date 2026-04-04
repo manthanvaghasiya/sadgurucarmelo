@@ -118,10 +118,14 @@ router.get('/stats', protect, admin, async (req, res) => {
 // ═══════════════════════════════════════════════
 router.get('/filters', async (req, res) => {
   try {
-    const [makes, bodyTypes, years] = await Promise.all([
+    const [makes, bodyTypes, years, brandModelMap] = await Promise.all([
       Car.distinct('make', { status: { $ne: 'Sold' } }),
       Car.distinct('bodyType', { status: { $ne: 'Sold' } }),
       Car.distinct('year', { status: { $ne: 'Sold' } }),
+      Car.aggregate([
+        { $match: { status: { $ne: 'Sold' } } },
+        { $group: { _id: "$make", models: { $addToSet: "$model" } } }
+      ])
     ]);
 
     res.json({
@@ -130,6 +134,7 @@ router.get('/filters', async (req, res) => {
         makes: makes.filter(Boolean).sort(),
         bodyTypes: bodyTypes.filter(Boolean).sort(),
         years: years.sort((a, b) => b - a),
+        brandModelMap: brandModelMap,
         fuelTypes: ['Petrol', 'Diesel', 'CNG', 'Electric', 'Hybrid'],
         transmissions: ['Manual', 'Automatic'],
       },
