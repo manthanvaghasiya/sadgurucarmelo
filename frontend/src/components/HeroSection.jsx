@@ -1,20 +1,44 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Car, Settings2, Wallet, Search } from 'lucide-react';
+import axiosInstance from '../api/axiosConfig';
 
 export default function HeroSection() {
   const navigate = useNavigate();
-  const [selectedBrand, setSelectedBrand] = useState('All Brands');
-  const [selectedModel, setSelectedModel] = useState('All Models');
-  const [selectedBudget, setSelectedBudget] = useState('Any Budget');
+  const [selectedBrand, setSelectedBrand] = useState('');
+  const [selectedModel, setSelectedModel] = useState('');
+  const [selectedBudget, setSelectedBudget] = useState('');
+  
+  const [availableBrands, setAvailableBrands] = useState([]);
+  const [availableBodyTypes, setAvailableBodyTypes] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchMetadata = async () => {
+      try {
+        const res = await axiosInstance.get('/cars/metadata');
+        if (res.data && res.data.data) {
+          setAvailableBrands(res.data.data.makes || res.data.data.brands || []);
+          setAvailableBodyTypes(res.data.data.bodyTypes || []);
+        }
+      } catch (error) {
+        console.error('Failed to fetch car metadata', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchMetadata();
+  }, []);
 
   const handleSearch = () => {
     const params = new URLSearchParams();
-    if (selectedBrand && selectedBrand !== 'All Brands') params.set('brand', selectedBrand);
-    if (selectedModel && selectedModel !== 'All Models') params.set('model', selectedModel);
+    if (selectedBrand) params.set('make', selectedBrand);
+    if (selectedModel) params.set('bodyType', selectedModel);
 
-    if (selectedBudget && selectedBudget !== 'Any Budget') {
-      params.set('budget', selectedBudget);
+    if (selectedBudget && selectedBudget.includes('-')) {
+      const [minPrice, maxPrice] = selectedBudget.split('-');
+      if (minPrice) params.set('priceMin', minPrice);
+      if (maxPrice) params.set('priceMax', maxPrice);
     }
 
     navigate(`/inventory?${params.toString()}`);
@@ -72,31 +96,32 @@ export default function HeroSection() {
               <select
                 value={selectedBrand}
                 onChange={(e) => setSelectedBrand(e.target.value)}
-                className="w-full h-12 px-4 rounded-xl border border-slate-200 bg-slate-50 focus:ring-2 focus:ring-red-600 focus:border-red-600 text-slate-900 outline-none transition-all duration-300"
+                disabled={isLoading}
+                className="w-full h-12 px-4 rounded-xl border border-slate-200 bg-slate-50 focus:ring-2 focus:ring-red-600 focus:border-red-600 text-slate-900 outline-none transition-all duration-300 disabled:opacity-50"
               >
-                <option value="All Brands">All Brands</option>
-                <option value="Tata">Tata</option>
-                <option value="Hyundai">Hyundai</option>
-                <option value="Maruti Suzuki">Maruti Suzuki</option>
-                <option value="Mahindra">Mahindra</option>
+                <option value="">{isLoading ? 'Loading...' : 'All Brands'}</option>
+                {availableBrands.map(brand => (
+                  <option key={brand} value={brand}>{brand}</option>
+                ))}
               </select>
             </div>
 
-            {/* Model */}
+            {/* Model -> Body Type */}
             <div className="flex flex-col">
               <label className="flex items-center gap-2 text-sm font-semibold text-slate-700 mb-2">
                 <Settings2 className="w-4 h-4" />
-                Model
+                Body Type
               </label>
               <select
                 value={selectedModel}
                 onChange={(e) => setSelectedModel(e.target.value)}
-                className="w-full h-12 px-4 rounded-xl border border-slate-200 bg-slate-50 focus:ring-2 focus:ring-red-600 focus:border-red-600 text-slate-900 outline-none transition-all duration-300"
+                disabled={isLoading}
+                className="w-full h-12 px-4 rounded-xl border border-slate-200 bg-slate-50 focus:ring-2 focus:ring-red-600 focus:border-red-600 text-slate-900 outline-none transition-all duration-300 disabled:opacity-50"
               >
-                <option value="All Models">All Models</option>
-                <option value="SUV">SUV</option>
-                <option value="Sedan">Sedan</option>
-                <option value="Hatchback">Hatchback</option>
+                <option value="">{isLoading ? 'Loading...' : 'All Body Types'}</option>
+                {availableBodyTypes.map(type => (
+                  <option key={type} value={type}>{type}</option>
+                ))}
               </select>
             </div>
 
@@ -111,10 +136,11 @@ export default function HeroSection() {
                 onChange={(e) => setSelectedBudget(e.target.value)}
                 className="w-full h-12 px-4 rounded-xl border border-slate-200 bg-slate-50 focus:ring-2 focus:ring-red-600 focus:border-red-600 text-slate-900 outline-none transition-all duration-300"
               >
-                <option value="Any Budget">Any Budget</option>
-                <option value="Under ₹5 Lakh">Under ₹5 Lakh</option>
-                <option value="₹5 - ₹10 Lakh">₹5 - ₹10 Lakh</option>
-                <option value="Over ₹10 Lakh">Over ₹10 Lakh</option>
+                <option value="">Any Budget</option>
+                <option value="0-500000">Under ₹5 Lakh</option>
+                <option value="500000-1000000">₹5 Lakh - ₹10 Lakh</option>
+                <option value="1000000-2000000">₹10 Lakh - ₹20 Lakh</option>
+                <option value="2000000-99999999">Above ₹20 Lakh</option>
               </select>
             </div>
 

@@ -330,9 +330,11 @@ export default function AddCar() {
       if (data.isPetipack) formData.append('badges', 'Peti-pack');
       if (data.validVimo) formData.append('badges', 'Valid Vimo');
 
-      // Inject the image file
+      // Inject the image files
       if (photos.length > 0) {
-        formData.append('image', photos[0]);
+        photos.forEach(photo => {
+          formData.append('images', photo);
+        });
       } else {
         toast.error('Please upload at least one image.');
         return; 

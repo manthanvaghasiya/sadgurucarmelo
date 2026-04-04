@@ -35,8 +35,16 @@ export default function InventoryGrid({ filters = {} }) {
       if (sortBy !== 'newest') params.set('sort', sortBy);
       if (filters.fuelType) params.set('fuelType', filters.fuelType);
       if (filters.bodyType) params.set('bodyType', filters.bodyType);
-      if (filters.priceMin) params.set('priceMin', filters.priceMin);
-      if (filters.priceMax) params.set('priceMax', filters.priceMax);
+      
+      // Map new budget array back to min/max API requirements
+      if (filters.budget && filters.budget.length === 2) {
+        params.set('priceMin', filters.budget[0]);
+        params.set('priceMax', filters.budget[1]);
+      } else {
+        if (filters.priceMin) params.set('priceMin', filters.priceMin);
+        if (filters.priceMax) params.set('priceMax', filters.priceMax);
+      }
+
       if (filters.makes && filters.makes.length === 1) {
         params.set('make', filters.makes[0]);
       }

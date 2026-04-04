@@ -2,19 +2,39 @@ import { useParams } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { Fuel, Settings2, User, Gauge, Calendar, MessageCircle, MapPin, Star, Tag, Check, ShieldCheck, Palette, FileText } from 'lucide-react';
 import axiosInstance from '../api/axiosConfig';
+import CarCard from '../components/CarCard';
 
 export default function CarDetails() {
     const { id } = useParams();
     const [car, setCar] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
+    const [activeImage, setActiveImage] = useState(null);
+    const [relatedCars, setRelatedCars] = useState([]);
 
     useEffect(() => {
         const fetchCar = async () => {
             try {
                 const res = await axiosInstance.get(`/cars/${id}`);
                 if (res.data.success) {
-                    setCar(res.data.data);
+                    const fetchedCar = res.data.data;
+                    setCar(fetchedCar);
+                    setActiveImage(fetchedCar.image || (fetchedCar.images && fetchedCar.images[0]) || 'https://placehold.co/1200x800/e2e8f0/64748b?text=No+Image');
+                    
+                    // Fetch "Similar Cars" based on Make
+                    try {
+                        const relatedRes = await axiosInstance.get(`/cars?make=${fetchedCar.make}&limit=5`);
+                        if (relatedRes.data.success || relatedRes.data.data) {
+                            const relatedArray = relatedRes.data.data || [];
+                            // Ensure the current car isn't listed and keep maximum 3 cars
+                            const filteredRelated = relatedArray
+                                .filter(c => (c._id || c.id) !== id)
+                                .slice(0, 3);
+                            setRelatedCars(filteredRelated);
+                        }
+                    } catch (relatedErr) {
+                        console.error('Failed to fetch related cars', relatedErr);
+                    }
                 } else {
                     setError(res.data.message || 'Car not found');
                 }
@@ -68,7 +88,7 @@ export default function CarDetails() {
                         </ol>
                     </nav>
                     <h1 className="font-heading font-extrabold text-3xl sm:text-4xl text-text leading-tight tracking-tight">
-                        {car.year} {car.make} {car.model}
+                        {car.make} {car.model} {car.year}
                     </h1>
                 </div>
 
@@ -80,23 +100,32 @@ export default function CarDetails() {
 
                         {/* Media Gallery */}
                         <div className="bg-surface p-4 rounded-2xl shadow-sm border border-gray-100">
-                            <div className="relative w-full h-[300px] sm:h-[400px] bg-gray-200 rounded-xl overflow-hidden mb-4 group cursor-pointer">
-                                {/* 360 Viewer Placeholder */}
-                                <img src={mainImg} alt="Car Exterior" className="w-full h-full object-cover" />
+                            {/* Main Viewer */}
+                            <div className="relative w-full aspect-video bg-gray-200 rounded-2xl overflow-hidden mb-4 shadow-lg group">
+                                <img src={activeImage} alt="Car View" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.02]" />
 
-                                <div className="absolute top-4 left-4 bg-primary text-white text-[10px] font-heading font-bold px-3 py-1.5 rounded flex items-center gap-1.5 uppercase tracking-wider z-10 shadow-sm">
-                                    VEHICLE EXTERIOR
+                                <div className="absolute top-4 left-4 bg-primary text-white text-[10px] font-heading font-extrabold px-3 py-1.5 rounded flex items-center gap-1.5 uppercase tracking-wider z-10 shadow-sm backdrop-blur-md bg-opacity-90">
+                                    VEHICLE VIEW
                                 </div>
                             </div>
 
-                            {/* Thumbnails */}
+                            {/* Thumbnail Strip */}
                             {(car.images && car.images.length > 0) && (
-                                <div className="grid grid-cols-4 gap-2 sm:gap-4">
-                                    {car.images.slice(0, 4).map((img, i) => (
-                                        <div key={i} className="h-16 sm:h-24 bg-gray-200 rounded-lg overflow-hidden cursor-pointer border-2 border-transparent hover:border-primary/50">
-                                            <img src={img} className="w-full h-full object-cover" alt={`Thumb ${i+1}`} />
-                                        </div>
-                                    ))}
+                                <div className="flex overflow-x-auto gap-3 pb-2 scrollbar-thin scrollbar-thumb-gray-200 scrollbar-track-transparent">
+                                    {car.images.map((img, i) => {
+                                        const isActive = activeImage === img;
+                                        return (
+                                            <button 
+                                                key={i} 
+                                                onClick={() => setActiveImage(img)}
+                                                className={`relative shrink-0 w-24 sm:w-32 aspect-video bg-gray-200 rounded-lg overflow-hidden cursor-pointer transition-all duration-300 focus:outline-none 
+                                                    ${isActive ? 'ring-2 ring-red-600 ring-offset-2 opacity-100 z-10' : 'opacity-60 hover:opacity-100 hover:ring-2 hover:ring-primary/30 hover:ring-offset-1'}`
+                                                }
+                                            >
+                                                <img src={img} className="w-full h-full object-cover" alt={`Thumb ${i+1}`} />
+                                            </button>
+                                        );
+                                    })}
                                 </div>
                             )}
                         </div>
@@ -296,6 +325,32 @@ export default function CarDetails() {
                     </div>
 
                 </div>
+
+                {/* Similar Cars Section */}
+                {relatedCars.length > 0 && (
+                    <div className="mt-20 md:mt-28 pt-12 border-t border-gray-100 pb-8">
+                        <div className="flex items-center justify-between mb-8">
+                            <h2 className="font-heading font-bold text-2xl text-slate-900 tracking-tight">Similar Cars You Might Like</h2>
+                            <a href={`/inventory?make=${car.make}`} className="font-body text-sm font-bold text-primary hover:text-primary-hover transition-colors hidden sm:block">View all {car.make} models &rarr;</a>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {relatedCars.map((relatedCar) => (
+                                <CarCard
+                                  key={relatedCar._id || relatedCar.id}
+                                  id={relatedCar._id || relatedCar.id}
+                                  image={relatedCar.image || (relatedCar.images && relatedCar.images[0])}
+                                  title={`${relatedCar.make} ${relatedCar.model} ${relatedCar.year}`}
+                                  price={`₹${relatedCar.price?.toLocaleString('en-IN')}`}
+                                  fuel={relatedCar.fuelType}
+                                  transmission={relatedCar.transmission}
+                                  owner={relatedCar.owner}
+                                  kms={`${relatedCar.kms?.toLocaleString('en-IN')} KM`}
+                                  badges={relatedCar.badges || []}
+                                />
+                            ))}
+                        </div>
+                    </div>
+                )}
             </div>
         </div>
     );

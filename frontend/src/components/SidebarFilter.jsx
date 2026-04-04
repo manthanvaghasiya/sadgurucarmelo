@@ -1,28 +1,50 @@
-import { useState, useEffect } from 'react';
-import { CarFront, Truck, X } from 'lucide-react';
-import axiosInstance from '../api/axiosConfig';
+import { useCallback } from 'react';
+import { X, ChevronDown } from 'lucide-react';
 
-export default function SidebarFilter({ filters, setFilters }) {
-  const [filterOptions, setFilterOptions] = useState({
-    makes: [],
-    bodyTypes: [],
-    fuelTypes: ['Petrol', 'Diesel', 'CNG', 'Electric', 'Hybrid'],
-    years: [],
-  });
+export default function SidebarFilter({
+  filters,
+  setFilters,
+  availableBrands = [],
+  availableFuels = [],
+  availableBodyTypes = [],
+  priceRangeBounds = [0, 5000000]
+}) {
 
-  useEffect(() => {
-    const fetchFilters = async () => {
-      try {
-        const res = await axiosInstance.get('/cars/filters');
-        if (res.data.success) {
-          setFilterOptions(res.data.data);
-        }
-      } catch (err) {
-        console.error('Failed to fetch filter options:', err);
-      }
-    };
-    fetchFilters();
-  }, []);
+  // Range Slider implementation directly integrated
+  const exactMin = Number(priceRangeBounds[0]) || 0;
+  const exactMax = Number(priceRangeBounds[1]) || 5000000;
+  
+  // Mathematically snap slider bounds beyond actual max so users can scale properly
+  const minBound = Math.floor(exactMin / 10000) * 10000;
+  const maxBound = Math.ceil(exactMax / 10000) * 10000;
+
+  // Use filter's budget or fallback to overall bounds
+  const currentMin = filters.budget ? filters.budget[0] : minBound;
+  const currentMax = filters.budget ? filters.budget[1] : maxBound;
+
+  const handleBudgetChange = useCallback((newMin, newMax) => {
+    setFilters(prev => ({
+      ...prev,
+      budget: [newMin, newMax]
+    }));
+  }, [setFilters]);
+
+  // Format currency
+  const formatINR = (val) => {
+    return new Intl.NumberFormat('en-IN', {
+      style: 'currency',
+      currency: 'INR',
+      maximumFractionDigits: 0
+    }).format(val);
+  };
+
+  const getPercent = (value) => {
+    if (maxBound === minBound) return 0;
+    return Math.round(((value - minBound) / (maxBound - minBound)) * 100);
+  };
+
+  const currentMinPercent = getPercent(currentMin);
+  const currentMaxPercent = getPercent(currentMax);
 
   const toggleMake = (make) => {
     const current = filters.makes || [];
@@ -42,145 +64,170 @@ export default function SidebarFilter({ filters, setFilters }) {
   };
 
   const clearAll = () => {
-    setFilters({ makes: [], fuelType: '', bodyType: '', priceMin: '', priceMax: '' });
+    setFilters({ makes: [], fuelType: '', bodyType: '', budget: null, priceMin: '', priceMax: '' });
   };
 
   const activeMakes = filters.makes || [];
 
   return (
-    <aside className="w-full bg-surface rounded-2xl shadow-sm border border-gray-100 p-6 flex flex-col gap-8">
-      
+    <aside className="w-full sticky top-28 h-fit max-h-[calc(100vh-7rem)] overflow-y-auto scrollbar-thin scrollbar-thumb-slate-200 scrollbar-track-transparent bg-white p-6 rounded-2xl shadow-xl ring-1 ring-black/[0.03] flex flex-col gap-6">
+
       {/* Header */}
       <div className="flex items-center justify-between pb-4 border-b border-gray-100">
         <h2 className="font-heading font-bold text-lg text-text">Advanced Filters</h2>
         <button onClick={clearAll} className="text-primary font-body text-sm font-semibold hover:underline">Clear All</button>
       </div>
 
-      {/* Budget Filter */}
-      <div className="flex flex-col gap-4">
-        <h3 className="font-heading font-semibold text-sm text-text-muted tracking-widest uppercase">Budget</h3>
-        <div className="grid grid-cols-2 gap-2">
-          {[
-            { label: 'Under ₹5L', min: '', max: '500000' },
-            { label: '₹5L-₹10L', min: '500000', max: '1000000' },
-            { label: '₹10L-₹20L', min: '1000000', max: '2000000' },
-            { label: '₹20L+', min: '2000000', max: '' },
-          ].map(range => {
-            const isActive = filters.priceMin === range.min && filters.priceMax === range.max;
-            return (
-              <button
-                key={range.label}
-                onClick={() => {
-                  if (isActive) {
-                    setFilters({ ...filters, priceMin: '', priceMax: '' });
-                  } else {
-                    setFilters({ ...filters, priceMin: range.min, priceMax: range.max });
-                  }
-                }}
-                className={`py-2.5 rounded-xl border font-body text-xs font-medium transition-colors ${
-                  isActive
-                    ? 'border-primary bg-primary/5 text-primary font-bold'
-                    : 'border-gray-200 bg-surface text-text hover:border-primary hover:text-primary'
-                }`}
-              >
-                {range.label}
-              </button>
-            );
-          })}
+      {/* Budget Filter - Dual Thumb Range Slider */}
+      <div className="flex flex-col gap-5">
+        <div className="flex justify-between items-center">
+          <h3 className="font-heading font-semibold text-sm text-text-muted tracking-widest uppercase">Budget</h3>
+        </div>
+
+        {/* Render formatted selected budget */}
+        <div className="flex items-center justify-between font-heading font-bold text-[15px] text-text bg-gray-50 px-4 py-2.5 rounded-xl border border-gray-100">
+          <span>{formatINR(currentMin)}</span>
+          <span className="text-text-muted">-</span>
+          <span>{formatINR(currentMax)}</span>
+        </div>
+
+        {/* Dual Thumb Slider */}
+        <div className="relative w-full h-8 flex items-center group mt-2">
+          {/* Track Background */}
+          <div className="absolute w-full h-1.5 bg-slate-200 rounded-full"></div>
+
+          {/* Track Active Highlight */}
+          <div
+            className="absolute h-1.5 bg-red-600 rounded-full transition-all duration-100"
+            style={{
+              left: `${currentMinPercent}%`,
+              width: `${currentMaxPercent - currentMinPercent}%`
+            }}
+          ></div>
+
+          {/* Min Slider */}
+          <input
+            type="range"
+            min={minBound}
+            max={maxBound}
+            value={currentMin}
+            step={10000}
+            onChange={(e) => {
+              const value = Math.min(Number(e.target.value), currentMax - 10000);
+              handleBudgetChange(value, currentMax);
+            }}
+            className="absolute w-full appearance-none bg-transparent pointer-events-none 
+                [&::-webkit-slider-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:appearance-none 
+                [&::-webkit-slider-thumb]:w-[22px] [&::-webkit-slider-thumb]:h-[22px] 
+                [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:rounded-full 
+                [&::-webkit-slider-thumb]:shadow-md [&::-webkit-slider-thumb]:ring-1 [&::-webkit-slider-thumb]:ring-black/5
+                hover:[&::-webkit-slider-thumb]:scale-110 [&::-webkit-slider-thumb]:transition-transform
+                z-20"
+          />
+
+          {/* Max Slider */}
+          <input
+            type="range"
+            min={minBound}
+            max={maxBound}
+            value={currentMax}
+            step={10000}
+            onChange={(e) => {
+              const value = Math.max(Number(e.target.value), currentMin + 10000);
+              handleBudgetChange(currentMin, value);
+            }}
+            className="absolute w-full appearance-none bg-transparent pointer-events-none 
+                [&::-webkit-slider-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:appearance-none 
+                [&::-webkit-slider-thumb]:w-[22px] [&::-webkit-slider-thumb]:h-[22px] 
+                [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:rounded-full 
+                [&::-webkit-slider-thumb]:shadow-md [&::-webkit-slider-thumb]:ring-1 [&::-webkit-slider-thumb]:ring-black/5
+                hover:[&::-webkit-slider-thumb]:scale-110 [&::-webkit-slider-thumb]:transition-transform
+                z-20"
+          />
         </div>
       </div>
 
       {/* Brand Filter */}
-      <div className="flex flex-col gap-4">
-        <h3 className="font-heading font-semibold text-sm text-text-muted tracking-widest uppercase">Brand</h3>
-        <div className="flex flex-col gap-3 font-body text-sm text-text max-h-48 overflow-y-auto">
-          {filterOptions.makes.map(make => (
-            <label key={make} className="flex items-center justify-between cursor-pointer group">
-              <div className="flex items-center gap-3">
-                <input
-                  type="checkbox"
-                  checked={activeMakes.includes(make)}
-                  onChange={() => toggleMake(make)}
-                  className="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary focus:ring-offset-0 cursor-pointer accent-primary"
-                />
-                <span className="group-hover:text-primary transition-colors font-medium">{make}</span>
-              </div>
-            </label>
-          ))}
-          {filterOptions.makes.length === 0 && (
-            <p className="text-text-muted text-xs">Loading brands...</p>
-          )}
+      {availableBrands.length > 0 && (
+        <div className="flex flex-col gap-4">
+          <h3 className="font-heading font-semibold text-sm text-text-muted tracking-widest uppercase">Brand</h3>
+          <div className="flex flex-col gap-3 font-body text-sm text-text max-h-48 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-200">
+            {availableBrands.map(make => (
+              <label key={make} className="flex items-center justify-between cursor-pointer group">
+                <div className="flex items-center gap-3">
+                  <input
+                    type="checkbox"
+                    checked={activeMakes.includes(make)}
+                    onChange={() => toggleMake(make)}
+                    className="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary focus:ring-offset-0 cursor-pointer accent-primary transition-colors"
+                  />
+                  <span className="group-hover:text-primary transition-colors font-medium">{make}</span>
+                </div>
+              </label>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Fuel Type Filter */}
-      <div className="flex flex-col gap-4">
-        <h3 className="font-heading font-semibold text-sm text-text-muted tracking-widest uppercase">Fuel Type</h3>
-        <div className="grid grid-cols-2 gap-2">
-          {filterOptions.fuelTypes.map(ft => {
-            const isActive = filters.fuelType === ft;
-            return (
-              <button
-                key={ft}
-                onClick={() => setFuelType(ft)}
-                className={`py-2.5 rounded-xl border font-body text-xs font-medium transition-colors ${
-                  isActive
-                    ? 'border-primary bg-primary/5 text-primary font-bold'
-                    : 'border-gray-200 bg-surface text-text hover:border-primary hover:text-primary'
-                }`}
-              >
-                {ft}
-              </button>
-            );
-          })}
+      {availableFuels.length > 0 && (
+        <div className="flex flex-col gap-3">
+          <label htmlFor="fuelType" className="font-heading font-semibold text-sm text-text-muted tracking-widest uppercase">Fuel Type</label>
+          <div className="relative">
+            <select
+              id="fuelType"
+              value={filters.fuelType || ''}
+              onChange={(e) => setFilters({ ...filters, fuelType: e.target.value })}
+              className="w-full appearance-none bg-slate-50 border border-slate-200 text-slate-700 py-3 px-4 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent transition-all cursor-pointer font-body text-sm font-semibold shadow-sm hover:border-slate-300 hover:bg-white"
+            >
+              <option value="">All Fuel Types</option>
+              {availableFuels.map(ft => (
+                <option key={ft} value={ft}>{ft}</option>
+              ))}
+            </select>
+            <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Body Type Filter */}
-      <div className="flex flex-col gap-4">
-        <h3 className="font-heading font-semibold text-sm text-text-muted tracking-widest uppercase">Body Type</h3>
-        <div className="flex flex-col gap-2">
-          {filterOptions.bodyTypes.map(bt => {
-            const isActive = filters.bodyType === bt;
-            return (
-              <button
-                key={bt}
-                onClick={() => setBodyType(bt)}
-                className={`flex items-center gap-3 w-full p-3 rounded-xl border text-sm font-medium transition-colors ${
-                  isActive
-                    ? 'border-primary/20 bg-primary/5 text-primary font-body font-bold'
-                    : 'border-transparent hover:bg-gray-50 text-text font-body'
-                }`}
-              >
-                {bt === 'SUV' ? (
-                  <Truck className={`w-5 h-5 ${isActive ? 'text-primary' : 'text-text-muted'}`} strokeWidth={isActive ? 2 : 1.5} />
-                ) : (
-                  <CarFront className={`w-5 h-5 ${isActive ? 'text-primary' : 'text-text-muted'}`} strokeWidth={isActive ? 2 : 1.5} />
-                )}
-                {bt}
-              </button>
-            );
-          })}
+      {availableBodyTypes.length > 0 && (
+        <div className="flex flex-col gap-3">
+          <label htmlFor="bodyType" className="font-heading font-semibold text-sm text-text-muted tracking-widest uppercase">Body Type</label>
+          <div className="relative">
+            <select
+              id="bodyType"
+              value={filters.bodyType || ''}
+              onChange={(e) => setFilters({ ...filters, bodyType: e.target.value })}
+              className="w-full appearance-none bg-slate-50 border border-slate-200 text-slate-700 py-3 px-4 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent transition-all cursor-pointer font-body text-sm font-semibold shadow-sm hover:border-slate-300 hover:bg-white"
+            >
+              <option value="">All Body Types</option>
+              {availableBodyTypes.map(bt => (
+                <option key={bt} value={bt}>{bt}</option>
+              ))}
+            </select>
+            <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Active Filters Summary */}
-      {(activeMakes.length > 0 || filters.fuelType || filters.bodyType || filters.priceMin || filters.priceMax) && (
+      {(activeMakes.length > 0 || filters.fuelType || filters.bodyType || filters.budget) && (
         <div className="flex flex-wrap gap-2 pt-4 border-t border-gray-100">
           {activeMakes.map(m => (
-            <span key={m} className="inline-flex items-center gap-1 px-2.5 py-1 bg-primary/10 text-primary rounded-full font-body text-xs font-bold">
+            <span key={m} className="inline-flex items-center gap-1 px-2.5 py-1 bg-primary/10 text-primary rounded-full font-body text-xs font-bold transition-all hover:bg-primary/20">
               {m}
               <button onClick={() => toggleMake(m)}><X className="w-3 h-3" /></button>
             </span>
           ))}
           {filters.fuelType && (
-            <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-primary/10 text-primary rounded-full font-body text-xs font-bold">
+            <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-primary/10 text-primary rounded-full font-body text-xs font-bold transition-all hover:bg-primary/20">
               {filters.fuelType}
               <button onClick={() => setFilters({ ...filters, fuelType: '' })}><X className="w-3 h-3" /></button>
             </span>
           )}
           {filters.bodyType && (
-            <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-primary/10 text-primary rounded-full font-body text-xs font-bold">
+            <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-primary/10 text-primary rounded-full font-body text-xs font-bold transition-all hover:bg-primary/20">
               {filters.bodyType}
               <button onClick={() => setFilters({ ...filters, bodyType: '' })}><X className="w-3 h-3" /></button>
             </span>

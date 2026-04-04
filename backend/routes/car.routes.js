@@ -157,7 +157,7 @@ router.get('/:id', async (req, res) => {
 // ═══════════════════════════════════════════════
 //  POST /api/cars — Add new car (Admin)
 // ═══════════════════════════════════════════════
-router.post('/', protect, admin, upload.single('image'), async (req, res) => {
+router.post('/', protect, admin, upload.array('images', 10), async (req, res) => {
   try {
     const carData = { ...req.body };
     
@@ -165,10 +165,13 @@ router.post('/', protect, admin, upload.single('image'), async (req, res) => {
       carData.features = carData.features.split(',').map(f => f.trim()).filter(Boolean);
     }
     
-    if (req.file) {
-      carData.image = req.file.path;
+    if (req.files && req.files.length > 0) {
+      const imageUrls = req.files.map(file => file.path);
+      carData.images = imageUrls;
+      carData.image = imageUrls[0];
     } else {
       carData.image = 'https://placehold.co/600x400/e2e8f0/64748b?text=' + encodeURIComponent(`${carData.make || 'Car'} ${carData.model || ''}`);
+      carData.images = [carData.image];
     }
 
     const car = await Car.create(carData);
@@ -182,12 +185,18 @@ router.post('/', protect, admin, upload.single('image'), async (req, res) => {
 // ═══════════════════════════════════════════════
 //  PUT /api/cars/:id — Update car (Admin)
 // ═══════════════════════════════════════════════
-router.put('/:id', protect, admin, async (req, res) => {
+router.put('/:id', protect, admin, upload.array('images', 10), async (req, res) => {
   try {
     const updateData = { ...req.body };
     
     if (typeof updateData.features === 'string') {
       updateData.features = updateData.features.split(',').map(f => f.trim()).filter(Boolean);
+    }
+
+    if (req.files && req.files.length > 0) {
+      const imageUrls = req.files.map(file => file.path);
+      updateData.images = imageUrls;
+      updateData.image = imageUrls[0];
     }
 
     const car = await Car.findByIdAndUpdate(req.params.id, updateData, {

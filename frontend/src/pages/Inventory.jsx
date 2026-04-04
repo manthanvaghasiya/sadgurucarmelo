@@ -1,15 +1,38 @@
-import { useState, useEffect } from 'react';
+import { useState, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import SidebarFilter from '../components/SidebarFilter';
 import InventoryGrid from '../components/InventoryGrid';
+import { useCars } from '../context/CarContext';
 import PromoBanner from '../components/PromoBanner';
 
 export default function Inventory() {
   const [searchParams] = useSearchParams();
 
+  const { cars } = useCars();
+
+  const availableBrands = useMemo(() => {
+    return [...new Set(cars.map(c => c.make))].filter(Boolean).sort();
+  }, [cars]);
+
+  const availableFuels = useMemo(() => {
+    return [...new Set(cars.map(c => c.fuelType))].filter(Boolean).sort();
+  }, [cars]);
+
+  const availableBodyTypes = useMemo(() => {
+    return [...new Set(cars.map(c => c.bodyType))].filter(Boolean).sort();
+  }, [cars]);
+
+  const priceRangeBounds = useMemo(() => {
+    if (!cars || cars.length === 0) return [0, 5000000];
+    const prices = cars.map(c => Number(c.price)).filter(p => !isNaN(p));
+    // Provide a default fallback if price maps fail
+    if (prices.length === 0) return [0, 5000000];
+    return [Math.min(...prices), Math.max(...prices)];
+  }, [cars]);
+
   // Initialize filters from URL query params (from Home page search)
   const [filters, setFilters] = useState(() => {
-    const initial = { makes: [], fuelType: '', bodyType: '', priceMin: '', priceMax: '' };
+    const initial = { makes: [], fuelType: '', bodyType: '', budget: null };
     const make = searchParams.get('make');
     const fuelType = searchParams.get('fuelType');
     const priceMin = searchParams.get('priceMin');
@@ -18,10 +41,17 @@ export default function Inventory() {
 
     if (make) initial.makes = [make];
     if (fuelType) initial.fuelType = fuelType;
-    if (priceMin) initial.priceMin = priceMin;
-    if (priceMax) initial.priceMax = priceMax;
     if (bodyType) initial.bodyType = bodyType;
 
+    // Handle budget from URL safely
+    const parsedMin = priceMin ? Number(priceMin) : null;
+    const parsedMax = priceMax ? Number(priceMax) : null;
+    if (parsedMin !== null || parsedMax !== null) {
+      initial.budget = [
+        parsedMin !== null && !isNaN(parsedMin) ? parsedMin : 0,
+        parsedMax !== null && !isNaN(parsedMax) ? parsedMax : 5000000
+      ];
+    }
     return initial;
   });
 
@@ -50,7 +80,14 @@ export default function Inventory() {
 
           {/* Sidebar (Filters) - 1/4 Width Desktop */}
           <div className="w-full lg:w-1/4 shrink-0">
-            <SidebarFilter filters={filters} setFilters={setFilters} />
+            <SidebarFilter
+              filters={filters}
+              setFilters={setFilters}
+              availableBrands={availableBrands}
+              availableFuels={availableFuels}
+              availableBodyTypes={availableBodyTypes}
+              priceRangeBounds={priceRangeBounds}
+            />
           </div>
 
           {/* Right Area (Grid + Top Bar) - 3/4 Width Desktop */}

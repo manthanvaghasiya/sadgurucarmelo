@@ -112,12 +112,82 @@ function ToggleSwitch({ label, description, checked, onChange }) {
   );
 }
 
+// Drop Zone component (moved from AddCar.jsx logic)
+function DropZone({
+  title,
+  description,
+  icon: Icon,
+  files,
+  onFilesAdded,
+  onRemoveFile,
+  accept,
+  highlight = false,
+  id,
+}) {
+  const [isDragging, useStateDragging] = useState(false);
+  const inputRef = useRef(null);
+
+  const handleDrag = useCallback((e) => { e.preventDefault(); e.stopPropagation(); }, []);
+  const handleDragIn = useCallback((e) => { e.preventDefault(); e.stopPropagation(); useStateDragging(true); }, []);
+  const handleDragOut = useCallback((e) => { e.preventDefault(); e.stopPropagation(); useStateDragging(false); }, []);
+  const handleDrop = useCallback(
+    (e) => {
+      e.preventDefault(); e.stopPropagation(); useStateDragging(false);
+      if (e.dataTransfer.files && e.dataTransfer.files.length > 0) onFilesAdded([...e.dataTransfer.files]);
+    },
+    [onFilesAdded]
+  );
+  const handleFileSelect = (e) => {
+    if (e.target.files && e.target.files.length > 0) onFilesAdded([...e.target.files]);
+  };
+
+  return (
+    <div className="space-y-3">
+      <div className="flex items-center gap-2">
+        <Icon className={`w-5 h-5 ${highlight ? 'text-accent' : 'text-text-muted'}`} />
+        <h3 className={`font-heading font-bold text-base ${highlight ? 'text-accent' : 'text-text'}`}>{title}</h3>
+      </div>
+      <div
+        onDragEnter={handleDragIn} onDragLeave={handleDragOut} onDragOver={handleDrag} onDrop={handleDrop} onClick={() => inputRef.current?.click()}
+        className={`relative cursor-pointer rounded-2xl border-2 border-dashed p-8 flex flex-col items-center justify-center text-center transition-all duration-200 ${highlight ? (isDragging ? 'border-accent bg-accent/10 scale-[1.01]' : 'border-accent/40 bg-accent/5 hover:border-accent hover:bg-accent/8') : (isDragging ? 'border-primary bg-primary/5 scale-[1.01]' : 'border-gray-200 bg-background hover:border-primary/30 hover:bg-primary/[0.02]')}`}
+      >
+        <input ref={inputRef} type="file" accept={accept} multiple={!highlight} onChange={handleFileSelect} className="hidden" id={id} />
+        <div className={`w-14 h-14 rounded-2xl flex items-center justify-center mb-4 ${highlight ? 'bg-accent/15' : 'bg-primary/5'}`}>
+          <Upload className={`w-6 h-6 ${highlight ? 'text-accent' : 'text-primary'}`} />
+        </div>
+        <p className="font-body text-sm font-semibold text-text mb-1">{isDragging ? 'Release to upload' : 'Drag & drop files here'}</p>
+        <p className="font-body text-xs text-text-muted">{description}</p>
+        <button type="button" onClick={(e) => { e.stopPropagation(); inputRef.current?.click(); }} className={`mt-4 px-5 py-2 rounded-xl font-body text-sm font-bold transition-colors ${highlight ? 'bg-accent/15 text-accent hover:bg-accent/25' : 'bg-primary/5 text-primary hover:bg-primary/10'}`}>Browse Files</button>
+      </div>
+      {files.length > 0 && (
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 mt-3">
+          {files.map((file, index) => (
+            <div key={index} className="relative group bg-background rounded-xl overflow-hidden border border-gray-100 aspect-[4/3]">
+              <img src={URL.createObjectURL(file)} alt={file.name} className="w-full h-full object-cover" />
+              <div className="absolute inset-0 bg-primary/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                <button type="button" onClick={() => onRemoveFile(index)} className="p-2 bg-white/90 rounded-full text-red-500 hover:bg-white transition-colors"><X className="w-4 h-4" /></button>
+              </div>
+              <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-2">
+                <p className="font-body text-[10px] text-white truncate">{file.name}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function EditCar() {
   const { id } = useParams();
   const { updateCar } = useCars();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
-  const [existingImage, setExistingImage] = useState('');
+  const [existingImages, setExistingImages] = useState([]);
+  const [photos, setPhotos] = useState([]);
+
+  const addPhotos = (newFiles) => setPhotos((prev) => [...prev, ...newFiles]);
+  const removePhoto = (index) => setPhotos((prev) => prev.filter((_, i) => i !== index));
 
   const {
     register,
@@ -144,7 +214,7 @@ export default function EditCar() {
         const res = await axiosInstance.get(`/cars/${id}`);
         const car = res.data.data || res.data;
 
-        setExistingImage(car.image || '');
+        setExistingImages(car.images?.length > 0 ? car.images : (car.image ? [car.image] : []));
 
         const badges = car.badges || [];
         reset({
@@ -189,42 +259,42 @@ export default function EditCar() {
 
   const onSubmit = async (data) => {
     try {
-      const payload = {
-        make: data.make,
-        model: data.model,
-        year: data.year,
-        price: data.price,
-        kms: data.kmDriven,
-        fuelType: data.fuelType,
-        transmission: data.transmission,
-        owner: data.ownership,
-        bodyType: data.bodyType,
-        color: data.color,
-        registration: data.registration,
-        description: data.description,
-        airConditioner: data.airConditioner,
-        powerWindows: data.powerWindows,
-        sunroof: data.sunroof,
-        parkingSensors: data.parkingSensors,
-        displacement: data.displacement,
-        maxPower: data.maxPower,
-        driveType: data.driveType,
-        cylinders: data.cylinders,
-      };
-
-      // Features as comma-separated string — backend parses it
+      const formData = new FormData();
+      formData.append('make', data.make);
+      formData.append('model', data.model);
+      formData.append('year', data.year);
+      formData.append('price', data.price);
+      formData.append('kms', data.kmDriven);
+      formData.append('fuelType', data.fuelType);
+      formData.append('transmission', data.transmission);
+      formData.append('owner', data.ownership);
+      formData.append('bodyType', data.bodyType);
+      formData.append('color', data.color);
+      formData.append('registration', data.registration);
+      formData.append('description', data.description);
+      formData.append('airConditioner', data.airConditioner);
+      formData.append('powerWindows', data.powerWindows);
+      formData.append('sunroof', data.sunroof);
+      formData.append('parkingSensors', data.parkingSensors);
+      formData.append('displacement', data.displacement);
+      formData.append('maxPower', data.maxPower);
+      formData.append('driveType', data.driveType);
+      formData.append('cylinders', data.cylinders);
+      
       if (data.features) {
-        payload.features = data.features;
+        formData.append('features', data.features);
       }
 
-      // Badges
-      const badges = [];
-      if (data.isCertified) badges.push('Certified');
-      if (data.isPetipack) badges.push('Peti-pack');
-      if (data.validVimo) badges.push('Valid Vimo');
-      payload.badges = badges;
+      if (data.isCertified) formData.append('badges', 'Certified');
+      if (data.isPetipack) formData.append('badges', 'Peti-pack');
+      if (data.validVimo) formData.append('badges', 'Valid Vimo');
 
-      await toast.promise(updateCar(id, payload), {
+      // Append any new images
+      if (photos.length > 0) {
+        photos.forEach(photo => formData.append('images', photo));
+      }
+
+      await toast.promise(updateCar(id, formData), {
         loading: 'Updating vehicle...',
         success: 'Vehicle updated successfully!',
         error: 'Failed to update vehicle.',
@@ -255,11 +325,15 @@ export default function EditCar() {
       </div>
 
       {/* Existing Image Preview */}
-      {existingImage && (
+      {existingImages.length > 0 && (
         <div className="mb-6 bg-surface rounded-2xl border border-gray-100 p-4">
-          <p className="font-body text-sm font-semibold text-text mb-3">Current Image</p>
-          <div className="w-40 h-28 rounded-xl overflow-hidden bg-background ring-1 ring-gray-100">
-            <img src={existingImage} alt="Current car" className="w-full h-full object-cover" />
+          <p className="font-body text-sm font-semibold text-text mb-3">Live Photos</p>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
+            {existingImages.map((img, idx) => (
+              <div key={idx} className="w-full aspect-[4/3] rounded-xl overflow-hidden bg-background ring-1 ring-gray-100">
+                <img src={img} alt={`Car ${idx + 1}`} className="w-full h-full object-cover" />
+              </div>
+            ))}
           </div>
         </div>
       )}
@@ -453,6 +527,34 @@ export default function EditCar() {
               )}
             </div>
           )}
+        </section>
+
+        {/* ── Section 5: Media Upload ── */}
+        <section className="bg-surface rounded-2xl border border-gray-100 p-6 sm:p-8">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center">
+              <span className="font-heading font-bold text-sm text-primary">5</span>
+            </div>
+            <h2 className="font-heading font-bold text-lg text-text">Replace Media (Upload New)</h2>
+          </div>
+          <div className="mb-4">
+            <p className="text-sm font-body text-red-500 bg-red-50 p-3 rounded-lg border border-red-100 font-semibold">
+              <AlertCircle className="w-4 h-4 inline mr-2 align-text-bottom" />
+              Note: Uploading new photos here will entirely overwrite the existing live photos.
+            </p>
+          </div>
+          <div className="space-y-8">
+            <DropZone
+              id="standard-photos"
+              title="Exterior & Interior Photos"
+              description="Upload high-quality JPG or PNG images. Pick up to 10 photos."
+              icon={ImageIcon}
+              files={photos}
+              onFilesAdded={addPhotos}
+              onRemoveFile={removePhoto}
+              accept="image/*"
+            />
+          </div>
         </section>
       </div>
 
