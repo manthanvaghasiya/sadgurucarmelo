@@ -7,7 +7,7 @@ import TopNavigation from './components/TopNavigation';
 import Footer from './components/Footer';
 import Home from './pages/Home';
 import Inventory from './pages/Inventory';
-import Services from './pages/Services';
+import AboutPage from './pages/AboutPage';
 import Contact from './pages/Contact';
 import CarDetails from './pages/CarDetails';
 
@@ -51,7 +51,7 @@ function App() {
                 <Routes>
                   <Route path="/" element={<Home />} />
                   <Route path="/inventory" element={<Inventory />} />
-                  <Route path="/services" element={<Services />} />
+                  <Route path="/about" element={<AboutPage />} />
                   <Route path="/contact" element={<Contact />} />
                   <Route path="/car-details/:id" element={<CarDetails />} />
                 </Routes>

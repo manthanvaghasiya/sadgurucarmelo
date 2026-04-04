@@ -16,15 +16,17 @@ router.get('/', async (req, res) => {
       priceMin, priceMax, kmsMax,
       page = 1,
       search,
+      isFeaturedOnHome,
     } = req.query;
 
     // Build filter
     const filter = {};
     if (status) filter.status = status;
+    if (isFeaturedOnHome) filter.isFeaturedOnHome = isFeaturedOnHome === 'true';
     if (fuelType) filter.fuelType = fuelType;
     if (transmission) filter.transmission = transmission;
     if (make) filter.make = { $regex: make, $options: 'i' };
-    if (model) filter.model = { $regex: model, $options: 'i' };
+    if (model) filter.model = { $regex: new RegExp(`^${model}$`, 'i') };
     if (bodyType) filter.bodyType = { $regex: bodyType, $options: 'i' };
     if (year) filter.year = parseInt(year);
     if (owner) filter.owner = owner;
@@ -227,6 +229,23 @@ router.delete('/:id', protect, admin, async (req, res) => {
       return res.status(404).json({ success: false, message: 'Car not found' });
     }
     res.json({ success: true, message: 'Vehicle successfully marked as Sold.' });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+});
+
+// ═══════════════════════════════════════════════
+//  PATCH /api/cars/:id/toggle-featured — Toggle Home Page status (Admin)
+// ═══════════════════════════════════════════════
+router.patch('/:id/toggle-featured', protect, admin, async (req, res) => {
+  try {
+    const car = await Car.findById(req.params.id);
+    if (!car) {
+      return res.status(404).json({ success: false, message: 'Car not found' });
+    }
+    car.isFeaturedOnHome = !car.isFeaturedOnHome;
+    await car.save();
+    res.json({ success: true, data: car });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Server error' });
   }

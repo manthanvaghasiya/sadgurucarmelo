@@ -45,7 +45,7 @@ const statusConfig = {
 };
 
 export default function Inventory() {
-  const { cars, deleteCar } = useCars();
+  const { cars, deleteCar, toggleFeatured } = useCars();
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
@@ -66,6 +66,7 @@ export default function Inventory() {
       price: c.price >= 100000 ? `₹${(c.price / 100000).toFixed(2)} Lakhs` : `₹${(c.price || 0).toLocaleString('en-IN')}`,
       priceRaw: c.price || 0,
       status: c.status || 'Available',
+      isFeaturedOnHome: c.isFeaturedOnHome || false,
       dateAdded: new Date(c.createdAt || Date.now()).toLocaleDateString('en-IN', { month: 'short', day: '2-digit', year: 'numeric' }),
       fuel: c.fuelType || 'Unknown',
     }));
@@ -286,7 +287,7 @@ export default function Inventory() {
                   </button>
                 </th>
                 <th className="text-left font-body text-[11px] font-bold text-text-muted uppercase tracking-wider px-4 py-4 bg-background/40">
-                  Status
+                  Show on Home
                 </th>
                 <th className="text-left font-body text-[11px] font-bold text-text-muted uppercase tracking-wider px-4 py-4 bg-background/40">
                   Date Added
@@ -359,14 +360,27 @@ export default function Inventory() {
                         </span>
                       </td>
 
-                      {/* Status */}
+                      {/* Show on Home Page Toggle */}
                       <td className="px-4 py-4">
-                        <span
-                          className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full font-body text-[11px] font-bold ring-1 ${cfg.bg} ${cfg.text} ${cfg.ring}`}
+                        <button
+                          onClick={async () => {
+                            try {
+                              await toggleFeatured(car.id);
+                              toast.success(`Vehicle ${car.isFeaturedOnHome ? 'removed from' : 'added to'} Home Page`);
+                            } catch (err) {
+                              toast.error('Failed to update featured status');
+                            }
+                          }}
+                          className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 ${
+                            car.isFeaturedOnHome ? 'bg-primary' : 'bg-gray-200'
+                          }`}
                         >
-                          <span className={`w-1.5 h-1.5 rounded-full ${cfg.dot}`} />
-                          {car.status}
-                        </span>
+                          <span
+                            className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                              car.isFeaturedOnHome ? 'translate-x-6' : 'translate-x-1'
+                            }`}
+                          />
+                        </button>
                       </td>
 
                       {/* Date Added */}
@@ -438,12 +452,24 @@ export default function Inventory() {
                         <p className="font-body text-sm font-semibold text-text truncate">
                           {car.title}
                         </p>
-                        <span
-                          className={`inline-flex items-center gap-1 px-2 py-1 rounded-full font-body text-[10px] font-bold ring-1 shrink-0 ${cfg.bg} ${cfg.text} ${cfg.ring}`}
+                        <button
+                          onClick={async () => {
+                            try {
+                              await toggleFeatured(car.id);
+                            } catch (err) {
+                              toast.error('Failed to update');
+                            }
+                          }}
+                          className={`relative inline-flex h-5 w-10 items-center rounded-full transition-colors focus:outline-none ${
+                            car.isFeaturedOnHome ? 'bg-primary' : 'bg-gray-200'
+                          }`}
                         >
-                          <span className={`w-1.5 h-1.5 rounded-full ${cfg.dot}`} />
-                          {car.status}
-                        </span>
+                          <span
+                            className={`inline-block h-3 w-3 transform rounded-full bg-white transition-transform ${
+                              car.isFeaturedOnHome ? 'translate-x-6' : 'translate-x-1'
+                            }`}
+                          />
+                        </button>
                       </div>
                       <div className="flex items-center gap-2 mt-1">
                         <span className="font-body text-xs text-text-muted">{car.km}</span>

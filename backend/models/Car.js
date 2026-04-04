@@ -119,6 +119,12 @@ const carSchema = new mongoose.Schema(
       default: 'Available',
     },
 
+    // ── Home Page Featured ──
+    isFeaturedOnHome: {
+      type: Boolean,
+      default: false,
+    },
+
     // ── Meta ──
     addedBy: {
       type: mongoose.Schema.Types.ObjectId,
@@ -141,6 +147,7 @@ carSchema.pre('save', function () {
 carSchema.index({ status: 1, createdAt: -1 });
 carSchema.index({ make: 1, model: 1 });
 carSchema.index({ price: 1 });
+carSchema.index({ isFeaturedOnHome: 1 });
 
 const Car = mongoose.model('Car', carSchema);
 export default Car;

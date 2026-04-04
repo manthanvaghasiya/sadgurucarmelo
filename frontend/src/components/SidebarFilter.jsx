@@ -1,4 +1,5 @@
 import { useCallback } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { X, ChevronDown } from 'lucide-react';
 
 export default function SidebarFilter({
@@ -63,8 +64,13 @@ export default function SidebarFilter({
     setFilters({ ...filters, bodyType: filters.bodyType === bt ? '' : bt });
   };
 
+  const [searchParams, setSearchParams] = useSearchParams();
+
   const clearAll = () => {
     setFilters({ makes: [], fuelType: '', bodyType: '', budget: null, priceMin: '', priceMax: '' });
+    if (searchParams.toString()) {
+        setSearchParams({});
+    }
   };
 
   const activeMakes = filters.makes || [];

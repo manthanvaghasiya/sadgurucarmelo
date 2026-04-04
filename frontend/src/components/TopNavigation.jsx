@@ -9,7 +9,7 @@ export default function TopNavigation() {
   const navLinks = [
     { name: 'Home', path: '/' },
     { name: 'Catalog', path: '/inventory' },
-    { name: 'About Us', path: '/services' },
+    { name: 'About Us', path: '/about' },
     { name: 'Contact', path: '/contact' },
   ];
 

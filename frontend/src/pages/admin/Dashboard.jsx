@@ -57,8 +57,8 @@ export default function Dashboard() {
   const statsData = [
     {
       id: 'total-cars',
-      title: 'Total Cars in Stock',
-      value: (carStats.availableCars || cars.length).toString(),
+      title: 'Total Available Cars',
+      value: (carStats.availableCars || 0).toString(),
       change: 'Active',
       trend: 'up',
       subtitle: 'Live Database',
@@ -90,8 +90,8 @@ export default function Dashboard() {
     },
   ];
 
-  // Map backend top 6 latest cars
-  const inventoryData = cars.slice(0, 6).map((c) => ({
+  // Map backend featured cars
+  const inventoryData = cars.filter(c => c.isFeaturedOnHome).map((c) => ({
     id: c._id || c.id,
     image: c.image || 'https://placehold.co/120x80/e2e8f0/64748b?text=Car',
     name: `${c.make} ${c.model}`,
@@ -99,7 +99,6 @@ export default function Dashboard() {
     price: c.price >= 100000 ? `₹${(c.price / 100000).toFixed(2)} Lakhs` : `₹${(c.price || 0).toLocaleString('en-IN')}`,
     km: `${(c.kms || 0).toLocaleString('en-IN')} KM`,
     fuel: c.fuelType,
-    status: c.status || 'Available',
   }));
 
   return (
@@ -160,10 +159,10 @@ export default function Dashboard() {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between p-6 pb-4 gap-4">
           <div>
             <h2 className="font-heading font-bold text-lg text-text">
-              Current Inventory
+              Home Page Inventory
             </h2>
             <p className="font-body text-sm text-text-muted mt-0.5">
-              {inventoryData.length} recent vehicles from database
+              {inventoryData.length} vehicles selected for Home Page
             </p>
           </div>
           <div className="flex items-center gap-3">
@@ -202,9 +201,6 @@ export default function Dashboard() {
                 </th>
                 <th className="text-left font-body text-[11px] font-bold text-text-muted uppercase tracking-wider px-4 py-3.5 bg-background/50">
                   Fuel
-                </th>
-                <th className="text-left font-body text-[11px] font-bold text-text-muted uppercase tracking-wider px-4 py-3.5 bg-background/50">
-                  Status
                 </th>
                 <th className="text-right font-body text-[11px] font-bold text-text-muted uppercase tracking-wider px-6 py-3.5 bg-background/50">
                   Actions
@@ -254,14 +250,6 @@ export default function Dashboard() {
                   <td className="px-4 py-4">
                     <span className="font-body text-sm text-text-muted font-medium">
                       {car.fuel}
-                    </span>
-                  </td>
-                  {/* Status */}
-                  <td className="px-4 py-4">
-                    <span
-                      className={`inline-flex items-center px-2.5 py-1 rounded-full font-body text-[11px] font-bold ring-1 ${statusStyles[car.status] || statusStyles['Available']}`}
-                    >
-                      {car.status}
                     </span>
                   </td>
                   {/* Actions */}

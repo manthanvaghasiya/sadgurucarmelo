@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import axiosInstance from '../api/axiosConfig';
 import CarCard from './CarCard';
@@ -22,6 +23,8 @@ export default function InventoryGrid({ filters = {} }) {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
+  const [searchParams] = useSearchParams();
+  const currentModelParam = searchParams.get('model');
 
   const fetchCars = useCallback(async () => {
     setIsLoading(true);
@@ -48,6 +51,10 @@ export default function InventoryGrid({ filters = {} }) {
       if (filters.makes && filters.makes.length === 1) {
         params.set('make', filters.makes[0]);
       }
+      
+      if (currentModelParam) {
+        params.set('model', currentModelParam);
+      }
 
       const res = await axiosInstance.get(`/cars?${params.toString()}`);
       let data = res.data.data || [];
@@ -65,7 +72,7 @@ export default function InventoryGrid({ filters = {} }) {
     } finally {
       setIsLoading(false);
     }
-  }, [page, stockTab, sortBy, filters]);
+  }, [page, stockTab, sortBy, filters, currentModelParam]);
 
   useEffect(() => {
     fetchCars();

@@ -78,8 +78,35 @@ export function CarProvider({ children }) {
     }
   };
 
+  // ── Toggle Featured Status (Home Page) ──
+  const toggleFeatured = async (id) => {
+    // Optimistic UI update
+    setCars((prevCars) =>
+      prevCars.map((car) =>
+        (car._id || car.id) === id
+          ? { ...car, isFeaturedOnHome: !car.isFeaturedOnHome }
+          : car
+      )
+    );
+
+    try {
+      await axiosInstance.patch(`/cars/${id}/toggle-featured`);
+    } catch (err) {
+      // Revert on error
+      setCars((prevCars) =>
+        prevCars.map((car) =>
+          (car._id || car.id) === id
+            ? { ...car, isFeaturedOnHome: !car.isFeaturedOnHome }
+            : car
+        )
+      );
+      setError(err.response?.data?.message || err.message || 'Failed to toggle featured status');
+      throw err;
+    }
+  };
+
   return (
-    <CarContext.Provider value={{ cars, isLoading, error, fetchCars, addCar, updateCar, deleteCar }}>
+    <CarContext.Provider value={{ cars, isLoading, error, fetchCars, addCar, updateCar, deleteCar, toggleFeatured }}>
       {children}
     </CarContext.Provider>
   );
