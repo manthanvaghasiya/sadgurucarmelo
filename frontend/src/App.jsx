@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { CarProvider } from './context/CarContext';
 import { AuthProvider } from './context/AuthContext';
@@ -16,7 +16,6 @@ import UnifiedLogin from './pages/Login';
 
 // Admin Panel Imports
 import AdminLayout from './components/admin/AdminLayout';
-import AdminLogin from './pages/admin/Login';
 import Dashboard from './pages/admin/Dashboard';
 import AddCar from './pages/admin/AddCar';
 import EditCar from './pages/admin/EditCar';
@@ -27,9 +26,9 @@ import AdminSettings from './pages/admin/Settings';
 import AdminPosters from './pages/admin/Posters';
 
 // Sales Portal Imports
-import SalesLogin from './pages/sales/SalesLogin';
 import SalesDashboard from './pages/sales/SalesDashboard';
 import AddLead from './pages/sales/AddLead';
+import EditLead from './pages/sales/EditLead';
 
 import FloatingWhatsApp from './components/FloatingWhatsApp';
 
@@ -68,7 +67,7 @@ function App() {
         <Route path="/login" element={<UnifiedLogin />} />
 
         {/* ── Admin Routes ── */}
-        <Route path="/admin/login" element={<AdminLogin />} />
+        <Route path="/admin/login" element={<Navigate to="/login" replace />} />
         <Route path="/admin" element={
           <ProtectedRoute allowedRoles={['admin']}>
             <AdminLayout />
@@ -85,15 +84,20 @@ function App() {
         </Route>
 
         {/* ── Sales Portal Routes ── */}
-        <Route path="/sales/login" element={<SalesLogin />} />
+        <Route path="/sales/login" element={<Navigate to="/login" replace />} />
         <Route path="/sales" element={
-          <ProtectedRoute allowedRoles={['admin', 'salesman']}>
+          <ProtectedRoute allowedRoles={['admin', 'sales']}>
             <SalesDashboard />
           </ProtectedRoute>
         } />
         <Route path="/sales/add-lead" element={
-          <ProtectedRoute allowedRoles={['admin', 'salesman']}>
+          <ProtectedRoute allowedRoles={['admin', 'sales']}>
             <AddLead />
+          </ProtectedRoute>
+        } />
+        <Route path="/sales/edit-lead/:id" element={
+          <ProtectedRoute allowedRoles={['admin', 'sales']}>
+            <EditLead />
           </ProtectedRoute>
         } />
       </Routes>

@@ -76,11 +76,39 @@ router.get('/', protect, async (req, res) => {
 });
 
 // ═══════════════════════════════════════════════
+//  GET /api/leads/:id — Get a single lead
+// ═══════════════════════════════════════════════
+router.get('/:id', protect, async (req, res) => {
+  try {
+    const lead = await Lead.findById(req.params.id)
+      .populate('carOfInterest', 'title make model year price')
+      .populate('assignedTo', 'name employeeId');
+      
+    if (!lead) {
+      return res.status(404).json({ success: false, message: 'Lead not found' });
+    }
+    
+    res.json({ success: true, data: lead });
+  } catch (error) {
+    if (error.kind === 'ObjectId') {
+      return res.status(404).json({ success: false, message: 'Lead not found' });
+    }
+    console.error('Get single lead error:', error);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+});
+
+// ═══════════════════════════════════════════════
 //  POST /api/leads — Create new lead
 // ═══════════════════════════════════════════════
 router.post('/', protect, async (req, res) => {
   try {
-    const lead = await Lead.create(req.body);
+    const leadData = { ...req.body };
+    // Auto-assign the lead to the user creating it if not explicitly set
+    if (!leadData.assignedTo && req.user) {
+      leadData.assignedTo = req.user.id;
+    }
+    const lead = await Lead.create(leadData);
     res.status(201).json({ success: true, data: lead });
   } catch (error) {
     console.error('Create lead error:', error);

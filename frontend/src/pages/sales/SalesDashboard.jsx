@@ -4,6 +4,7 @@ import {
   Users, Phone, Clock, Plus, CheckCircle2,
   ChevronRight, MessageCircle, Flame, Thermometer,
   Snowflake, CalendarClock, TrendingUp, UserCircle, AlertCircle,
+  Car, MapPin, X
 } from 'lucide-react';
 import axiosInstance from '../../api/axiosConfig';
 import toast from 'react-hot-toast';
@@ -30,6 +31,13 @@ export default function SalesDashboard() {
   const [leads, setLeads] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [stats, setStats] = useState({ total: 0, newCount: 0, followUp: 0, todayFollowUps: 0 });
+  const [callingLeadId, setCallingLeadId] = useState(null);
+  const [activeCallLead, setActiveCallLead] = useState(null);
+  const [callOutcome, setCallOutcome] = useState('complete');
+  const [callNotes, setCallNotes] = useState('');
+  const [nextFollowUp, setNextFollowUp] = useState('');
+  const [isSubmittingLog, setIsSubmittingLog] = useState(false);
+  const [processedTodayIds, setProcessedTodayIds] = useState(new Set());
 
   // ── Fetch leads from API ──
   const fetchData = useCallback(async () => {
@@ -60,6 +68,7 @@ export default function SalesDashboard() {
   tomorrow.setDate(tomorrow.getDate() + 1);
 
   const todayFollowUps = leads.filter(l => {
+    if (processedTodayIds.has(l._id)) return true;
     if (!l.followUpDate) return false;
     const d = new Date(l.followUpDate);
     return d >= today && d < tomorrow;
@@ -76,6 +85,57 @@ export default function SalesDashboard() {
       toast.success(`Lead marked as ${newStatus}`);
     } catch (err) {
       toast.error('Failed to update');
+    }
+  };
+
+  // ── Call Log Logic ──
+  const handleCallClick = (lead) => {
+    setCallingLeadId(lead._id);
+    window.location.href = `tel:${lead.phone}`;
+
+    // Automatically pop up the log dialog after a brief delay
+    setTimeout(() => {
+      setCallingLeadId(null);
+      setActiveCallLead(lead);
+      setCallOutcome('complete');
+      setCallNotes('');
+      setNextFollowUp('');
+    }, 2500);
+  };
+
+  const handleSubmitCallLog = async () => {
+    if (!activeCallLead) return;
+    setIsSubmittingLog(true);
+    try {
+      const payload = {};
+
+      if (callNotes) {
+        const prefix = callOutcome === 'decline' ? '[Declined]' : '[Follow-up]';
+        payload.notes = activeCallLead.notes
+          ? `${activeCallLead.notes}\n\n${prefix} ${callNotes}`
+          : `${prefix} ${callNotes}`;
+      }
+
+      if (callOutcome === 'complete') {
+        if (nextFollowUp) {
+          payload.followUpDate = nextFollowUp;
+        }
+        payload.status = 'Follow-up';
+      } else {
+        payload.status = 'Closed';
+        payload.followUpDate = null;
+      }
+
+      const { data } = await axiosInstance.put(`/leads/${activeCallLead._id}`, payload);
+
+      setLeads(prev => prev.map(l => l._id === activeCallLead._id ? { ...l, ...payload } : l));
+      setProcessedTodayIds(prev => new Set(prev).add(activeCallLead._id));
+      toast.success('Call log saved!');
+      setActiveCallLead(null);
+    } catch (err) {
+      toast.error('Failed to save call log');
+    } finally {
+      setIsSubmittingLog(false);
     }
   };
 
@@ -121,6 +181,75 @@ export default function SalesDashboard() {
 
   return (
     <div className="min-h-screen bg-background">
+      {/* ── Call Log Modal ── */}
+      {activeCallLead && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-primary/40 backdrop-blur-sm" onClick={() => setActiveCallLead(null)} />
+          <div className="relative bg-surface rounded-2xl shadow-2xl border border-gray-100 w-full max-w-sm p-6 space-y-4">
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="font-heading font-bold text-lg text-text">Log Call</h3>
+              <button onClick={() => setActiveCallLead(null)} className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors"><X className="w-4 h-4 text-text-muted" /></button>
+            </div>
+
+            <div className="bg-primary/5 p-3 rounded-xl border border-primary/10">
+              <p className="font-body text-xs text-text-muted">Recording details for</p>
+              <p className="font-heading font-bold text-base text-primary truncate">{activeCallLead.customerName}</p>
+            </div>
+
+            <div className="flex bg-background rounded-lg p-1.5 border border-gray-100">
+              <button
+                onClick={() => setCallOutcome('complete')}
+                className={`flex-1 py-2 font-body text-xs font-bold rounded-md transition-all ${callOutcome === 'complete' ? 'bg-surface shadow text-primary' : 'text-text-muted hover:text-text'}`}
+              >
+                Complete Follow-up
+              </button>
+              <button
+                onClick={() => setCallOutcome('decline')}
+                className={`flex-1 py-2 font-body text-xs font-bold rounded-md transition-all ${callOutcome === 'decline' ? 'bg-surface shadow text-red-500' : 'text-text-muted hover:text-text'}`}
+              >
+                Decline Lead
+              </button>
+            </div>
+
+            <div>
+              <label className="block font-body text-xs font-semibold text-text-muted mb-1.5 uppercase tracking-wide">
+                {callOutcome === 'decline' ? 'Reason for decline' : 'Client Response / Notes'}
+              </label>
+              <textarea
+                value={callNotes}
+                onChange={(e) => setCallNotes(e.target.value)}
+                rows={3}
+                placeholder={callOutcome === 'decline' ? 'e.g., Client is no longer interested...' : 'What did they say?'}
+                className="w-full px-4 py-3 bg-background rounded-xl border border-gray-200 font-body text-sm text-text placeholder:text-text-muted/60 outline-none focus:border-primary/30 focus:ring-2 focus:ring-primary/10 resize-none"
+              />
+            </div>
+
+            {callOutcome === 'complete' && (
+              <div>
+                <label className="block font-body text-xs font-semibold text-text-muted mb-1.5 uppercase tracking-wide">
+                  Next Follow-up Date
+                </label>
+                <input
+                  type="date"
+                  value={nextFollowUp}
+                  onChange={(e) => setNextFollowUp(e.target.value)}
+                  min={new Date().toISOString().split('T')[0]}
+                  className="w-full px-4 py-3 bg-background rounded-xl border border-gray-200 font-body text-sm text-text outline-none focus:border-primary/30 focus:ring-2 focus:ring-primary/10"
+                />
+              </div>
+            )}
+
+            <button
+              onClick={handleSubmitCallLog}
+              disabled={isSubmittingLog || (callOutcome === 'complete' && !nextFollowUp)}
+              className="w-full py-3 bg-primary hover:bg-primary-hover text-white rounded-xl font-body font-bold text-sm transition-all shadow-md shadow-primary/20 flex items-center justify-center gap-2 disabled:opacity-50 mt-2"
+            >
+              {isSubmittingLog ? 'Saving...' : <><CheckCircle2 className="w-4 h-4" /> Save Call Log</>}
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* ── Top Header ── */}
       <header className="bg-surface border-b border-gray-100 px-4 sm:px-6 py-5">
         <div className="max-w-4xl mx-auto flex items-center justify-between">
@@ -183,38 +312,46 @@ export default function SalesDashboard() {
                 const uCfg = urgencyConfig[lead.urgency] || urgencyConfig['Warm'];
                 const UrgencyIcon = uCfg.icon;
                 return (
-                  <div key={lead._id} className="flex items-center justify-between py-3">
+                  <div key={lead._id} className={`flex items-center justify-between py-3 rounded-xl transition-all duration-300 ${callingLeadId === lead._id ? 'bg-green-500/10 border border-green-200 px-3 -mx-3 shadow-sm' : processedTodayIds.has(lead._id) ? 'bg-[#10b981]/10 border border-[#10b981]/20 px-3 -mx-3' : ''}`}>
                     <div className="flex items-center gap-3 min-w-0">
                       <div className={`w-8 h-8 ${uCfg.bg} rounded-lg flex items-center justify-center shrink-0`}>
                         <UrgencyIcon className={`w-4 h-4 ${uCfg.text}`} />
                       </div>
-                      <div className="min-w-0">
+                      <div className="min-w-0 space-y-0.5">
                         <p className="font-body text-sm font-semibold text-text truncate">{lead.customerName}</p>
-                        <p className="font-body text-xs text-text-muted">{lead.phone}</p>
+                        <p className="font-body text-xs text-text-muted flex items-center gap-3">
+                          <span className="flex items-center gap-1"><Phone className="w-3 h-3" />{lead.phone}</span>
+                          <span className="flex items-center gap-1"><MapPin className="w-3 h-3 text-primary/60" />{lead.source}</span>
+                        </p>
+                        {lead.carOfInterest && (
+                          <p className="font-body text-xs text-primary flex items-center gap-1">
+                            <Car className="w-3 h-3" />
+                            {lead.carOfInterest.year} {lead.carOfInterest.make} {lead.carOfInterest.model}
+                          </p>
+                        )}
+                        {lead.notes && (
+                          <p className="font-body text-[11px] text-text-muted/80 pt-1 line-clamp-2">
+                            <span className="font-semibold text-text-muted">Notes:</span> {lead.notes}
+                          </p>
+                        )}
                       </div>
                     </div>
                     <div className="flex items-center gap-2 shrink-0">
-                      <a
-                        href={`tel:${lead.phone}`}
-                        className="p-2 text-primary bg-primary/5 hover:bg-primary/10 rounded-lg transition-colors"
+                      <button
+                        onClick={() => handleCallClick(lead)}
+                        className={`p-2 rounded-lg transition-colors shadow-sm ${callingLeadId === lead._id ? 'bg-green-500 text-white animate-pulse' : 'text-primary bg-primary/10 hover:bg-primary/20'}`}
                       >
                         <Phone className="w-4 h-4" />
-                      </a>
-                      <a
-                        href={`https://wa.me/${lead.phone?.replace(/[\s+]/g, '')}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="p-2 text-accent bg-accent/5 hover:bg-accent/10 rounded-lg transition-colors"
-                      >
-                        <MessageCircle className="w-4 h-4" />
-                      </a>
-                      <button
-                        onClick={() => handleStatusChange(lead._id, 'Contacted')}
-                        className="p-2 text-[#10b981] bg-[#10b981]/5 hover:bg-[#10b981]/10 rounded-lg transition-colors"
-                        title="Mark as Contacted"
-                      >
-                        <CheckCircle2 className="w-4 h-4" />
                       </button>
+                      {!processedTodayIds.has(lead._id) && (
+                        <button
+                          onClick={() => handleStatusChange(lead._id, 'Contacted')}
+                          className="p-2 text-[#10b981] bg-[#10b981]/5 hover:bg-[#10b981]/10 rounded-lg transition-colors"
+                          title="Mark as Contacted"
+                        >
+                          <CheckCircle2 className="w-4 h-4" />
+                        </button>
+                      )}
                     </div>
                   </div>
                 );
@@ -251,10 +388,21 @@ export default function SalesDashboard() {
                         <div className="w-9 h-9 bg-primary/5 rounded-xl flex items-center justify-center shrink-0">
                           <UserCircle className="w-5 h-5 text-primary/40" />
                         </div>
-                        <div className="min-w-0">
-                          <p className="font-body text-sm font-semibold text-text truncate">{lead.customerName}</p>
-                          <p className="font-body text-xs text-text-muted flex items-center gap-1">
-                            <Phone className="w-2.5 h-2.5" />{lead.phone}
+                        <div className="min-w-0 space-y-0.5">
+                          <div className="flex items-center gap-2">
+                            <p className="font-body text-sm font-semibold text-text truncate">{lead.customerName}</p>
+                            <span className="inline-flex items-center gap-1 px-1.5 py-0.5 bg-primary/5 text-primary rounded font-body text-[10px] font-bold">
+                              <MapPin className="w-2.5 h-2.5" />{lead.source}
+                            </span>
+                          </div>
+                          <p className="font-body text-xs text-text-muted flex items-center gap-3">
+                            <span className="flex items-center gap-1"><Phone className="w-3 h-3" />{lead.phone}</span>
+                            {lead.carOfInterest && (
+                              <span className="flex items-center gap-1 text-primary">
+                                <Car className="w-3 h-3" />
+                                {lead.carOfInterest.year} {lead.carOfInterest.make} {lead.carOfInterest.model}
+                              </span>
+                            )}
                           </p>
                         </div>
                       </div>
@@ -268,16 +416,20 @@ export default function SalesDashboard() {
                       </div>
                     </div>
                     {lead.notes && (
-                      <p className="font-body text-xs text-text-muted/70 ml-12 line-clamp-1">{lead.notes}</p>
+                      <div className="ml-12 mt-1.5 p-2 bg-background rounded-lg border border-gray-50">
+                        <p className="font-body text-xs text-text-muted/80 line-clamp-2">
+                          <span className="font-semibold text-text-muted">Notes:</span> {lead.notes}
+                        </p>
+                      </div>
                     )}
                     <div className="flex items-center justify-between mt-2 ml-12">
                       <span className="font-body text-[10px] text-text-muted/60">
                         {new Date(lead.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: '2-digit' })}
                       </span>
                       <div className="flex items-center gap-1">
-                        <a href={`tel:${lead.phone}`} className="p-1.5 text-primary hover:bg-primary/5 rounded-md transition-colors">
+                        <button onClick={() => handleCallClick(lead)} className={`p-1.5 rounded-md transition-colors ${callingLeadId === lead._id ? 'bg-green-500 text-white animate-pulse' : 'text-primary hover:bg-primary/5'}`}>
                           <Phone className="w-3.5 h-3.5" />
-                        </a>
+                        </button>
                         <a
                           href={`https://wa.me/${lead.phone?.replace(/[\s+]/g, '')}`}
                           target="_blank"

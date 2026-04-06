@@ -16,6 +16,7 @@ import {
   AlertTriangle,
   Lock,
   Key,
+  Edit2,
 } from 'lucide-react';
 import axiosInstance from '../../api/axiosConfig';
 
@@ -34,6 +35,7 @@ export default function AdminSettings() {
   const [teamLoading, setTeamLoading] = useState(true);
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState(null);
+  const [editTarget, setEditTarget] = useState(null);
 
   // ── Password State ──
   const [showCurrent, setShowCurrent] = useState(false);
@@ -76,26 +78,52 @@ export default function AdminSettings() {
     fetchStaff();
   }, [fetchStaff]);
 
-  // ── Create Staff ──
-  const onCreateStaff = async (data) => {
+  // ── Create or Edit Staff ──
+  const onSubmitStaff = async (data) => {
     try {
-      const res = await axiosInstance.post('/auth/register', {
-        name: data.name,
-        employeeId: data.employeeId.toUpperCase(),
-        password: data.password,
-        phone: data.phone || '',
-        email: data.email || '',
+      const payload = {
+        name: data.name.trim(),
+        employeeId: data.employeeId.trim().toUpperCase(),
         role: data.role || 'sales',
-      });
-      if (res.data.success) {
-        setStaff(prev => [res.data.data, ...prev]);
-        resetStaff();
-        setShowCreateForm(false);
-        toast.success(`${res.data.data.name} registered successfully!`);
+      };
+      if (data.password) payload.password = data.password;
+      if (data.phone?.trim()) payload.phone = data.phone.trim();
+      if (data.address?.trim()) payload.address = data.address.trim();
+
+      if (editTarget) {
+        const res = await axiosInstance.put(`/auth/users/${editTarget}`, payload);
+        if (res.data.success) {
+          setStaff(prev => prev.map(s => s._id === editTarget ? res.data.data : s));
+          resetStaff({});
+          setEditTarget(null);
+          setShowCreateForm(false);
+          toast.success(`${res.data.data.name} updated successfully!`);
+        }
+      } else {
+        const res = await axiosInstance.post('/auth/register', payload);
+        if (res.data.success) {
+          setStaff(prev => [res.data.data, ...prev]);
+          resetStaff({});
+          setShowCreateForm(false);
+          toast.success(`${res.data.data.name} registered successfully!`);
+        }
       }
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Failed to create staff account');
+      toast.error(err.response?.data?.message || 'Failed to save staff account');
     }
+  };
+
+  const handleEditStaff = (member) => {
+    resetStaff({
+      name: member.name,
+      employeeId: member.employeeId,
+      role: member.role,
+      phone: member.phone || '',
+      address: member.address || ''
+    });
+    setEditTarget(member._id);
+    setShowCreateForm(true);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   // ── Toggle Staff Active/Suspend ──
@@ -206,7 +234,13 @@ export default function AdminSettings() {
               <p className="font-body text-sm text-text-muted mt-0.5">{staff.length} team member{staff.length !== 1 ? 's' : ''}</p>
             </div>
             <button
-              onClick={() => setShowCreateForm(!showCreateForm)}
+              onClick={() => {
+                if (showCreateForm) {
+                  resetStaff({});
+                  setEditTarget(null);
+                }
+                setShowCreateForm(!showCreateForm);
+              }}
               className="flex items-center gap-2 px-4 py-2.5 bg-primary hover:bg-primary-hover text-white rounded-xl font-body text-sm font-bold transition-colors shadow-sm shadow-primary/20"
             >
               <Plus className="w-4 h-4" />
@@ -214,10 +248,12 @@ export default function AdminSettings() {
             </button>
           </div>
 
-          {/* Create Staff Form */}
+          {/* Create / Edit Staff Form */}
           {showCreateForm && (
-            <form onSubmit={handleStaffSubmit(onCreateStaff)} className="bg-surface rounded-2xl border border-primary/10 p-6 space-y-4">
-              <h3 className="font-heading font-bold text-base text-text mb-2">Create Staff Account</h3>
+            <form onSubmit={handleStaffSubmit(onSubmitStaff)} className="bg-surface rounded-2xl border border-primary/10 p-6 space-y-4">
+              <h3 className="font-heading font-bold text-base text-text mb-2">
+                {editTarget ? 'Edit Staff Account' : 'Create Staff Account'}
+              </h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block font-body text-xs font-semibold text-text-muted mb-1.5 uppercase tracking-wide">Full Name *</label>
@@ -238,10 +274,12 @@ export default function AdminSettings() {
                   {staffErrors.employeeId && <p className="text-red-500 text-xs font-body mt-1">{staffErrors.employeeId.message}</p>}
                 </div>
                 <div>
-                  <label className="block font-body text-xs font-semibold text-text-muted mb-1.5 uppercase tracking-wide">Password *</label>
+                  <label className="block font-body text-xs font-semibold text-text-muted mb-1.5 uppercase tracking-wide">
+                    Password {editTarget && '(Leave blank to keep current)'} {!editTarget && '*'}
+                  </label>
                   <input
                     type="password"
-                    {...registerStaff('password', { required: 'Password is required', minLength: { value: 6, message: 'Min 6 characters' } })}
+                    {...registerStaff('password', { required: editTarget ? false : 'Password is required', minLength: { value: 6, message: 'Min 6 characters' } })}
                     className="w-full px-4 py-3 bg-background rounded-xl border border-gray-200 font-body text-sm text-text placeholder:text-text-muted/60 outline-none focus:border-primary/30 focus:ring-2 focus:ring-primary/10"
                     placeholder="Min 6 characters"
                   />
@@ -266,11 +304,11 @@ export default function AdminSettings() {
                   />
                 </div>
                 <div>
-                  <label className="block font-body text-xs font-semibold text-text-muted mb-1.5 uppercase tracking-wide">Email</label>
+                  <label className="block font-body text-xs font-semibold text-text-muted mb-1.5 uppercase tracking-wide">Address</label>
                   <input
-                    {...registerStaff('email')}
+                    {...registerStaff('address')}
                     className="w-full px-4 py-3 bg-background rounded-xl border border-gray-200 font-body text-sm text-text placeholder:text-text-muted/60 outline-none focus:border-primary/30 focus:ring-2 focus:ring-primary/10"
-                    placeholder="e.g. rahul@sadgurucarmelo.com"
+                    placeholder="e.g. Varachha, Surat"
                   />
                 </div>
               </div>
@@ -281,7 +319,7 @@ export default function AdminSettings() {
                   className="px-6 py-3 bg-primary hover:bg-primary-hover text-white rounded-xl font-body text-sm font-bold transition-colors shadow-sm shadow-primary/20 disabled:opacity-50 flex items-center gap-2"
                 >
                   {staffSubmitting && <Loader2 className="w-4 h-4 animate-spin" />}
-                  Create Account
+                  {editTarget ? 'Update Account' : 'Create Account'}
                 </button>
               </div>
             </form>
@@ -322,6 +360,13 @@ export default function AdminSettings() {
                       <span className={`px-2.5 py-1 rounded-full font-body text-[11px] font-bold ring-1 capitalize ${roleStyles[member.role] || roleStyles['sales']}`}>
                         {member.role}
                       </span>
+                      <button
+                        onClick={() => handleEditStaff(member)}
+                        className="p-1.5 text-text-muted hover:text-primary hover:bg-primary/5 rounded-lg transition-colors opacity-60 group-hover:opacity-100"
+                        title="Edit Staff"
+                      >
+                        <Edit2 className="w-4 h-4" />
+                      </button>
                       <button
                         onClick={() => toggleActive(member._id, member.isActive)}
                         className={`p-1.5 rounded-lg transition-colors ${member.isActive ? 'text-[#10b981] hover:bg-[#10b981]/10' : 'text-red-400 hover:bg-red-50'}`}

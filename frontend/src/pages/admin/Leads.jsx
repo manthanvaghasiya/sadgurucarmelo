@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Search,
   Users,
@@ -8,6 +9,7 @@ import {
   Trash2,
   ChevronLeft,
   ChevronRight,
+  ChevronDown,
   Phone,
   X,
   AlertTriangle,
@@ -17,6 +19,9 @@ import {
   Flame,
   Thermometer,
   Snowflake,
+  Edit2,
+  UserCircle,
+  Eye,
 } from 'lucide-react';
 import axiosInstance from '../../api/axiosConfig';
 import toast from 'react-hot-toast';
@@ -59,14 +64,24 @@ const sourceConfig = {
 };
 
 export default function Leads() {
+  const navigate = useNavigate();
   const [leads, setLeads] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [sourceFilter, setSourceFilter] = useState('All');
   const [statusFilter, setStatusFilter] = useState('All');
+  const [urgencyFilter, setUrgencyFilter] = useState('All');
   const [currentPage, setCurrentPage] = useState(1);
   const [deleteTarget, setDeleteTarget] = useState(null);
+  const [viewTarget, setViewTarget] = useState(null);
   const [leadStats, setLeadStats] = useState({ total: 0, newCount: 0, followUp: 0 });
+  const [salesmen, setSalesmen] = useState([]);
+
+  // New Filters
+  const [dateFilter, setDateFilter] = useState('');
+  const [customerTextFilter, setCustomerTextFilter] = useState('');
+  const [carTextFilter, setCarTextFilter] = useState('');
+  const [salesmanFilter, setSalesmanFilter] = useState('All');
 
   // ── Fetch leads from API ──
   const fetchLeads = useCallback(async () => {
@@ -75,12 +90,13 @@ export default function Leads() {
       const params = new URLSearchParams();
       if (sourceFilter !== 'All') params.set('source', sourceFilter);
       if (statusFilter !== 'All') params.set('status', statusFilter);
-      
+      if (urgencyFilter !== 'All') params.set('urgency', urgencyFilter);
+
       const [leadsRes, statsRes] = await Promise.all([
         axiosInstance.get(`/leads?${params.toString()}`),
         axiosInstance.get('/leads/stats'),
       ]);
-      
+
       if (leadsRes.data.success) setLeads(leadsRes.data.data || []);
       if (statsRes.data.success) setLeadStats(statsRes.data.data);
     } catch (err) {
@@ -89,23 +105,72 @@ export default function Leads() {
     } finally {
       setIsLoading(false);
     }
-  }, [sourceFilter, statusFilter]);
+  }, [sourceFilter, statusFilter, urgencyFilter]);
 
   useEffect(() => {
     fetchLeads();
   }, [fetchLeads]);
 
+  useEffect(() => {
+    const fetchSalesmen = async () => {
+      try {
+        const { data } = await axiosInstance.get('/auth/users');
+        if (data.success) {
+          setSalesmen(data.data.filter(u => u.role === 'sales'));
+        }
+      } catch (err) {
+        console.error('Failed to fetch salesmen:', err);
+      }
+    };
+    fetchSalesmen();
+  }, []);
+
   // ── Filtering ──
   const filtered = useMemo(() => {
-    if (!searchQuery.trim()) return leads;
-    const q = searchQuery.toLowerCase();
-    return leads.filter(
-      (l) =>
-        l.customerName?.toLowerCase().includes(q) ||
-        l.phone?.includes(q) ||
-        l.email?.toLowerCase().includes(q)
-    );
-  }, [leads, searchQuery]);
+    let result = leads;
+
+    // Global search
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+      result = result.filter(
+        (l) =>
+          l.customerName?.toLowerCase().includes(q) ||
+          l.phone?.includes(q) ||
+          l.email?.toLowerCase().includes(q)
+      );
+    }
+
+    // Inline Date Filter
+    if (dateFilter) {
+      result = result.filter(l => {
+        const leadDate = new Date(l.createdAt).toISOString().split('T')[0];
+        return leadDate === dateFilter;
+      });
+    }
+
+    // Inline Customer Text Filter
+    if (customerTextFilter.trim()) {
+      const q = customerTextFilter.toLowerCase();
+      result = result.filter(l => l.customerName?.toLowerCase().includes(q));
+    }
+
+    // Inline Car Text Filter
+    if (carTextFilter.trim()) {
+      const q = carTextFilter.toLowerCase();
+      result = result.filter(l => {
+        if (!l.carOfInterest) return false;
+        const carStr = `${l.carOfInterest.make} ${l.carOfInterest.model} ${l.carOfInterest.year}`.toLowerCase();
+        return carStr.includes(q);
+      });
+    }
+
+    // Inline Salesman Filter
+    if (salesmanFilter !== 'All') {
+      result = result.filter(l => l.assignedTo?._id === salesmanFilter);
+    }
+
+    return result;
+  }, [leads, searchQuery, dateFilter, customerTextFilter, carTextFilter, salesmanFilter]);
 
   // ── Pagination ──
   const totalPages = Math.max(1, Math.ceil(filtered.length / ITEMS_PER_PAGE));
@@ -120,6 +185,7 @@ export default function Leads() {
   const handleSearch = (v) => { setSearchQuery(v); resetPage(); };
   const handleSourceFilter = (v) => { setSourceFilter(v); resetPage(); };
   const handleStatusFilter = (v) => { setStatusFilter(v); resetPage(); };
+  const handleUrgencyFilter = (v) => { setUrgencyFilter(v); resetPage(); };
 
   // ── Update lead status ──
   const handleStatusChange = async (leadId, newStatus) => {
@@ -196,6 +262,48 @@ export default function Leads() {
         </div>
       )}
 
+      {/* History / View Log Modal */}
+      {viewTarget && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-primary/40 backdrop-blur-sm" onClick={() => setViewTarget(null)} />
+          <div className="relative bg-surface rounded-2xl shadow-2xl shadow-primary/10 border border-gray-100 w-full max-w-lg p-6 max-h-[90vh] flex flex-col">
+            <div className="flex items-center justify-between mb-4 pb-4 border-b border-gray-100 shrink-0">
+              <div>
+                <h3 className="font-heading font-bold text-lg text-text">Lead History & Notes</h3>
+                <p className="font-body text-sm text-text-muted mt-0.5">{viewTarget.customerName} - {viewTarget.phone}</p>
+              </div>
+              <button onClick={() => setViewTarget(null)} className="p-2 text-text-muted hover:bg-gray-100 rounded-lg transition-colors">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto pr-2 space-y-4 font-body text-sm text-text/80 leading-relaxed whitespace-pre-wrap">
+              {viewTarget.notes ? (
+                viewTarget.notes
+              ) : (
+                <div className="text-center py-8 text-text-muted">No interactions or notes logged yet.</div>
+              )}
+            </div>
+
+            {(viewTarget.followUpDate || viewTarget.assignedTo) && (
+              <div className="mt-4 pt-4 border-t border-gray-100 shrink-0 flex items-center justify-between bg-background rounded-xl p-3">
+                <div className="flex flex-col gap-1 text-xs">
+                  {viewTarget.assignedTo ? (
+                    <span className="font-body font-semibold text-text flex items-center gap-1.5"><UserCircle className="w-3.5 h-3.5 text-text-muted" />{viewTarget.assignedTo.name}</span>
+                  ) : <span className="font-body text-text-muted font-semibold flex items-center gap-1.5"><UserCircle className="w-3.5 h-3.5" />Unassigned</span>}
+                </div>
+                {viewTarget.followUpDate && (
+                  <div className="flex items-center gap-1.5">
+                    <CalendarClock className="w-4 h-4 text-primary" />
+                    <span className="font-body text-xs font-bold text-primary px-2 py-0.5 bg-primary/10 rounded-md">Next: {new Date(viewTarget.followUpDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' })}</span>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* Page Header */}
       <div>
         <h1 className="font-heading font-bold text-2xl text-text">Lead Management</h1>
@@ -246,20 +354,6 @@ export default function Leads() {
             </button>
           )}
         </div>
-        <div className="relative">
-          <SlidersHorizontal className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted pointer-events-none" />
-          <select
-            value={sourceFilter}
-            onChange={(e) => handleSourceFilter(e.target.value)}
-            className="w-full sm:w-auto pl-10 pr-8 py-2.5 bg-background rounded-xl font-body text-sm text-text appearance-none cursor-pointer outline-none border border-transparent focus:border-primary/20 transition-colors"
-          >
-            <option value="All">All Sources</option>
-            <option value="WhatsApp">WhatsApp</option>
-            <option value="Walk-in">Walk-in</option>
-            <option value="Phone">Phone</option>
-            <option value="Website">Website</option>
-          </select>
-        </div>
       </div>
 
       {/* Data Table */}
@@ -273,14 +367,125 @@ export default function Leads() {
           <>
             {/* Desktop Table */}
             <div className="hidden lg:block overflow-x-auto">
-              <table className="w-full min-w-[900px]">
+              <table className="w-full min-w-[1200px]">
                 <thead>
                   <tr className="border-b border-gray-100">
-                    {['Date', 'Customer', 'Source', 'Urgency', 'Status', 'Actions'].map((col, i) => (
-                      <th key={col} className={`font-body text-[11px] font-bold text-text-muted uppercase tracking-wider py-4 bg-background/40 ${i === 0 ? 'pl-6 pr-4 text-left' : col === 'Actions' ? 'px-6 text-right' : 'px-4 text-left'}`}>
-                        {col}
-                      </th>
-                    ))}
+                    <th className="font-body text-[11px] font-bold text-text-muted uppercase tracking-wider py-4 bg-background/40 pl-6 pr-4 text-left relative group">
+                      <div className="flex flex-col gap-1.5">
+                        <div className="flex items-center gap-1 cursor-pointer">
+                          Date
+                          <ChevronDown className="w-3 h-3" />
+                          {dateFilter && <span className="w-1.5 h-1.5 bg-primary rounded-full" />}
+                        </div>
+                        <input
+                          type="date"
+                          value={dateFilter}
+                          onChange={(e) => { setDateFilter(e.target.value); setCurrentPage(1); }}
+                          className="font-body text-[10px] w-full bg-surface border border-gray-100 rounded px-1 py-0.5 outline-none focus:border-primary/30"
+                        />
+                      </div>
+                    </th>
+                    <th className="font-body text-[11px] font-bold text-text-muted uppercase tracking-wider py-4 bg-background/40 px-4 text-left">
+                      <div className="flex flex-col gap-1.5">
+                        <span>Customer</span>
+                        <input
+                          type="text"
+                          placeholder="Search..."
+                          value={customerTextFilter}
+                          onChange={(e) => { setCustomerTextFilter(e.target.value); setCurrentPage(1); }}
+                          className="font-body text-[10px] w-full bg-surface border border-gray-100 rounded px-2 py-0.5 outline-none focus:border-primary/30 font-normal normal-case tracking-normal"
+                        />
+                      </div>
+                    </th>
+                    <th className="font-body text-[11px] font-bold text-text-muted uppercase tracking-wider py-4 bg-background/40 px-4 text-left">
+                      <div className="flex flex-col gap-1.5">
+                        <span>Car of Interest</span>
+                        <input
+                          type="text"
+                          placeholder="Search..."
+                          value={carTextFilter}
+                          onChange={(e) => { setCarTextFilter(e.target.value); setCurrentPage(1); }}
+                          className="font-body text-[10px] w-full bg-surface border border-gray-100 rounded px-2 py-0.5 outline-none focus:border-primary/30 font-normal normal-case tracking-normal"
+                        />
+                      </div>
+                    </th>
+                    <th className="font-body text-[11px] font-bold text-text-muted uppercase tracking-wider py-4 bg-background/40 px-4 text-left relative group">
+                      <div className="flex flex-col gap-1.5">
+                        <div className="flex items-center gap-1 cursor-pointer">
+                          Salesman
+                          <ChevronDown className="w-3 h-3" />
+                          {salesmanFilter !== 'All' && <span className="w-1.5 h-1.5 bg-primary rounded-full" />}
+                        </div>
+                        <div className="relative">
+                          <select
+                            value={salesmanFilter}
+                            onChange={(e) => { setSalesmanFilter(e.target.value); setCurrentPage(1); }}
+                            className="font-body text-[10px] w-full bg-surface border border-gray-100 rounded px-1 py-0.5 outline-none focus:border-primary/30 cursor-pointer appearance-none"
+                          >
+                            <option value="All">All</option>
+                            {salesmen.map(s => (
+                              <option key={s._id} value={s._id}>{s.name}</option>
+                            ))}
+                          </select>
+                          <ChevronDown className="absolute right-1 top-1/2 -translate-y-1/2 w-2 h-2 text-text-muted pointer-events-none" />
+                        </div>
+                      </div>
+                    </th>
+                    <th className="font-body text-[11px] font-bold text-text-muted uppercase tracking-wider py-4 bg-background/40 px-4 text-left">History</th>
+                    <th className="font-body text-[11px] font-bold text-text-muted uppercase tracking-wider py-4 bg-background/40 px-4 text-left relative group">
+                      <div className="flex items-center gap-1 cursor-pointer w-max h-full">
+                        Source
+                        <ChevronDown className="w-3 h-3 transition-transform group-hover:text-primary" />
+                        {sourceFilter !== 'All' && <span className="w-1.5 h-1.5 bg-primary rounded-full absolute top-[18px] right-2" />}
+                        <select
+                          value={sourceFilter}
+                          onChange={(e) => handleSourceFilter(e.target.value)}
+                          className="absolute inset-0 opacity-0 cursor-pointer w-full h-full text-transparent"
+                        >
+                          <option value="All">All Sources</option>
+                          <option value="Walk-in">Walk-in</option>
+                          <option value="WhatsApp">WhatsApp</option>
+                          <option value="Phone">Phone</option>
+                          <option value="Website">Website</option>
+                        </select>
+                      </div>
+                    </th>
+                    <th className="font-body text-[11px] font-bold text-text-muted uppercase tracking-wider py-4 bg-background/40 px-4 text-left relative group">
+                      <div className="flex items-center gap-1 cursor-pointer w-max h-full">
+                        Urgency
+                        <ChevronDown className="w-3 h-3 transition-transform group-hover:text-primary" />
+                        {urgencyFilter !== 'All' && <span className="w-1.5 h-1.5 bg-primary rounded-full absolute top-[18px] right-2" />}
+                        <select
+                          value={urgencyFilter}
+                          onChange={(e) => handleUrgencyFilter(e.target.value)}
+                          className="absolute inset-0 opacity-0 cursor-pointer w-full h-full text-transparent"
+                        >
+                          <option value="All">All Urgency</option>
+                          <option value="Hot">Hot</option>
+                          <option value="Warm">Warm</option>
+                          <option value="Cold">Cold</option>
+                        </select>
+                      </div>
+                    </th>
+                    <th className="font-body text-[11px] font-bold text-text-muted uppercase tracking-wider py-4 bg-background/40 px-4 text-left relative group">
+                      <div className="flex items-center gap-1 cursor-pointer w-max h-full">
+                        Status
+                        <ChevronDown className="w-3 h-3 transition-transform group-hover:text-primary" />
+                        {statusFilter !== 'All' && <span className="w-1.5 h-1.5 bg-primary rounded-full absolute top-[18px] right-2" />}
+                        <select
+                          value={statusFilter}
+                          onChange={(e) => handleStatusFilter(e.target.value)}
+                          className="absolute inset-0 opacity-0 cursor-pointer w-full h-full text-transparent"
+                        >
+                          <option value="All">All Statuses</option>
+                          <option value="New">New</option>
+                          <option value="Contacted">Contacted</option>
+                          <option value="Follow-up">Follow-up</option>
+                          <option value="Closed">Closed</option>
+                        </select>
+                      </div>
+                    </th>
+                    <th className="font-body text-[11px] font-bold text-text-muted uppercase tracking-wider py-4 bg-background/40 px-6 text-right">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -322,6 +527,34 @@ export default function Leads() {
                             </div>
                           </td>
                           <td className="px-4 py-4">
+                            {lead.carOfInterest ? (
+                              <div className="flex flex-col">
+                                <span className="font-body text-xs font-semibold text-text truncate max-w-[150px]">
+                                  {lead.carOfInterest.make} {lead.carOfInterest.model}
+                                </span>
+                                <span className="font-body text-[11px] text-text-muted truncate max-w-[150px]">
+                                  {lead.carOfInterest.year}
+                                </span>
+                              </div>
+                            ) : (
+                              <span className="font-body text-xs text-text-muted/60 italic">-</span>
+                            )}
+                          </td>
+                          <td className="px-4 py-4">
+                            <div className="flex items-center gap-2">
+                              {lead.assignedTo ? (
+                                <span className="font-body text-sm font-semibold text-text">{lead.assignedTo.name}</span>
+                              ) : (
+                                <span className="font-body text-[10px] uppercase tracking-wider px-2 py-0.5 bg-gray-100 text-gray-500 rounded-full font-bold">Unassigned</span>
+                              )}
+                            </div>
+                          </td>
+                          <td className="px-4 py-4">
+                            <button onClick={() => setViewTarget(lead)} className="flex items-center gap-1.5 px-3 py-1.5 bg-surface text-primary border border-primary/20 hover:bg-primary/5 rounded-lg font-body text-xs font-semibold transition-colors">
+                              <Eye className="w-3.5 h-3.5" /> View Log
+                            </button>
+                          </td>
+                          <td className="px-4 py-4">
                             <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full font-body text-[11px] font-bold ring-1 ${sCfg.bg} ${sCfg.text} ${sCfg.ring}`}>
                               {lead.source}
                             </span>
@@ -345,15 +578,13 @@ export default function Leads() {
                           </td>
                           <td className="px-6 py-4">
                             <div className="flex items-center justify-end gap-1 opacity-60 group-hover:opacity-100 transition-opacity">
-                              <a
-                                href={`https://wa.me/${lead.phone?.replace(/[\s+]/g, '')}`}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="p-2 text-accent hover:bg-accent/10 rounded-lg transition-colors"
-                                title="Reply on WhatsApp"
+                              <button
+                                onClick={() => navigate(`/sales/edit-lead/${lead._id}`)}
+                                className="p-2 text-text-muted hover:text-primary hover:bg-primary/5 rounded-lg transition-colors"
+                                title="Edit Lead"
                               >
-                                <MessageCircle className="w-4 h-4" />
-                              </a>
+                                <Edit2 className="w-4 h-4" />
+                              </button>
                               <button
                                 onClick={() => setDeleteTarget(lead._id)}
                                 className="p-2 text-text-muted hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
@@ -384,6 +615,7 @@ export default function Leads() {
                 paginated.map((lead) => {
                   const stCfg = statusConfig[lead.status] || statusConfig['New'];
                   const uCfg = urgencyConfig[lead.urgency] || urgencyConfig['Warm'];
+                  const sCfg = sourceConfig[lead.source] || sourceConfig['Website'];
                   const UrgencyIcon = uCfg.icon;
 
                   return (
@@ -393,6 +625,15 @@ export default function Leads() {
                           <p className="font-body text-sm font-semibold text-text">{lead.customerName}</p>
                           <p className="font-body text-xs text-text-muted flex items-center gap-1 mt-0.5">
                             <Phone className="w-3 h-3" />{lead.phone}
+                          </p>
+                          {lead.carOfInterest && (
+                            <p className="font-body text-xs text-primary flex items-center gap-1 mt-1">
+                              <Car className="w-3 h-3" />
+                              {lead.carOfInterest.year} {lead.carOfInterest.make} {lead.carOfInterest.model}
+                            </p>
+                          )}
+                          <p className="font-body text-xs text-text-muted flex items-center gap-1 mt-1">
+                            <UserCircle className="w-3 h-3" /> {lead.assignedTo?.name || 'Unassigned'}
                           </p>
                         </div>
                         <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full font-body text-[10px] font-bold ring-1 shrink-0 ${stCfg.bg} ${stCfg.text} ${stCfg.ring}`}>
@@ -408,13 +649,30 @@ export default function Leads() {
                           {new Date(lead.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' })}
                         </span>
                       </div>
-                      <div className="flex items-center justify-end gap-1">
-                        <a href={`https://wa.me/${lead.phone?.replace(/[\s+]/g, '')}`} target="_blank" rel="noopener noreferrer" className="p-1.5 text-accent hover:bg-accent/10 rounded-md transition-colors">
-                          <MessageCircle className="w-3.5 h-3.5" />
-                        </a>
-                        <button onClick={() => setDeleteTarget(lead._id)} className="p-1.5 text-text-muted hover:text-red-500 rounded-md transition-colors">
-                          <Trash2 className="w-3.5 h-3.5" />
+                      <div className="flex items-center justify-between gap-2 mt-2 pt-2 border-t border-gray-50">
+                        {lead.followUpDate ? (
+                          <div className="flex items-center gap-1.5 text-primary">
+                            <CalendarClock className="w-3.5 h-3.5" />
+                            <span className="font-body text-xs font-semibold">Next: {new Date(lead.followUpDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' })}</span>
+                          </div>
+                        ) : <div />}
+                        <button onClick={() => setViewTarget(lead)} className="flex items-center gap-1 px-2.5 py-1 bg-surface text-primary border border-primary/20 hover:bg-primary/5 rounded-md font-body text-[11px] font-bold transition-colors">
+                          <Eye className="w-3 h-3" /> View Log
                         </button>
+                      </div>
+
+                      <div className="flex items-center justify-between gap-1 mt-2">
+                        <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full font-body text-[10px] font-bold ring-1 ${sCfg.bg} ${sCfg.text} ${sCfg.ring}`}>
+                          {lead.source}
+                        </span>
+                        <div className="flex items-center gap-1">
+                          <button onClick={() => navigate(`/sales/edit-lead/${lead._id}`)} className="p-1.5 text-text-muted hover:text-primary hover:bg-primary/5 rounded-md transition-colors" title="Edit Lead">
+                            <Edit2 className="w-3.5 h-3.5" />
+                          </button>
+                          <button onClick={() => setDeleteTarget(lead._id)} className="p-1.5 text-text-muted hover:text-red-500 rounded-md transition-colors" title="Delete">
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
                       </div>
                     </div>
                   );

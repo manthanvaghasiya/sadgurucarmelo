@@ -72,7 +72,7 @@ router.post('/login', async (req, res) => {
 // ═══════════════════════════════════════════════
 router.post('/register', protect, admin, async (req, res) => {
   try {
-    const { name, employeeId, password, phone, email, role } = req.body;
+    const { name, employeeId, password, phone, address, role } = req.body;
 
     // Check if employee ID already exists
     const exists = await User.findOne({ employeeId: employeeId.toUpperCase() });
@@ -83,14 +83,16 @@ router.post('/register', protect, admin, async (req, res) => {
       });
     }
 
-    const user = await User.create({
+    const userData = {
       name,
       employeeId: employeeId.toUpperCase(),
       password,
-      phone,
-      email,
       role: role || 'sales',
-    });
+    };
+    if (phone) userData.phone = phone;
+    if (address) userData.address = address;
+
+    const user = await User.create(userData);
 
     res.status(201).json({
       success: true,
@@ -100,7 +102,7 @@ router.post('/register', protect, admin, async (req, res) => {
         employeeId: user.employeeId,
         role: user.role,
         phone: user.phone,
-        email: user.email,
+        address: user.address,
         isActive: user.isActive,
         createdAt: user.createdAt,
       },
@@ -108,7 +110,12 @@ router.post('/register', protect, admin, async (req, res) => {
   } catch (error) {
     console.error('Register error:', error);
     if (error.code === 11000) {
-      return res.status(400).json({ success: false, message: 'Employee ID already exists' });
+      const duplicateField = Object.keys(error.keyPattern)[0];
+      let errorMessage = 'Account already exists';
+      if (duplicateField === 'employeeId') errorMessage = 'Employee ID already exists';
+      if (duplicateField === 'phone') errorMessage = 'Phone number already exists';
+
+      return res.status(400).json({ success: false, message: errorMessage });
     }
     res.status(500).json({ success: false, message: error.message });
   }
@@ -131,7 +138,7 @@ router.get('/me', protect, async (req, res) => {
         employeeId: user.employeeId,
         role: user.role,
         phone: user.phone,
-        email: user.email,
+        address: user.address,
         isActive: user.isActive,
       },
     });
@@ -162,7 +169,7 @@ router.get('/users', protect, admin, async (req, res) => {
 // ═══════════════════════════════════════════════
 router.put('/users/:id', protect, admin, async (req, res) => {
   try {
-    const { isActive, role, password } = req.body;
+    const { isActive, role, password, name, employeeId, phone, address } = req.body;
     const user = await User.findById(req.params.id).select('+password');
 
     if (!user) {
@@ -172,6 +179,10 @@ router.put('/users/:id', protect, admin, async (req, res) => {
     if (isActive !== undefined) user.isActive = isActive;
     if (role) user.role = role;
     if (password) user.password = password;
+    if (name) user.name = name;
+    if (employeeId) user.employeeId = employeeId.toUpperCase();
+    if (phone !== undefined) user.phone = phone;
+    if (address !== undefined) user.address = address;
 
     await user.save();
 
@@ -184,7 +195,7 @@ router.put('/users/:id', protect, admin, async (req, res) => {
         role: user.role,
         isActive: user.isActive,
         phone: user.phone,
-        email: user.email,
+        address: user.address,
       },
     });
   } catch (error) {

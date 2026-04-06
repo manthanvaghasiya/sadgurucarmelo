@@ -9,11 +9,9 @@ const userSchema = new mongoose.Schema(
       trim: true,
       maxlength: [80, 'Name cannot exceed 80 characters'],
     },
-    email: {
+    address: {
       type: String,
       trim: true,
-      lowercase: true,
-      sparse: true,
     },
     employeeId: {
       type: String,
