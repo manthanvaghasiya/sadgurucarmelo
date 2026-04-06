@@ -77,7 +77,8 @@ export default function Leads() {
   const [currentPage, setCurrentPage] = useState(1);
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [viewTarget, setViewTarget] = useState(null);
-  const [leadStats, setLeadStats] = useState({ total: 0, newCount: 0, followUp: 0 });
+  const [leadStats, setLeadStats] = useState({ total: 0, newCount: 0, followUp: 0, todayFollowUps: 0 });
+  const [showTodayTracker, setShowTodayTracker] = useState(false);
   const [salesmen, setSalesmen] = useState([]);
 
   // New Filters Refactor
@@ -190,6 +191,12 @@ export default function Leads() {
     return result;
   }, [leads, searchQuery, columnFilters]);
 
+  // ── Today's Follow-ups Filtered Logic ──
+  const todayLeads = useMemo(() => {
+    const todayStr = new Date().toISOString().split('T')[0];
+    return leads.filter(l => l.followUpDate && new Date(l.followUpDate).toISOString().split('T')[0] === todayStr);
+  }, [leads]);
+
   // ── Pagination ──
   const totalPages = Math.max(1, Math.ceil(filtered.length / ITEMS_PER_PAGE));
   const paginated = filtered.slice(
@@ -243,9 +250,11 @@ export default function Leads() {
       highlight: true,
     },
     {
-      title: 'Follow-ups Pending', subtitle: 'In progress',
-      value: leadStats.followUp, icon: Clock,
-      iconBg: 'bg-[#3b82f6]/10', iconColor: 'text-[#2563eb]',
+      title: 'Today\'s Follow-ups', subtitle: 'Requires attention today',
+      value: leadStats.todayFollowUps, icon: CalendarClock,
+      iconBg: 'bg-red-50', iconColor: 'text-red-500',
+      interactive: true,
+      onClick: () => setShowTodayTracker(true),
     },
   ];
 
@@ -322,6 +331,100 @@ export default function Leads() {
         </div>
       )}
 
+      {/* Today's Activity Tracker Slide-Over */}
+      {showTodayTracker && (
+        <div className="fixed inset-0 z-50 flex justify-end">
+          <div className="absolute inset-0 bg-primary/40 backdrop-blur-sm" onClick={() => setShowTodayTracker(false)} />
+          <div className="relative bg-surface w-full max-w-md h-full shadow-2xl flex flex-col animate-in slide-in-from-right duration-300 border-l border-gray-100">
+            <div className="p-6 border-b border-gray-100 flex items-center justify-between bg-surface shrink-0">
+              <div>
+                <h3 className="font-heading font-bold text-lg text-text">Today's Follow-up Tracker</h3>
+                <p className="font-body text-xs text-text-muted mt-0.5">Accountability & Performance Monitoring</p>
+              </div>
+              <button 
+                onClick={() => setShowTodayTracker(false)}
+                className="p-2 text-text-muted hover:bg-gray-100 rounded-lg transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-background/30">
+              {todayLeads.length === 0 ? (
+                <div className="h-full flex flex-col items-center justify-center text-center p-8">
+                  <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-sm mb-4">
+                    <Clock className="w-8 h-8 text-text-muted/20" />
+                  </div>
+                  <p className="font-body text-sm font-semibold text-text-muted">No follow-ups scheduled for today</p>
+                  <p className="font-body text-xs text-text-muted/60 mt-1">Check back later or view general leads.</p>
+                </div>
+              ) : (
+                todayLeads.map((lead) => {
+                  const isUpdatedToday = new Date(lead.updatedAt).toDateString() === new Date().toDateString();
+                  return (
+                    <div 
+                      key={lead._id} 
+                      className={`p-4 rounded-2xl border transition-all ${
+                        isUpdatedToday 
+                          ? 'bg-green-50 border-green-100 ring-1 ring-green-200 shadow-sm shadow-green-100' 
+                          : 'bg-orange-50 border-orange-100 ring-1 ring-orange-200 shadow-sm shadow-orange-100'
+                      }`}
+                    >
+                      <div className="flex items-start justify-between gap-4 mb-3">
+                        <div className="min-w-0">
+                          <h4 className="font-body text-sm font-bold text-text truncate">{lead.customerName}</h4>
+                          <p className="font-body text-xs text-text-muted flex items-center gap-1.5 mt-0.5">
+                            <Phone className="w-3.5 h-3.5" />{lead.phone}
+                          </p>
+                        </div>
+                        {isUpdatedToday ? (
+                          <span className="flex items-center gap-1 px-2 py-0.5 bg-green-500/10 text-green-600 rounded-full font-body text-[10px] font-bold ring-1 ring-green-500/20 whitespace-nowrap">
+                            Logged Today
+                          </span>
+                        ) : (
+                          <span className="flex items-center gap-1 px-2 py-0.5 bg-orange-500/10 text-orange-600 rounded-full font-body text-[10px] font-bold ring-1 ring-orange-500/20 whitespace-nowrap">
+                            Pending Call
+                          </span>
+                        )}
+                      </div>
+
+                      {lead.carOfInterest && (
+                        <div className="flex items-center gap-1.5 p-2 bg-white/60 rounded-xl mb-3">
+                          <Car className="w-3.5 h-3.5 text-text-muted" />
+                          <span className="font-body text-xs font-medium text-text truncate">
+                            {lead.carOfInterest.year} {lead.carOfInterest.make} {lead.carOfInterest.model}
+                          </span>
+                        </div>
+                      )}
+
+                      <div className="flex items-center justify-between gap-3 pt-3 border-t border-black/[0.03]">
+                        <div className="flex items-center gap-2">
+                          <div className="w-7 h-7 bg-white rounded-lg flex items-center justify-center border border-black/[0.05]">
+                            <UserIcon className="w-3.5 h-3.5 text-text-muted" />
+                          </div>
+                          <span className="font-body text-xs font-semibold text-text-muted">
+                            {lead.assignedTo?.name || 'Unassigned'}
+                          </span>
+                        </div>
+                        <button 
+                          onClick={() => {
+                            setShowTodayTracker(false);
+                            setViewTarget(lead);
+                          }}
+                          className="flex items-center gap-1.5 px-3 py-1.5 bg-white text-primary border border-primary/20 hover:bg-primary/5 rounded-lg font-body text-xs font-bold transition-all shadow-sm active:scale-95"
+                        >
+                          <Eye className="w-3.5 h-3.5" /> View Log
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Page Header */}
       <div>
         <h1 className="font-heading font-bold text-2xl text-text">Lead Management</h1>
@@ -333,7 +436,11 @@ export default function Leads() {
         {kpiCards.map((kpi) => {
           const Icon = kpi.icon;
           return (
-            <div key={kpi.title} className={`bg-surface rounded-2xl border p-6 hover:shadow-lg hover:shadow-primary/5 transition-all duration-300 group ${kpi.highlight ? 'border-[#f59e0b]/20' : 'border-gray-100'}`}>
+            <div 
+              key={kpi.title} 
+              onClick={kpi.onClick}
+              className={`bg-surface rounded-2xl border p-6 transition-all duration-300 group ${kpi.highlight ? 'border-[#f59e0b]/20' : 'border-gray-100'} ${kpi.interactive ? 'cursor-pointer hover:ring-2 hover:ring-red-600 hover:shadow-lg' : 'hover:shadow-lg hover:shadow-primary/5'}`}
+            >
               <div className="flex items-start justify-between mb-4">
                 <div className={`w-12 h-12 ${kpi.iconBg} rounded-xl flex items-center justify-center transition-transform group-hover:scale-110`}>
                   <Icon className={`w-6 h-6 ${kpi.iconColor}`} strokeWidth={2} />
