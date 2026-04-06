@@ -22,6 +22,9 @@ import {
   Edit2,
   UserCircle,
   Eye,
+  ListFilter,
+  User as UserIcon,
+  Calendar,
 } from 'lucide-react';
 import axiosInstance from '../../api/axiosConfig';
 import toast from 'react-hot-toast';
@@ -77,11 +80,14 @@ export default function Leads() {
   const [leadStats, setLeadStats] = useState({ total: 0, newCount: 0, followUp: 0 });
   const [salesmen, setSalesmen] = useState([]);
 
-  // New Filters
-  const [dateFilter, setDateFilter] = useState('');
-  const [customerTextFilter, setCustomerTextFilter] = useState('');
-  const [carTextFilter, setCarTextFilter] = useState('');
-  const [salesmanFilter, setSalesmanFilter] = useState('All');
+  // New Filters Refactor
+  const [columnFilters, setColumnFilters] = useState({ 
+    date: '', 
+    customer: '', 
+    car: '', 
+    salesman: '' 
+  });
+  const [activeFilterBox, setActiveFilterBox] = useState(null); // 'date', 'customer', 'car', 'salesman' or null
 
   // ── Fetch leads from API ──
   const fetchLeads = useCallback(async () => {
@@ -125,6 +131,21 @@ export default function Leads() {
     fetchSalesmen();
   }, []);
 
+  // Click outside to close filters
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (activeFilterBox && !event.target.closest('.filter-container')) {
+        setActiveFilterBox(null);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [activeFilterBox]);
+
+  const toggleFilter = (box) => {
+    setActiveFilterBox(activeFilterBox === box ? null : box);
+  };
+
   // ── Filtering ──
   const filtered = useMemo(() => {
     let result = leads;
@@ -140,37 +161,34 @@ export default function Leads() {
       );
     }
 
-    // Inline Date Filter
-    if (dateFilter) {
-      result = result.filter(l => {
-        const leadDate = new Date(l.createdAt).toISOString().split('T')[0];
-        return leadDate === dateFilter;
-      });
-    }
+    // Column-specific local filters
+    result = result.filter(lead => {
+      // Date filter
+      const matchesDate = !columnFilters.date || 
+        new Date(lead.createdAt).toISOString().split('T')[0] === columnFilters.date;
+      
+      // Customer filter
+      const matchesCustomer = !columnFilters.customer || 
+        lead.customerName?.toLowerCase().includes(columnFilters.customer.toLowerCase());
+      
+      // Car filter
+      const matchesCar = !columnFilters.car || (
+        lead.carOfInterest && (
+          `${lead.carOfInterest.make} ${lead.carOfInterest.model} ${lead.carOfInterest.year}`
+            .toLowerCase()
+            .includes(columnFilters.car.toLowerCase())
+        )
+      );
+      
+      // Salesman filter
+      const matchesSalesman = !columnFilters.salesman || 
+        lead.assignedTo?._id === columnFilters.salesman;
 
-    // Inline Customer Text Filter
-    if (customerTextFilter.trim()) {
-      const q = customerTextFilter.toLowerCase();
-      result = result.filter(l => l.customerName?.toLowerCase().includes(q));
-    }
-
-    // Inline Car Text Filter
-    if (carTextFilter.trim()) {
-      const q = carTextFilter.toLowerCase();
-      result = result.filter(l => {
-        if (!l.carOfInterest) return false;
-        const carStr = `${l.carOfInterest.make} ${l.carOfInterest.model} ${l.carOfInterest.year}`.toLowerCase();
-        return carStr.includes(q);
-      });
-    }
-
-    // Inline Salesman Filter
-    if (salesmanFilter !== 'All') {
-      result = result.filter(l => l.assignedTo?._id === salesmanFilter);
-    }
+      return matchesDate && matchesCustomer && matchesCar && matchesSalesman;
+    });
 
     return result;
-  }, [leads, searchQuery, dateFilter, customerTextFilter, carTextFilter, salesmanFilter]);
+  }, [leads, searchQuery, columnFilters]);
 
   // ── Pagination ──
   const totalPages = Math.max(1, Math.ceil(filtered.length / ITEMS_PER_PAGE));
@@ -370,67 +388,145 @@ export default function Leads() {
               <table className="w-full min-w-[1200px]">
                 <thead>
                   <tr className="border-b border-gray-100">
-                    <th className="font-body text-[11px] font-bold text-text-muted uppercase tracking-wider py-4 bg-background/40 pl-6 pr-4 text-left relative group">
-                      <div className="flex flex-col gap-1.5">
-                        <div className="flex items-center gap-1 cursor-pointer">
+                    {/* Date Column with Filter */}
+                    <th className="font-body text-[11px] font-bold text-text-muted uppercase tracking-wider py-4 bg-background/40 pl-6 pr-4 text-left relative filter-container">
+                      <div 
+                        className="flex items-center justify-between cursor-pointer group hover:text-primary transition-colors"
+                        onClick={() => toggleFilter('date')}
+                      >
+                        <div className="flex items-center gap-1">
                           Date
-                          <ChevronDown className="w-3 h-3" />
-                          {dateFilter && <span className="w-1.5 h-1.5 bg-primary rounded-full" />}
+                          {columnFilters.date && <span className="w-1.5 h-1.5 bg-primary rounded-full" />}
                         </div>
-                        <input
-                          type="date"
-                          value={dateFilter}
-                          onChange={(e) => { setDateFilter(e.target.value); setCurrentPage(1); }}
-                          className="font-body text-[10px] w-full bg-surface border border-gray-100 rounded px-1 py-0.5 outline-none focus:border-primary/30"
-                        />
+                        <ListFilter className={`w-3.5 h-3.5 transition-colors ${activeFilterBox === 'date' ? 'text-primary' : 'text-text-muted/40 group-hover:text-primary/60'}`} />
                       </div>
+                      
+                      {activeFilterBox === 'date' && (
+                        <div className="absolute top-full left-6 mt-1 w-56 bg-white p-3 rounded-xl shadow-2xl ring-1 ring-black/[0.05] z-50 animate-in fade-in slide-in-from-top-1 duration-200">
+                          <label className="block text-[10px] font-bold text-text-muted uppercase mb-1.5 px-1 font-heading">Pick a date</label>
+                          <div className="relative">
+                            <input 
+                              type="date" 
+                              className="w-full pl-3 pr-3 py-2 bg-background border border-slate-100 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 font-normal text-slate-700"
+                              value={columnFilters.date}
+                              onChange={(e) => {
+                                setColumnFilters({...columnFilters, date: e.target.value});
+                                setCurrentPage(1);
+                              }}
+                              onClick={(e) => e.stopPropagation()}
+                            />
+                            {columnFilters.date && (
+                              <button 
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setColumnFilters({...columnFilters, date: ''});
+                                  setCurrentPage(1);
+                                }}
+                                className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-text-muted hover:text-red-500"
+                              >
+                                <X className="w-3 h-3" />
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      )}
                     </th>
-                    <th className="font-body text-[11px] font-bold text-text-muted uppercase tracking-wider py-4 bg-background/40 px-4 text-left">
-                      <div className="flex flex-col gap-1.5">
-                        <span>Customer</span>
-                        <input
-                          type="text"
-                          placeholder="Search..."
-                          value={customerTextFilter}
-                          onChange={(e) => { setCustomerTextFilter(e.target.value); setCurrentPage(1); }}
-                          className="font-body text-[10px] w-full bg-surface border border-gray-100 rounded px-2 py-0.5 outline-none focus:border-primary/30 font-normal normal-case tracking-normal"
-                        />
+
+                    {/* Customer Column with Filter */}
+                    <th className="font-body text-[11px] font-bold text-text-muted uppercase tracking-wider py-4 bg-background/40 px-4 text-left relative filter-container">
+                      <div 
+                        className="flex items-center justify-between cursor-pointer group hover:text-primary transition-colors"
+                        onClick={() => toggleFilter('customer')}
+                      >
+                        <div className="flex items-center gap-1">
+                          Customer
+                          {columnFilters.customer && <span className="w-1.5 h-1.5 bg-primary rounded-full" />}
+                        </div>
+                        <ListFilter className={`w-3.5 h-3.5 transition-colors ${activeFilterBox === 'customer' ? 'text-primary' : 'text-text-muted/40 group-hover:text-primary/60'}`} />
                       </div>
+                      
+                      {activeFilterBox === 'customer' && (
+                        <div className="absolute top-full left-0 mt-1 w-56 bg-white p-3 rounded-xl shadow-2xl ring-1 ring-black/[0.05] z-50 animate-in fade-in slide-in-from-top-1 duration-200">
+                          <input 
+                            type="text" 
+                            placeholder="Search customer name..."
+                            autoFocus
+                            className="w-full px-3 py-2 bg-background border border-slate-100 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 font-normal text-slate-700 normal-case tracking-normal"
+                            value={columnFilters.customer}
+                            onChange={(e) => {
+                              setColumnFilters({...columnFilters, customer: e.target.value});
+                              setCurrentPage(1);
+                            }}
+                            onClick={(e) => e.stopPropagation()}
+                          />
+                        </div>
+                      )}
                     </th>
-                    <th className="font-body text-[11px] font-bold text-text-muted uppercase tracking-wider py-4 bg-background/40 px-4 text-left">
-                      <div className="flex flex-col gap-1.5">
-                        <span>Car of Interest</span>
-                        <input
-                          type="text"
-                          placeholder="Search..."
-                          value={carTextFilter}
-                          onChange={(e) => { setCarTextFilter(e.target.value); setCurrentPage(1); }}
-                          className="font-body text-[10px] w-full bg-surface border border-gray-100 rounded px-2 py-0.5 outline-none focus:border-primary/30 font-normal normal-case tracking-normal"
-                        />
+
+                    {/* Car Column with Filter */}
+                    <th className="font-body text-[11px] font-bold text-text-muted uppercase tracking-wider py-4 bg-background/40 px-4 text-left relative filter-container">
+                      <div 
+                        className="flex items-center justify-between cursor-pointer group hover:text-primary transition-colors"
+                        onClick={() => toggleFilter('car')}
+                      >
+                        <div className="flex items-center gap-1">
+                          Car of Interest
+                          {columnFilters.car && <span className="w-1.5 h-1.5 bg-primary rounded-full" />}
+                        </div>
+                        <ListFilter className={`w-3.5 h-3.5 transition-colors ${activeFilterBox === 'car' ? 'text-primary' : 'text-text-muted/40 group-hover:text-primary/60'}`} />
                       </div>
+                      
+                      {activeFilterBox === 'car' && (
+                        <div className="absolute top-full left-0 mt-1 w-56 bg-white p-3 rounded-xl shadow-2xl ring-1 ring-black/[0.05] z-50 animate-in fade-in slide-in-from-top-1 duration-200">
+                          <input 
+                            type="text" 
+                            placeholder="Search car make/model..."
+                            autoFocus
+                            className="w-full px-3 py-2 bg-background border border-slate-100 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 font-normal text-slate-700 normal-case tracking-normal"
+                            value={columnFilters.car}
+                            onChange={(e) => {
+                              setColumnFilters({...columnFilters, car: e.target.value});
+                              setCurrentPage(1);
+                            }}
+                            onClick={(e) => e.stopPropagation()}
+                          />
+                        </div>
+                      )}
                     </th>
-                    <th className="font-body text-[11px] font-bold text-text-muted uppercase tracking-wider py-4 bg-background/40 px-4 text-left relative group">
-                      <div className="flex flex-col gap-1.5">
-                        <div className="flex items-center gap-1 cursor-pointer">
+
+                    {/* Salesman Column with Filter */}
+                    <th className="font-body text-[11px] font-bold text-text-muted uppercase tracking-wider py-4 bg-background/40 px-4 text-left relative filter-container">
+                      <div 
+                        className="flex items-center justify-between cursor-pointer group hover:text-primary transition-colors"
+                        onClick={() => toggleFilter('salesman')}
+                      >
+                        <div className="flex items-center gap-1">
                           Salesman
-                          <ChevronDown className="w-3 h-3" />
-                          {salesmanFilter !== 'All' && <span className="w-1.5 h-1.5 bg-primary rounded-full" />}
+                          {columnFilters.salesman && <span className="w-1.5 h-1.5 bg-primary rounded-full" />}
                         </div>
-                        <div className="relative">
+                        <ListFilter className={`w-3.5 h-3.5 transition-colors ${activeFilterBox === 'salesman' ? 'text-primary' : 'text-text-muted/40 group-hover:text-primary/60'}`} />
+                      </div>
+                      
+                      {activeFilterBox === 'salesman' && (
+                        <div className="absolute top-full left-0 mt-1 w-56 bg-white p-3 rounded-xl shadow-2xl ring-1 ring-black/[0.05] z-50 animate-in fade-in slide-in-from-top-1 duration-200" onClick={e => e.stopPropagation()}>
+                          <label className="block text-[10px] font-bold text-text-muted uppercase mb-1.5 px-1 font-heading">Filter by staff</label>
                           <select
-                            value={salesmanFilter}
-                            onChange={(e) => { setSalesmanFilter(e.target.value); setCurrentPage(1); }}
-                            className="font-body text-[10px] w-full bg-surface border border-gray-100 rounded px-1 py-0.5 outline-none focus:border-primary/30 cursor-pointer appearance-none"
+                            value={columnFilters.salesman}
+                            onChange={(e) => {
+                              setColumnFilters({...columnFilters, salesman: e.target.value});
+                              setCurrentPage(1);
+                            }}
+                            className="w-full px-3 py-2 bg-background border border-slate-100 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 font-normal text-slate-700 cursor-pointer"
                           >
-                            <option value="All">All</option>
+                            <option value="">All Salesmen</option>
                             {salesmen.map(s => (
                               <option key={s._id} value={s._id}>{s.name}</option>
                             ))}
                           </select>
-                          <ChevronDown className="absolute right-1 top-1/2 -translate-y-1/2 w-2 h-2 text-text-muted pointer-events-none" />
                         </div>
-                      </div>
+                      )}
                     </th>
+
                     <th className="font-body text-[11px] font-bold text-text-muted uppercase tracking-wider py-4 bg-background/40 px-4 text-left">History</th>
                     <th className="font-body text-[11px] font-bold text-text-muted uppercase tracking-wider py-4 bg-background/40 px-4 text-left relative group">
                       <div className="flex items-center gap-1 cursor-pointer w-max h-full">
@@ -540,13 +636,10 @@ export default function Leads() {
                               <span className="font-body text-xs text-text-muted/60 italic">-</span>
                             )}
                           </td>
-                          <td className="px-4 py-4">
-                            <div className="flex items-center gap-2">
-                              {lead.assignedTo ? (
-                                <span className="font-body text-sm font-semibold text-text">{lead.assignedTo.name}</span>
-                              ) : (
-                                <span className="font-body text-[10px] uppercase tracking-wider px-2 py-0.5 bg-gray-100 text-gray-500 rounded-full font-bold">Unassigned</span>
-                              )}
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="flex items-center gap-2 text-sm font-medium text-slate-700">
+                              <UserIcon className="w-4 h-4 text-slate-400" />
+                              {lead.assignedTo?.name}
                             </div>
                           </td>
                           <td className="px-4 py-4">
@@ -633,7 +726,7 @@ export default function Leads() {
                             </p>
                           )}
                           <p className="font-body text-xs text-text-muted flex items-center gap-1 mt-1">
-                            <UserCircle className="w-3 h-3" /> {lead.assignedTo?.name || 'Unassigned'}
+                            <UserIcon className="w-3 h-3" /> {lead.assignedTo?.name}
                           </p>
                         </div>
                         <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full font-body text-[10px] font-bold ring-1 shrink-0 ${stCfg.bg} ${stCfg.text} ${stCfg.ring}`}>

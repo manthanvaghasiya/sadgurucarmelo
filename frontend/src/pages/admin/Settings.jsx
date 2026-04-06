@@ -155,11 +155,19 @@ export default function AdminSettings() {
   // ── Change Password ──
   const onChangePassword = async (data) => {
     try {
-      // This would call a change-password endpoint
-      toast.success('Password changed successfully!');
-      resetPwd();
+      const res = await axiosInstance.put('/auth/change-password', {
+        currentPassword: data.currentPassword,
+        newPassword: data.newPassword,
+      });
+      if (res.data.success) {
+        toast.success('Password changed successfully!');
+        resetPwd();
+        setShowCurrent(false);
+        setShowNew(false);
+        setShowConfirm(false);
+      }
     } catch (err) {
-      toast.error('Failed to change password');
+      toast.error(err.response?.data?.message || 'Failed to change password');
     }
   };
 
