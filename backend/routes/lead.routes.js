@@ -46,14 +46,13 @@ router.get('/stats', protect, async (req, res) => {
 // ═══════════════════════════════════════════════
 router.get('/', protect, async (req, res) => {
   try {
-    const { status, urgency, source, sort, assignedTo } = req.query;
+    const { status, urgency, source, sort } = req.query;
 
     // Build filter
     const filter = {};
     if (status) filter.status = status;
     if (urgency) filter.urgency = urgency;
     if (source) filter.source = source;
-    if (assignedTo) filter.assignedTo = assignedTo;
 
     // Build sort
     let sortBy = { createdAt: -1 };
@@ -61,8 +60,7 @@ router.get('/', protect, async (req, res) => {
 
     const leads = await Lead.find(filter)
       .sort(sortBy)
-      .populate('carOfInterest', 'title make model year price')
-      .populate('assignedTo', 'name employeeId');
+      .populate('carOfInterest', 'title make model year price');
 
     res.json({
       success: true,
@@ -81,13 +79,12 @@ router.get('/', protect, async (req, res) => {
 router.get('/:id', protect, async (req, res) => {
   try {
     const lead = await Lead.findById(req.params.id)
-      .populate('carOfInterest', 'title make model year price')
-      .populate('assignedTo', 'name employeeId');
-      
+      .populate('carOfInterest', 'title make model year price');
+
     if (!lead) {
       return res.status(404).json({ success: false, message: 'Lead not found' });
     }
-    
+
     res.json({ success: true, data: lead });
   } catch (error) {
     if (error.kind === 'ObjectId') {
@@ -104,10 +101,6 @@ router.get('/:id', protect, async (req, res) => {
 router.post('/', protect, async (req, res) => {
   try {
     const leadData = { ...req.body };
-    // Auto-assign the lead to the user creating it if not explicitly set
-    if (!leadData.assignedTo && req.user) {
-      leadData.assignedTo = req.user.id;
-    }
     const lead = await Lead.create(leadData);
     res.status(201).json({ success: true, data: lead });
   } catch (error) {

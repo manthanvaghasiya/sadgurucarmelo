@@ -110,10 +110,12 @@ export default function SalesDashboard() {
       const payload = {};
 
       if (callNotes) {
+        const dateStamp = new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
         const prefix = callOutcome === 'decline' ? '[Declined]' : '[Follow-up]';
+        const newEntry = `[${dateStamp}] ${prefix} ${callNotes}`;
         payload.notes = activeCallLead.notes
-          ? `${activeCallLead.notes}\n\n${prefix} ${callNotes}`
-          : `${prefix} ${callNotes}`;
+          ? `${activeCallLead.notes}\n\n${newEntry}`
+          : newEntry;
       }
 
       if (callOutcome === 'complete') {
@@ -254,9 +256,9 @@ export default function SalesDashboard() {
       <header className="bg-surface border-b border-gray-100 px-4 sm:px-6 py-5">
         <div className="max-w-4xl mx-auto flex items-center justify-between">
           <div>
-            <p className="font-body text-xs text-text-muted uppercase tracking-wider">Sales Portal</p>
-            <h1 className="font-heading font-bold text-xl text-text">
-              Welcome, {user?.name || 'Salesman'} 👋
+            <p className="font-body text-xs text-text-muted uppercase tracking-wider">Sales Executive</p>
+            <h1 className="font-heading font-bold text-xl text-text capitalize">
+              Welcome, {user?.name} 👋
             </h1>
           </div>
           <button

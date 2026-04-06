@@ -8,10 +8,12 @@ import {
   CalendarClock,
 } from 'lucide-react';
 import axiosInstance from '../../api/axiosConfig';
+import { useAuth } from '../../context/AuthContext';
 import { useCars } from '../../context/CarContext';
 
 export default function EditLead() {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const { id } = useParams();
   const { cars } = useCars();
   const [urgency, setUrgency] = useState('Warm');
@@ -103,9 +105,13 @@ export default function EditLead() {
           >
             <ArrowLeft className="w-5 h-5 text-text" />
           </button>
-          <div>
+          <div className="flex-1">
             <p className="font-body text-xs text-text-muted uppercase tracking-wider">Edit Properties</p>
             <h1 className="font-heading font-bold text-lg text-text">Edit Lead</h1>
+          </div>
+          <div className="hidden sm:block text-right">
+            <p className="font-body text-[10px] text-text-muted uppercase tracking-widest font-bold">Sales Executive</p>
+            <p className="font-heading font-bold text-sm text-primary capitalize">{user?.name}</p>
           </div>
         </div>
       </header>

@@ -48,10 +48,10 @@ export default function Dashboard() {
   }, []);
 
   const totalValue = carStats.totalValue || 0;
-  const totalValueFormatted = totalValue >= 10000000 
-    ? `₹${(totalValue / 10000000).toFixed(2)} Cr` 
-    : totalValue >= 100000 
-      ? `₹${(totalValue / 100000).toFixed(2)} Lakhs` 
+  const totalValueFormatted = totalValue >= 10000000
+    ? `₹${(totalValue / 10000000).toFixed(2)} Cr`
+    : totalValue >= 100000
+      ? `₹${(totalValue / 100000).toFixed(2)} Lakhs`
       : `₹${totalValue.toLocaleString('en-IN')}`;
 
   const statsData = [
@@ -126,11 +126,10 @@ export default function Dashboard() {
                 <div className={`w-12 h-12 ${stat.iconBg} rounded-xl flex items-center justify-center transition-transform group-hover:scale-110`}>
                   <Icon className={`w-6 h-6 ${stat.iconColor}`} strokeWidth={2} />
                 </div>
-                <div className={`flex items-center gap-1 font-body text-xs font-bold px-2.5 py-1 rounded-full ${
-                  stat.trend === 'up'
+                <div className={`flex items-center gap-1 font-body text-xs font-bold px-2.5 py-1 rounded-full ${stat.trend === 'up'
                     ? 'bg-[#10b981]/10 text-[#059669]'
                     : 'bg-red-50 text-red-500'
-                }`}>
+                  }`}>
                   {stat.trend === 'up' ? (
                     <TrendingUp className="w-3 h-3" />
                   ) : (
@@ -166,14 +165,14 @@ export default function Dashboard() {
             </p>
           </div>
           <div className="flex items-center gap-3">
-            <button 
+            <button
               onClick={() => navigate('/admin/inventory')}
               className="flex items-center gap-2 px-4 py-2 bg-background rounded-xl font-body text-sm font-semibold text-text-muted hover:text-text transition-colors"
             >
               <Eye className="w-4 h-4" />
               View All
             </button>
-            <button 
+            <button
               onClick={() => navigate('/admin/add-car')}
               className="flex items-center gap-2 px-4 py-2 bg-accent text-white rounded-xl font-body text-sm font-bold hover:bg-accent-hover transition-colors shadow-sm shadow-accent/20"
             >

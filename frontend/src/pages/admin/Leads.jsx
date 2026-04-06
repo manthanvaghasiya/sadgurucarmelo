@@ -25,6 +25,7 @@ import {
   ListFilter,
   User as UserIcon,
   Calendar,
+  ClipboardList,
 } from 'lucide-react';
 import axiosInstance from '../../api/axiosConfig';
 import toast from 'react-hot-toast';
@@ -79,16 +80,14 @@ export default function Leads() {
   const [viewTarget, setViewTarget] = useState(null);
   const [leadStats, setLeadStats] = useState({ total: 0, newCount: 0, followUp: 0, todayFollowUps: 0 });
   const [showTodayTracker, setShowTodayTracker] = useState(false);
-  const [salesmen, setSalesmen] = useState([]);
 
   // New Filters Refactor
-  const [columnFilters, setColumnFilters] = useState({ 
-    date: '', 
-    customer: '', 
-    car: '', 
-    salesman: '' 
+  const [columnFilters, setColumnFilters] = useState({
+    date: '',
+    customer: '',
+    car: ''
   });
-  const [activeFilterBox, setActiveFilterBox] = useState(null); // 'date', 'customer', 'car', 'salesman' or null
+  const [activeFilterBox, setActiveFilterBox] = useState(null); // 'date', 'customer', 'car' or null
 
   // ── Fetch leads from API ──
   const fetchLeads = useCallback(async () => {
@@ -118,19 +117,7 @@ export default function Leads() {
     fetchLeads();
   }, [fetchLeads]);
 
-  useEffect(() => {
-    const fetchSalesmen = async () => {
-      try {
-        const { data } = await axiosInstance.get('/auth/users');
-        if (data.success) {
-          setSalesmen(data.data.filter(u => u.role === 'sales'));
-        }
-      } catch (err) {
-        console.error('Failed to fetch salesmen:', err);
-      }
-    };
-    fetchSalesmen();
-  }, []);
+
 
   // Click outside to close filters
   useEffect(() => {
@@ -165,13 +152,13 @@ export default function Leads() {
     // Column-specific local filters
     result = result.filter(lead => {
       // Date filter
-      const matchesDate = !columnFilters.date || 
+      const matchesDate = !columnFilters.date ||
         new Date(lead.createdAt).toISOString().split('T')[0] === columnFilters.date;
-      
+
       // Customer filter
-      const matchesCustomer = !columnFilters.customer || 
+      const matchesCustomer = !columnFilters.customer ||
         lead.customerName?.toLowerCase().includes(columnFilters.customer.toLowerCase());
-      
+
       // Car filter
       const matchesCar = !columnFilters.car || (
         lead.carOfInterest && (
@@ -180,12 +167,8 @@ export default function Leads() {
             .includes(columnFilters.car.toLowerCase())
         )
       );
-      
-      // Salesman filter
-      const matchesSalesman = !columnFilters.salesman || 
-        lead.assignedTo?._id === columnFilters.salesman;
 
-      return matchesDate && matchesCustomer && matchesCar && matchesSalesman;
+      return matchesDate && matchesCustomer && matchesCar;
     });
 
     return result;
@@ -304,27 +287,46 @@ export default function Leads() {
               </button>
             </div>
 
-            <div className="flex-1 overflow-y-auto pr-2 space-y-4 font-body text-sm text-text/80 leading-relaxed whitespace-pre-wrap">
+            <div className="flex-1 overflow-y-auto pr-2">
               {viewTarget.notes ? (
-                viewTarget.notes
+                <table className="w-full border-collapse">
+                  <thead>
+                    <tr className="bg-background text-[10px] font-bold text-slate-500 uppercase tracking-wider font-heading">
+                      <th className="px-4 py-3 text-left border-b border-slate-100">Message</th>
+                      <th className="px-4 py-3 text-right border-b border-slate-100">Date</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-50">
+                    {viewTarget.notes.split('\n\n').filter(e => e.trim()).map((entry, idx) => {
+                      const dateMatch = entry.match(/^\[(.*?)\]/);
+                      const date = dateMatch ? dateMatch[1] : (viewTarget.createdAt ? new Date(viewTarget.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : '-');
+                      const message = dateMatch ? entry.replace(dateMatch[0], '').trim() : entry;
+                      return (
+                        <tr key={idx} className="group hover:bg-slate-50/50 transition-colors">
+                          <td className="px-4 py-3 font-body text-sm text-text/90 leading-relaxed whitespace-pre-wrap">{message}</td>
+                          <td className="px-4 py-3 font-body text-[11px] text-text-muted text-right whitespace-nowrap align-top opacity-60 group-hover:opacity-100 pt-3.5">{date}</td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
               ) : (
-                <div className="text-center py-8 text-text-muted">No interactions or notes logged yet.</div>
+                <div className="text-center py-12 flex flex-col items-center">
+                  <div className="w-16 h-16 bg-background rounded-2xl flex items-center justify-center mb-4">
+                    <ClipboardList className="w-8 h-8 text-text-muted/20" />
+                  </div>
+                  <p className="font-body text-sm font-semibold text-text-muted">No interactions logged yet</p>
+                  <p className="font-body text-xs text-text-muted/60 mt-1">Updates from Sales Dashboard or Lead editing will appear here.</p>
+                </div>
               )}
             </div>
 
-            {(viewTarget.followUpDate || viewTarget.assignedTo) && (
+            {viewTarget.followUpDate && (
               <div className="mt-4 pt-4 border-t border-gray-100 shrink-0 flex items-center justify-between bg-background rounded-xl p-3">
-                <div className="flex flex-col gap-1 text-xs">
-                  {viewTarget.assignedTo ? (
-                    <span className="font-body font-semibold text-text flex items-center gap-1.5"><UserCircle className="w-3.5 h-3.5 text-text-muted" />{viewTarget.assignedTo.name}</span>
-                  ) : <span className="font-body text-text-muted font-semibold flex items-center gap-1.5"><UserCircle className="w-3.5 h-3.5" />Unassigned</span>}
+                <div className="flex items-center gap-1.5 pl-1">
+                  <CalendarClock className="w-4 h-4 text-primary" />
+                  <span className="font-body text-xs font-bold text-primary px-2 py-0.5 bg-primary/10 rounded-md">Next Follow-up: {new Date(viewTarget.followUpDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' })}</span>
                 </div>
-                {viewTarget.followUpDate && (
-                  <div className="flex items-center gap-1.5">
-                    <CalendarClock className="w-4 h-4 text-primary" />
-                    <span className="font-body text-xs font-bold text-primary px-2 py-0.5 bg-primary/10 rounded-md">Next: {new Date(viewTarget.followUpDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' })}</span>
-                  </div>
-                )}
               </div>
             )}
           </div>
@@ -335,90 +337,114 @@ export default function Leads() {
       {showTodayTracker && (
         <div className="fixed inset-0 z-50 flex justify-end">
           <div className="absolute inset-0 bg-primary/40 backdrop-blur-sm" onClick={() => setShowTodayTracker(false)} />
-          <div className="relative bg-surface w-full max-w-md h-full shadow-2xl flex flex-col animate-in slide-in-from-right duration-300 border-l border-gray-100">
+          <div className="relative bg-surface w-full max-w-4xl h-full shadow-2xl flex flex-col animate-in slide-in-from-right duration-300 border-l border-gray-100">
             <div className="p-6 border-b border-gray-100 flex items-center justify-between bg-surface shrink-0">
               <div>
                 <h3 className="font-heading font-bold text-lg text-text">Today's Follow-up Tracker</h3>
-                <p className="font-body text-xs text-text-muted mt-0.5">Accountability & Performance Monitoring</p>
+                <p className="font-body text-xs text-text-muted mt-0.5">Real-time Performance & Accountability View</p>
               </div>
-              <button 
-                onClick={() => setShowTodayTracker(false)}
-                className="p-2 text-text-muted hover:bg-gray-100 rounded-lg transition-colors"
-              >
-                <X className="w-5 h-5" />
-              </button>
+              <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2 px-3 py-1.5 bg-background rounded-lg border border-gray-100">
+                  <div className="w-2 h-2 rounded-full bg-green-500" />
+                  <span className="font-body text-[10px] font-bold text-text-muted uppercase">Live Monitoring</span>
+                </div>
+                <button
+                  onClick={() => setShowTodayTracker(false)}
+                  className="p-2 text-text-muted hover:bg-gray-100 rounded-lg transition-colors"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
             </div>
 
-            <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-background/30">
+            <div className="flex-1 overflow-y-auto bg-surface scrollbar-none">
               {todayLeads.length === 0 ? (
-                <div className="h-full flex flex-col items-center justify-center text-center p-8">
-                  <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-sm mb-4">
-                    <Clock className="w-8 h-8 text-text-muted/20" />
+                <div className="h-full flex flex-col items-center justify-center text-center p-12">
+                  <div className="w-16 h-16 bg-background rounded-2xl flex items-center justify-center mb-4">
+                    <ClipboardList className="w-8 h-8 text-text-muted/20" />
                   </div>
                   <p className="font-body text-sm font-semibold text-text-muted">No follow-ups scheduled for today</p>
                   <p className="font-body text-xs text-text-muted/60 mt-1">Check back later or view general leads.</p>
                 </div>
               ) : (
-                todayLeads.map((lead) => {
-                  const isUpdatedToday = new Date(lead.updatedAt).toDateString() === new Date().toDateString();
-                  return (
-                    <div 
-                      key={lead._id} 
-                      className={`p-4 rounded-2xl border transition-all ${
-                        isUpdatedToday 
-                          ? 'bg-green-50 border-green-100 ring-1 ring-green-200 shadow-sm shadow-green-100' 
-                          : 'bg-orange-50 border-orange-100 ring-1 ring-orange-200 shadow-sm shadow-orange-100'
-                      }`}
-                    >
-                      <div className="flex items-start justify-between gap-4 mb-3">
-                        <div className="min-w-0">
-                          <h4 className="font-body text-sm font-bold text-text truncate">{lead.customerName}</h4>
-                          <p className="font-body text-xs text-text-muted flex items-center gap-1.5 mt-0.5">
-                            <Phone className="w-3.5 h-3.5" />{lead.phone}
-                          </p>
-                        </div>
-                        {isUpdatedToday ? (
-                          <span className="flex items-center gap-1 px-2 py-0.5 bg-green-500/10 text-green-600 rounded-full font-body text-[10px] font-bold ring-1 ring-green-500/20 whitespace-nowrap">
-                            Logged Today
-                          </span>
-                        ) : (
-                          <span className="flex items-center gap-1 px-2 py-0.5 bg-orange-500/10 text-orange-600 rounded-full font-body text-[10px] font-bold ring-1 ring-orange-500/20 whitespace-nowrap">
-                            Pending Call
-                          </span>
-                        )}
-                      </div>
-
-                      {lead.carOfInterest && (
-                        <div className="flex items-center gap-1.5 p-2 bg-white/60 rounded-xl mb-3">
-                          <Car className="w-3.5 h-3.5 text-text-muted" />
-                          <span className="font-body text-xs font-medium text-text truncate">
-                            {lead.carOfInterest.year} {lead.carOfInterest.make} {lead.carOfInterest.model}
-                          </span>
-                        </div>
-                      )}
-
-                      <div className="flex items-center justify-between gap-3 pt-3 border-t border-black/[0.03]">
-                        <div className="flex items-center gap-2">
-                          <div className="w-7 h-7 bg-white rounded-lg flex items-center justify-center border border-black/[0.05]">
-                            <UserIcon className="w-3.5 h-3.5 text-text-muted" />
-                          </div>
-                          <span className="font-body text-xs font-semibold text-text-muted">
-                            {lead.assignedTo?.name || 'Unassigned'}
-                          </span>
-                        </div>
-                        <button 
-                          onClick={() => {
-                            setShowTodayTracker(false);
-                            setViewTarget(lead);
-                          }}
-                          className="flex items-center gap-1.5 px-3 py-1.5 bg-white text-primary border border-primary/20 hover:bg-primary/5 rounded-lg font-body text-xs font-bold transition-all shadow-sm active:scale-95"
-                        >
-                          <Eye className="w-3.5 h-3.5" /> View Log
-                        </button>
-                      </div>
-                    </div>
-                  );
-                })
+                <div className="inline-block min-w-full align-middle">
+                  <table className="min-w-full divide-y divide-slate-100">
+                    <thead>
+                      <tr className="bg-background/50">
+                        <th className="px-6 py-4 text-left text-[10px] font-bold text-slate-500 uppercase tracking-wider font-heading">Customer</th>
+                        <th className="px-6 py-4 text-left text-[10px] font-bold text-slate-500 uppercase tracking-wider font-heading">Car of Interest</th>
+                        <th className="px-6 py-4 text-left text-[10px] font-bold text-slate-500 uppercase tracking-wider font-heading">Source</th>
+                        <th className="px-6 py-4 text-left text-[10px] font-bold text-slate-500 uppercase tracking-wider font-heading text-center">Status</th>
+                        <th className="px-6 py-4 text-right text-[10px] font-bold text-slate-500 uppercase tracking-wider font-heading">View Log</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-50">
+                      {todayLeads.map((lead) => {
+                        const isUpdatedToday = new Date(lead.updatedAt).toDateString() === new Date().toDateString();
+                        const sCfg = sourceConfig[lead.source] || sourceConfig['Website'];
+                        return (
+                          <tr key={lead._id} className="hover:bg-slate-50/80 transition-colors group">
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <div className="flex flex-col">
+                                <span className="font-body text-sm font-bold text-text">{lead.customerName}</span>
+                                <span className="font-body text-[11px] text-text-muted flex items-center gap-1.5 mt-0.5">
+                                  <Phone className="w-3 h-3" />{lead.phone}
+                                </span>
+                              </div>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              {lead.carOfInterest ? (
+                                <div className="flex items-center gap-2">
+                                  <div className="w-8 h-8 bg-background rounded-lg flex items-center justify-center shrink-0">
+                                    <Car className="w-4 h-4 text-text-muted/60" />
+                                  </div>
+                                  <div className="flex flex-col min-w-0">
+                                    <span className="font-body text-xs font-semibold text-text truncate max-w-[120px]">
+                                      {lead.carOfInterest.make} {lead.carOfInterest.model}
+                                    </span>
+                                    <span className="font-body text-[10px] text-text-muted">{lead.carOfInterest.year}</span>
+                                  </div>
+                                </div>
+                              ) : (
+                                <span className="font-body text-xs text-text-muted/40 italic">Not specified</span>
+                              )}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full font-body text-[10px] font-bold ring-1 ${sCfg.bg} ${sCfg.text} ${sCfg.ring}`}>
+                                {lead.source}
+                              </span>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-center">
+                              {isUpdatedToday ? (
+                                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-green-50 text-green-700 rounded-full font-body text-[10px] font-bold ring-1 ring-green-200">
+                                  <span className="w-1 h-1 rounded-full bg-green-600 animate-pulse" />
+                                  ✅ Logged
+                                </span>
+                              ) : (
+                                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-orange-50 text-orange-700 rounded-full font-body text-[10px] font-bold ring-1 ring-orange-200">
+                                  <span className="w-1 h-1 rounded-full bg-orange-600" />
+                                  ⏳ Pending
+                                </span>
+                              )}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-right">
+                              <button
+                                onClick={() => {
+                                  setShowTodayTracker(false);
+                                  setViewTarget(lead);
+                                }}
+                                className="p-2 text-text-muted hover:text-primary hover:bg-primary/5 rounded-lg transition-all active:scale-90"
+                                title="View Interaction Log"
+                              >
+                                <ClipboardList className="w-5 h-5" />
+                              </button>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
               )}
             </div>
           </div>
@@ -436,8 +462,8 @@ export default function Leads() {
         {kpiCards.map((kpi) => {
           const Icon = kpi.icon;
           return (
-            <div 
-              key={kpi.title} 
+            <div
+              key={kpi.title}
               onClick={kpi.onClick}
               className={`bg-surface rounded-2xl border p-6 transition-all duration-300 group ${kpi.highlight ? 'border-[#f59e0b]/20' : 'border-gray-100'} ${kpi.interactive ? 'cursor-pointer hover:ring-2 hover:ring-red-600 hover:shadow-lg' : 'hover:shadow-lg hover:shadow-primary/5'}`}
             >
@@ -497,7 +523,7 @@ export default function Leads() {
                   <tr className="border-b border-gray-100">
                     {/* Date Column with Filter */}
                     <th className="font-body text-[11px] font-bold text-text-muted uppercase tracking-wider py-4 bg-background/40 pl-6 pr-4 text-left relative filter-container">
-                      <div 
+                      <div
                         className="flex items-center justify-between cursor-pointer group hover:text-primary transition-colors"
                         onClick={() => toggleFilter('date')}
                       >
@@ -507,26 +533,26 @@ export default function Leads() {
                         </div>
                         <ListFilter className={`w-3.5 h-3.5 transition-colors ${activeFilterBox === 'date' ? 'text-primary' : 'text-text-muted/40 group-hover:text-primary/60'}`} />
                       </div>
-                      
+
                       {activeFilterBox === 'date' && (
                         <div className="absolute top-full left-6 mt-1 w-56 bg-white p-3 rounded-xl shadow-2xl ring-1 ring-black/[0.05] z-50 animate-in fade-in slide-in-from-top-1 duration-200">
                           <label className="block text-[10px] font-bold text-text-muted uppercase mb-1.5 px-1 font-heading">Pick a date</label>
                           <div className="relative">
-                            <input 
-                              type="date" 
+                            <input
+                              type="date"
                               className="w-full pl-3 pr-3 py-2 bg-background border border-slate-100 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 font-normal text-slate-700"
                               value={columnFilters.date}
                               onChange={(e) => {
-                                setColumnFilters({...columnFilters, date: e.target.value});
+                                setColumnFilters({ ...columnFilters, date: e.target.value });
                                 setCurrentPage(1);
                               }}
                               onClick={(e) => e.stopPropagation()}
                             />
                             {columnFilters.date && (
-                              <button 
+                              <button
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  setColumnFilters({...columnFilters, date: ''});
+                                  setColumnFilters({ ...columnFilters, date: '' });
                                   setCurrentPage(1);
                                 }}
                                 className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-text-muted hover:text-red-500"
@@ -541,7 +567,7 @@ export default function Leads() {
 
                     {/* Customer Column with Filter */}
                     <th className="font-body text-[11px] font-bold text-text-muted uppercase tracking-wider py-4 bg-background/40 px-4 text-left relative filter-container">
-                      <div 
+                      <div
                         className="flex items-center justify-between cursor-pointer group hover:text-primary transition-colors"
                         onClick={() => toggleFilter('customer')}
                       >
@@ -551,17 +577,17 @@ export default function Leads() {
                         </div>
                         <ListFilter className={`w-3.5 h-3.5 transition-colors ${activeFilterBox === 'customer' ? 'text-primary' : 'text-text-muted/40 group-hover:text-primary/60'}`} />
                       </div>
-                      
+
                       {activeFilterBox === 'customer' && (
                         <div className="absolute top-full left-0 mt-1 w-56 bg-white p-3 rounded-xl shadow-2xl ring-1 ring-black/[0.05] z-50 animate-in fade-in slide-in-from-top-1 duration-200">
-                          <input 
-                            type="text" 
+                          <input
+                            type="text"
                             placeholder="Search customer name..."
                             autoFocus
                             className="w-full px-3 py-2 bg-background border border-slate-100 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 font-normal text-slate-700 normal-case tracking-normal"
                             value={columnFilters.customer}
                             onChange={(e) => {
-                              setColumnFilters({...columnFilters, customer: e.target.value});
+                              setColumnFilters({ ...columnFilters, customer: e.target.value });
                               setCurrentPage(1);
                             }}
                             onClick={(e) => e.stopPropagation()}
@@ -572,7 +598,7 @@ export default function Leads() {
 
                     {/* Car Column with Filter */}
                     <th className="font-body text-[11px] font-bold text-text-muted uppercase tracking-wider py-4 bg-background/40 px-4 text-left relative filter-container">
-                      <div 
+                      <div
                         className="flex items-center justify-between cursor-pointer group hover:text-primary transition-colors"
                         onClick={() => toggleFilter('car')}
                       >
@@ -582,17 +608,17 @@ export default function Leads() {
                         </div>
                         <ListFilter className={`w-3.5 h-3.5 transition-colors ${activeFilterBox === 'car' ? 'text-primary' : 'text-text-muted/40 group-hover:text-primary/60'}`} />
                       </div>
-                      
+
                       {activeFilterBox === 'car' && (
                         <div className="absolute top-full left-0 mt-1 w-56 bg-white p-3 rounded-xl shadow-2xl ring-1 ring-black/[0.05] z-50 animate-in fade-in slide-in-from-top-1 duration-200">
-                          <input 
-                            type="text" 
+                          <input
+                            type="text"
                             placeholder="Search car make/model..."
                             autoFocus
                             className="w-full px-3 py-2 bg-background border border-slate-100 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 font-normal text-slate-700 normal-case tracking-normal"
                             value={columnFilters.car}
                             onChange={(e) => {
-                              setColumnFilters({...columnFilters, car: e.target.value});
+                              setColumnFilters({ ...columnFilters, car: e.target.value });
                               setCurrentPage(1);
                             }}
                             onClick={(e) => e.stopPropagation()}
@@ -601,38 +627,7 @@ export default function Leads() {
                       )}
                     </th>
 
-                    {/* Salesman Column with Filter */}
-                    <th className="font-body text-[11px] font-bold text-text-muted uppercase tracking-wider py-4 bg-background/40 px-4 text-left relative filter-container">
-                      <div 
-                        className="flex items-center justify-between cursor-pointer group hover:text-primary transition-colors"
-                        onClick={() => toggleFilter('salesman')}
-                      >
-                        <div className="flex items-center gap-1">
-                          Salesman
-                          {columnFilters.salesman && <span className="w-1.5 h-1.5 bg-primary rounded-full" />}
-                        </div>
-                        <ListFilter className={`w-3.5 h-3.5 transition-colors ${activeFilterBox === 'salesman' ? 'text-primary' : 'text-text-muted/40 group-hover:text-primary/60'}`} />
-                      </div>
-                      
-                      {activeFilterBox === 'salesman' && (
-                        <div className="absolute top-full left-0 mt-1 w-56 bg-white p-3 rounded-xl shadow-2xl ring-1 ring-black/[0.05] z-50 animate-in fade-in slide-in-from-top-1 duration-200" onClick={e => e.stopPropagation()}>
-                          <label className="block text-[10px] font-bold text-text-muted uppercase mb-1.5 px-1 font-heading">Filter by staff</label>
-                          <select
-                            value={columnFilters.salesman}
-                            onChange={(e) => {
-                              setColumnFilters({...columnFilters, salesman: e.target.value});
-                              setCurrentPage(1);
-                            }}
-                            className="w-full px-3 py-2 bg-background border border-slate-100 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 font-normal text-slate-700 cursor-pointer"
-                          >
-                            <option value="">All Salesmen</option>
-                            {salesmen.map(s => (
-                              <option key={s._id} value={s._id}>{s.name}</option>
-                            ))}
-                          </select>
-                        </div>
-                      )}
-                    </th>
+
 
                     <th className="font-body text-[11px] font-bold text-text-muted uppercase tracking-wider py-4 bg-background/40 px-4 text-left">History</th>
                     <th className="font-body text-[11px] font-bold text-text-muted uppercase tracking-wider py-4 bg-background/40 px-4 text-left relative group">
@@ -694,7 +689,7 @@ export default function Leads() {
                 <tbody>
                   {paginated.length === 0 ? (
                     <tr>
-                      <td colSpan={6} className="text-center py-16">
+                      <td colSpan={8} className="text-center py-16">
                         <div className="flex flex-col items-center gap-3">
                           <div className="w-14 h-14 bg-background rounded-2xl flex items-center justify-center">
                             <Users className="w-7 h-7 text-text-muted/40" />
@@ -743,12 +738,7 @@ export default function Leads() {
                               <span className="font-body text-xs text-text-muted/60 italic">-</span>
                             )}
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="flex items-center gap-2 text-sm font-medium text-slate-700">
-                              <UserIcon className="w-4 h-4 text-slate-400" />
-                              {lead.assignedTo?.name}
-                            </div>
-                          </td>
+
                           <td className="px-4 py-4">
                             <button onClick={() => setViewTarget(lead)} className="flex items-center gap-1.5 px-3 py-1.5 bg-surface text-primary border border-primary/20 hover:bg-primary/5 rounded-lg font-body text-xs font-semibold transition-colors">
                               <Eye className="w-3.5 h-3.5" /> View Log
@@ -832,9 +822,7 @@ export default function Leads() {
                               {lead.carOfInterest.year} {lead.carOfInterest.make} {lead.carOfInterest.model}
                             </p>
                           )}
-                          <p className="font-body text-xs text-text-muted flex items-center gap-1 mt-1">
-                            <UserIcon className="w-3 h-3" /> {lead.assignedTo?.name}
-                          </p>
+
                         </div>
                         <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full font-body text-[10px] font-bold ring-1 shrink-0 ${stCfg.bg} ${stCfg.text} ${stCfg.ring}`}>
                           <span className={`w-1.5 h-1.5 rounded-full ${stCfg.dot}`} />

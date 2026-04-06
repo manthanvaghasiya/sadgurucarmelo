@@ -67,13 +67,6 @@ const leadSchema = new mongoose.Schema(
       type: Date,
       default: null,
     },
-
-    // ── Assignment ──
-    assignedTo: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
-      default: null,
-    },
   },
   {
     timestamps: true,
@@ -83,7 +76,6 @@ const leadSchema = new mongoose.Schema(
 // ── Indexes for dashboard queries ──
 leadSchema.index({ status: 1, createdAt: -1 });
 leadSchema.index({ urgency: 1 });
-leadSchema.index({ assignedTo: 1 });
 
 const Lead = mongoose.model('Lead', leadSchema);
 export default Lead;
