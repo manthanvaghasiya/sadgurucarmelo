@@ -4,6 +4,8 @@ import { Fuel, Settings2, User, Gauge, Calendar, MessageCircle, MapPin, Star, Ta
 import axiosInstance from '../api/axiosConfig';
 import CarCard from '../components/CarCard';
 
+import { getCarWhatsAppLink } from '../utils/whatsapp';
+
 export default function CarDetails() {
     const { id } = useParams();
     const [car, setCar] = useState(null);
@@ -11,6 +13,8 @@ export default function CarDetails() {
     const [error, setError] = useState('');
     const [activeImage, setActiveImage] = useState(null);
     const [relatedCars, setRelatedCars] = useState([]);
+
+    const whatsappUrl = car ? getCarWhatsAppLink(car) : '#';
 
     useEffect(() => {
         const fetchCar = async () => {
@@ -285,12 +289,12 @@ export default function CarDetails() {
 
                             <div className="flex flex-col gap-3">
                                     <a
-                                      href={`https://wa.me/919913634447?text=${encodeURIComponent(`Hi, I am interested in the ${car.year} ${car.make} ${car.model} listed at ₹${car.price?.toLocaleString('en-IN')}. Please share more details.`)}`}
+                                      href={whatsappUrl}
                                       target="_blank"
                                       rel="noopener noreferrer"
-                                      className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl bg-[#25D366] text-white font-body font-bold text-sm hover:bg-[#128C7E] transition-colors shadow-md"
+                                      className="w-full flex items-center justify-center gap-2.5 py-4 rounded-xl bg-[#25D366] text-white font-body font-bold text-sm hover:bg-[#20bd5a] transition-all shadow-lg shadow-green-500/20 active:scale-[0.98]"
                                     >
-                                        <MessageCircle className="w-4 h-4 fill-current" />
+                                        <MessageCircle className="w-5 h-5 fill-current" />
                                         INQUIRE ON WHATSAPP
                                     </a>
                                 </div>

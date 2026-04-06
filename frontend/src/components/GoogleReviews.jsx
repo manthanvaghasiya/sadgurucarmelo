@@ -193,7 +193,7 @@ export default function GoogleReviews() {
 
           <div className="flex items-center gap-5 bg-white rounded-2xl px-8 py-5 shadow-sm border border-gray-100 shrink-0">
             <div className="text-center">
-              <span className="font-heading text-4xl font-extrabold text-text">4.9</span>
+              <span className="font-heading text-4xl font-extrabold text-text">4.8</span>
               <div className="flex items-center gap-0.5 mt-1">
                 {[...Array(5)].map((_, i) => (
                   <Star key={i} className="w-4 h-4 fill-yellow-400 text-yellow-400" />

@@ -170,53 +170,38 @@ export default function Contact() {
 
           </div>
 
-          {/* 4. Right Column (Map Placeholder & WhatsApp) */}
+          {/* 4. Right Column (Real Live Map & WhatsApp) */}
           <div className="relative h-[600px] lg:h-auto bg-[#e2e8f0]/40 rounded-3xl overflow-hidden border border-gray-200">
-            {/* Mock Map Background Grid */}
-            <div 
-              className="absolute inset-0 opacity-40 mix-blend-multiply"
-              style={{
-                backgroundImage: `radial-gradient(circle at center, transparent 0%, #cbd5e1 100%), 
-                                  linear-gradient(rgba(203, 213, 225, 0.4) 1px, transparent 1px), 
-                                  linear-gradient(90deg, rgba(203, 213, 225, 0.4) 1px, transparent 1px)`,
-                backgroundSize: '100% 100%, 20px 20px, 20px 20px'
-              }}
-            ></div>
+            {/* Real Google Map Embed */}
+            <iframe 
+              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3719.5210617841512!2d72.89515417470535!3d21.211176681489203!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3be04fdde8bfb4e5%3A0x834add64072864dc!2sSadguru%20Car%20Melo!5e0!3m2!1sen!2sin!4v1775327556300!5m2!1sen!2sin" 
+              width="100%" 
+              height="100%" 
+              className="absolute inset-0 grayscale-[0.2] contrast-[1.1] hover:grayscale-0 transition-all duration-700"
+              style={{ border: 0 }} 
+              allowFullScreen="" 
+              loading="lazy" 
+              referrerPolicy="no-referrer-when-downgrade">
+            </iframe>
             
-            {/* Decorative concentric circles to mock streets */}
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[80%] aspect-square rounded-full border border-white/50"></div>
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[60%] aspect-square rounded-full border border-white/40"></div>
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[40%] aspect-square rounded-full border border-white/30"></div>
-
-            {/* Map Zoom Controls */}
-            <div className="absolute top-6 right-6 flex flex-col shadow-md rounded-lg overflow-hidden bg-surface">
-              <button className="p-2 hover:bg-gray-50 border-b border-gray-100 text-text transition-colors">
-                <Plus className="w-5 h-5" />
-              </button>
-              <button className="p-2 hover:bg-gray-50 text-text transition-colors">
-                <Minus className="w-5 h-5" />
-              </button>
-            </div>
-
-            {/* Center Map Marker */}
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center">
-              <div className="bg-surface px-4 py-2.5 rounded-xl shadow-lg border border-gray-100 mb-2 relative">
-                <h3 className="font-heading font-bold text-sm text-primary">Sadguru Car Melo</h3>
-                <p className="font-body text-[10px] text-text-muted">Varachha, Surat</p>
-                <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-4 h-4 bg-surface rotate-45 border-b border-r border-gray-100"></div>
-              </div>
-              <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center text-white shadow-md relative z-10 border-2 border-white">
-                <Car className="w-5 h-5" />
-              </div>
-            </div>
+            {/* Fading overlay to match site aesthetic */}
+            <div className="absolute inset-0 pointer-events-none bg-gradient-to-t from-black/20 to-transparent"></div>
 
             {/* Floating WhatsApp Card */}
-            <div className="absolute bottom-6 left-6 right-6 sm:bottom-8 sm:left-8 sm:right-auto bg-surface p-6 rounded-2xl shadow-xl border border-gray-100 max-w-sm">
-              <h3 className="font-heading font-bold text-lg text-text mb-4">Need instant answers?</h3>
-              <button className="w-full flex items-center justify-center gap-2 bg-[#10b981] text-white font-body font-bold text-sm py-3.5 rounded-xl hover:bg-[#059669] shadow-sm transition-colors">
+            <div className="absolute bottom-6 left-6 right-6 sm:bottom-8 sm:left-8 sm:right-auto bg-surface/90 backdrop-blur-md p-6 rounded-2xl shadow-xl border border-white/20 max-w-sm flex flex-col gap-4">
+              <div>
+                <h3 className="font-heading font-bold text-lg text-text mb-1">Need instant answers?</h3>
+                <p className="font-body text-xs text-text-muted">Chat with our sales team directly on WhatsApp.</p>
+              </div>
+              <a 
+                href="https://wa.me/919913634447" 
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full flex items-center justify-center gap-2 bg-[#10b981] text-white font-body font-bold text-sm py-3.5 rounded-xl hover:bg-[#059669] shadow-sm transition-colors"
+              >
                 <MessageCircle className="w-5 h-5 fill-current" />
                 Start WhatsApp Chat
-              </button>
+              </a>
             </div>
 
           </div>

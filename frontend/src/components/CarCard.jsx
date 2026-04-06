@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { Fuel, Settings2, User, Gauge, MessageCircle, Eye } from 'lucide-react';
+import { getCarWhatsAppLink } from '../utils/whatsapp';
 
 export default function CarCard({
   id = '1',
@@ -12,6 +13,7 @@ export default function CarCard({
   owner = '1st Owner',
   kms = '45,000 KM'
 }) {
+  const whatsappUrl = getCarWhatsAppLink({ title, price });
   return (
     <div className="bg-surface rounded-2xl border border-gray-100 overflow-hidden group hover:shadow-lg transition-all duration-300 flex flex-col h-full">
 
@@ -79,12 +81,12 @@ export default function CarCard({
             <Eye className="w-4 h-4" /> View
           </Link>
           <a
-            href={`https://wa.me/919913634447?text=Hi, I am interested in the ${title} listed for ${price}.`}
+            href={whatsappUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-lg bg-[#25D366] text-white font-body font-bold text-xs hover:bg-[#128C7E] transition-colors shadow-sm"
+            className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-lg bg-[#25D366] text-white font-body font-bold text-xs hover:bg-[#20bd5a] transition-all shadow-md shadow-green-500/10 active:scale-95"
           >
-            <MessageCircle className="w-4 h-4" /> Chat
+            <MessageCircle className="w-4 h-4 fill-current" /> Chat
           </a>
         </div>
       </div>

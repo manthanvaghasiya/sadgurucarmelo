@@ -48,20 +48,12 @@ export default function TopNavigation() {
 
           {/* Desktop Call-to-Actions */}
           <div className="hidden md:flex items-center gap-5">
-            <a href="tel:+919913634447" className="flex items-center gap-2 font-body font-bold text-sm text-text hover:text-primary transition-colors">
-              <div className="w-8 h-8 rounded-full bg-background flex items-center justify-center">
-                <Phone className="w-4 h-4 text-primary" />
-              </div>
-              +91 99136 34447
-            </a>
-            <a
-              href="https://wa.me/919913634447"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="bg-accent hover:bg-accent-hover text-white px-5 py-2.5 rounded-lg font-body font-bold text-sm flex items-center gap-2 transition-colors shadow-md shadow-accent/20"
+            <a 
+              href="tel:+919913634447" 
+              className="bg-accent hover:bg-accent-hover text-white px-6 py-2.5 rounded-lg font-body font-bold text-sm flex items-center gap-2 transition-all shadow-md shadow-accent/20 active:scale-95"
             >
-              <MessageCircle className="w-4 h-4" />
-              Live Chat
+              <Phone className="w-4 h-4 fill-current" />
+              Call Me
             </a>
             <Link
               to="/login"
@@ -99,11 +91,9 @@ export default function TopNavigation() {
             ))}
 
             <div className="flex flex-col gap-3 mt-4 pt-4 border-t border-gray-100">
-              <a href="tel:+919913634447" className="flex items-center justify-center gap-2 bg-background hover:bg-gray-200 text-text py-3.5 rounded-xl font-body font-bold transition-colors">
-                <Phone className="w-5 h-5" /> Call Now
-              </a>
-              <a href="https://wa.me/919913634447" target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-2 bg-accent hover:bg-accent-hover text-white py-3.5 rounded-xl font-body font-bold shadow-md shadow-accent/20 transition-colors">
-                <MessageCircle className="w-5 h-5" /> WhatsApp Chat
+              <a href="tel:+919913634447" className="flex items-center justify-center gap-2 bg-accent hover:bg-accent-hover text-white py-3.5 rounded-xl font-body font-bold shadow-md shadow-accent/20 transition-colors">
+                <Phone className="w-5 h-5 fill-current" />
+                Call Me
               </a>
               <Link
                 to="/login"

@@ -31,6 +31,8 @@ import SalesLogin from './pages/sales/SalesLogin';
 import SalesDashboard from './pages/sales/SalesDashboard';
 import AddLead from './pages/sales/AddLead';
 
+import FloatingWhatsApp from './components/FloatingWhatsApp';
+
 function App() {
   return (
     <AuthProvider>
@@ -45,8 +47,9 @@ function App() {
         <Route
           path="/*"
           element={
-            <div className="flex flex-col min-h-screen bg-background font-body text-text">
+            <div className="flex flex-col min-h-screen bg-background font-body text-text relative">
               <TopNavigation />
+              <FloatingWhatsApp />
               <main className="flex-grow">
                 <Routes>
                   <Route path="/" element={<Home />} />

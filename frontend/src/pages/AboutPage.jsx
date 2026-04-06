@@ -4,7 +4,7 @@ import { ShieldCheck, FileText, Landmark, Tag, Star, Banknote, RefreshCw, CarFro
 
 export default function AboutPage() {
   const [searchParams, setSearchParams] = useSearchParams();
-  
+
   // Read service from URL or default to 'buy'
   const initialService = searchParams.get('service') || 'buy';
   const [activeTab, setActiveTab] = useState(initialService);
@@ -14,7 +14,7 @@ export default function AboutPage() {
     const serviceFromUrl = searchParams.get('service');
     if (serviceFromUrl && ['buy', 'sell', 'exchange'].includes(serviceFromUrl)) {
       setActiveTab(serviceFromUrl);
-      
+
       // Auto-scroll logic so users are instantly mapped to the matching content
       setTimeout(() => {
         const el = document.getElementById('core-services');
@@ -89,7 +89,7 @@ export default function AboutPage() {
         <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
           <div className="relative rounded-3xl overflow-hidden shadow-2xl h-[400px] lg:h-[550px] bg-gray-900">
             <img
-              src="https://placehold.co/800x1000/111827/ffffff?text=Premium+Sports+Car"
+              src="about.png"
               alt="Premium Car Showcase"
               className="w-full h-full object-cover opacity-90"
             />
@@ -187,11 +187,10 @@ export default function AboutPage() {
               <button
                 key={tab.id}
                 onClick={() => handleTabClick(tab.id)}
-                className={`px-8 py-3 rounded-full font-heading font-bold text-sm md:text-base transition-all duration-300 ${
-                  activeTab === tab.id
-                    ? 'bg-primary text-white shadow-lg shadow-primary/30 scale-105'
-                    : 'bg-white text-text-muted hover:text-primary hover:bg-gray-50 shadow-sm border border-gray-100'
-                }`}
+                className={`px-8 py-3 rounded-full font-heading font-bold text-sm md:text-base transition-all duration-300 ${activeTab === tab.id
+                  ? 'bg-primary text-white shadow-lg shadow-primary/30 scale-105'
+                  : 'bg-white text-text-muted hover:text-primary hover:bg-gray-50 shadow-sm border border-gray-100'
+                  }`}
               >
                 {tab.label}
               </button>
