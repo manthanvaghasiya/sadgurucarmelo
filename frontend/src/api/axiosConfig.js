@@ -5,9 +5,10 @@ const axiosInstance = axios.create({
   baseURL: 'http://localhost:5000/api',
 });
 
-// Interceptor to attach the JWT token to requests if it exists in localStorage
+// 1. Dynamic Request Interceptor
 axiosInstance.interceptors.request.use(
   (config) => {
+    // MUST be inside the interceptor to get a fresh token on every request!
     const token = localStorage.getItem('token');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
@@ -19,20 +20,14 @@ axiosInstance.interceptors.request.use(
   }
 );
 
-// Interceptor to handle 401 Unauthorized responses
+// 2. Auto-Logout Response Interceptor
 axiosInstance.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response && error.response.status === 401) {
-      // Clear session data
       localStorage.removeItem('token');
       localStorage.removeItem('user');
-      
-      // Notify user
-      toast.error('Your session expired for security reasons. Please log in again.');
-      
-      // Redirect
-      window.location.href = '/login';
+      window.location.href = '/'; // Kick them out securely if token is expired/invalid
     }
     return Promise.reject(error);
   }

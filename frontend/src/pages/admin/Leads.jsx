@@ -26,6 +26,7 @@ import {
   User as UserIcon,
   Calendar,
   ClipboardList,
+  Briefcase,
 } from 'lucide-react';
 import axiosInstance from '../../api/axiosConfig';
 import toast from 'react-hot-toast';
@@ -85,7 +86,8 @@ export default function Leads() {
   const [columnFilters, setColumnFilters] = useState({
     date: '',
     customer: '',
-    car: ''
+    car: '',
+    salesman: ''
   });
   const [activeFilterBox, setActiveFilterBox] = useState(null); // 'date', 'customer', 'car' or null
 
@@ -168,16 +170,38 @@ export default function Leads() {
         )
       );
 
-      return matchesDate && matchesCustomer && matchesCar;
+      // Salesman filter
+      const matchesSalesman = !columnFilters.salesman ||
+        (lead.assignedTo?.name && lead.assignedTo.name.toLowerCase().includes(columnFilters.salesman.toLowerCase()));
+
+      return matchesDate && matchesCustomer && matchesCar && matchesSalesman;
     });
 
     return result;
   }, [leads, searchQuery, columnFilters]);
 
-  // ── Today's Follow-ups Filtered Logic ──
+  // ── Today's Follow-ups & Activity Logic ──
   const todayLeads = useMemo(() => {
-    const todayStr = new Date().toISOString().split('T')[0];
-    return leads.filter(l => l.followUpDate && new Date(l.followUpDate).toISOString().split('T')[0] === todayStr);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Start of today midnight
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1); // Start of tomorrow midnight
+
+    return leads.filter(l => {
+      // Rule 1: Was it updated today? (Keeps it on the board as "Done" until tomorrow)
+      const isUpdatedToday = new Date(l.updatedAt) >= today && new Date(l.updatedAt) < tomorrow;
+      
+      // Rule 2: Is the scheduled follow-up today or in the past? (Carries missed leads over)
+      const isDueOrOverdue = l.followUpDate && new Date(l.followUpDate) < tomorrow;
+
+      return isUpdatedToday || isDueOrOverdue;
+    }).sort((a, b) => {
+      // Sort: Pending items at the top, Done items at the bottom
+      const aUpdatedToday = new Date(a.updatedAt) >= today;
+      const bUpdatedToday = new Date(b.updatedAt) >= today;
+      if (aUpdatedToday === bUpdatedToday) return new Date(b.updatedAt) - new Date(a.updatedAt);
+      return aUpdatedToday ? 1 : -1;
+    });
   }, [leads]);
 
   // ── Pagination ──
@@ -372,6 +396,7 @@ export default function Leads() {
                     <thead>
                       <tr className="bg-background/50">
                         <th className="px-6 py-4 text-left text-[10px] font-bold text-slate-500 uppercase tracking-wider font-heading">Customer</th>
+                        <th className="px-6 py-4 text-left text-[10px] font-bold text-slate-500 uppercase tracking-wider font-heading">Salesman</th>
                         <th className="px-6 py-4 text-left text-[10px] font-bold text-slate-500 uppercase tracking-wider font-heading">Car of Interest</th>
                         <th className="px-6 py-4 text-left text-[10px] font-bold text-slate-500 uppercase tracking-wider font-heading">Source</th>
                         <th className="px-6 py-4 text-left text-[10px] font-bold text-slate-500 uppercase tracking-wider font-heading text-center">Status</th>
@@ -382,6 +407,9 @@ export default function Leads() {
                       {todayLeads.map((lead) => {
                         const isUpdatedToday = new Date(lead.updatedAt).toDateString() === new Date().toDateString();
                         const sCfg = sourceConfig[lead.source] || sourceConfig['Website'];
+                        const stCfg = statusConfig[lead.status] || statusConfig['New'];
+                        const lastNote = lead.notes?.split('\n\n').filter(n => n.trim()).pop()?.replace(/^\[.*?\]/, '').trim();
+
                         return (
                           <tr key={lead._id} className="hover:bg-slate-50/80 transition-colors group">
                             <td className="px-6 py-4 whitespace-nowrap">
@@ -389,6 +417,14 @@ export default function Leads() {
                                 <span className="font-body text-sm font-bold text-text">{lead.customerName}</span>
                                 <span className="font-body text-[11px] text-text-muted flex items-center gap-1.5 mt-0.5">
                                   <Phone className="w-3 h-3" />{lead.phone}
+                                </span>
+                              </div>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <div className="flex items-center gap-1.5">
+                                <UserCircle className="w-4 h-4 text-text-muted/60" />
+                                <span className="font-body text-xs font-semibold text-text-muted capitalize">
+                                  {lead.assignedTo?.name || 'Unassigned'}
                                 </span>
                               </div>
                             </td>
@@ -415,17 +451,25 @@ export default function Leads() {
                               </span>
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-center">
-                              {isUpdatedToday ? (
-                                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-green-50 text-green-700 rounded-full font-body text-[10px] font-bold ring-1 ring-green-200">
-                                  <span className="w-1 h-1 rounded-full bg-green-600 animate-pulse" />
-                                  ✅ Logged
-                                </span>
-                              ) : (
-                                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-orange-50 text-orange-700 rounded-full font-body text-[10px] font-bold ring-1 ring-orange-200">
-                                  <span className="w-1 h-1 rounded-full bg-orange-600" />
-                                  ⏳ Pending
-                                </span>
-                              )}
+                              <div className="flex flex-col items-center gap-1.5">
+                                {isUpdatedToday ? (
+                                  <>
+                                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-green-50 text-green-700 rounded-full font-body text-[10px] font-bold ring-1 ring-green-200">
+                                      ✅ Done
+                                    </span>
+                                    {lastNote && (
+                                      <span className="font-body text-[10px] text-text-muted/60 italic max-w-[150px] truncate" title={lastNote}>
+                                        Reason: {lastNote}
+                                      </span>
+                                    )}
+                                  </>
+                                ) : (
+                                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-orange-50 text-orange-700 rounded-full font-body text-[10px] font-bold ring-1 ring-orange-200">
+                                    <span className="w-1 h-1 rounded-full bg-orange-600 animate-pulse" />
+                                    ⏳ Pending
+                                  </span>
+                                )}
+                              </div>
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-right">
                               <button
@@ -626,9 +670,36 @@ export default function Leads() {
                         </div>
                       )}
                     </th>
+                    {/* Salesman Column with Filter */}
+                    <th className="font-body text-[11px] font-bold text-text-muted uppercase tracking-wider py-4 bg-background/40 px-4 text-left relative filter-container">
+                      <div
+                        className="flex items-center justify-between cursor-pointer group hover:text-primary transition-colors"
+                        onClick={() => toggleFilter('salesman')}
+                      >
+                        <div className="flex items-center gap-1">
+                          Salesman
+                          {columnFilters.salesman && <span className="w-1.5 h-1.5 bg-primary rounded-full" />}
+                        </div>
+                        <ListFilter className={`w-3.5 h-3.5 transition-colors ${activeFilterBox === 'salesman' ? 'text-primary' : 'text-text-muted/40 group-hover:text-primary/60'}`} />
+                      </div>
 
-
-
+                      {activeFilterBox === 'salesman' && (
+                        <div className="absolute top-full left-0 mt-1 w-56 bg-white p-3 rounded-xl shadow-2xl ring-1 ring-black/[0.05] z-50 animate-in fade-in slide-in-from-top-1 duration-200">
+                          <input
+                            type="text"
+                            placeholder="Search salesman name..."
+                            autoFocus
+                            className="w-full px-3 py-2 bg-background border border-slate-100 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 font-normal text-slate-700 normal-case tracking-normal"
+                            value={columnFilters.salesman}
+                            onChange={(e) => {
+                              setColumnFilters({ ...columnFilters, salesman: e.target.value });
+                              setCurrentPage(1);
+                            }}
+                            onClick={(e) => e.stopPropagation()}
+                          />
+                        </div>
+                      )}
+                    </th>
                     <th className="font-body text-[11px] font-bold text-text-muted uppercase tracking-wider py-4 bg-background/40 px-4 text-left">History</th>
                     <th className="font-body text-[11px] font-bold text-text-muted uppercase tracking-wider py-4 bg-background/40 px-4 text-left relative group">
                       <div className="flex items-center gap-1 cursor-pointer w-max h-full">
@@ -739,6 +810,14 @@ export default function Leads() {
                             )}
                           </td>
 
+                          <td className="px-4 py-4">
+                            <div className="flex items-center gap-2 px-2 py-1 bg-primary/5 rounded-lg w-fit ring-1 ring-primary/10">
+                              <Briefcase className="w-3 h-3 text-primary/50" />
+                              <span className="font-body text-xs font-semibold text-text whitespace-nowrap">
+                                {lead.assignedTo?.name || 'Unassigned'}
+                              </span>
+                            </div>
+                          </td>
                           <td className="px-4 py-4">
                             <button onClick={() => setViewTarget(lead)} className="flex items-center gap-1.5 px-3 py-1.5 bg-surface text-primary border border-primary/20 hover:bg-primary/5 rounded-lg font-body text-xs font-semibold transition-colors">
                               <Eye className="w-3.5 h-3.5" /> View Log

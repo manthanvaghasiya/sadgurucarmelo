@@ -1,23 +1,42 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
+import axiosInstance from '../api/axiosConfig';
 
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
-  const [token, setToken] = useState(null);
+  // 1. Initialize state directly from localStorage so it is instant on render
+  const [user, setUser] = useState(() => {
+    try {
+      const savedUser = localStorage.getItem('user');
+      return savedUser ? JSON.parse(savedUser) : null;
+    } catch {
+      return null;
+    }
+  });
+  
+  const [token, setToken] = useState(() => localStorage.getItem('token') || null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const savedToken = localStorage.getItem('token');
-    const savedUser = localStorage.getItem('user');
+    const verifySession = async () => {
+      // If we have a token, we can verify the session in the background
+      if (token) {
+        try {
+          const res = await axiosInstance.get('/auth/me');
+          if (res.data.success) {
+            setUser(res.data.data);
+            localStorage.setItem('user', JSON.stringify(res.data.data));
+          }
+        } catch (error) {
+          console.error('Session verification failed');
+          // If 401 is received, the axios interceptor handles the auto-logout
+        }
+      }
+      setIsLoading(false);
+    };
 
-    if (savedToken && savedUser) {
-      setToken(savedToken);
-      setUser(JSON.parse(savedUser));
-    }
-    
-    setIsLoading(false);
-  }, []);
+    verifySession();
+  }, [token]);
 
   const login = (userData, userToken) => {
     setUser(userData);
@@ -31,8 +50,6 @@ export const AuthProvider = ({ children }) => {
     setToken(null);
     localStorage.removeItem('user');
     localStorage.removeItem('token');
-    
-    // Using window.location to safely redirect since AuthProvider is outside BrowserRouter
     window.location.href = '/';
   };
 
@@ -43,6 +60,4 @@ export const AuthProvider = ({ children }) => {
   );
 };
 
-export const useAuth = () => {
-  return useContext(AuthContext);
-};
+export const useAuth = () => useContext(AuthContext);

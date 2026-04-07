@@ -31,13 +31,6 @@ const leadSchema = new mongoose.Schema(
       trim: true,
     },
 
-    // ── Assignment ──
-    assignedTo: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
-      required: [true, 'Lead must be assigned to a user'],
-    },
-
     // ── CRM Data ──
     source: {
       type: String,
@@ -74,6 +67,13 @@ const leadSchema = new mongoose.Schema(
       type: Date,
       default: null,
     },
+
+    // 🚨 THE FIX: THIS LOCKS THE LEAD TO ONE SALESMAN 🚨
+    assignedTo: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      required: true,
+    },
   },
   {
     timestamps: true,
@@ -83,6 +83,7 @@ const leadSchema = new mongoose.Schema(
 // ── Indexes for dashboard queries ──
 leadSchema.index({ status: 1, createdAt: -1 });
 leadSchema.index({ urgency: 1 });
+leadSchema.index({ assignedTo: 1 }); // Makes filtering by salesman very fast
 
 const Lead = mongoose.model('Lead', leadSchema);
 export default Lead;

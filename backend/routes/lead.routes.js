@@ -14,7 +14,7 @@ router.get('/stats', protect, async (req, res) => {
     const endOfToday = new Date(startOfToday);
     endOfToday.setDate(endOfToday.getDate() + 1);
 
-    // Apply role-based filter: Admin sees all, Sales sees only their own
+    // 🚨 THE FIX: Admin sees all, Sales sees only their own stats
     const userFilter = req.user.role === 'admin' ? {} : { assignedTo: req.user.id };
 
     const [total, newCount, contacted, followUp, todayFollowUps] = await Promise.all([
@@ -30,13 +30,7 @@ router.get('/stats', protect, async (req, res) => {
 
     res.json({
       success: true,
-      data: {
-        total,
-        newCount,
-        contacted,
-        followUp,
-        todayFollowUps,
-      },
+      data: { total, newCount, contacted, followUp, todayFollowUps },
     });
   } catch (error) {
     console.error('Lead stats error:', error);
@@ -51,7 +45,7 @@ router.get('/', protect, async (req, res) => {
   try {
     const { status, urgency, source, sort } = req.query;
 
-    // Apply role-based filter
+    // 🚨 THE FIX: Admin sees all, Sales sees only their own leads
     const filter = req.user.role === 'admin' ? {} : { assignedTo: req.user.id };
 
     if (status) filter.status = status;
@@ -63,15 +57,33 @@ router.get('/', protect, async (req, res) => {
 
     const leads = await Lead.find(filter)
       .sort(sortBy)
-      .populate('carOfInterest', 'title make model year price');
+      .populate('carOfInterest', 'title make model year price')
+      .populate('assignedTo', 'name');
 
-    res.json({
-      success: true,
-      count: leads.length,
-      data: leads,
-    });
+    res.json({ success: true, count: leads.length, data: leads });
   } catch (error) {
     console.error('Get leads error:', error);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+});
+
+// ═══════════════════════════════════════════════
+//  GET /api/leads/:id — Get a single lead
+// ═══════════════════════════════════════════════
+router.get('/:id', protect, async (req, res) => {
+  try {
+    const lead = await Lead.findById(req.params.id)
+      .populate('carOfInterest', 'title make model year price');
+
+    if (!lead) return res.status(404).json({ success: false, message: 'Lead not found' });
+
+    // 🚨 SECURITY: Prevent Salesman A from viewing Salesman B's lead if they guess the ID
+    if (req.user.role !== 'admin' && lead.assignedTo.toString() !== req.user.id) {
+      return res.status(403).json({ success: false, message: 'Not authorized to view this lead' });
+    }
+
+    res.json({ success: true, data: lead });
+  } catch (error) {
     res.status(500).json({ success: false, message: 'Server error' });
   }
 });
@@ -81,14 +93,16 @@ router.get('/', protect, async (req, res) => {
 // ═══════════════════════════════════════════════
 router.post('/', protect, async (req, res) => {
   try {
-    // 👉 Automatically assign this lead to the logged-in user who created it
+    // 🚨 THE FIX: Automatically assign the new lead to the person creating it
     const leadData = {
       ...req.body,
       assignedTo: req.user.id
     };
+
     const lead = await Lead.create(leadData);
     res.status(201).json({ success: true, data: lead });
   } catch (error) {
+    console.error('Create lead error:', error);
     res.status(400).json({ success: false, message: error.message });
   }
 });
@@ -98,13 +112,19 @@ router.post('/', protect, async (req, res) => {
 // ═══════════════════════════════════════════════
 router.put('/:id', protect, async (req, res) => {
   try {
-    const lead = await Lead.findByIdAndUpdate(req.params.id, req.body, {
+    let lead = await Lead.findById(req.params.id);
+    if (!lead) return res.status(404).json({ success: false, message: 'Lead not found' });
+
+    // 🚨 SECURITY: Prevent Salesman A from editing Salesman B's lead
+    if (req.user.role !== 'admin' && lead.assignedTo.toString() !== req.user.id) {
+      return res.status(403).json({ success: false, message: 'Not authorized to edit this lead' });
+    }
+
+    lead = await Lead.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
       runValidators: true,
     });
-    if (!lead) {
-      return res.status(404).json({ success: false, message: 'Lead not found' });
-    }
+
     res.json({ success: true, data: lead });
   } catch (error) {
     res.status(400).json({ success: false, message: error.message });
@@ -116,10 +136,15 @@ router.put('/:id', protect, async (req, res) => {
 // ═══════════════════════════════════════════════
 router.delete('/:id', protect, async (req, res) => {
   try {
-    const lead = await Lead.findByIdAndDelete(req.params.id);
-    if (!lead) {
-      return res.status(404).json({ success: false, message: 'Lead not found' });
+    const lead = await Lead.findById(req.params.id);
+    if (!lead) return res.status(404).json({ success: false, message: 'Lead not found' });
+
+    // 🚨 SECURITY: Prevent Salesman A from deleting Salesman B's lead
+    if (req.user.role !== 'admin' && lead.assignedTo.toString() !== req.user.id) {
+      return res.status(403).json({ success: false, message: 'Not authorized to delete this lead' });
     }
+
+    await lead.deleteOne();
     res.json({ success: true, message: 'Lead deleted' });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Server error' });

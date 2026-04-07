@@ -86,17 +86,17 @@ function App() {
         {/* ── Sales Portal Routes ── */}
         <Route path="/sales/login" element={<Navigate to="/login" replace />} />
         <Route path="/sales" element={
-          <ProtectedRoute allowedRoles={['admin', 'sales']}>
+          <ProtectedRoute allowedRoles={['sales']}>
             <SalesDashboard />
           </ProtectedRoute>
         } />
         <Route path="/sales/add-lead" element={
-          <ProtectedRoute allowedRoles={['admin', 'sales']}>
+          <ProtectedRoute allowedRoles={['sales']}>
             <AddLead />
           </ProtectedRoute>
         } />
         <Route path="/sales/edit-lead/:id" element={
-          <ProtectedRoute allowedRoles={['admin', 'sales']}>
+          <ProtectedRoute allowedRoles={['sales']}>
             <EditLead />
           </ProtectedRoute>
         } />
