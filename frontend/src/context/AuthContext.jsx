@@ -3,6 +3,7 @@ import React, { createContext, useState, useEffect, useContext } from 'react';
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
+  // 1. Grab data synchronously from localStorage
   const [user, setUser] = useState(() => {
     try {
       const savedUser = localStorage.getItem('user');
@@ -11,13 +12,14 @@ export const AuthProvider = ({ children }) => {
       return null;
     }
   });
-  
   const [token, setToken] = useState(() => localStorage.getItem('token') || null);
+  
+  // 2. CRITICAL: Force isLoading to be TRUE on the very first render cycle
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Instantly finish loading since we rely on localStorage for initial state.
-    // Invalid tokens will be caught by the Axios 401 interceptor during API calls.
+    // 3. Immediately turn off loading after the component successfully mounts.
+    // This creates a micro-delay that prevents the Router from panic-redirecting.
     setIsLoading(false);
   }, []);
 
