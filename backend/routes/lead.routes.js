@@ -10,17 +10,20 @@ const router = express.Router();
 router.get('/stats', protect, async (req, res) => {
   try {
     const now = new Date();
-    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
     const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
     const endOfToday = new Date(startOfToday);
     endOfToday.setDate(endOfToday.getDate() + 1);
 
+    // Apply role-based filter: Admin sees all, Sales sees only their own
+    const userFilter = req.user.role === 'admin' ? {} : { assignedTo: req.user.id };
+
     const [total, newCount, contacted, followUp, todayFollowUps] = await Promise.all([
-      Lead.countDocuments(),
-      Lead.countDocuments({ status: 'New' }),
-      Lead.countDocuments({ status: 'Contacted' }),
-      Lead.countDocuments({ status: 'Follow-up' }),
+      Lead.countDocuments({ ...userFilter }),
+      Lead.countDocuments({ ...userFilter, status: 'New' }),
+      Lead.countDocuments({ ...userFilter, status: 'Contacted' }),
+      Lead.countDocuments({ ...userFilter, status: 'Follow-up' }),
       Lead.countDocuments({
+        ...userFilter,
         followUpDate: { $gte: startOfToday, $lt: endOfToday },
       }),
     ]);
@@ -48,13 +51,13 @@ router.get('/', protect, async (req, res) => {
   try {
     const { status, urgency, source, sort } = req.query;
 
-    // Build filter
-    const filter = {};
+    // Apply role-based filter
+    const filter = req.user.role === 'admin' ? {} : { assignedTo: req.user.id };
+
     if (status) filter.status = status;
     if (urgency) filter.urgency = urgency;
     if (source) filter.source = source;
 
-    // Build sort
     let sortBy = { createdAt: -1 };
     if (sort === 'urgency') sortBy = { urgency: 1, createdAt: -1 };
 
@@ -74,37 +77,18 @@ router.get('/', protect, async (req, res) => {
 });
 
 // ═══════════════════════════════════════════════
-//  GET /api/leads/:id — Get a single lead
-// ═══════════════════════════════════════════════
-router.get('/:id', protect, async (req, res) => {
-  try {
-    const lead = await Lead.findById(req.params.id)
-      .populate('carOfInterest', 'title make model year price');
-
-    if (!lead) {
-      return res.status(404).json({ success: false, message: 'Lead not found' });
-    }
-
-    res.json({ success: true, data: lead });
-  } catch (error) {
-    if (error.kind === 'ObjectId') {
-      return res.status(404).json({ success: false, message: 'Lead not found' });
-    }
-    console.error('Get single lead error:', error);
-    res.status(500).json({ success: false, message: 'Server error' });
-  }
-});
-
-// ═══════════════════════════════════════════════
 //  POST /api/leads — Create new lead
 // ═══════════════════════════════════════════════
 router.post('/', protect, async (req, res) => {
   try {
-    const leadData = { ...req.body };
+    // 👉 Automatically assign this lead to the logged-in user who created it
+    const leadData = {
+      ...req.body,
+      assignedTo: req.user.id
+    };
     const lead = await Lead.create(leadData);
     res.status(201).json({ success: true, data: lead });
   } catch (error) {
-    console.error('Create lead error:', error);
     res.status(400).json({ success: false, message: error.message });
   }
 });

@@ -17,17 +17,17 @@ const generateToken = (userId, role) => {
 // ═══════════════════════════════════════════════
 router.post('/login', async (req, res) => {
   try {
-    const { employeeId, password } = req.body;
+    const { email, password } = req.body;
 
-    if (!employeeId || !password) {
+    if (!email || !password) {
       return res.status(400).json({
         success: false,
-        message: 'Please provide Employee ID and password',
+        message: 'Please provide Email and password',
       });
     }
 
     // Find user and explicitly select the password field
-    const user = await User.findOne({ employeeId: employeeId.toUpperCase() }).select('+password');
+    const user = await User.findOne({ email }).select('+password');
 
     if (!user) {
       return res.status(401).json({
@@ -56,7 +56,7 @@ router.post('/login', async (req, res) => {
       data: {
         _id: user._id,
         name: user.name,
-        employeeId: user.employeeId,
+        email: user.email,
         role: user.role,
         token: generateToken(user._id, user.role),
       },
@@ -72,22 +72,22 @@ router.post('/login', async (req, res) => {
 // ═══════════════════════════════════════════════
 router.post('/register', protect, admin, async (req, res) => {
   try {
-    const { name, employeeId, password, phone, address, role } = req.body;
+    const { name, email, password, phone, address } = req.body;
 
-    // Check if employee ID already exists
-    const exists = await User.findOne({ employeeId: employeeId.toUpperCase() });
+    // Check if email already exists
+    const exists = await User.findOne({ email });
     if (exists) {
       return res.status(400).json({
         success: false,
-        message: 'Employee ID already exists',
+        message: 'Email already exists',
       });
     }
 
     const userData = {
       name,
-      employeeId: employeeId.toUpperCase(),
+      email,
       password,
-      role: role || 'sales',
+      role: 'sales', // FORCE: Only Sales accounts can be registered
     };
     if (phone) userData.phone = phone;
     if (address) userData.address = address;
@@ -99,7 +99,7 @@ router.post('/register', protect, admin, async (req, res) => {
       data: {
         _id: user._id,
         name: user.name,
-        employeeId: user.employeeId,
+        email: user.email,
         role: user.role,
         phone: user.phone,
         address: user.address,
@@ -112,7 +112,7 @@ router.post('/register', protect, admin, async (req, res) => {
     if (error.code === 11000) {
       const duplicateField = Object.keys(error.keyPattern)[0];
       let errorMessage = 'Account already exists';
-      if (duplicateField === 'employeeId') errorMessage = 'Employee ID already exists';
+      if (duplicateField === 'email') errorMessage = 'Email already exists';
       if (duplicateField === 'phone') errorMessage = 'Phone number already exists';
 
       return res.status(400).json({ success: false, message: errorMessage });
@@ -135,7 +135,7 @@ router.get('/me', protect, async (req, res) => {
       data: {
         _id: user._id,
         name: user.name,
-        employeeId: user.employeeId,
+        email: user.email,
         role: user.role,
         phone: user.phone,
         address: user.address,
@@ -216,7 +216,7 @@ router.get('/users', protect, admin, async (req, res) => {
 // ═══════════════════════════════════════════════
 router.put('/users/:id', protect, admin, async (req, res) => {
   try {
-    const { isActive, role, password, name, employeeId, phone, address } = req.body;
+    const { isActive, role, password, name, email, phone, address } = req.body;
     const user = await User.findById(req.params.id).select('+password');
 
     if (!user) {
@@ -227,7 +227,7 @@ router.put('/users/:id', protect, admin, async (req, res) => {
     if (role) user.role = role;
     if (password) user.password = password;
     if (name) user.name = name;
-    if (employeeId) user.employeeId = employeeId.toUpperCase();
+    if (email) user.email = email;
     if (phone !== undefined) user.phone = phone;
     if (address !== undefined) user.address = address;
 
@@ -238,7 +238,7 @@ router.put('/users/:id', protect, admin, async (req, res) => {
       data: {
         _id: user._id,
         name: user.name,
-        employeeId: user.employeeId,
+        email: user.email,
         role: user.role,
         isActive: user.isActive,
         phone: user.phone,

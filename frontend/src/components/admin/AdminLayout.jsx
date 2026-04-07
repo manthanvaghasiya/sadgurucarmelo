@@ -14,6 +14,7 @@ import {
   Mail,
   Image as ImageIcon,
 } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
 
 const navItems = [
   { name: 'Dashboard', path: '/admin', icon: LayoutDashboard },
@@ -36,8 +37,10 @@ export default function AdminLayout() {
     return location.pathname.startsWith(path);
   };
 
+  const { logout } = useAuth();
+ 
   const handleLogout = () => {
-    navigate('/admin/login');
+    logout();
   };
 
   return (

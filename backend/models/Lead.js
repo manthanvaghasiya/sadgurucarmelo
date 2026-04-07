@@ -31,6 +31,13 @@ const leadSchema = new mongoose.Schema(
       trim: true,
     },
 
+    // ── Assignment ──
+    assignedTo: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      required: [true, 'Lead must be assigned to a user'],
+    },
+
     // ── CRM Data ──
     source: {
       type: String,

@@ -17,6 +17,9 @@ import {
   Lock,
   Key,
   Edit2,
+  Mail,
+  Phone,
+  MapPin,
 } from 'lucide-react';
 import axiosInstance from '../../api/axiosConfig';
 
@@ -81,10 +84,13 @@ export default function AdminSettings() {
   // ── Create or Edit Staff ──
   const onSubmitStaff = async (data) => {
     try {
+      // Find original member if editing to keep their current role
+      const member = editTarget ? staff.find(s => s._id === editTarget) : null;
+
       const payload = {
         name: data.name.trim(),
-        employeeId: data.employeeId.trim().toUpperCase(),
-        role: data.role || 'sales',
+        email: data.email.trim().toLowerCase(),
+        role: editTarget ? (member?.role || 'sales') : 'sales', // Use existing role for edits, 'sales' for new
       };
       if (data.password) payload.password = data.password;
       if (data.phone?.trim()) payload.phone = data.phone.trim();
@@ -116,7 +122,7 @@ export default function AdminSettings() {
   const handleEditStaff = (member) => {
     resetStaff({
       name: member.name,
-      employeeId: member.employeeId,
+      email: member.email,
       role: member.role,
       phone: member.phone || '',
       address: member.address || ''
@@ -219,11 +225,10 @@ export default function AdminSettings() {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-body text-sm font-semibold transition-all duration-200 ${
-                activeTab === tab.id
-                  ? 'bg-primary text-white shadow-md shadow-primary/15'
-                  : 'text-text-muted hover:text-text hover:bg-background'
-              }`}
+              className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-body text-sm font-semibold transition-all duration-200 ${activeTab === tab.id
+                ? 'bg-primary text-white shadow-md shadow-primary/15'
+                : 'text-text-muted hover:text-text hover:bg-background'
+                }`}
             >
               <Icon className="w-4 h-4" />
               {tab.label}
@@ -273,13 +278,14 @@ export default function AdminSettings() {
                   {staffErrors.name && <p className="text-red-500 text-xs font-body mt-1">{staffErrors.name.message}</p>}
                 </div>
                 <div>
-                  <label className="block font-body text-xs font-semibold text-text-muted mb-1.5 uppercase tracking-wide">Employee ID *</label>
+                  <label className="block font-body text-xs font-semibold text-text-muted mb-1.5 uppercase tracking-wide">Email Address *</label>
                   <input
-                    {...registerStaff('employeeId', { required: 'Employee ID is required' })}
-                    className="w-full px-4 py-3 bg-background rounded-xl border border-gray-200 font-body text-sm text-text placeholder:text-text-muted/60 outline-none focus:border-primary/30 focus:ring-2 focus:ring-primary/10 uppercase"
-                    placeholder="e.g. SCM001"
+                    type="email"
+                    {...registerStaff('email', { required: 'Email is required' })}
+                    className="w-full px-4 py-3 bg-background rounded-xl border border-gray-200 font-body text-sm text-text placeholder:text-text-muted/60 outline-none focus:border-primary/30 focus:ring-2 focus:ring-primary/10"
+                    placeholder="e.g. rahul@gmail.com"
                   />
-                  {staffErrors.employeeId && <p className="text-red-500 text-xs font-body mt-1">{staffErrors.employeeId.message}</p>}
+                  {staffErrors.email && <p className="text-red-500 text-xs font-body mt-1">{staffErrors.email.message}</p>}
                 </div>
                 <div>
                   <label className="block font-body text-xs font-semibold text-text-muted mb-1.5 uppercase tracking-wide">
@@ -294,14 +300,12 @@ export default function AdminSettings() {
                   {staffErrors.password && <p className="text-red-500 text-xs font-body mt-1">{staffErrors.password.message}</p>}
                 </div>
                 <div>
-                  <label className="block font-body text-xs font-semibold text-text-muted mb-1.5 uppercase tracking-wide">Role *</label>
-                  <select
-                    {...registerStaff('role')}
-                    className="w-full px-4 py-3 bg-background rounded-xl border border-gray-200 font-body text-sm text-text outline-none focus:border-primary/30 focus:ring-2 focus:ring-primary/10"
-                  >
-                    <option value="sales">Salesman</option>
-                    <option value="admin">Admin</option>
-                  </select>
+                  <label className="block font-body text-xs font-semibold text-text-muted mb-1.5 uppercase tracking-wide">Role</label>
+                  <input
+                    value="Salesman"
+                    readOnly
+                    className="w-full px-4 py-3 bg-gray-50 rounded-xl border border-gray-200 font-body text-sm text-text-muted cursor-not-allowed outline-none"
+                  />
                 </div>
                 <div>
                   <label className="block font-body text-xs font-semibold text-text-muted mb-1.5 uppercase tracking-wide">Phone</label>
@@ -356,12 +360,25 @@ export default function AdminSettings() {
                       <div className="w-11 h-11 bg-primary/5 rounded-xl flex items-center justify-center shrink-0">
                         <UserCircle className="w-6 h-6 text-primary/40" />
                       </div>
-                      <div className="min-w-0">
+                      <div className="min-w-0 flex flex-col gap-1">
                         <p className="font-body text-sm font-semibold text-text">{member.name}</p>
-                        <p className="font-body text-xs text-text-muted mt-0.5">
-                          {member.employeeId}
-                          {member.phone && <span className="ml-2">• {member.phone}</span>}
-                        </p>
+                        <div className="flex items-center gap-3 flex-wrap">
+                          {member.email && (
+                            <p className="font-body text-xs text-text-muted flex items-center gap-1">
+                              <Mail className="w-3 h-3" /> {member.email}
+                            </p>
+                          )}
+                          {member.phone && (
+                            <p className="font-body text-xs text-text-muted flex items-center gap-1">
+                              <Phone className="w-3 h-3" /> {member.phone}
+                            </p>
+                          )}
+                        </div>
+                        {member.address && (
+                          <p className="font-body text-xs text-text-muted/70 flex items-center gap-1">
+                            <MapPin className="w-3 h-3" /> {member.address}
+                          </p>
+                        )}
                       </div>
                     </div>
                     <div className="flex items-center gap-3 shrink-0">

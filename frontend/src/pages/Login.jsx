@@ -1,9 +1,9 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import { useAuth } from '../context/AuthContext';
-import { Eye, EyeOff, Lock, User, ArrowRight } from 'lucide-react';
+import { Eye, EyeOff, Lock, User, ArrowRight, Home } from 'lucide-react';
 
 export default function Login() {
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm();
@@ -14,9 +14,9 @@ export default function Login() {
   const onSubmit = async (data) => {
     try {
       const { default: axiosInstance } = await import('../api/axiosConfig');
-      // Backend auth endpoint expects 'employeeId'
+      // Backend auth endpoint expects 'email'
       const response = await axiosInstance.post('/auth/login', {
-        employeeId: data.username, 
+        email: data.email, 
         password: data.password
       });
       
@@ -42,6 +42,15 @@ export default function Login() {
         <div className="absolute -top-40 -right-40 w-96 h-96 bg-accent/5 rounded-full blur-3xl" />
         <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
       </div>
+ 
+      {/* Back to Home Button */}
+      <Link 
+        to="/" 
+        className="absolute top-6 left-6 md:top-8 md:left-8 flex items-center gap-2 text-text-muted hover:text-primary transition-colors font-body text-sm font-semibold z-20 bg-surface/50 backdrop-blur-sm px-4 py-2 rounded-xl border border-gray-100 shadow-sm"
+      >
+        <Home className="w-4 h-4" />
+        Back to Home
+      </Link>
 
       <div className="w-full max-w-[420px] relative z-10">
         {/* Branding & Logo */}
@@ -61,22 +70,22 @@ export default function Login() {
         <div className="bg-surface rounded-2xl shadow-xl shadow-primary/5 border border-gray-100 p-8">
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
             
-            {/* Username Input */}
+            {/* Email Input */}
             <div className="space-y-2">
               <label className="font-body text-sm font-semibold text-text">
-                Username
+                Email Address
               </label>
               <div className="relative">
-                <User className={`absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 ${errors.username ? 'text-red-500' : 'text-text-muted'}`} />
+                <User className={`absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 ${errors.email ? 'text-red-500' : 'text-text-muted'}`} />
                 <input
-                  type="text"
-                  {...register('username', { required: 'Username is required' })}
-                  placeholder="Enter your username"
-                  className={`w-full pl-10 pr-4 py-3 bg-background border ${errors.username ? 'border-red-500 ring-1 ring-red-500/20' : 'border-gray-100'} focus:border-primary/30 rounded-xl font-body text-sm text-text placeholder:text-text-muted/50 outline-none transition-all focus:ring-2 focus:ring-primary/10`}
+                  type="email"
+                  {...register('email', { required: 'Email is required' })}
+                  placeholder="admin@gmail.com"
+                  className={`w-full pl-10 pr-4 py-3 bg-background border ${errors.email ? 'border-red-500 ring-1 ring-red-500/20' : 'border-gray-100'} focus:border-primary/30 rounded-xl font-body text-sm text-text placeholder:text-text-muted/50 outline-none transition-all focus:ring-2 focus:ring-primary/10`}
                 />
               </div>
-              {errors.username && (
-                <span className="text-red-500 text-xs font-body font-medium">{errors.username.message}</span>
+              {errors.email && (
+                <span className="text-red-500 text-xs font-body font-medium">{errors.email.message}</span>
               )}
             </div>
 

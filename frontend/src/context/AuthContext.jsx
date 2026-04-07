@@ -33,7 +33,7 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem('token');
     
     // Using window.location to safely redirect since AuthProvider is outside BrowserRouter
-    window.location.href = '/login';
+    window.location.href = '/';
   };
 
   return (

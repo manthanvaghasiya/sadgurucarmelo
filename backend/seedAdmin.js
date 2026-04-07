@@ -19,18 +19,16 @@ const seedAdmin = async () => {
         // Delete any corrupt previously seeded admins without an employeeId
         await User.deleteMany({ role: 'admin' });
 
-        // The auth route checks `employeeId` strictly.
-        // We will map their requested 'admin@gmail.com' to `employeeId`.
+        // The auth route now checks `email` strictly.
         const masterAdmin = new User({
             name: 'Master Admin',
-            employeeId: 'admin@gmail.com',
             email: 'admin@gmail.com',
             password: 'Sadguru@123', // Model pre-save hook handles bcrypt automatically now
             role: 'admin',
         });
 
         await masterAdmin.save();
-        console.log('✅ Admin successfully created! You may now log in with -> Username: admin@gmail.com');
+        console.log('✅ Admin successfully created! You may now log in with -> Email: admin@gmail.com');
         process.exit(0);
     } catch (error) {
         console.error('❌ Fatal Error creating admin user:', error);

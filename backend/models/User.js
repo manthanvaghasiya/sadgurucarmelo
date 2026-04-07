@@ -13,11 +13,11 @@ const userSchema = new mongoose.Schema(
       type: String,
       trim: true,
     },
-    employeeId: {
+    email: {
       type: String,
-      required: [true, 'Employee ID is required'],
+      required: [true, 'Email is required'],
       unique: true,
-      uppercase: true,
+      lowercase: true,
       trim: true,
     },
     password: {
