@@ -70,10 +70,10 @@ export default function SalesDashboard() {
 
     return leads.filter(l => {
       const isUpdatedToday = new Date(l.updatedAt) >= today && new Date(l.updatedAt) < tomorrow;
-      
+
       // Rule 1: It is PENDING if the follow-up date is today or past, AND it is not closed.
       const isPending = l.followUpDate && new Date(l.followUpDate) < tomorrow && l.status !== 'Closed';
-      
+
       // Rule 2: It is DONE if it was updated today AND (the salesman pushed the follow-up date to the future OR closed it).
       const isDoneToday = isUpdatedToday && (l.status === 'Closed' || (l.followUpDate && new Date(l.followUpDate) >= tomorrow));
 
@@ -82,7 +82,7 @@ export default function SalesDashboard() {
       // Sort: Pending items at the top, Done items at the bottom
       const aDone = new Date(a.updatedAt) >= today && (a.status === 'Closed' || new Date(a.followUpDate) >= tomorrow);
       const bDone = new Date(b.updatedAt) >= today && (b.status === 'Closed' || new Date(b.followUpDate) >= tomorrow);
-      
+
       if (aDone === bDone) return new Date(b.updatedAt) - new Date(a.updatedAt);
       return aDone ? 1 : -1;
     });
@@ -270,7 +270,7 @@ export default function SalesDashboard() {
       {/* ── Sticky Top Header ── */}
       <header className="sticky top-0 z-40 bg-surface/80 backdrop-blur-md border-b border-gray-100 px-4 sm:px-6 py-4 shadow-sm">
         <div className="max-w-4xl mx-auto flex items-center justify-between gap-4">
-          
+
           {/* Left Side: Welcome */}
           <div className="min-w-0 flex-1">
             <p className="font-body text-[10px] text-text-muted uppercase tracking-wider truncate">Sales Executive</p>
@@ -281,14 +281,14 @@ export default function SalesDashboard() {
 
           {/* Right Side: Actions */}
           <div className="flex items-center gap-2 sm:gap-3 shrink-0">
-            
+
             {/* 1. New Lead Button (Bigger / Wider) */}
             <button
               onClick={() => navigate('/sales/add-lead')}
               className="flex items-center justify-center gap-1.5 sm:gap-2 px-4 py-2 sm:px-6 sm:py-2.5 bg-primary hover:bg-primary-hover text-white rounded-xl font-body text-xs sm:text-sm font-bold transition-all shadow-md shadow-primary/20"
             >
               <Plus className="w-4 h-4 sm:w-5 sm:h-5" />
-              <span className="hidden xs:inline">Create New Lead</span>
+              <span className="hidden sm:inline ml-1.5">New lead</span>
             </button>
 
             {/* 2. Logout Button (Smaller / Compact) */}
@@ -298,7 +298,7 @@ export default function SalesDashboard() {
               className="flex items-center justify-center p-2 sm:px-3 sm:py-2.5 bg-red-50 hover:bg-red-100 text-red-600 rounded-xl font-body text-xs sm:text-sm font-bold transition-colors border border-red-100 shrink-0"
             >
               <LogOut className="w-4 h-4 sm:w-4 sm:h-4" />
-              <span className="hidden sm:inline ml-1.5">Logout</span>
+
             </button>
 
           </div>
@@ -352,7 +352,7 @@ export default function SalesDashboard() {
 
                 const isUpdatedToday = new Date(lead.updatedAt) >= today && new Date(lead.updatedAt) < tomorrow;
                 const isActuallyDone = isUpdatedToday && (lead.status === 'Closed' || (lead.followUpDate && new Date(lead.followUpDate) >= tomorrow));
-                
+
                 const uCfg = urgencyConfig[lead.urgency] || urgencyConfig['Warm'];
                 const UrgencyIcon = uCfg.icon;
                 return (
@@ -502,16 +502,7 @@ export default function SalesDashboard() {
           </div>
         </div>
 
-        {/* ── Quick Actions ── */}
-        <div className="grid grid-cols-1">
-          <button
-            onClick={() => navigate('/sales/add-lead')}
-            className="flex items-center justify-center gap-2 p-4 bg-primary hover:bg-primary-hover text-white rounded-2xl font-body text-base font-bold transition-all shadow-md shadow-primary/20"
-          >
-            <Plus className="w-6 h-6" />
-            Create New Lead
-          </button>
-        </div>
+
       </div>
     </div>
   );

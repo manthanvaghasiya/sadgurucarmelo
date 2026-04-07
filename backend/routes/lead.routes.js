@@ -89,7 +89,7 @@ router.get('/:id', protect, async (req, res) => {
 });
 
 // ═══════════════════════════════════════════════
-//  POST /api/leads — Create new lead
+//  POST /api/leads — 
 // ═══════════════════════════════════════════════
 router.post('/', protect, async (req, res) => {
   try {
