@@ -20,6 +20,7 @@ export default function AddLead() {
   const {
     register,
     handleSubmit,
+    watch,
     formState: { errors, isSubmitting },
   } = useForm({
     defaultValues: {
@@ -27,16 +28,23 @@ export default function AddLead() {
     },
   });
 
+  const selectedCarOfInterest = watch('carOfInterest');
+
   const onSubmit = async (data) => {
     try {
+      let combinedNotes = data.notes || '';
+      if (data.carOfInterest === 'custom' && data.customCarName) {
+        combinedNotes = `Looking for: ${data.customCarName}${combinedNotes ? `\n\n${combinedNotes}` : ''}`;
+      }
+
       const payload = {
         customerName: data.customerName,
         phone: data.phone,
         email: data.email || '',
         source: data.source,
         urgency,
-        notes: data.notes ? `[${new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}] ${data.notes}` : '',
-        carOfInterest: data.carOfInterest || undefined,
+        notes: combinedNotes ? `[${new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}] ${combinedNotes}` : '',
+        carOfInterest: (data.carOfInterest && data.carOfInterest !== 'custom') ? data.carOfInterest : undefined,
         followUpDate: data.followUpDate || undefined,
       };
 
@@ -157,24 +165,39 @@ export default function AddLead() {
             </div>
 
             {/* Car of Interest */}
-            <div>
-              <label className="block font-body text-xs font-semibold text-text-muted mb-1.5 uppercase tracking-wide">
-                Car of Interest
-              </label>
-              <div className="relative">
-                <Car className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
-                <select
-                  {...register('carOfInterest')}
-                  className="w-full pl-11 pr-4 py-3 bg-background rounded-xl border border-gray-200 font-body text-sm text-text outline-none focus:border-primary/30 focus:ring-2 focus:ring-primary/10 appearance-none cursor-pointer"
-                >
-                  <option value="">Not specific / General inquiry</option>
-                  {availableCars.map((car) => (
-                    <option key={car._id || car.id} value={car._id || car.id}>
-                      {car.year} {car.make} {car.model} — ₹{car.price?.toLocaleString('en-IN')}
-                    </option>
-                  ))}
-                </select>
+            <div className="space-y-3">
+              <div>
+                <label className="block font-body text-xs font-semibold text-text-muted mb-1.5 uppercase tracking-wide">
+                  Car of Interest
+                </label>
+                <div className="relative">
+                  <Car className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
+                  <select
+                    {...register('carOfInterest')}
+                    className="w-full pl-11 pr-4 py-3 bg-background rounded-xl border border-gray-200 font-body text-sm text-text outline-none focus:border-primary/30 focus:ring-2 focus:ring-primary/10 appearance-none cursor-pointer"
+                  >
+                    <option value="">Not specific / General inquiry</option>
+                    {availableCars.map((car) => (
+                      <option key={car._id || car.id} value={car._id || car.id}>
+                        {car.year} {car.make} {car.model} — ₹{car.price?.toLocaleString('en-IN')}
+                      </option>
+                    ))}
+                    <option value="custom" className="font-bold text-primary">➕ Other / Custom Car...</option>
+                  </select>
+                </div>
               </div>
+
+              {selectedCarOfInterest === 'custom' && (
+                <div className="relative animate-in fade-in slide-in-from-top-2 duration-300">
+                  <input
+                    {...register('customCarName', { required: 'Please enter the car details' })}
+                    placeholder="Enter customized car name (e.g., Hyundai Creta 2022)"
+                    className="w-full px-4 py-3 bg-primary/5 rounded-xl border border-primary/20 font-body text-sm text-text placeholder:text-text-muted/60 outline-none focus:border-primary/40 focus:ring-2 focus:ring-primary/10"
+                    autoFocus
+                  />
+                  {errors.customCarName && <p className="text-red-500 text-xs font-body mt-1">{errors.customCarName.message}</p>}
+                </div>
+              )}
             </div>
 
             {/* Urgency */}

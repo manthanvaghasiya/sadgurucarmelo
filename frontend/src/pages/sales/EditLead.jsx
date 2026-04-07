@@ -279,18 +279,38 @@ export default function EditLead() {
           </div>
 
           {/* ── Submit ── */}
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            className="w-full flex items-center justify-center gap-2 py-4 bg-primary hover:bg-primary-hover text-white rounded-2xl font-heading font-bold text-base transition-all shadow-lg shadow-primary/15 disabled:opacity-50 active:scale-[0.99]"
-          >
-            {isSubmitting ? (
-              <Loader2 className="w-5 h-5 animate-spin" />
-            ) : (
-              <CheckCircle2 className="w-5 h-5" />
+          <div className="flex flex-col sm:flex-row gap-3">
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="flex-1 flex items-center justify-center gap-2 py-4 bg-primary hover:bg-primary-hover text-white rounded-2xl font-heading font-bold text-base transition-all shadow-lg shadow-primary/15 disabled:opacity-50 active:scale-[0.99]"
+            >
+              {isSubmitting ? (
+                <Loader2 className="w-5 h-5 animate-spin" />
+              ) : (
+                <CheckCircle2 className="w-5 h-5" />
+              )}
+              {isSubmitting ? 'Updating Lead...' : 'Update Lead'}
+            </button>
+
+            {!isSubmitting && (
+              <button
+                type="button"
+                onClick={async () => {
+                  try {
+                    await axiosInstance.put(`/leads/${id}`, { status: 'Closed' });
+                    toast.success('Deal marked as Complete! 🎉');
+                    navigate('/sales');
+                  } catch (err) {
+                    toast.error('Failed to complete deal');
+                  }
+                }}
+                className="flex-1 py-4 bg-green-500 hover:bg-green-600 text-white rounded-2xl font-heading font-bold text-base transition-all shadow-lg shadow-green-500/20 active:scale-[0.99] flex items-center justify-center gap-2"
+              >
+                ✅ Complete Deal
+              </button>
             )}
-            {isSubmitting ? 'Updating Lead...' : 'Update Lead'}
-          </button>
+          </div>
         </form>
       </div>
     </div>

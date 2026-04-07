@@ -180,27 +180,30 @@ export default function Leads() {
     return result;
   }, [leads, searchQuery, columnFilters]);
 
-  // ── Today's Follow-ups & Activity Logic ──
+  // ── Strict Today's Follow-ups & Activity Logic ──
   const todayLeads = useMemo(() => {
     const today = new Date();
-    today.setHours(0, 0, 0, 0); // Start of today midnight
+    today.setHours(0, 0, 0, 0);
     const tomorrow = new Date(today);
-    tomorrow.setDate(tomorrow.getDate() + 1); // Start of tomorrow midnight
+    tomorrow.setDate(tomorrow.getDate() + 1);
 
     return leads.filter(l => {
-      // Rule 1: Was it updated today? (Keeps it on the board as "Done" until tomorrow)
       const isUpdatedToday = new Date(l.updatedAt) >= today && new Date(l.updatedAt) < tomorrow;
-      
-      // Rule 2: Is the scheduled follow-up today or in the past? (Carries missed leads over)
-      const isDueOrOverdue = l.followUpDate && new Date(l.followUpDate) < tomorrow;
 
-      return isUpdatedToday || isDueOrOverdue;
+      // Rule 1: It is PENDING if the follow-up date is today or in the past, AND it is not closed.
+      const isPending = l.followUpDate && new Date(l.followUpDate) < tomorrow && l.status !== 'Closed';
+
+      // Rule 2: It is DONE if it was updated today AND (the salesman pushed the follow-up date to the future OR closed it).
+      const isDoneToday = isUpdatedToday && (l.status === 'Closed' || (l.followUpDate && new Date(l.followUpDate) >= tomorrow));
+
+      return isPending || isDoneToday;
     }).sort((a, b) => {
       // Sort: Pending items at the top, Done items at the bottom
-      const aUpdatedToday = new Date(a.updatedAt) >= today;
-      const bUpdatedToday = new Date(b.updatedAt) >= today;
-      if (aUpdatedToday === bUpdatedToday) return new Date(b.updatedAt) - new Date(a.updatedAt);
-      return aUpdatedToday ? 1 : -1;
+      const aDone = new Date(a.updatedAt) >= today && (a.status === 'Closed' || (a.followUpDate && new Date(a.followUpDate) >= tomorrow));
+      const bDone = new Date(b.updatedAt) >= today && (b.status === 'Closed' || (b.followUpDate && new Date(b.followUpDate) >= tomorrow));
+
+      if (aDone === bDone) return new Date(b.updatedAt) - new Date(a.updatedAt);
+      return aDone ? 1 : -1;
     });
   }, [leads]);
 
@@ -405,7 +408,13 @@ export default function Leads() {
                     </thead>
                     <tbody className="divide-y divide-slate-50">
                       {todayLeads.map((lead) => {
-                        const isUpdatedToday = new Date(lead.updatedAt).toDateString() === new Date().toDateString();
+                        const today = new Date();
+                        today.setHours(0, 0, 0, 0);
+                        const tomorrow = new Date(today);
+                        tomorrow.setDate(tomorrow.getDate() + 1);
+
+                        const isUpdatedToday = new Date(lead.updatedAt) >= today && new Date(lead.updatedAt) < tomorrow;
+                        const isActuallyDone = isUpdatedToday && (lead.status === 'Closed' || (lead.followUpDate && new Date(lead.followUpDate) >= tomorrow));
                         const sCfg = sourceConfig[lead.source] || sourceConfig['Website'];
                         const stCfg = statusConfig[lead.status] || statusConfig['New'];
                         const lastNote = lead.notes?.split('\n\n').filter(n => n.trim()).pop()?.replace(/^\[.*?\]/, '').trim();
@@ -452,10 +461,10 @@ export default function Leads() {
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-center">
                               <div className="flex flex-col items-center gap-1.5">
-                                {isUpdatedToday ? (
+                                {isActuallyDone ? (
                                   <>
                                     <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-green-50 text-green-700 rounded-full font-body text-[10px] font-bold ring-1 ring-green-200">
-                                      ✅ Done
+                                      ✅ {lead.status === 'Closed' ? 'Complete' : 'Done'}
                                     </span>
                                     {lastNote && (
                                       <span className="font-body text-[10px] text-text-muted/60 italic max-w-[150px] truncate" title={lastNote}>
@@ -584,7 +593,7 @@ export default function Leads() {
                           <div className="relative">
                             <input
                               type="date"
-                              className="w-full pl-3 pr-3 py-2 bg-background border border-slate-100 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 font-normal text-slate-700"
+                              className="w-full pl-3 pr-8 py-2 bg-background border border-slate-100 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 font-normal text-slate-700"
                               value={columnFilters.date}
                               onChange={(e) => {
                                 setColumnFilters({ ...columnFilters, date: e.target.value });
@@ -598,10 +607,11 @@ export default function Leads() {
                                   e.stopPropagation();
                                   setColumnFilters({ ...columnFilters, date: '' });
                                   setCurrentPage(1);
+                                  setActiveFilterBox(null);
                                 }}
-                                className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-text-muted hover:text-red-500"
+                                className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 text-text-muted hover:text-red-500 transition-colors bg-background"
                               >
-                                <X className="w-3 h-3" />
+                                <X className="w-3.5 h-3.5" />
                               </button>
                             )}
                           </div>
@@ -624,18 +634,33 @@ export default function Leads() {
 
                       {activeFilterBox === 'customer' && (
                         <div className="absolute top-full left-0 mt-1 w-56 bg-white p-3 rounded-xl shadow-2xl ring-1 ring-black/[0.05] z-50 animate-in fade-in slide-in-from-top-1 duration-200">
-                          <input
-                            type="text"
-                            placeholder="Search customer name..."
-                            autoFocus
-                            className="w-full px-3 py-2 bg-background border border-slate-100 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 font-normal text-slate-700 normal-case tracking-normal"
-                            value={columnFilters.customer}
-                            onChange={(e) => {
-                              setColumnFilters({ ...columnFilters, customer: e.target.value });
-                              setCurrentPage(1);
-                            }}
-                            onClick={(e) => e.stopPropagation()}
-                          />
+                          <div className="relative">
+                            <input
+                              type="text"
+                              placeholder="Search customer name..."
+                              autoFocus
+                              className="w-full pl-3 pr-8 py-2 bg-background border border-slate-100 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 font-normal text-slate-700 normal-case tracking-normal"
+                              value={columnFilters.customer}
+                              onChange={(e) => {
+                                setColumnFilters({ ...columnFilters, customer: e.target.value });
+                                setCurrentPage(1);
+                              }}
+                              onClick={(e) => e.stopPropagation()}
+                            />
+                            {columnFilters.customer && (
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setColumnFilters({ ...columnFilters, customer: '' });
+                                  setCurrentPage(1);
+                                  setActiveFilterBox(null);
+                                }}
+                                className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 text-text-muted hover:text-red-500 transition-colors bg-background"
+                              >
+                                <X className="w-3.5 h-3.5" />
+                              </button>
+                            )}
+                          </div>
                         </div>
                       )}
                     </th>
@@ -655,18 +680,33 @@ export default function Leads() {
 
                       {activeFilterBox === 'car' && (
                         <div className="absolute top-full left-0 mt-1 w-56 bg-white p-3 rounded-xl shadow-2xl ring-1 ring-black/[0.05] z-50 animate-in fade-in slide-in-from-top-1 duration-200">
-                          <input
-                            type="text"
-                            placeholder="Search car make/model..."
-                            autoFocus
-                            className="w-full px-3 py-2 bg-background border border-slate-100 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 font-normal text-slate-700 normal-case tracking-normal"
-                            value={columnFilters.car}
-                            onChange={(e) => {
-                              setColumnFilters({ ...columnFilters, car: e.target.value });
-                              setCurrentPage(1);
-                            }}
-                            onClick={(e) => e.stopPropagation()}
-                          />
+                          <div className="relative">
+                            <input
+                              type="text"
+                              placeholder="Search car make/model..."
+                              autoFocus
+                              className="w-full pl-3 pr-8 py-2 bg-background border border-slate-100 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 font-normal text-slate-700 normal-case tracking-normal"
+                              value={columnFilters.car}
+                              onChange={(e) => {
+                                setColumnFilters({ ...columnFilters, car: e.target.value });
+                                setCurrentPage(1);
+                              }}
+                              onClick={(e) => e.stopPropagation()}
+                            />
+                            {columnFilters.car && (
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setColumnFilters({ ...columnFilters, car: '' });
+                                  setCurrentPage(1);
+                                  setActiveFilterBox(null);
+                                }}
+                                className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 text-text-muted hover:text-red-500 transition-colors bg-background"
+                              >
+                                <X className="w-3.5 h-3.5" />
+                              </button>
+                            )}
+                          </div>
                         </div>
                       )}
                     </th>
@@ -685,18 +725,33 @@ export default function Leads() {
 
                       {activeFilterBox === 'salesman' && (
                         <div className="absolute top-full left-0 mt-1 w-56 bg-white p-3 rounded-xl shadow-2xl ring-1 ring-black/[0.05] z-50 animate-in fade-in slide-in-from-top-1 duration-200">
-                          <input
-                            type="text"
-                            placeholder="Search salesman name..."
-                            autoFocus
-                            className="w-full px-3 py-2 bg-background border border-slate-100 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 font-normal text-slate-700 normal-case tracking-normal"
-                            value={columnFilters.salesman}
-                            onChange={(e) => {
-                              setColumnFilters({ ...columnFilters, salesman: e.target.value });
-                              setCurrentPage(1);
-                            }}
-                            onClick={(e) => e.stopPropagation()}
-                          />
+                          <div className="relative">
+                            <input
+                              type="text"
+                              placeholder="Search salesman name..."
+                              autoFocus
+                              className="w-full pl-3 pr-8 py-2 bg-background border border-slate-100 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 font-normal text-slate-700 normal-case tracking-normal"
+                              value={columnFilters.salesman}
+                              onChange={(e) => {
+                                setColumnFilters({ ...columnFilters, salesman: e.target.value });
+                                setCurrentPage(1);
+                              }}
+                              onClick={(e) => e.stopPropagation()}
+                            />
+                            {columnFilters.salesman && (
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setColumnFilters({ ...columnFilters, salesman: '' });
+                                  setCurrentPage(1);
+                                  setActiveFilterBox(null);
+                                }}
+                                className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 text-text-muted hover:text-red-500 transition-colors bg-background"
+                              >
+                                <X className="w-3.5 h-3.5" />
+                              </button>
+                            )}
+                          </div>
                         </div>
                       )}
                     </th>
@@ -709,13 +764,13 @@ export default function Leads() {
                         <select
                           value={sourceFilter}
                           onChange={(e) => handleSourceFilter(e.target.value)}
-                          className="absolute inset-0 opacity-0 cursor-pointer w-full h-full text-transparent"
+                          className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
                         >
-                          <option value="All">All Sources</option>
-                          <option value="Walk-in">Walk-in</option>
-                          <option value="WhatsApp">WhatsApp</option>
-                          <option value="Phone">Phone</option>
-                          <option value="Website">Website</option>
+                          <option value="All" className="text-slate-800 bg-white font-semibold">All Sources</option>
+                          <option value="Walk-in" className="text-slate-800 bg-white font-semibold">Walk-in</option>
+                          <option value="WhatsApp" className="text-slate-800 bg-white font-semibold">WhatsApp</option>
+                          <option value="Phone" className="text-slate-800 bg-white font-semibold">Phone</option>
+                          <option value="Website" className="text-slate-800 bg-white font-semibold">Website</option>
                         </select>
                       </div>
                     </th>
@@ -727,12 +782,12 @@ export default function Leads() {
                         <select
                           value={urgencyFilter}
                           onChange={(e) => handleUrgencyFilter(e.target.value)}
-                          className="absolute inset-0 opacity-0 cursor-pointer w-full h-full text-transparent"
+                          className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
                         >
-                          <option value="All">All Urgency</option>
-                          <option value="Hot">Hot</option>
-                          <option value="Warm">Warm</option>
-                          <option value="Cold">Cold</option>
+                          <option value="All" className="text-slate-800 bg-white font-semibold">All Urgency</option>
+                          <option value="Hot" className="text-slate-800 bg-white font-semibold">Hot</option>
+                          <option value="Warm" className="text-slate-800 bg-white font-semibold">Warm</option>
+                          <option value="Cold" className="text-slate-800 bg-white font-semibold">Cold</option>
                         </select>
                       </div>
                     </th>
@@ -744,13 +799,13 @@ export default function Leads() {
                         <select
                           value={statusFilter}
                           onChange={(e) => handleStatusFilter(e.target.value)}
-                          className="absolute inset-0 opacity-0 cursor-pointer w-full h-full text-transparent"
+                          className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
                         >
-                          <option value="All">All Statuses</option>
-                          <option value="New">New</option>
-                          <option value="Contacted">Contacted</option>
-                          <option value="Follow-up">Follow-up</option>
-                          <option value="Closed">Closed</option>
+                          <option value="All" className="text-slate-800 bg-white font-semibold">All Statuses</option>
+                          <option value="New" className="text-slate-800 bg-white font-semibold">New</option>
+                          <option value="Contacted" className="text-slate-800 bg-white font-semibold">Contacted</option>
+                          <option value="Follow-up" className="text-slate-800 bg-white font-semibold">Follow-up</option>
+                          <option value="Closed" className="text-slate-800 bg-white font-semibold">Closed</option>
                         </select>
                       </div>
                     </th>

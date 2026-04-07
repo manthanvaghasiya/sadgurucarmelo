@@ -1,10 +1,8 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
-import axiosInstance from '../api/axiosConfig';
 
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-  // 1. Initialize state directly from localStorage so it is instant on render
   const [user, setUser] = useState(() => {
     try {
       const savedUser = localStorage.getItem('user');
@@ -18,25 +16,10 @@ export const AuthProvider = ({ children }) => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const verifySession = async () => {
-      // If we have a token, we can verify the session in the background
-      if (token) {
-        try {
-          const res = await axiosInstance.get('/auth/me');
-          if (res.data.success) {
-            setUser(res.data.data);
-            localStorage.setItem('user', JSON.stringify(res.data.data));
-          }
-        } catch (error) {
-          console.error('Session verification failed');
-          // If 401 is received, the axios interceptor handles the auto-logout
-        }
-      }
-      setIsLoading(false);
-    };
-
-    verifySession();
-  }, [token]);
+    // Instantly finish loading since we rely on localStorage for initial state.
+    // Invalid tokens will be caught by the Axios 401 interceptor during API calls.
+    setIsLoading(false);
+  }, []);
 
   const login = (userData, userToken) => {
     setUser(userData);
