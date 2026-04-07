@@ -12,7 +12,9 @@ import {
   CheckCircle2,
   AlertCircle,
   GripVertical,
+  RotateCw,
 } from 'lucide-react';
+import VR360Uploader from '../../components/admin/VR360Uploader';
 
 // Reusable Select component
 function FormSelect({ label, options, placeholder, register, error }) {
@@ -282,7 +284,8 @@ export default function AddCar() {
       bodyType: '', color: '', registration: '', description: '', features: '',
       airConditioner: '', powerWindows: '', sunroof: '', parkingSensors: '',
       displacement: '', maxPower: '', driveType: '', cylinders: '',
-      isCertified: false, isPetipack: false, validVimo: false
+      isCertified: false, isPetipack: false, validVimo: false,
+      spinImages: []
     }
   });
 
@@ -294,6 +297,7 @@ export default function AddCar() {
   // Files
   const [photos, setPhotos] = useState([]);
   const [vrImage, setVrImage] = useState([]);
+  const [spinImages, setSpinImages] = useState([]);
 
   const onSubmit = async (data) => {
     try {
@@ -311,6 +315,11 @@ export default function AddCar() {
       formData.append('registration', data.registration);
       formData.append('description', data.description);
       formData.append('status', 'Available');
+      
+      // Add spin images from state (array of URLs)
+      if (spinImages.length > 0) {
+        formData.append('spinImages', spinImages.join(','));
+      }
 
       formData.append('airConditioner', data.airConditioner);
       formData.append('powerWindows', data.powerWindows);
@@ -350,6 +359,7 @@ export default function AddCar() {
       reset();
       setPhotos([]);
       setVrImage([]);
+      setSpinImages([]);
 
       // Instantly navigate — the car is already in global state
       navigate('/admin/inventory');
@@ -609,6 +619,30 @@ export default function AddCar() {
                   accept="image/*"
                   highlight
                 />
+              </div>
+            </div>
+
+            {/* NEW: 360° Exterior Spin - High Resolution */}
+            <div className="relative mt-8">
+              <div className="absolute -inset-1 bg-gradient-to-r from-[#10b981]/20 via-[#10b981]/10 to-[#10b981]/20 rounded-3xl blur-sm" />
+              <div className="relative bg-surface rounded-2xl border-2 border-[#10b981]/20 p-6 sm:p-8">
+                <div className="flex items-center gap-2 mb-6">
+                  <RotateCw className="w-4 h-4 text-[#10b981]" />
+                  <span className="font-body text-xs font-bold text-[#10b981] uppercase tracking-wider">
+                    360° Exterior Spin — Direct-to-Cloud
+                  </span>
+                </div>
+                
+                <VR360Uploader 
+                  onUploadComplete={(urls) => setSpinImages(urls)}
+                  initialImages={spinImages}
+                />
+                
+                <div className="mt-4 p-4 bg-background/50 rounded-xl border border-[#10b981]/10">
+                  <p className="font-body text-xs text-text-muted leading-relaxed">
+                    <span className="font-bold text-[#10b981]">Pro-Tip:</span> To ensure the best 360° spin experience, upload between 24 and 36 photos taken at equal intervals around the car. These images will be optimized automatically by Cloudinary.
+                  </p>
+                </div>
               </div>
             </div>
           </div>

@@ -13,7 +13,9 @@ import {
   CheckCircle2,
   AlertCircle,
   GripVertical,
+  RotateCw,
 } from 'lucide-react';
+import VR360Uploader from '../../components/admin/VR360Uploader';
 
 // Reusable Select component
 function FormSelect({ label, options, placeholder, register, error }) {
@@ -185,6 +187,7 @@ export default function EditCar() {
   const [loading, setLoading] = useState(true);
   const [existingImages, setExistingImages] = useState([]);
   const [photos, setPhotos] = useState([]);
+  const [spinImages, setSpinImages] = useState([]);
 
   const addPhotos = (newFiles) => setPhotos((prev) => [...prev, ...newFiles]);
   const removePhoto = (index) => setPhotos((prev) => prev.filter((_, i) => i !== index));
@@ -203,7 +206,8 @@ export default function EditCar() {
       bodyType: '', color: '', registration: '', description: '', features: '',
       airConditioner: '', powerWindows: '', sunroof: '', parkingSensors: '',
       displacement: '', maxPower: '', driveType: '', cylinders: '',
-      isCertified: false, isPetipack: false, validVimo: false
+      isCertified: false, isPetipack: false, validVimo: false,
+      spinImages: []
     }
   });
 
@@ -215,6 +219,7 @@ export default function EditCar() {
         const car = res.data.data || res.data;
 
         setExistingImages(car.images?.length > 0 ? car.images : (car.image ? [car.image] : []));
+        setSpinImages(car.spinImages || []);
 
         const badges = car.badges || [];
         reset({
@@ -280,6 +285,11 @@ export default function EditCar() {
       formData.append('maxPower', data.maxPower);
       formData.append('driveType', data.driveType);
       formData.append('cylinders', data.cylinders);
+      
+      // Add spin images from state (array of URLs)
+      if (spinImages.length > 0) {
+        formData.append('spinImages', spinImages.join(','));
+      }
       
       if (data.features) {
         formData.append('features', data.features);
@@ -552,8 +562,31 @@ export default function EditCar() {
               files={photos}
               onFilesAdded={addPhotos}
               onRemoveFile={removePhoto}
-              accept="image/*"
             />
+          </div>
+
+          {/* 360° Exterior Spin - High Resolution */}
+          <div className="relative mt-12">
+            <div className="absolute -inset-1 bg-gradient-to-r from-[#10b981]/20 via-[#10b981]/10 to-[#10b981]/20 rounded-3xl blur-sm" />
+            <div className="relative bg-surface rounded-2xl border-2 border-[#10b981]/20 p-6 sm:p-8">
+              <div className="flex items-center gap-2 mb-6">
+                <RotateCw className="w-4 h-4 text-[#10b981]" />
+                <span className="font-body text-xs font-bold text-[#10b981] uppercase tracking-wider">
+                  360° Exterior Spin — Direct-to-Cloud
+                </span>
+              </div>
+              
+              <VR360Uploader 
+                onUploadComplete={(urls) => setSpinImages(urls)}
+                initialImages={spinImages}
+              />
+              
+              <div className="mt-4 p-4 bg-background/50 rounded-xl border border-[#10b981]/10">
+                <p className="font-body text-xs text-text-muted leading-relaxed">
+                  <span className="font-bold text-[#10b981]">Note:</span> You can add more photos or remove current ones. The 360° spinner will automatically update on the buyer's side.
+                </p>
+              </div>
+            </div>
           </div>
         </section>
       </div>

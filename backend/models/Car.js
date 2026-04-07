@@ -104,6 +104,10 @@ const carSchema = new mongoose.Schema(
       type: [String], // Array of image URLs
       default: [],
     },
+    spinImages: {
+      type: [String], // Array of URLs for 360° spin
+      default: [],
+    },
     vr360Image: {
       type: String, // Single panorama URL
       default: '',

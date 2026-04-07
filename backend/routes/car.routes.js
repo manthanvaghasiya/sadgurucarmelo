@@ -171,6 +171,10 @@ router.post('/', protect, admin, upload.array('images', 10), async (req, res) =>
     if (typeof carData.features === 'string') {
       carData.features = carData.features.split(',').map(f => f.trim()).filter(Boolean);
     }
+
+    if (typeof carData.spinImages === 'string') {
+      carData.spinImages = carData.spinImages.split(',').map(u => u.trim()).filter(Boolean);
+    }
     
     if (req.files && req.files.length > 0) {
       const imageUrls = req.files.map(file => file.path);
@@ -198,6 +202,10 @@ router.put('/:id', protect, admin, upload.array('images', 10), async (req, res) 
     
     if (typeof updateData.features === 'string') {
       updateData.features = updateData.features.split(',').map(f => f.trim()).filter(Boolean);
+    }
+
+    if (typeof updateData.spinImages === 'string') {
+      updateData.spinImages = updateData.spinImages.split(',').map(u => u.trim()).filter(Boolean);
     }
 
     if (req.files && req.files.length > 0) {

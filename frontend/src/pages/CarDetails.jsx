@@ -1,8 +1,9 @@
 import { useParams } from 'react-router-dom';
 import { useState, useEffect } from 'react';
-import { Fuel, Settings2, User, Gauge, Calendar, MessageCircle, MapPin, Star, Tag, Check, ShieldCheck, Palette, FileText } from 'lucide-react';
+import { Fuel, Settings2, User, Gauge, Calendar, MessageCircle, MapPin, Star, Tag, Check, ShieldCheck, Palette, FileText, RotateCw, Image as ImageIcon } from 'lucide-react';
 import axiosInstance from '../api/axiosConfig';
 import CarCard from '../components/CarCard';
+import Car360Viewer from '../components/Car360Viewer';
 
 import { getCarWhatsAppLink } from '../utils/whatsapp';
 
@@ -13,6 +14,7 @@ export default function CarDetails() {
     const [error, setError] = useState('');
     const [activeImage, setActiveImage] = useState(null);
     const [relatedCars, setRelatedCars] = useState([]);
+    const [viewMode, setViewMode] = useState('standard'); // 'standard' or '360'
 
     const whatsappUrl = car ? getCarWhatsAppLink(car) : '#';
 
@@ -106,10 +108,30 @@ export default function CarDetails() {
                         <div className="bg-surface p-4 rounded-2xl shadow-sm border border-gray-100">
                             {/* Main Viewer */}
                             <div className="relative w-full aspect-video bg-gray-200 rounded-2xl overflow-hidden mb-4 shadow-lg group">
-                                <img src={activeImage} alt="Car View" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.02]" />
+                                {viewMode === '360' && car.spinImages?.length > 0 ? (
+                                    <Car360Viewer images={car.spinImages} title="360° EXTERIOR SPIN" />
+                                ) : (
+                                    <img src={activeImage} alt="Car View" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.02]" />
+                                )}
 
-                                <div className="absolute top-4 left-4 bg-primary text-white text-[10px] font-heading font-extrabold px-3 py-1.5 rounded flex items-center gap-1.5 uppercase tracking-wider z-10 shadow-sm backdrop-blur-md bg-opacity-90">
-                                    VEHICLE VIEW
+                                <div className="absolute top-4 left-4 flex gap-2 z-10">
+                                    <div className="bg-primary text-white text-[10px] font-heading font-extrabold px-3 py-1.5 rounded flex items-center gap-1.5 uppercase tracking-wider shadow-sm backdrop-blur-md bg-opacity-90">
+                                        VEHICLE VIEW
+                                    </div>
+                                    
+                                    {car.spinImages?.length > 0 && (
+                                        <button 
+                                            onClick={() => setViewMode(viewMode === '360' ? 'standard' : '360')}
+                                            className={`flex items-center gap-2 px-3 py-1.5 rounded text-[10px] font-heading font-extrabold uppercase tracking-wider shadow-sm backdrop-blur-md transition-all ${
+                                                viewMode === '360' 
+                                                ? 'bg-accent text-white hover:bg-accent-hover' 
+                                                : 'bg-white/90 text-accent hover:bg-white'
+                                            }`}
+                                        >
+                                            {viewMode === '360' ? <ImageIcon className="w-3 h-3" /> : <RotateCw className="w-3 h-3" />}
+                                            {viewMode === '360' ? 'Gallery View' : '360° SPIN'}
+                                        </button>
+                                    )}
                                 </div>
                             </div>
 
@@ -117,11 +139,14 @@ export default function CarDetails() {
                             {(car.images && car.images.length > 0) && (
                                 <div className="flex overflow-x-auto gap-3 pb-2 scrollbar-thin scrollbar-thumb-gray-200 scrollbar-track-transparent">
                                     {car.images.map((img, i) => {
-                                        const isActive = activeImage === img;
+                                        const isActive = activeImage === img && viewMode === 'standard';
                                         return (
                                             <button 
                                                 key={i} 
-                                                onClick={() => setActiveImage(img)}
+                                                onClick={() => {
+                                                    setActiveImage(img);
+                                                    setViewMode('standard');
+                                                }}
                                                 className={`relative shrink-0 w-24 sm:w-32 aspect-video bg-gray-200 rounded-lg overflow-hidden cursor-pointer transition-all duration-300 focus:outline-none 
                                                     ${isActive ? 'ring-2 ring-red-600 ring-offset-2 opacity-100 z-10' : 'opacity-60 hover:opacity-100 hover:ring-2 hover:ring-primary/30 hover:ring-offset-1'}`
                                                 }
