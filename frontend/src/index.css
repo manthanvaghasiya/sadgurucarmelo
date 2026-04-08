@@ -2,20 +2,24 @@
 @import "tailwindcss";
 
 @theme {
+  /* Brand Identity Colors */
+  --color-brand-orange: #F59423;
+  --color-brand-dark: #363535;
+
   /* Global Color Variables */
   --color-primary: #0f172a;
   /* Deep Slate/Navy for Headers & Main branding */
   --color-primary-hover: #1e293b;
-  --color-accent: #25D366;
-  /* WhatsApp Green for high-conversion CTAs */
-  --color-accent-hover: #128C7E;
+  --color-accent: var(--color-brand-orange);
+  /* Use Brand Orange as primary accent */
+  --color-accent-hover: #e0831a;
   --color-surface: #ffffff;
   /* White for cards */
   --color-surface-hover: #f8fafc;
   --color-background: #f1f5f9;
   /* Light gray for the app background */
-  --color-text: #0f172a;
-  /* Dark text for readability */
+  --color-text: var(--color-brand-dark);
+  /* Use Brand Dark for primary text */
   --color-text-muted: #64748b;
   /* Muted text for specs and labels */
 

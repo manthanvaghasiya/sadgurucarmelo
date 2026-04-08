@@ -48,8 +48,8 @@ export default function TopNavigation() {
 
           {/* Desktop Call-to-Actions */}
           <div className="hidden md:flex items-center gap-5">
-            <a 
-              href="tel:+919913634447" 
+            <a
+              href="tel:+919913634447"
               className="bg-accent hover:bg-accent-hover text-white px-6 py-2.5 rounded-lg font-body font-bold text-sm flex items-center gap-2 transition-all shadow-md shadow-accent/20 active:scale-95"
             >
               <Phone className="w-4 h-4 fill-current" />
