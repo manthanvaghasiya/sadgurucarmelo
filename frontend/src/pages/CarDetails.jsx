@@ -122,14 +122,22 @@ export default function CarDetails() {
                                     {car.spinImages?.length > 0 && (
                                         <button 
                                             onClick={() => setViewMode(viewMode === '360' ? 'standard' : '360')}
-                                            className={`flex items-center gap-2 px-3 py-1.5 rounded text-[10px] font-heading font-extrabold uppercase tracking-wider shadow-sm backdrop-blur-md transition-all ${
+                                            className={`group/toggle flex items-center gap-2.5 px-4 py-2 rounded-full text-[11px] font-heading font-black uppercase tracking-widest shadow-2xl backdrop-blur-xl transition-all duration-300 border active:scale-95 ${
                                                 viewMode === '360' 
-                                                ? 'bg-accent text-white hover:bg-accent-hover' 
-                                                : 'bg-white/90 text-accent hover:bg-white'
+                                                ? 'bg-accent text-white border-accent shadow-accent/20' 
+                                                : 'bg-white/90 text-text border-white hover:bg-white hover:border-gray-100 hover:text-accent'
                                             }`}
                                         >
-                                            {viewMode === '360' ? <ImageIcon className="w-3 h-3" /> : <RotateCw className="w-3 h-3" />}
-                                            {viewMode === '360' ? 'Gallery View' : '360° SPIN'}
+                                            <div className={`relative flex items-center justify-center w-4 h-4 transition-transform duration-500 ${viewMode === '360' ? 'rotate-180' : 'rotate-0'}`}>
+                                                {viewMode === '360' ? (
+                                                    <ImageIcon className="w-3.5 h-3.5" />
+                                                ) : (
+                                                    <RotateCw className="w-3.5 h-3.5 group-hover/toggle:animate-spin" />
+                                                )}
+                                            </div>
+                                            <span className="relative">
+                                                {viewMode === '360' ? 'Gallery View' : '360° SPIN'}
+                                            </span>
                                         </button>
                                     )}
                                 </div>

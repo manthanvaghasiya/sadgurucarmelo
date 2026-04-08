@@ -286,9 +286,11 @@ export default function EditCar() {
       formData.append('driveType', data.driveType);
       formData.append('cylinders', data.cylinders);
       
-      // Add spin images from state (array of URLs)
-      if (spinImages.length > 0) {
-        formData.append('spinImages', spinImages.join(','));
+      // Add spin images from state (array of URLs) - Loop through to avoid .join(',') as per critical backend requirement
+      if (spinImages && spinImages.length > 0) {
+        spinImages.forEach((url) => {
+          if (url) formData.append('spinImages', url);
+        });
       }
       
       if (data.features) {

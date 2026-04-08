@@ -34,7 +34,7 @@ const VR360Uploader = ({ onUploadComplete, initialImages = [] }) => {
 
   const handleUpload = async () => {
     if (selectedFiles.length === 0) return;
-    
+
     setIsUploading(true);
     setError('');
     setOverallProgress(0);
@@ -49,9 +49,10 @@ const VR360Uploader = ({ onUploadComplete, initialImages = [] }) => {
       // Sequential upload to avoid browser/Cloudinary rate limits
       for (const file of selectedFiles) {
         const formData = new FormData();
-        formData.append('file', file);
         formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
-        formData.append('folder', 'car_360_spins');
+        formData.append('file', file);
+
+        console.log(`Uploading ${file.name} to Cloudinary...`);
 
         const response = await axios.post(cloudinaryUrl, formData, {
           onUploadProgress: (progressEvent) => {
@@ -74,10 +75,11 @@ const VR360Uploader = ({ onUploadComplete, initialImages = [] }) => {
       toast.success('360° Sequence Uploaded Successfully!');
 
     } catch (err) {
-      console.error("Upload failed", err);
-      setError('Upload failed. Please check your internet connection and try again.');
+      console.error("Cloudinary Error Details:", err.response?.data);
+      const errorMessage = err.response?.data?.error?.message || 'Upload failed. Please check your internet connection.';
+      setError(`Cloudinary Error: ${errorMessage}`);
       setIsUploading(false);
-      toast.error('Failed to upload images.');
+      toast.error(`Error: ${errorMessage}`);
     }
   };
 
@@ -109,20 +111,20 @@ const VR360Uploader = ({ onUploadComplete, initialImages = [] }) => {
       <p className="text-sm font-body text-text-muted mb-6">Select 24 to 36 sequential photos. We process them for zero-lag spinning.</p>
 
       {/* Dropzone Area */}
-      <div 
+      <div
         className="relative border-4 border-dashed border-gray-100 rounded-2xl p-10 text-center hover:bg-gray-50/50 hover:border-accent/20 transition-all cursor-pointer group"
         onClick={() => !isUploading && document.getElementById('vr-file-input').click()}
       >
-        <input 
+        <input
           id="vr-file-input"
-          type="file" 
-          multiple 
+          type="file"
+          multiple
           accept="image/*"
           onChange={handleFileSelect}
           disabled={isUploading}
           className="hidden"
         />
-        
+
         <div className="w-16 h-16 bg-accent/5 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
           <UploadCloud className="w-8 h-8 text-accent" />
         </div>
@@ -148,7 +150,7 @@ const VR360Uploader = ({ onUploadComplete, initialImages = [] }) => {
               <p className="font-heading font-black text-blue-900 text-sm">{selectedFiles.length} IMAGES READY</p>
               <p className="font-body text-[10px] text-blue-700 font-bold uppercase tracking-wider">Sequential processing active</p>
             </div>
-            <button 
+            <button
               onClick={handleUpload}
               className="px-6 py-2.5 bg-accent hover:bg-accent-hover text-white text-xs font-black rounded-xl shadow-lg shadow-accent/20 transition-all uppercase tracking-widest"
             >
@@ -161,7 +163,7 @@ const VR360Uploader = ({ onUploadComplete, initialImages = [] }) => {
             {selectedFiles.map((file, i) => (
               <div key={i} className="relative aspect-square rounded-lg overflow-hidden bg-gray-100 border border-gray-200">
                 <img src={URL.createObjectURL(file)} alt="" className="w-full h-full object-cover" />
-                <button 
+                <button
                   onClick={(e) => { e.stopPropagation(); removeSelectedFile(i); }}
                   className="absolute top-1 right-1 p-0.5 bg-black/50 text-white rounded-full hover:bg-red-500 transition-colors"
                 >
@@ -178,14 +180,14 @@ const VR360Uploader = ({ onUploadComplete, initialImages = [] }) => {
         <div className="mt-6 p-4 bg-gray-50 rounded-2xl border border-gray-100">
           <div className="flex justify-between text-xs font-bold text-text-muted mb-3 uppercase tracking-widest">
             <span className="flex items-center gap-2 italic">
-              <Loader2 className="w-4 h-4 animate-spin text-accent" /> 
+              <Loader2 className="w-4 h-4 animate-spin text-accent" />
               Cloud Processing...
             </span>
             <span>{overallProgress}%</span>
           </div>
           <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
-            <div 
-              className="bg-accent h-full rounded-full transition-all duration-300" 
+            <div
+              className="bg-accent h-full rounded-full transition-all duration-300"
               style={{ width: `${overallProgress}%` }}
             ></div>
           </div>

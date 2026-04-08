@@ -7,7 +7,6 @@ import {
   Upload,
   X,
   Image as ImageIcon,
-  View,
   ChevronDown,
   CheckCircle2,
   AlertCircle,
@@ -296,7 +295,6 @@ export default function AddCar() {
 
   // Files
   const [photos, setPhotos] = useState([]);
-  const [vrImage, setVrImage] = useState([]);
   const [spinImages, setSpinImages] = useState([]);
 
   const onSubmit = async (data) => {
@@ -316,9 +314,9 @@ export default function AddCar() {
       formData.append('description', data.description);
       formData.append('status', 'Available');
       
-      // Add spin images from state (array of URLs)
+      // Add spin images from state (array of URLs) - Loop through to avoid .join(',') as per critical backend requirement
       if (spinImages.length > 0) {
-        formData.append('spinImages', spinImages.join(','));
+        spinImages.forEach((url) => formData.append('spinImages', url));
       }
 
       formData.append('airConditioner', data.airConditioner);
@@ -358,7 +356,6 @@ export default function AddCar() {
       // Reset form
       reset();
       setPhotos([]);
-      setVrImage([]);
       setSpinImages([]);
 
       // Instantly navigate — the car is already in global state
@@ -370,9 +367,6 @@ export default function AddCar() {
 
   const addPhotos = (newFiles) => setPhotos((prev) => [...prev, ...newFiles]);
   const removePhoto = (index) => setPhotos((prev) => prev.filter((_, i) => i !== index));
-
-  const addVrImage = (newFiles) => setVrImage(newFiles.slice(0, 1)); // Only 1 VR image
-  const removeVrImage = () => setVrImage([]);
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="pb-24">
@@ -597,30 +591,7 @@ export default function AddCar() {
               accept="image/*"
             />
 
-            {/* VR 360° Image - Highlighted */}
-            <div className="relative">
-              {/* Glow effect */}
-              <div className="absolute -inset-1 bg-gradient-to-r from-accent/20 via-accent/10 to-accent/20 rounded-3xl blur-sm" />
-              <div className="relative bg-surface rounded-2xl border-2 border-accent/20 p-6 sm:p-8">
-                <div className="flex items-center gap-2 mb-2">
-                  <AlertCircle className="w-4 h-4 text-accent" />
-                  <span className="font-body text-xs font-bold text-accent uppercase tracking-wider">
-                    Premium Feature — Heavy File Upload
-                  </span>
-                </div>
-                <DropZone
-                  id="vr-360-image"
-                  title="Upload 360° Interior VR Image"
-                  description="Upload a single high-res equirectangular panorama (JPG/PNG). File can be up to 50MB."
-                  icon={View}
-                  files={vrImage}
-                  onFilesAdded={addVrImage}
-                  onRemoveFile={removeVrImage}
-                  accept="image/*"
-                  highlight
-                />
-              </div>
-            </div>
+
 
             {/* NEW: 360° Exterior Spin - High Resolution */}
             <div className="relative mt-8">
