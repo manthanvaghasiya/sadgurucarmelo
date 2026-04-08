@@ -1,9 +1,7 @@
-import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, Phone, MessageCircle, User } from 'lucide-react';
+import { Phone, User } from 'lucide-react';
 
 export default function TopNavigation() {
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const location = useLocation();
 
   const navLinks = [
@@ -46,66 +44,25 @@ export default function TopNavigation() {
             ))}
           </nav>
 
-          {/* Desktop Call-to-Actions */}
-          <div className="hidden md:flex items-center gap-5">
+          {/* Desktop Call-to-Actions (Now partially visible on Mobile) */}
+          <div className="flex items-center gap-2 md:gap-5">
             <a
               href="tel:+919913634447"
-              className="bg-accent hover:bg-accent-hover text-white px-6 py-2.5 rounded-lg font-body font-bold text-sm flex items-center gap-2 transition-all shadow-md shadow-accent/20 active:scale-95"
+              className="bg-accent hover:bg-accent-hover text-white p-2.5 md:px-6 md:py-2.5 rounded-lg md:rounded-lg font-body font-bold text-sm flex items-center gap-2 transition-all shadow-md shadow-accent/20 active:scale-95"
             >
-              <Phone className="w-4 h-4 fill-current" />
-              Call Me
+              <Phone className="w-5 h-5 md:w-4 md:h-4 fill-current" />
+              <span className="hidden md:inline">Call Me</span>
             </a>
             <Link
               to="/login"
-              className="border-2 border-primary text-primary hover:bg-primary hover:text-white px-5 py-2.5 rounded-lg font-body font-bold text-sm flex items-center gap-2 transition-colors"
+              className="border-2 border-primary text-primary hover:bg-primary hover:text-white p-2 md:px-5 md:py-2.5 rounded-lg font-body font-bold text-sm flex items-center gap-2 transition-colors"
             >
-              <User className="w-4 h-4" />
-              Login
+              <User className="w-5 h-5 md:w-4 md:h-4" />
+              <span className="hidden md:inline">Login</span>
             </Link>
           </div>
-
-          {/* Mobile Menu Toggle Button */}
-          <button
-            className="md:hidden p-2 text-text hover:bg-background rounded-lg transition-colors"
-            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-          >
-            {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-          </button>
         </div>
       </div>
-
-      {/* Mobile Navigation Dropdown */}
-      {isMobileMenuOpen && (
-        <div className="md:hidden bg-surface border-t border-gray-100 py-4 px-4 shadow-xl absolute w-full">
-          <div className="flex flex-col gap-2">
-            {navLinks.map((link) => (
-              <Link
-                key={link.name}
-                to={link.path}
-                onClick={() => setIsMobileMenuOpen(false)}
-                className={`font-body text-base font-bold p-3 rounded-lg transition-colors ${isActive(link.path) ? 'bg-primary/5 text-primary' : 'text-text hover:bg-background'
-                  }`}
-              >
-                {link.name}
-              </Link>
-            ))}
-
-            <div className="flex flex-col gap-3 mt-4 pt-4 border-t border-gray-100">
-              <a href="tel:+919913634447" className="flex items-center justify-center gap-2 bg-accent hover:bg-accent-hover text-white py-3.5 rounded-xl font-body font-bold shadow-md shadow-accent/20 transition-colors">
-                <Phone className="w-5 h-5 fill-current" />
-                Call Me
-              </a>
-              <Link
-                to="/login"
-                onClick={() => setIsMobileMenuOpen(false)}
-                className="flex items-center justify-center gap-2 border-2 border-primary text-primary hover:bg-primary hover:text-white py-3.5 rounded-xl font-body font-bold transition-colors"
-              >
-                <User className="w-5 h-5" /> Login / Portal Access
-              </Link>
-            </div>
-          </div>
-        </div>
-      )}
     </header>
   );
 }

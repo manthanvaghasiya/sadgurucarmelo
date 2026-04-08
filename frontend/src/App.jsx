@@ -31,6 +31,7 @@ import AddLead from './pages/sales/AddLead';
 import EditLead from './pages/sales/EditLead';
 
 import FloatingWhatsApp from './components/FloatingWhatsApp';
+import MobileBottomNav from './components/MobileBottomNav';
 
 function App() {
   return (
@@ -46,9 +47,10 @@ function App() {
             <Route
               path="/*"
               element={
-                <div className="flex flex-col min-h-screen bg-background font-body text-text relative">
+                <div className="flex flex-col min-h-screen bg-background font-body text-text relative pb-24 md:pb-0">
                   <TopNavigation />
                   <FloatingWhatsApp />
+                  <MobileBottomNav />
                   <main className="flex-grow">
                     <Routes>
                       <Route path="/" element={<Home />} />

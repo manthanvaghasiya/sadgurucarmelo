@@ -7,7 +7,7 @@ export default function FloatingWhatsApp() {
       href={getGeneralWhatsAppLink()}
       target="_blank"
       rel="noopener noreferrer"
-      className="fixed bottom-6 right-6 z-[9999] group flex flex-col items-center"
+      className="fixed bottom-28 md:bottom-6 right-6 z-[9999] group flex flex-col items-center"
       aria-label="Chat on WhatsApp"
     >
       <div className="relative">
