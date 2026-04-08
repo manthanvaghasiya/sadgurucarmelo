@@ -17,7 +17,7 @@ const Car360Viewer = ({ images = [], title = "360° SPIN" }) => {
 
     setPreloading(true);
     setLoadedCount(0);
-    
+
     let isMounted = true;
     const TOTAL_IMAGES = images.length;
 
@@ -63,18 +63,18 @@ const Car360Viewer = ({ images = [], title = "360° SPIN" }) => {
 
     const deltaX = startX - clientX;
     const sensitivity = 12; // 12px drag movement triggers a frame change
-    
+
     if (Math.abs(deltaX) > sensitivity) {
       const direction = deltaX > 0 ? 1 : -1;
       const steps = Math.floor(Math.abs(deltaX) / sensitivity);
-      
+
       setCurrentIndex((prev) => {
         // Infinite looping logic using Modulo arithmetic
         let next = (prev + direction * steps) % images.length;
         if (next < 0) next = images.length + next;
         return next;
       });
-      
+
       setStartX(clientX);
     }
   }, [isDragging, images.length, startX]);
@@ -122,7 +122,7 @@ const Car360Viewer = ({ images = [], title = "360° SPIN" }) => {
       >
         <AnimatePresence mode="wait">
           {preloading ? (
-            <motion.div 
+            <motion.div
               key="preloader"
               initial={{ opacity: 1 }}
               exit={{ opacity: 0 }}
@@ -134,7 +134,7 @@ const Car360Viewer = ({ images = [], title = "360° SPIN" }) => {
                   <span className="text-[10px] font-black text-accent">{Math.round((loadedCount / images.length) * 100)}%</span>
                 </div>
               </div>
-              
+
               <div className="text-center">
                 <h3 className="font-heading font-black text-text uppercase tracking-tighter text-xl mb-1">Preparing 360° Experience</h3>
                 <p className="font-body text-xs text-text-muted">High-resolution frame syncing...</p>
@@ -142,20 +142,20 @@ const Car360Viewer = ({ images = [], title = "360° SPIN" }) => {
 
               {/* Professional Progress Bar */}
               <div className="mt-8 w-64 h-1.5 bg-gray-100 rounded-full overflow-hidden border border-gray-200/50">
-                <motion.div 
+                <motion.div
                   className="h-full bg-accent"
                   initial={{ width: 0 }}
                   animate={{ width: `${(loadedCount / images.length) * 100}%` }}
                   transition={{ duration: 0.3 }}
                 />
               </div>
-              
+
               <p className="mt-3 font-body text-[10px] font-bold text-accent uppercase tracking-widest">
                 Optimizing {images.length} HD Frames
               </p>
             </motion.div>
           ) : (
-            <motion.div 
+            <motion.div
               key="viewer"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -171,7 +171,7 @@ const Car360Viewer = ({ images = [], title = "360° SPIN" }) => {
               />
 
               {/* UI Overlays */}
-              
+
               {/* 360° SPIN Badge */}
               <div className="absolute top-6 left-6 z-10">
                 <div className="flex items-center gap-2 px-4 py-2 bg-white/90 backdrop-blur-md rounded-full border border-gray-100 shadow-xl">
@@ -185,17 +185,11 @@ const Car360Viewer = ({ images = [], title = "360° SPIN" }) => {
                 </div>
               </div>
 
-              {/* Frame Counter Indicator */}
-              <div className="absolute top-6 right-6 z-10 px-3 py-1 bg-black/5 backdrop-blur-sm rounded-lg border border-black/5">
-                <span className="font-body text-[10px] font-bold text-text-muted">
-                  {String(currentIndex + 1).padStart(2, '0')} / {images.length}
-                </span>
-              </div>
 
               {/* Interaction Hint: "Drag to Rotate" */}
               <AnimatePresence>
                 {!hasInteracted && (
-                  <motion.div 
+                  <motion.div
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, scale: 0.95 }}
@@ -208,7 +202,7 @@ const Car360Viewer = ({ images = [], title = "360° SPIN" }) => {
                           Drag to Rotate
                         </span>
                       </div>
-                      
+
                       <div className="flex items-center gap-1.5 opacity-60">
                         <MousePointer2 className="w-3 h-3 text-text-muted" />
                         <span className="font-body text-[10px] font-bold text-text-muted uppercase">Interactive 3D View</span>
@@ -226,7 +220,8 @@ const Car360Viewer = ({ images = [], title = "360° SPIN" }) => {
       </div>
 
       {/* Tailwind Custom Animation for the hint */}
-      <style dangerouslySetInnerHTML={{ __html: `
+      <style dangerouslySetInnerHTML={{
+        __html: `
         @keyframes bounce-x {
           0%, 100% { transform: translateX(-25%); animation-timing-function: cubic-bezier(0.8, 0, 1, 1); }
           50% { transform: translateX(0); animation-timing-function: cubic-bezier(0, 0, 0.2, 1); }

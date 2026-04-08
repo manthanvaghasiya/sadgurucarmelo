@@ -1,10 +1,9 @@
 import { useParams } from 'react-router-dom';
 import { useState, useEffect } from 'react';
-import { Fuel, Settings2, User, Gauge, Calendar, MessageCircle, MapPin, Star, Tag, Check, ShieldCheck, Palette, FileText, RotateCw, Image as ImageIcon } from 'lucide-react';
+import { Fuel, Settings2, User, Gauge, MessageCircle, MapPin, Star, Tag, Check, ShieldCheck, Palette, RotateCw } from 'lucide-react';
 import axiosInstance from '../api/axiosConfig';
 import CarCard from '../components/CarCard';
 import Car360Viewer from '../components/Car360Viewer';
-
 import { getCarWhatsAppLink } from '../utils/whatsapp';
 
 export default function CarDetails() {
@@ -26,13 +25,17 @@ export default function CarDetails() {
                     const fetchedCar = res.data.data;
                     setCar(fetchedCar);
                     setActiveImage(fetchedCar.image || (fetchedCar.images && fetchedCar.images[0]) || 'https://placehold.co/1200x800/e2e8f0/64748b?text=No+Image');
-                    
-                    // Fetch "Similar Cars" based on Make
+
+                    // NEW: Automatically set viewMode to '360' if the car has spin images
+                    if (fetchedCar.spinImages && fetchedCar.spinImages.length > 0) {
+                        setViewMode('360');
+                    }
+
+                    // Fetch "Similar Cars"
                     try {
                         const relatedRes = await axiosInstance.get(`/cars?make=${fetchedCar.make}&limit=5`);
                         if (relatedRes.data.success || relatedRes.data.data) {
                             const relatedArray = relatedRes.data.data || [];
-                            // Ensure the current car isn't listed and keep maximum 3 cars
                             const filteredRelated = relatedArray
                                 .filter(c => (c._id || c.id) !== id)
                                 .slice(0, 3);
@@ -76,8 +79,6 @@ export default function CarDetails() {
         );
     }
 
-    const mainImg = car.image || (car.images && car.images[0]) || 'https://placehold.co/1200x800/e2e8f0/64748b?text=No+Image';
-
     return (
         <div className="bg-background min-h-screen py-10 px-4">
             <div className="max-w-7xl mx-auto">
@@ -87,9 +88,9 @@ export default function CarDetails() {
                     <nav className="flex mb-4" aria-label="Breadcrumb">
                         <ol className="flex items-center space-x-2 font-body text-xs font-semibold text-text-muted">
                             <li><a href="/" className="hover:text-primary transition-colors">Used Cars</a></li>
-                            <li><span className="text-gray-400">&gt;</span></li>
+                            <li><span className="text-gray-400">{'>'}</span></li>
                             <li><span className="text-text">{car.make}</span></li>
-                            <li><span className="text-gray-400">&gt;</span></li>
+                            <li><span className="text-gray-400">{'>'}</span></li>
                             <li aria-current="page" className="text-text">{car.model}</li>
                         </ol>
                     </nav>
@@ -106,7 +107,8 @@ export default function CarDetails() {
 
                         {/* Media Gallery */}
                         <div className="bg-surface p-4 rounded-2xl shadow-sm border border-gray-100">
-                            {/* Main Viewer */}
+
+                            {/* Main Big Screen Viewer */}
                             <div className="relative w-full aspect-video bg-gray-200 rounded-2xl overflow-hidden mb-4 shadow-lg group">
                                 {viewMode === '360' && car.spinImages?.length > 0 ? (
                                     <Car360Viewer images={car.spinImages} title="360° EXTERIOR SPIN" />
@@ -114,57 +116,54 @@ export default function CarDetails() {
                                     <img src={activeImage} alt="Car View" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.02]" />
                                 )}
 
-                                <div className="absolute top-4 left-4 flex gap-2 z-10">
-                                    <div className="bg-primary text-white text-[10px] font-heading font-extrabold px-3 py-1.5 rounded flex items-center gap-1.5 uppercase tracking-wider shadow-sm backdrop-blur-md bg-opacity-90">
-                                        VEHICLE VIEW
+                                {/* Simple Status Badge (No longer a toggle button) */}
+                                {viewMode !== '360' && (
+                                    <div className="absolute top-4 left-4 flex gap-2 z-10 pointer-events-none">
+                                        <div className="bg-primary text-white text-[10px] font-heading font-extrabold px-3 py-1.5 rounded flex items-center gap-1.5 uppercase tracking-wider shadow-sm backdrop-blur-md bg-opacity-90">
+                                            GALLERY VIEW
+                                        </div>
                                     </div>
-                                    
-                                    {car.spinImages?.length > 0 && (
-                                        <button 
-                                            onClick={() => setViewMode(viewMode === '360' ? 'standard' : '360')}
-                                            className={`group/toggle flex items-center gap-2.5 px-4 py-2 rounded-full text-[11px] font-heading font-black uppercase tracking-widest shadow-2xl backdrop-blur-xl transition-all duration-300 border active:scale-95 ${
-                                                viewMode === '360' 
-                                                ? 'bg-accent text-white border-accent shadow-accent/20' 
-                                                : 'bg-white/90 text-text border-white hover:bg-white hover:border-gray-100 hover:text-accent'
-                                            }`}
-                                        >
-                                            <div className={`relative flex items-center justify-center w-4 h-4 transition-transform duration-500 ${viewMode === '360' ? 'rotate-180' : 'rotate-0'}`}>
-                                                {viewMode === '360' ? (
-                                                    <ImageIcon className="w-3.5 h-3.5" />
-                                                ) : (
-                                                    <RotateCw className="w-3.5 h-3.5 group-hover/toggle:animate-spin" />
-                                                )}
-                                            </div>
-                                            <span className="relative">
-                                                {viewMode === '360' ? 'Gallery View' : '360° SPIN'}
-                                            </span>
-                                        </button>
-                                    )}
-                                </div>
+                                )}
                             </div>
 
-                            {/* Thumbnail Strip */}
-                            {(car.images && car.images.length > 0) && (
-                                <div className="flex overflow-x-auto gap-3 pb-2 scrollbar-thin scrollbar-thumb-gray-200 scrollbar-track-transparent">
-                                    {car.images.map((img, i) => {
-                                        const isActive = activeImage === img && viewMode === 'standard';
-                                        return (
-                                            <button 
-                                                key={i} 
-                                                onClick={() => {
-                                                    setActiveImage(img);
-                                                    setViewMode('standard');
-                                                }}
-                                                className={`relative shrink-0 w-24 sm:w-32 aspect-video bg-gray-200 rounded-lg overflow-hidden cursor-pointer transition-all duration-300 focus:outline-none 
-                                                    ${isActive ? 'ring-2 ring-red-600 ring-offset-2 opacity-100 z-10' : 'opacity-60 hover:opacity-100 hover:ring-2 hover:ring-primary/30 hover:ring-offset-1'}`
-                                                }
-                                            >
-                                                <img src={img} className="w-full h-full object-cover" alt={`Thumb ${i+1}`} />
-                                            </button>
-                                        );
-                                    })}
-                                </div>
-                            )}
+                            {/* Thumbnail Strip (Scrollable) */}
+                            <div className="flex overflow-x-auto gap-3 pb-2 scrollbar-thin scrollbar-thumb-gray-200 scrollbar-track-transparent">
+
+                                {/* 1. The 360° Spin Thumbnail (Always First if it exists) */}
+                                {car.spinImages?.length > 0 && (
+                                    <button
+                                        onClick={() => setViewMode('360')}
+                                        className={`relative shrink-0 w-24 sm:w-32 aspect-video bg-gray-900 rounded-lg overflow-hidden cursor-pointer transition-all duration-300 focus:outline-none 
+                                            ${viewMode === '360' ? 'ring-2 ring-accent ring-offset-2 opacity-100 z-10' : 'opacity-70 hover:opacity-100 hover:ring-2 hover:ring-accent/50 hover:ring-offset-1'}`
+                                        }
+                                    >
+                                        <img src={car.spinImages[0]} className="w-full h-full object-cover opacity-50 blur-[1px]" alt="360 Spin" />
+                                        <div className="absolute inset-0 flex flex-col items-center justify-center text-white">
+                                            <RotateCw className="w-6 h-6 mb-1" />
+                                            <span className="font-heading font-bold text-[10px] tracking-wider uppercase">360° Spin</span>
+                                        </div>
+                                    </button>
+                                )}
+
+                                {/* 2. Standard Photo Thumbnails */}
+                                {(car.images && car.images.length > 0) && car.images.map((img, i) => {
+                                    const isActive = activeImage === img && viewMode === 'standard';
+                                    return (
+                                        <button
+                                            key={i}
+                                            onClick={() => {
+                                                setActiveImage(img);
+                                                setViewMode('standard');
+                                            }}
+                                            className={`relative shrink-0 w-24 sm:w-32 aspect-video bg-gray-200 rounded-lg overflow-hidden cursor-pointer transition-all duration-300 focus:outline-none 
+                                                ${isActive ? 'ring-2 ring-primary ring-offset-2 opacity-100 z-10' : 'opacity-60 hover:opacity-100 hover:ring-2 hover:ring-primary/30 hover:ring-offset-1'}`
+                                            }
+                                        >
+                                            <img src={img} className="w-full h-full object-cover" alt={`Thumb ${i + 1}`} />
+                                        </button>
+                                    );
+                                })}
+                            </div>
                         </div>
 
                         {/* Detailed Specs */}
@@ -224,18 +223,38 @@ export default function CarDetails() {
                             )}
 
                             {car.features && car.features.length > 0 && (
-                                <div className={car.description ? 'mt-2' : ''}>
-                                    <h3 className="font-heading font-bold text-xl text-text mb-4 border-l-4 border-primary pl-3">Key Features</h3>
-                                    <div className="flex flex-wrap gap-2">
-                                        {car.features.map((f, i) => (
-                                            <span key={i} className="px-3 py-1.5 bg-background border border-gray-200 rounded-full font-body text-xs font-semibold text-text flex items-center gap-1.5">
-                                                <Check className="w-3 h-3 text-primary" /> {f}
-                                            </span>
-                                        ))}
+                                <div className={car.description ? 'mt-8' : ''}>
+                                    <h3 className="font-heading font-bold text-xl text-text mb-6 border-l-4 border-primary pl-3">Key Features</h3>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-4 font-body text-sm">
+                                        {car.features.map((f, i) => {
+                                            const featureStr = String(f || '');
+                                            const hasColon = featureStr.includes(':');
+                                            
+                                            // Split at the FIRST colon
+                                            let key = featureStr.trim();
+                                            let value = (
+                                                <span className="flex items-center gap-1 text-[#10b981]">
+                                                    <Check className="w-4 h-4 stroke-[3]" /> Yes
+                                                </span>
+                                            );
+
+                                            if (hasColon) {
+                                                const colonIndex = featureStr.indexOf(':');
+                                                key = featureStr.substring(0, colonIndex).trim();
+                                                value = featureStr.substring(colonIndex + 1).trim();
+                                            }
+
+                                            return (
+                                                <div key={i} className="flex justify-between items-center border-b border-gray-100 pb-3">
+                                                    <span className="text-text-muted capitalize">{key}</span>
+                                                    <span className="font-semibold text-text text-right">{value}</span>
+                                                </div>
+                                            );
+                                        })}
                                     </div>
                                 </div>
                             )}
-                            
+
                             {(!car.description && (!car.features || car.features.length === 0)) && (
                                 <div className="py-6 text-center text-text-muted font-body text-sm">
                                     No description or features provided for this vehicle.
@@ -320,12 +339,12 @@ export default function CarDetails() {
                                     </div>
                                 </div>
 
-                            <div className="flex flex-col gap-3">
+                                <div className="flex flex-col gap-3">
                                     <a
-                                      href={whatsappUrl}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                      className="w-full flex items-center justify-center gap-2.5 py-4 rounded-xl bg-[#25D366] text-white font-body font-bold text-sm hover:bg-[#20bd5a] transition-all shadow-lg shadow-green-500/20 active:scale-[0.98]"
+                                        href={whatsappUrl}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="w-full flex items-center justify-center gap-2.5 py-4 rounded-xl bg-[#25D366] text-white font-body font-bold text-sm hover:bg-[#20bd5a] transition-all shadow-lg shadow-green-500/20 active:scale-[0.98]"
                                     >
                                         <MessageCircle className="w-5 h-5 fill-current" />
                                         INQUIRE ON WHATSAPP
@@ -368,21 +387,21 @@ export default function CarDetails() {
                     <div className="mt-20 md:mt-28 pt-12 border-t border-gray-100 pb-8">
                         <div className="flex items-center justify-between mb-8">
                             <h2 className="font-heading font-bold text-2xl text-slate-900 tracking-tight">Similar Cars You Might Like</h2>
-                            <a href={`/inventory?make=${car.make}`} className="font-body text-sm font-bold text-primary hover:text-primary-hover transition-colors hidden sm:block">View all {car.make} models &rarr;</a>
+                            <a href={`/inventory?make=${car.make}`} className="font-body text-sm font-bold text-primary hover:text-primary-hover transition-colors hidden sm:block">View all {car.make} models →</a>
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                             {relatedCars.map((relatedCar) => (
                                 <CarCard
-                                  key={relatedCar._id || relatedCar.id}
-                                  id={relatedCar._id || relatedCar.id}
-                                  image={relatedCar.image || (relatedCar.images && relatedCar.images[0])}
-                                  title={`${relatedCar.make} ${relatedCar.model} ${relatedCar.year}`}
-                                  price={`₹${relatedCar.price?.toLocaleString('en-IN')}`}
-                                  fuel={relatedCar.fuelType}
-                                  transmission={relatedCar.transmission}
-                                  owner={relatedCar.owner}
-                                  kms={`${relatedCar.kms?.toLocaleString('en-IN')} KM`}
-                                  badges={relatedCar.badges || []}
+                                    key={relatedCar._id || relatedCar.id}
+                                    id={relatedCar._id || relatedCar.id}
+                                    image={relatedCar.image || (relatedCar.images && relatedCar.images[0])}
+                                    title={`${relatedCar.make} ${relatedCar.model} ${relatedCar.year}`}
+                                    price={`₹${relatedCar.price?.toLocaleString('en-IN')}`}
+                                    fuel={relatedCar.fuelType}
+                                    transmission={relatedCar.transmission}
+                                    owner={relatedCar.owner}
+                                    kms={`${relatedCar.kms?.toLocaleString('en-IN')} KM`}
+                                    badges={relatedCar.badges || []}
                                 />
                             ))}
                         </div>

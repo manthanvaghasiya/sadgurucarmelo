@@ -4,7 +4,7 @@ import { UploadCloud, CheckCircle, AlertCircle, Loader2, X } from 'lucide-react'
 import toast from 'react-hot-toast';
 
 const CLOUDINARY_UPLOAD_PRESET = 'car_360_uploads';
-const CLOUDINARY_CLOUD_NAME = 'dg2aajesb';
+const CLOUDINARY_CLOUD_NAME = 'drjww3vyq';
 
 const VR360Uploader = ({ onUploadComplete, initialImages = [] }) => {
   const [selectedFiles, setSelectedFiles] = useState([]);

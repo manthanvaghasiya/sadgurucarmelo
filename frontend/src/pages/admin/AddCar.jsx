@@ -1,7 +1,6 @@
 import { useState, useRef, useCallback } from 'react';
 import { useCars } from '../../context/CarContext';
 import { useNavigate } from 'react-router-dom';
-import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import {
   Upload,
@@ -12,7 +11,10 @@ import {
   AlertCircle,
   GripVertical,
   RotateCw,
+  Plus,
+  Trash2,
 } from 'lucide-react';
+import { useForm, useFieldArray } from 'react-hook-form';
 import VR360Uploader from '../../components/admin/VR360Uploader';
 
 // Reusable Select component
@@ -82,6 +84,72 @@ function FormTextarea({ label, placeholder, register, error, rows = 4 }) {
         className={`w-full px-4 py-3 bg-background border ${error ? 'border-red-500' : 'border-transparent'} focus:border-primary/30 rounded-xl font-body text-sm text-text placeholder:text-text-muted/50 outline-none transition-all focus:ring-2 focus:ring-primary/10 resize-none`}
       />
       {error && <span className="text-red-500 text-xs font-body">{error.message}</span>}
+    </div>
+  );
+}
+
+// Feature Manager Component for Key-Value pairs
+function FeatureManager({ control, register, errors }) {
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name: "features"
+  });
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <label className="font-body text-sm font-semibold text-text">
+          Key Features (Specifications)
+        </label>
+        <button
+          type="button"
+          onClick={() => append({ key: '', value: '' })}
+          className="flex items-center gap-1.5 px-3 py-1.5 bg-primary/5 text-primary hover:bg-primary/10 rounded-lg font-body text-xs font-bold transition-colors"
+        >
+          <Plus className="w-3.5 h-3.5" /> Add Feature
+        </button>
+      </div>
+
+      <div className="grid grid-cols-1 gap-3">
+        {fields.map((field, index) => (
+          <div key={field.id} className="flex items-center gap-3 animate-in fade-in slide-in-from-top-1 duration-200">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 flex-1">
+              <div className="relative">
+                <input
+                  {...register(`features.${index}.key`)}
+                  placeholder="Feature (e.g. Airbags)"
+                  className="w-full px-4 py-2.5 bg-background border border-transparent focus:border-primary/30 rounded-xl font-body text-sm text-text placeholder:text-text-muted/40 outline-none transition-all focus:ring-2 focus:ring-primary/10"
+                />
+              </div>
+              <div className="relative">
+                <input
+                  {...register(`features.${index}.value`)}
+                  placeholder="Value (e.g. 6) - Optional"
+                  className="w-full px-4 py-2.5 bg-background border border-transparent focus:border-primary/30 rounded-xl font-body text-sm text-text placeholder:text-text-muted/40 outline-none transition-all focus:ring-2 focus:ring-primary/10"
+                />
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => remove(index)}
+              className="p-2.5 bg-red-50 text-red-500 hover:bg-red-100 rounded-xl transition-colors"
+              title="Remove Feature"
+            >
+              <Trash2 className="w-4 h-4" />
+            </button>
+          </div>
+        ))}
+      </div>
+      
+      {fields.length === 0 && (
+        <div 
+          onClick={() => append({ key: '', value: '' })}
+          className="py-8 border-2 border-dashed border-gray-100 rounded-2xl flex flex-col items-center justify-center text-text-muted/50 hover:text-primary hover:border-primary/20 hover:bg-primary/[0.01] cursor-pointer transition-all"
+        >
+          <Plus className="w-6 h-6 mb-2" />
+          <span className="font-body text-xs font-medium">Click to add your first feature</span>
+        </div>
+      )}
     </div>
   );
 }
@@ -275,12 +343,13 @@ export default function AddCar() {
     reset,
     watch,
     setValue,
+    control,
     formState: { errors, isSubmitting }
   } = useForm({
     defaultValues: {
       make: '', model: '', year: '', price: '',
       kmDriven: '', fuelType: '', transmission: '', ownership: '',
-      bodyType: '', color: '', registration: '', description: '', features: '',
+      bodyType: '', color: '', registration: '', description: '', features: [{ key: '', value: '' }],
       airConditioner: '', powerWindows: '', sunroof: '', parkingSensors: '',
       displacement: '', maxPower: '', driveType: '', cylinders: '',
       isCertified: false, isPetipack: false, validVimo: false,
@@ -328,9 +397,16 @@ export default function AddCar() {
       formData.append('driveType', data.driveType);
       formData.append('cylinders', data.cylinders);
 
-      // Send features as a single comma-separated string — backend parses it
-      if (data.features) {
-        formData.append('features', data.features);
+      // Transform features back to array of "Key: Value" or "Key" strings
+      if (data.features && Array.isArray(data.features)) {
+        data.features.forEach(f => {
+          if (f.key && f.key.trim()) {
+            const featureStr = f.value && f.value.trim() 
+              ? `${f.key.trim()}: ${f.value.trim()}` 
+              : f.key.trim();
+            formData.append('features', featureStr);
+          }
+        });
       }
 
       if (data.isCertified) formData.append('badges', 'Certified');
@@ -466,11 +542,10 @@ export default function AddCar() {
           </div>
           
           <div className="grid grid-cols-1 gap-5 mt-5">
-            <FormInput
-              label="Features"
-              register={register('features')}
-              error={errors.features}
-              placeholder="Enter features separated by commas (e.g., Sunroof, Bluetooth, Airbags)"
+            <FeatureManager
+              control={control}
+              register={register}
+              errors={errors}
             />
             <FormTextarea
               label="Description"
