@@ -1,193 +1,175 @@
-import { useState, useEffect } from 'react';
-import { Plus, Trash2, Image as ImageIcon, Loader2 } from 'lucide-react';
+import { useState, useMemo } from 'react';
+import { useCars } from '../../context/CarContext';
+import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import axiosInstance from '../../api/axiosConfig';
+import { Clock, Plus, Trash2, Edit3, Car, AlertTriangle } from 'lucide-react';
 
 export default function Posters() {
-  const [posters, setPosters] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isUploading, setIsUploading] = useState(false);
+  const { cars, deleteCar } = useCars();
+  const navigate = useNavigate();
+  const [deleteTarget, setDeleteTarget] = useState(null);
 
-  const [newDesktopFile, setNewDesktopFile] = useState(null);
-  const [newMobileFile, setNewMobileFile] = useState(null);
-
-  const fetchPosters = async () => {
-    try {
-      const res = await axiosInstance.get('/promo-posters');
-      if (res.data.success) {
-        setPosters(res.data.data);
-      }
-    } catch (error) {
-      toast.error('Failed to load posters');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchPosters();
-  }, []);
-
-  const handleUpload = async () => {
-    if (!newDesktopFile || !newMobileFile) {
-      return toast.error('Both desktop and mobile images are required.');
-    }
-    
-    if (posters.length >= 10) {
-      return toast.error('Maximum of 10 posters reached.');
-    }
-
-    setIsUploading(true);
-    const formData = new FormData();
-    formData.append('desktopImage', newDesktopFile);
-    formData.append('mobileImage', newMobileFile);
-
-    try {
-      const res = await axiosInstance.post('/promo-posters/admin', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
-
-      if (res.data.success) {
-        toast.success('Poster pair uploaded successfully');
-        setNewDesktopFile(null);
-        setNewMobileFile(null);
-        fetchPosters(); // refresh
-      } else {
-        toast.error(res.data.message || 'Upload failed');
-      }
-    } catch (error) {
-      toast.error(error.response?.data?.message || 'Server error during upload');
-    } finally {
-      setIsUploading(false);
-    }
-  };
-
-  const handleDelete = async (id) => {
-    if (!window.confirm('Are you sure you want to delete this poster?')) return;
-
-    try {
-      const res = await axiosInstance.delete(`/promo-posters/admin/${id}`);
-      if (res.data.success) {
-        toast.success('Poster deleted');
-        fetchPosters();
-      } else {
-        toast.error(res.data.message || 'Failed to delete');
-      }
-    } catch (error) {
-      toast.error(error.response?.data?.message || 'Server error');
-    }
-  };
+  // Filter only 'Coming Soon' cars
+  const comingSoonCars = useMemo(() => {
+    return cars
+      .filter((c) => c.status === 'Coming Soon')
+      .map((c) => ({
+        id: c._id || c.id,
+        image: c.image || 'https://placehold.co/120x80/e2e8f0/64748b?text=Car',
+        title: `${c.make} ${c.model} (${c.year})`,
+        price: c.price >= 100000 ? `₹${(c.price / 100000).toFixed(2)} Lakhs` : `₹${(c.price || 0).toLocaleString('en-IN')}`,
+        dateAdded: new Date(c.createdAt || Date.now()).toLocaleDateString('en-IN', { month: 'short', day: '2-digit', year: 'numeric' }),
+      }));
+  }, [cars]);
 
   return (
-    <div className="max-w-6xl mx-auto space-y-8">
-      <div>
-        <h1 className="text-3xl font-heading font-extrabold text-primary mb-2">Manage Promo Posters</h1>
-        <p className="text-text-muted font-body">Upload up to 10 "Arriving Shortly" image pairs. One active pair will be shown randomly on the Homepage.</p>
-      </div>
-
-      {/* Upload Section */}
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-        <h2 className="text-lg font-heading font-bold text-text mb-4">Add New Poster Pair ({posters.length}/10)</h2>
-        
-        {posters.length >= 10 ? (
-          <div className="bg-yellow-50 text-yellow-800 p-4 rounded-xl text-sm font-semibold">
-            Maximum limit of 10 reached. Please delete an existing poster to add a new one.
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="border-2 border-dashed border-gray-200 rounded-xl p-6 flex flex-col items-center text-center">
-              <ImageIcon className="w-8 h-8 text-text-muted mb-3" />
-              <p className="font-semibold text-text text-sm mb-1">Desktop Image (16:9)</p>
-              <p className="text-xs text-text-muted mb-4">Recommended: 1920x1080</p>
-              <input 
-                type="file" 
-                accept="image/*" 
-                onChange={(e) => setNewDesktopFile(e.target.files[0])}
-                className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-primary hover:file:bg-blue-100 cursor-pointer"
-              />
+    <div className="space-y-8 max-w-6xl mx-auto">
+      {/* ═══════════════════════════════════════════════
+          Delete Confirmation Modal
+         ═══════════════════════════════════════════════ */}
+      {deleteTarget && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div
+            className="absolute inset-0 bg-primary/40 backdrop-blur-sm"
+            onClick={() => setDeleteTarget(null)}
+          />
+          <div className="relative bg-surface rounded-2xl shadow-2xl shadow-primary/10 border border-gray-100 w-full max-w-sm p-6 space-y-5 animate-[fadeScale_200ms_ease-out]">
+            <div className="flex items-center gap-3">
+              <div className="w-11 h-11 bg-red-50 rounded-xl flex items-center justify-center shrink-0">
+                <AlertTriangle className="w-5 h-5 text-red-500" />
+              </div>
+              <div>
+                <h3 className="font-heading font-bold text-base text-text">Delete Vehicle?</h3>
+                <p className="font-body text-sm text-text-muted mt-0.5">
+                  This action cannot be undone.
+                </p>
+              </div>
             </div>
-            
-            <div className="border-2 border-dashed border-gray-200 rounded-xl p-6 flex flex-col items-center text-center">
-              <ImageIcon className="w-8 h-8 text-text-muted mb-3" />
-              <p className="font-semibold text-text text-sm mb-1">Mobile Image (9:16)</p>
-              <p className="text-xs text-text-muted mb-4">Recommended: 1080x1920</p>
-              <input 
-                type="file" 
-                accept="image/*" 
-                onChange={(e) => setNewMobileFile(e.target.files[0])}
-                className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-primary hover:file:bg-blue-100 cursor-pointer"
-              />
-            </div>
-
-            <div className="md:col-span-2 flex justify-end">
+            <div className="flex items-center gap-3 justify-end">
               <button
-                onClick={handleUpload}
-                disabled={isUploading || !newDesktopFile || !newMobileFile}
-                className={`flex items-center gap-2 px-6 py-3 rounded-full font-heading font-bold transition-all ${
-                  (isUploading || !newDesktopFile || !newMobileFile) 
-                  ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
-                  : 'bg-primary text-white hover:bg-primary-hover shadow-lg'
-                }`}
+                onClick={() => setDeleteTarget(null)}
+                className="px-5 py-2.5 bg-background rounded-xl font-body text-sm font-semibold text-text-muted hover:text-text transition-colors"
               >
-                {isUploading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Plus className="w-5 h-5" />}
-                {isUploading ? 'Uploading...' : 'Upload Pair'}
+                Cancel
+              </button>
+              <button
+                onClick={async () => {
+                  try {
+                    await deleteCar(deleteTarget);
+                    toast.success('Coming soon vehicle deleted.');
+                  } catch (error) {
+                    toast.error('Failed to delete vehicle.');
+                  }
+                  setDeleteTarget(null);
+                }}
+                className="px-5 py-2.5 bg-red-500 hover:bg-red-600 text-white rounded-xl font-body text-sm font-bold transition-colors shadow-sm shadow-red-500/20"
+              >
+                Yes, Delete
               </button>
             </div>
           </div>
-        )}
+        </div>
+      )}
+
+      {/* ═══════════════════════════════════════════════
+          Page Header
+         ═══════════════════════════════════════════════ */}
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+        <div>
+          <div className="flex items-center gap-3 mb-2">
+            <span className="p-2 bg-amber-100 text-amber-600 rounded-lg">
+              <Clock className="w-5 h-5" />
+            </span>
+            <h1 className="text-3xl font-heading font-extrabold text-primary">
+              Coming Soon Cars
+            </h1>
+          </div>
+          <p className="font-body text-sm text-text-muted max-w-lg">
+            Manage your highly anticipated vehicles. These cars are indicated as arriving shortly.
+            To add a car here, create or edit a car and set its status to "Coming Soon".
+          </p>
+        </div>
+        <button
+          onClick={() => navigate('/admin/add-car')}
+          className="inline-flex items-center gap-2 px-5 py-3 bg-accent hover:bg-accent-hover text-white rounded-xl font-body text-sm font-bold transition-colors shadow-lg shadow-accent/20 shrink-0 self-start sm:self-auto"
+        >
+          <Plus className="w-4 h-4" strokeWidth={2.5} />
+          Add New Car
+        </button>
       </div>
 
-      {/* Grid of existing posters */}
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-        <h2 className="text-lg font-heading font-bold text-text mb-6">Active Posters</h2>
-        
-        {isLoading ? (
-          <div className="flex justify-center py-10">
-            <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      {/* ═══════════════════════════════════════════════
+          Content Grid
+         ═══════════════════════════════════════════════ */}
+      {comingSoonCars.length === 0 ? (
+        <div className="bg-surface rounded-2xl border border-gray-100 p-16 flex flex-col items-center justify-center text-center">
+          <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mb-4">
+            <Car className="w-10 h-10 text-gray-300" />
           </div>
-        ) : posters.length === 0 ? (
-          <div className="text-center py-10 text-text-muted font-body">
-            No posters uploaded yet.
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {posters.map((poster, index) => (
-              <div key={poster._id} className="border border-gray-100 rounded-xl overflow-hidden bg-gray-50 flex flex-col sm:flex-row shadow-sm">
-                
-                {/* Desktop View */}
-                <div className="sm:w-1/2 h-40 sm:h-auto relative">
-                  <div className="absolute top-2 left-2 bg-black/60 text-white text-[10px] px-2 py-1 rounded font-bold uppercase z-10 backdrop-blur-md">
-                    Desktop (16:9)
-                  </div>
-                  <img src={poster.desktopImageUrl} alt="Desktop Preview" className="w-full h-full object-cover" />
+          <h3 className="font-heading font-bold text-xl text-text mb-2">No Coming Soon Cars</h3>
+          <p className="font-body text-text-muted max-w-sm mb-6">
+            You don't have any vehicles marked as "Coming Soon" right now. Add a new listing to build hype!
+          </p>
+          <button
+            onClick={() => navigate('/admin/add-car')}
+            className="px-6 py-2.5 bg-primary/10 text-primary hover:bg-primary/20 rounded-xl font-body text-sm font-bold transition-colors"
+          >
+            Add Vehicle Now
+          </button>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {comingSoonCars.map((car) => (
+            <div
+              key={car.id}
+              className="group bg-surface rounded-2xl border border-gray-100 overflow-hidden shadow-sm hover:shadow-xl hover:border-accent/30 transition-all duration-300"
+            >
+              {/* Image Header */}
+              <div className="aspect-[4/3] w-full relative overflow-hidden bg-gray-100">
+                <div className="absolute top-3 left-3 bg-amber-500 text-white text-[10px] px-2.5 py-1 rounded-full font-bold uppercase z-10 shadow-md flex items-center gap-1.5">
+                  <Clock className="w-3 h-3" /> Coming Soon
                 </div>
+                <img
+                  src={car.image}
+                  alt={car.title}
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
+                />
                 
-                {/* Mobile View */}
-                <div className="sm:w-1/4 h-40 sm:h-auto relative border-l border-t sm:border-t-0 border-white">
-                  <div className="absolute top-2 left-2 bg-black/60 text-white text-[10px] px-2 py-1 rounded font-bold uppercase z-10 backdrop-blur-md">
-                    Mobile (9:16)
-                  </div>
-                  <img src={poster.mobileImageUrl} alt="Mobile Preview" className="w-full h-full object-cover" />
-                </div>
-
-                {/* Actions */}
-                <div className="p-4 sm:w-1/4 flex flex-col items-center justify-center gap-2 border-l border-t sm:border-t-0 border-white bg-white">
-                  <span className="text-sm font-bold text-gray-500 mb-2">Slot {index + 1}</span>
+                {/* Quick Actions Overlay */}
+                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center gap-3 backdrop-blur-[2px]">
                   <button
-                    onClick={() => handleDelete(poster._id)}
-                    className="p-3 text-red-500 hover:bg-red-50 rounded-full transition-colors"
-                    title="Delete Poster"
+                    onClick={() => navigate(`/admin/edit-car/${car.id}`)}
+                    className="p-3 bg-white text-primary hover:bg-primary hover:text-white rounded-full transition-all transform translate-y-4 group-hover:translate-y-0 duration-300"
+                    title="Edit Vehicle"
+                  >
+                    <Edit3 className="w-5 h-5" />
+                  </button>
+                  <button
+                    onClick={() => setDeleteTarget(car.id)}
+                    className="p-3 bg-white text-red-500 hover:bg-red-500 hover:text-white rounded-full transition-all transform translate-y-4 group-hover:translate-y-0 duration-300 delay-75"
+                    title="Delete Vehicle"
                   >
                     <Trash2 className="w-5 h-5" />
                   </button>
                 </div>
               </div>
-            ))}
-          </div>
-        )}
-      </div>
+
+              {/* Details Body */}
+              <div className="p-5">
+                <h3 className="font-heading font-bold text-lg text-text truncate mb-1" title={car.title}>
+                  {car.title}
+                </h3>
+                <div className="flex items-center justify-between mt-4">
+                  <p className="font-heading font-bold text-accent text-xl">{car.price}</p>
+                  <p className="font-body text-xs text-text-muted font-semibold bg-gray-50 px-2.5 py-1 rounded-md border border-gray-100">
+                    Added: {car.dateAdded}
+                  </p>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

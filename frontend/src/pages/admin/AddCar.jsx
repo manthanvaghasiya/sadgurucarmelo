@@ -347,6 +347,7 @@ export default function AddCar() {
     formState: { errors, isSubmitting }
   } = useForm({
     defaultValues: {
+      status: 'Available',
       make: '', model: '', year: '', price: '',
       kmDriven: '', fuelType: '', transmission: '', ownership: '',
       bodyType: '', variantTier: '', color: '', registration: '', description: '', features: [{ key: '', value: '' }],
@@ -383,7 +384,7 @@ export default function AddCar() {
       formData.append('color', data.color);
       formData.append('registration', data.registration);
       formData.append('description', data.description);
-      formData.append('status', 'Available');
+      formData.append('status', data.status);
       
       // Add spin images from state (array of URLs) - Loop through to avoid .join(',') as per critical backend requirement
       if (spinImages.length > 0) {
@@ -468,6 +469,13 @@ export default function AddCar() {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            <FormSelect
+              label="Listing Status"
+              register={register('status', { required: 'Status is required' })}
+              error={errors.status}
+              placeholder="Select listing status"
+              options={['Available', 'Coming Soon']}
+            />
             <FormInput
               label="Make"
               register={register('make', { required: 'Make is required' })}

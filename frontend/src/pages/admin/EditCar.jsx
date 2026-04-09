@@ -270,6 +270,7 @@ export default function EditCar() {
     formState: { errors, isSubmitting }
   } = useForm({
     defaultValues: {
+      status: 'Available',
       make: '', model: '', year: '', price: '',
       kmDriven: '', fuelType: '', transmission: '', ownership: '',
       bodyType: '', variantTier: '', color: '', registration: '', description: '', 
@@ -293,6 +294,7 @@ export default function EditCar() {
 
         const badges = car.badges || [];
         reset({
+          status: car.status || 'Available',
           make: car.make || '',
           model: car.model || '',
           year: car.year || '',
@@ -357,6 +359,7 @@ export default function EditCar() {
       formData.append('color', data.color);
       formData.append('registration', data.registration);
       formData.append('description', data.description);
+      formData.append('status', data.status);
       formData.append('airConditioner', data.airConditioner);
       formData.append('powerWindows', data.powerWindows);
       formData.append('sunroof', data.sunroof);
@@ -450,6 +453,13 @@ export default function EditCar() {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            <FormSelect
+              label="Listing Status"
+              register={register('status', { required: 'Status is required' })}
+              error={errors.status}
+              placeholder="Select listing status"
+              options={['Available', 'Sold', 'Booked', 'Coming Soon']}
+            />
             <FormInput
               label="Make"
               register={register('make', { required: 'Make is required' })}

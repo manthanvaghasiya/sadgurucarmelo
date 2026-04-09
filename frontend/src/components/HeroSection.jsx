@@ -1,95 +1,52 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Car, Settings2, Wallet, Search, MapPin, ChevronDown, ChevronRight, X } from 'lucide-react';
+import { Car, Settings2, Wallet, Search, MapPin, ChevronDown, ChevronRight, X, Sparkles, ArrowRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import axiosInstance from '../api/axiosConfig';
+import { useCars } from '../context/CarContext';
 
 export default function HeroSection() {
   const navigate = useNavigate();
-  const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
-  const [selectedBrand, setSelectedBrand] = useState('');
-  const [selectedModel, setSelectedModel] = useState('');
-  const [selectedBudget, setSelectedBudget] = useState('');
-
-  const [availableBrands, setAvailableBrands] = useState([]);
-  const [brandModelMap, setBrandModelMap] = useState([]);
-  const [availableModels, setAvailableModels] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const { cars } = useCars();
+  
+  // Coming Soon Carousel State
+  const [currentCarIndex, setCurrentCarIndex] = useState(0);
+  const comingSoonCars = cars.filter(c => c.status === 'Coming Soon');
 
   useEffect(() => {
-    const fetchMetadata = async () => {
-      try {
-        const res = await axiosInstance.get('/cars/filters');
-        if (res.data && res.data.data) {
-          const fetchedMakes = res.data.data.makes || [];
-          const fetchedMap = res.data.data.brandModelMap || [];
+    if (comingSoonCars.length <= 1) return;
+    const interval = setInterval(() => {
+      setCurrentCarIndex((prev) => (prev + 1) % comingSoonCars.length);
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [comingSoonCars.length]);
 
-          setAvailableBrands(fetchedMakes);
-          setBrandModelMap(fetchedMap);
-
-          // Populate default all models
-          const allModels = [...new Set(fetchedMap.flatMap(item => item.models))].filter(Boolean).sort();
-          setAvailableModels(allModels);
-        }
-      } catch (error) {
-        console.error('Failed to fetch car metadata', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    fetchMetadata();
-  }, []);
-
-  const handleBrandChange = (e) => {
-    const newBrand = e.target.value;
-    setSelectedBrand(newBrand);
-    setSelectedModel(''); // Reset model match to prevent orphaned queries
-
-    // Filter models downward
-    if (newBrand) {
-      const match = brandModelMap.find(m => m._id === newBrand);
-      setAvailableModels(match && match.models ? match.models.filter(Boolean).sort() : []);
-    } else {
-      const allModels = [...new Set(brandModelMap.flatMap(item => item.models))].filter(Boolean).sort();
-      setAvailableModels(allModels);
-    }
-  };
-
-  const handleSearch = () => {
-    const params = new URLSearchParams();
-    if (selectedBrand) params.set('make', selectedBrand);
-    if (selectedModel) params.set('model', selectedModel);
-
-    if (selectedBudget && selectedBudget.includes('-')) {
-      const [minPrice, maxPrice] = selectedBudget.split('-');
-      if (minPrice) params.set('priceMin', minPrice);
-      if (maxPrice) params.set('priceMax', maxPrice);
-    }
-
-    navigate(`/inventory?${params.toString()}`);
+  const formatPrice = (price) => {
+    return price >= 100000 
+      ? `₹${(price / 100000).toFixed(2)} Lakhs` 
+      : `₹${(price || 0).toLocaleString('en-IN')}`;
   };
 
   // Animation Variants
   const containerVariants = {
     hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.2,
-        delayChildren: 0.1
-      }
-    }
+    visible: { opacity: 1, transition: { staggerChildren: 0.15, delayChildren: 0.1 } }
   };
 
   const itemVariants = {
     hidden: { opacity: 0, y: 30 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: {
-        duration: 0.8,
-        ease: [0.22, 1, 0.36, 1] // Custom cubic-bezier for smoothness
-      }
+    visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease: [0.22, 1, 0.36, 1] } }
+  };
+
+  const carSlideVariants = {
+    enter: { opacity: 0, x: 150, scale: 0.7, rotateY: 45, filter: 'blur(20px)', zIndex: 0 },
+    center: { 
+      opacity: 1, x: 0, scale: 1, rotateY: 0, filter: 'blur(0px)', zIndex: 10,
+      transition: { duration: 1.2, type: 'spring', bounce: 0.35, ease: 'easeOut' } 
+    },
+    exit: { 
+      opacity: 0, x: -150, scale: 0.8, rotateY: -30, filter: 'blur(20px)', zIndex: 0,
+      transition: { duration: 0.8, ease: 'easeIn' } 
     }
   };
 
@@ -108,386 +65,221 @@ export default function HeroSection() {
     }
   };
 
-  const imageVariants = {
-    hidden: { scale: 1.1, opacity: 0 },
-    visible: {
-      scale: 1,
-      opacity: 1,
-      transition: {
-        duration: 1.5,
-        ease: "easeOut"
-      }
-    }
-  };
+  const currentCar = comingSoonCars[currentCarIndex];
 
   return (
-    <section className="relative flex flex-col min-h-[60vh] md:min-h-[85vh] md:flex-row md:items-center font-['Inter',sans-serif] bg-slate-950 md:bg-transparent overflow-hidden">
-
+    <section className="relative w-full min-h-[100dvh] bg-[#030303] overflow-hidden font-['Inter',sans-serif] flex items-center">
+      
       {/* ════════════════════════════════════════════════════════════════
-          DESKTOP BACKGROUND (Hidden on mobile)
+          PREMIUM ABSTRACT BACKGROUND
       ════════════════════════════════════════════════════════════════ */}
-      <div className="hidden md:block absolute inset-0 z-0 overflow-hidden">
-        <motion.img
-          initial="hidden"
-          animate="visible"
-          variants={imageVariants}
-          src="image.png"
-          alt="Premium Car"
-          className="w-full h-full object-cover"
-        />
-        <div className="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-900/80 to-transparent"></div>
+      <div className="absolute inset-0 pointer-events-none z-0">
+        {/* Dynamic Gradients */}
+        <div className="absolute top-[-20%] left-[-10%] w-[50vw] h-[50vw] bg-brand-orange/10 rounded-full blur-[150px] animate-pulse"></div>
+        <div className="absolute bottom-[-10%] right-[-10%] w-[60vw] h-[60vw] bg-yellow-500/5 rounded-full blur-[150px] animate-pulse" style={{ animationDelay: '2s' }}></div>
+        
+        {/* Subtle grid pattern for texture */}
+        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxwYXRoIGQ9Ik00MCAwaC0xdjQwaDFWMHptMCAzOWgtNDB2MWg0MHYtMXoiIGZpbGw9IiNmZmZmZmYiIGZpbGwtb3BhY2l0eT0iMC4wMyIgZmlsbC1ydWxlPSJldmVub2RkIi8+Cjwvc3ZnPg==')] opacity-30"></div>
+        
+        {/* Dark vignette to focus center */}
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_transparent_0%,_#030303_100%)] opacity-80"></div>
       </div>
 
-      {/* ════════════════════════════════════════════════════════════════
-          MOBILE 100DVH LUXURY POSTER (Hidden on desktop)
-      ════════════════════════════════════════════════════════════════ */}
-      <div className="md:hidden absolute inset-0 w-full h-[60vh] z-0 overflow-hidden">
-        <motion.img
-          initial={{ scale: 1.1, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ duration: 1.8, ease: "easeOut" }}
-          src="mobile-image.png"
-          alt="Premium Car"
-          className="absolute inset-0 w-full h-full object-cover object-center z-0"
-        />
-        {/* Deep cinematic vignette gradient */}
-        <div className="absolute inset-0 z-0 bg-gradient-to-t from-black via-black/40 to-black/70"></div>
+      <div className="relative z-10 w-full max-w-[1600px] mx-auto px-6 sm:px-10 lg:px-16 grid grid-cols-1 lg:grid-cols-12 gap-8 pt-24 pb-32 lg:pb-24 lg:py-0 items-center min-h-[85vh]">
 
-        {/* Mobile Content Overlay */}
-        <div className="absolute inset-x-0 top-[20%] z-10 px-6 flex flex-col items-center text-center">
+        {/* ════════════════════════════════════════════════════════════════
+            LEFT COLUMN: TYPOGRAPHY
+        ════════════════════════════════════════════════════════════════ */}
+        <motion.div
+          className="col-span-1 lg:col-span-5 flex flex-col justify-center order-2 lg:order-1 pt-4 lg:pt-0"
+          initial="hidden"
+          animate="visible"
+          variants={containerVariants}
+        >
+          <motion.div variants={itemVariants} className="flex items-center gap-3 mb-6">
+            <div className="h-[2px] w-12 bg-gradient-to-r from-brand-orange to-transparent"></div>
+            <span className="text-brand-orange text-sm font-bold tracking-[0.2em] uppercase">Sadguru Carmelo</span>
+          </motion.div>
+
           <motion.h1
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1, delay: 0.2 }}
-            className="text-4xl text-white font-bold tracking-tight leading-[1.1] drop-shadow-2xl"
+            variants={itemVariants}
+            className="text-[3rem] sm:text-6xl lg:text-[4rem] xl:text-[4.5rem] text-white font-black tracking-tight leading-[1.05]"
           >
-            Your <span className="text-brand-orange">Dream Car,</span><br />Now Within Reach!
+            તમારી <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-orange to-yellow-500">ડ્રીમ કાર,</span><br />
+            હવે તમારી પહોંચમાં.
           </motion.h1>
 
-          <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 1, delay: 0.5 }}
-            className="mt-4 text-white/80 text-sm font-medium tracking-wide max-w-[300px]"
-          >
-            Surat&apos;s premier destination for curated luxury and certified pre-owned vehicles. Built on trust, driven by quality.
+          <motion.p variants={itemVariants} className="text-lg lg:text-xl text-slate-400 mt-6 font-medium leading-relaxed max-w-md drop-shadow-sm">
+            સુરતનું શ્રેષ્ઠ પ્રી-ઓવન્ડ અને લક્ઝરી કાર ડેસ્ટિનેશન. વિશ્વાસથી બનેલું, ગુણવત્તાથી ચાલતું.
           </motion.p>
 
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.8 }}
-            className="mt-8 flex flex-col items-center gap-3 w-full"
-          >
-            {/* Mobile Trust Badge with Google Reviews */}
-            <div className="flex items-center gap-2 bg-white/20 backdrop-blur-md px-3.5 py-1.5 rounded-full border border-white/20">
+          <motion.div variants={itemVariants} className="mt-10 flex flex-col sm:flex-row items-start sm:items-center gap-6">
+            <div className="flex items-center gap-2 bg-white/5 backdrop-blur-md px-4 py-2.5 rounded-full border border-white/10 shadow-lg">
               <div className="flex items-center gap-0.5">
                 {[...Array(5)].map((_, i) => (
-                  <svg key={i} className="w-3 h-3 text-yellow-400 fill-yellow-400" viewBox="0 0 20 20">
+                  <svg key={i} className="w-4 h-4 text-yellow-500 fill-yellow-500" viewBox="0 0 20 20">
                     <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                   </svg>
                 ))}
               </div>
-              <span className="text-white font-bold text-xs mt-0.5">4.8</span>
-              <div className="h-3 w-[1px] bg-white/40 mx-0.5"></div>
-              <span className="text-slate-200 text-[10px] uppercase tracking-wider font-semibold mt-0.5">Google Reviews</span>
+              <span className="text-white font-bold text-sm ml-1">4.8/5.0</span>
+              <div className="h-4 w-[1px] bg-white/20 mx-1"></div>
+              <span className="text-slate-300 text-[10px] uppercase tracking-widest font-bold">ગૂગલ રિવ્યુઝ</span>
             </div>
 
-            {/* Mobile Location Badge */}
             <button
               onClick={() => navigate('/contact')}
-              className="flex items-center gap-1.5 bg-white/10 backdrop-blur-md px-4 py-2 rounded-full border border-white/10 active:bg-white/20 transition-colors shadow-lg"
+              className="flex items-center gap-2 px-4 py-2.5 bg-white/5 hover:bg-white/10 backdrop-blur-md rounded-full border border-white/10 transition-all duration-300 group cursor-pointer"
             >
               <MapPin className="w-4 h-4 text-brand-orange" />
-              <span className="text-white font-medium text-sm tracking-wide">Varachha, Surat</span>
-              <ChevronRight className="w-4 h-4 text-white/60" />
+              <span className="text-white font-medium text-sm tracking-wide">વરાછા, સુરત</span>
+              <ChevronRight className="w-4 h-4 text-white/50 group-hover:text-brand-orange group-hover:translate-x-1 transition-transform" />
             </button>
           </motion.div>
-        </div>
-
-        <motion.div
-          initial={{ opacity: 0, y: 50 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 1 }}
-          className="absolute bottom-8 inset-x-6 z-20"
-        >
-          <button
-            onClick={() => setIsMobileSearchOpen(true)}
-            className="w-full flex items-center justify-between bg-white/10 backdrop-blur-xl border border-white/20 px-6 py-4 rounded-2xl shadow-2xl active:scale-95 transition-transform"
-          >
-            <div className="flex items-center gap-3">
-              <Search className="w-5 h-5 text-white" />
-              <span className="text-white font-semibold text-lg tracking-wide">Find Your Car</span>
-            </div>
-            <div className="w-8 h-8 rounded-full bg-brand-orange flex items-center justify-center">
-              <ChevronRight className="w-4 h-4 text-white" />
-            </div>
-          </button>
         </motion.div>
+
+
+        {/* ════════════════════════════════════════════════════════════════
+            RIGHT COLUMN: COMING SOON CAR ANIMATED STAGE
+        ════════════════════════════════════════════════════════════════ */}
+        <div className="col-span-1 lg:col-span-7 relative flex items-center justify-center order-1 lg:order-2 h-[50vh] lg:h-[75vh] w-full perspective-[2000px]">
+          {comingSoonCars.length > 0 ? (
+            <>
+              {/* Infinite Animated Marquee Background */}
+              <div className="absolute inset-0 flex items-center justify-center overflow-hidden pointer-events-none z-0">
+                <motion.div
+                  animate={{ x: [0, -1500] }}
+                  transition={{ repeat: Infinity, duration: 40, ease: 'linear' }}
+                  className="whitespace-nowrap"
+                >
+                  <h2 className="text-[8rem] lg:text-[16rem] font-black uppercase text-transparent bg-clip-text bg-gradient-to-r from-transparent via-amber-500/10 to-transparent select-none tracking-tighter">
+                    COMING SOON • INCOMING • ARRIVING • COMING SOON • INCOMING • ARRIVING •
+                  </h2>
+                </motion.div>
+              </div>
+
+              {/* Central Glowing Orb tied to Car */}
+              <motion.div 
+                key={`glow-${currentCarIndex}`}
+                initial={{ scale: 0.5, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ duration: 2, ease: "easeOut" }}
+                className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[70%] h-[70%] bg-gradient-to-tr from-amber-500/20 to-brand-orange/5 blur-[120px] rounded-full pointer-events-none z-0" 
+              />
+
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={currentCarIndex}
+                  variants={carSlideVariants}
+                  initial="enter"
+                  animate="center"
+                  exit="exit"
+                  className="relative w-full h-full flex flex-col lg:flex-row items-center justify-center lg:justify-end z-10"
+                >
+                  {/* Info Card (Floating Above) */}
+                  <div className="w-full sm:w-[85%] lg:w-[65%] xl:w-[55%] lg:absolute lg:bottom-12 lg:left-0 z-30 group mt-auto lg:mt-0 perspective-1000">
+                    <motion.div 
+                      initial={{ opacity: 0, y: 50, rotateX: 20 }}
+                      animate={{ opacity: 1, y: 0, rotateX: 0 }}
+                      transition={{ duration: 1, delay: 0.4, type: "spring", bounce: 0.4 }}
+                      onClick={() => navigate(`/car/${currentCar.id}`)}
+                      className="relative bg-white/[0.03] backdrop-blur-[40px] border border-white/10 p-6 lg:px-8 lg:py-6 rounded-[2rem] cursor-pointer shadow-[0_30px_60px_rgba(0,0,0,0.6)] overflow-hidden transform-gpu hover:-translate-y-2 hover:bg-white/[0.05] hover:border-amber-500/30 transition-all duration-500 flex flex-col lg:flex-row items-start lg:items-center justify-between"
+                    >
+                      {/* Sweeping Shimmer Effect inside Card */}
+                      <div className="absolute inset-0 w-[200%] h-full bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full group-hover:animate-[shimmer_1.5s_infinite] pointer-events-none" />
+
+                      {/* Left Area: Title & Specs */}
+                      <div className="w-full lg:w-auto flex-1 z-10 relative">
+                        {/* Header Badge */}
+                        <div className="flex items-center gap-3 mb-4 lg:mb-3">
+                          <div className="relative flex items-center justify-center w-8 h-8 rounded-full bg-amber-500/10 border border-amber-500/20 shadow-[0_0_15px_rgba(245,158,11,0.2)]">
+                            <div className="absolute w-full h-full rounded-full border border-amber-500/50 animate-[spin_4s_linear_infinite]" />
+                            <Sparkles className="w-4 h-4 text-amber-500" />
+                          </div>
+                          <span className="text-[10px] sm:text-xs font-black tracking-[0.2em] uppercase text-amber-400">
+                            Highly Anticipated
+                          </span>
+                        </div>
+                        
+                        {/* Title */}
+                        <h3 className="text-3xl sm:text-4xl font-extrabold text-white mb-2 leading-tight group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-white group-hover:to-amber-200 transition-all duration-500">
+                          {currentCar.make} <span className="font-light">{currentCar.model}</span>
+                        </h3>
+                        
+                        {/* Specs */}
+                        <div className="flex items-center gap-3 mb-6 lg:mb-0 flex-wrap">
+                          <span className="px-3 py-1 rounded-md bg-white/5 border border-white/10 text-slate-300 text-xs font-bold uppercase tracking-wider">{currentCar.year}</span>
+                          <span className="px-3 py-1 rounded-md bg-white/5 border border-white/10 text-slate-300 text-xs font-bold uppercase tracking-wider">{currentCar.fuelType || 'Fuel'}</span>
+                          <span className="px-3 py-1 rounded-md bg-white/5 border border-white/10 text-slate-300 text-xs font-bold uppercase tracking-wider">{currentCar.transmission || 'Auto'}</span>
+                        </div>
+                      </div>
+                      
+                      {/* Desktop Vertical Divider / Mobile Horizontal Divider */}
+                      <div className="w-full lg:w-[1px] h-[1px] lg:h-24 bg-gradient-to-r lg:bg-gradient-to-b from-transparent via-amber-500/50 to-transparent my-6 lg:my-0 lg:mx-8 relative z-10" />
+                      
+                      {/* Right Area: Pricing & CTA */}
+                      <div className="flex items-end lg:items-center justify-between lg:justify-end gap-6 w-full lg:w-auto relative z-10">
+                        <div className="flex flex-col lg:items-end lg:text-right">
+                          <p className="text-[10px] text-amber-500/70 uppercase tracking-[0.15em] font-bold mb-1.5 flex items-center gap-1.5">
+                            Expected Pricing
+                          </p>
+                          <p className="text-2xl sm:text-3xl font-black text-white tracking-tight drop-shadow-md">
+                            {formatPrice(currentCar.price)}
+                          </p>
+                        </div>
+                        <motion.div 
+                          whileHover={{ scale: 1.1, rotate: -15 }}
+                          whileTap={{ scale: 0.9 }}
+                          className="w-14 h-14 rounded-full bg-amber-500 shadow-[0_0_30px_rgba(245,158,11,0.4)] flex items-center justify-center transition-all duration-300 relative overflow-hidden shrink-0"
+                        >
+                          <div className="absolute inset-0 bg-white/20 scale-0 group-hover:scale-100 transition-transform duration-500 rounded-full" />
+                          <ArrowRight className="w-6 h-6 text-black relative z-10" strokeWidth={2.5} />
+                        </motion.div>
+                      </div>
+
+                      {/* Progress Bar locked to this specific car's slide duration */}
+                      <div className="absolute bottom-0 left-0 right-0 h-1 bg-white/5">
+                        <motion.div 
+                          initial={{ scaleX: 0 }}
+                          animate={{ scaleX: 1 }}
+                          transition={{ duration: 5, ease: "linear" }}
+                          className="h-full bg-gradient-to-r from-amber-500 to-brand-orange origin-left shadow-[0_0_10px_rgba(245,158,11,0.5)]"
+                        />
+                      </div>
+                    </motion.div>
+                  </div>
+
+                  {/* 3D Car Image Entrance */}
+                  <div className="w-[100%] lg:w-[85%] h-auto relative lg:absolute lg:right-[-5%] lg:top-[5%] z-20 flex items-center justify-center mt-6 lg:mt-0 pointer-events-none">
+                    <motion.div
+                      animate={{ y: [0, -20, 0], rotateZ: [0, -1, 0, 1, 0] }} 
+                      transition={{ 
+                        y: { repeat: Infinity, duration: 4, ease: "easeInOut" },
+                        rotateZ: { repeat: Infinity, duration: 8, ease: "easeInOut" }
+                      }}
+                      className="w-full flex justify-center"
+                    >
+                      <img
+                        src={currentCar.image || 'https://placehold.co/800x400/111/333?text=Incoming+Vehicle'}
+                        alt={`${currentCar.make} ${currentCar.model}`}
+                        className="w-full h-auto object-contain drop-shadow-[0_50px_50px_rgba(0,0,0,0.85)] max-h-[40vh] lg:max-h-[65vh] transform-gpu scale-110 lg:scale-125"
+                      />
+                    </motion.div>
+                  </div>
+
+                </motion.div>
+              </AnimatePresence>
+            </>
+          ) : (
+            // Fallback empty state
+            <div className="w-full h-full flex flex-col items-center justify-center opacity-30 select-none pointer-events-none z-10">
+              <Car className="w-32 h-32 text-white/10 mb-4" />
+              <h2 className="text-[4rem] font-black uppercase text-white/5 tracking-tighter">Premium Collection</h2>
+            </div>
+          )}
+        </div>
+
       </div>
-
-      {/* ════════════════════════════════════════════════════════════════
-          GLASSMORPHIC BOTTOM SHEET (Mobile Search)
-      ════════════════════════════════════════════════════════════════ */}
-      <AnimatePresence>
-        {isMobileSearchOpen && (
-          <motion.div
-            initial={{ y: "100%" }}
-            animate={{ y: 0 }}
-            exit={{ y: "100%" }}
-            transition={{ type: "spring", damping: 25, stiffness: 200 }}
-            className="md:hidden fixed inset-x-0 bottom-0 z-50 h-[75dvh] bg-black/60 backdrop-blur-3xl rounded-t-[2.5rem] border-t border-white/20 shadow-[0_-10px_40px_rgba(0,0,0,0.5)] flex flex-col"
-          >
-            <div className="flex justify-center pt-4 pb-2">
-              <div className="w-12 h-1.5 bg-white/20 rounded-full" />
-            </div>
-
-            <div className="px-6 pb-4 flex items-center justify-between border-b border-white/10">
-              <h2 className="text-2xl font-bold text-white tracking-tight">Search Inventory</h2>
-              <button
-                onClick={() => setIsMobileSearchOpen(false)}
-                className="p-2 bg-white/10 rounded-full text-white/70 hover:text-white transition-colors"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            <div className="flex-1 overflow-y-auto px-6 py-6 space-y-5">
-              {/* Brand */}
-              <div className="space-y-2">
-                <label className="text-xs font-bold text-white/50 uppercase tracking-widest pl-1">Make</label>
-                <div className="relative">
-                  <div className="absolute left-4 top-1/2 -translate-y-1/2 w-8 h-8 rounded-xl bg-white/10 flex items-center justify-center pointer-events-none">
-                    <Car className="w-4 h-4 text-white" />
-                  </div>
-                  <select
-                    value={selectedBrand}
-                    onChange={handleBrandChange}
-                    disabled={isLoading}
-                    className="w-full h-14 pl-14 pr-10 rounded-2xl bg-white/5 border border-white/10 text-white font-semibold appearance-none focus:ring-2 focus:ring-brand-orange focus:border-transparent outline-none transition-all disabled:opacity-50"
-                  >
-                    <option value="" className="text-black">{isLoading ? 'Loading...' : 'Any Brand'}</option>
-                    {availableBrands.map(brand => (
-                      <option key={brand} value={brand} className="text-black">{brand}</option>
-                    ))}
-                  </select>
-                  <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/40 pointer-events-none" />
-                </div>
-              </div>
-
-              {/* Model */}
-              <div className="space-y-2">
-                <label className="text-xs font-bold text-white/50 uppercase tracking-widest pl-1">Model</label>
-                <div className="relative">
-                  <div className="absolute left-4 top-1/2 -translate-y-1/2 w-8 h-8 rounded-xl bg-white/10 flex items-center justify-center pointer-events-none">
-                    <Settings2 className="w-4 h-4 text-white" />
-                  </div>
-                  <select
-                    value={selectedModel}
-                    onChange={(e) => setSelectedModel(e.target.value)}
-                    disabled={isLoading || availableModels.length === 0}
-                    className="w-full h-14 pl-14 pr-10 rounded-2xl bg-white/5 border border-white/10 text-white font-semibold appearance-none focus:ring-2 focus:ring-brand-orange focus:border-transparent outline-none transition-all disabled:opacity-50"
-                  >
-                    <option value="" className="text-black">{isLoading ? 'Loading...' : 'Any Model'}</option>
-                    {availableModels.map(model => (
-                      <option key={model} value={model} className="text-black">{model}</option>
-                    ))}
-                  </select>
-                  <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/40 pointer-events-none" />
-                </div>
-              </div>
-
-              {/* Budget */}
-              <div className="space-y-2">
-                <label className="text-xs font-bold text-white/50 uppercase tracking-widest pl-1">Max Budget</label>
-                <div className="relative">
-                  <div className="absolute left-4 top-1/2 -translate-y-1/2 w-8 h-8 rounded-xl bg-white/10 flex items-center justify-center pointer-events-none">
-                    <Wallet className="w-4 h-4 text-white" />
-                  </div>
-                  <select
-                    value={selectedBudget}
-                    onChange={(e) => setSelectedBudget(e.target.value)}
-                    className="w-full h-14 pl-14 pr-10 rounded-2xl bg-white/5 border border-white/10 text-white font-semibold appearance-none focus:ring-2 focus:ring-brand-orange focus:border-transparent outline-none transition-all"
-                  >
-                    <option value="" className="text-black">No Limit</option>
-                    <option value="0-500000" className="text-black">Under ₹5 Lakh</option>
-                    <option value="500000-1000000" className="text-black">₹5 Lakh - ₹10 Lakh</option>
-                    <option value="1000000-2000000" className="text-black">₹10 Lakh - ₹20 Lakh</option>
-                    <option value="2000000-99999999" className="text-black">Above ₹20 Lakh</option>
-                  </select>
-                  <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/40 pointer-events-none" />
-                </div>
-              </div>
-            </div>
-
-            <div className="pt-6 pb-48 px-6 border-t border-white/10 bg-black/20">
-              <button
-                onClick={() => {
-                  setIsMobileSearchOpen(false);
-                  handleSearch();
-                }}
-                className="w-full py-4 bg-brand-orange hover:bg-[#e68415] text-white font-bold rounded-2xl flex items-center justify-center gap-2 shadow-[0_10px_25px_rgba(245,148,35,0.4)] active:scale-[0.98] transition-all"
-              >
-                <Search className="w-5 h-5" />
-                <span className="text-lg tracking-wide">Search Inventory</span>
-              </button>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* ════════════════════════════════════════════════════════════════
-          DESKTOP CONTENT (Hidden on mobile)
-      ════════════════════════════════════════════════════════════════ */}
-      <motion.div
-        className="hidden md:block relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-24"
-        initial="hidden"
-        animate="visible"
-        variants={containerVariants}
-      >
-        <div className="max-w-3xl text-left">
-          <motion.h1
-            variants={itemVariants}
-            className="text-5xl md:text-7xl text-white font-bold tracking-tight leading-[1.1] drop-shadow-2xl"
-          >
-            Your <span className="text-brand-orange">Dream Car,</span><br />Now Within Your Reach!
-          </motion.h1>
-          <motion.p
-            variants={itemVariants}
-            className="text-xl text-slate-200 mt-6 max-w-2xl font-medium leading-relaxed drop-shadow-md"
-          >
-            Surat&apos;s premier destination for curated luxury and certified pre-owned vehicles. Built on trust, driven by quality.
-          </motion.p>
-
-          {/* Trust Badges & Details (Desktop) */}
-          <motion.div
-            variants={itemVariants}
-            className="mt-8 flex items-center gap-8"
-          >
-            <div className="flex items-center gap-3 bg-white/5 backdrop-blur-sm px-4 py-2 rounded-full border border-white/10 group hover:bg-white/10 transition-all duration-300 cursor-default">
-              <div className="flex items-center gap-0.5">
-                {[...Array(5)].map((_, i) => (
-                  <motion.svg
-                    key={i}
-                    initial={{ opacity: 0, scale: 0 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: 0.8 + (i * 0.1) }}
-                    className="w-4 h-4 text-yellow-400 fill-yellow-400 drop-shadow-[0_0_8px_rgba(250,204,21,0.4)]"
-                    viewBox="0 0 20 20"
-                  >
-                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                  </motion.svg>
-                ))}
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="text-white font-bold text-sm tracking-wide">4.8 Rating</span>
-                <div className="h-4 w-[1px] bg-white/20"></div>
-                <span className="text-slate-300 text-xs uppercase tracking-widest font-semibold">Google Reviews</span>
-              </div>
-            </div>
-
-            <motion.button
-              onClick={() => navigate('/contact')}
-              whileHover={{ x: 5 }}
-              className="flex items-center gap-2.5 px-4 py-2 bg-white/5 backdrop-blur-sm rounded-full border border-white/10 hover:bg-white/10 transition-all duration-300 cursor-pointer group"
-            >
-              <MapPin className="w-4 h-4 text-brand-orange shrink-0" />
-              <span className="text-white font-semibold text-sm tracking-wide group-hover:text-brand-orange transition-colors">Varachha, Surat</span>
-              <ChevronRight className="w-4 h-4 text-white/50 group-hover:text-brand-orange group-hover:translate-x-1 transition-all duration-300" />
-            </motion.button>
-          </motion.div>
-        </div>
-      </motion.div>
-
-      {/* ════════════════════════════════════════════════════════════════
-          DESKTOP SEARCH BAR (Hidden on Mobile)
-      ════════════════════════════════════════════════════════════════ */}
-      <motion.div
-        initial="hidden"
-        animate="visible"
-        variants={searchBarVariants}
-        className="hidden md:block absolute bottom-3 left-0 right-0 px-8 md:px-12 z-20"
-      >
-        <div className="max-w-6xl mx-auto bg-white/95 backdrop-blur-2xl border border-white/40 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.15),0_16px_32px_-8px_rgba(245,148,35,0.08)] rounded-[2rem] p-6">
-          <div className="grid grid-cols-4 gap-6 items-end">
-            {/* Brand */}
-            <div className="relative group">
-              <div className="absolute left-4 top-1/2 -translate-y-1/2 flex items-center gap-2 pointer-events-none z-10 transition-transform duration-300 group-focus-within:scale-110">
-                <div className="w-10 h-10 rounded-xl bg-brand-orange/5 flex items-center justify-center text-brand-orange border border-brand-orange/10 shadow-sm group-hover:bg-brand-orange group-hover:text-white transition-all duration-300">
-                  <Car className="w-5 h-5" />
-                </div>
-              </div>
-              <select
-                value={selectedBrand}
-                onChange={handleBrandChange}
-                disabled={isLoading}
-                className="appearance-none w-full h-16 pl-16 pr-12 rounded-2xl border-2 border-slate-100 bg-slate-50/50 text-brand-dark font-bold focus:ring-4 focus:ring-brand-orange/10 focus:border-brand-orange focus:bg-white outline-none transition-all duration-300 disabled:opacity-50 cursor-pointer text-base"
-              >
-                <option value="">{isLoading ? 'Loading...' : 'Select Brand'}</option>
-                {availableBrands.map(brand => (
-                  <option key={brand} value={brand}>{brand}</option>
-                ))}
-              </select>
-              <ChevronDown className="absolute right-5 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 pointer-events-none group-focus-within:text-brand-orange transition-colors" />
-            </div>
-
-            {/* Model */}
-            <div className="relative group">
-              <div className="absolute left-4 top-1/2 -translate-y-1/2 flex items-center gap-2 pointer-events-none z-10 transition-transform duration-300 group-focus-within:scale-110">
-                <div className="w-10 h-10 rounded-xl bg-brand-orange/5 flex items-center justify-center text-brand-orange border border-brand-orange/10 shadow-sm group-hover:bg-brand-orange group-hover:text-white transition-all duration-300">
-                  <Settings2 className="w-5 h-5" />
-                </div>
-              </div>
-              <select
-                value={selectedModel}
-                onChange={(e) => setSelectedModel(e.target.value)}
-                disabled={isLoading || availableModels.length === 0}
-                className="appearance-none w-full h-16 pl-16 pr-12 rounded-2xl border-2 border-slate-100 bg-slate-50/50 text-brand-dark font-bold focus:ring-4 focus:ring-brand-orange/10 focus:border-brand-orange focus:bg-white outline-none transition-all duration-300 disabled:opacity-50 cursor-pointer text-base"
-              >
-                <option value="">{isLoading ? 'Loading...' : 'Select Model'}</option>
-                {availableModels.map(model => (
-                  <option key={model} value={model}>{model}</option>
-                ))}
-              </select>
-              <ChevronDown className="absolute right-5 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 pointer-events-none group-focus-within:text-brand-orange transition-colors" />
-            </div>
-
-            {/* Budget */}
-            <div className="relative group">
-              <div className="absolute left-4 top-1/2 -translate-y-1/2 flex items-center gap-2 pointer-events-none z-10 transition-transform duration-300 group-focus-within:scale-110">
-                <div className="w-10 h-10 rounded-xl bg-brand-orange/5 flex items-center justify-center text-brand-orange border border-brand-orange/10 shadow-sm group-hover:bg-brand-orange group-hover:text-white transition-all duration-300">
-                  <Wallet className="w-5 h-5" />
-                </div>
-              </div>
-              <select
-                value={selectedBudget}
-                onChange={(e) => setSelectedBudget(e.target.value)}
-                className="appearance-none w-full h-16 pl-16 pr-12 rounded-2xl border-2 border-slate-100 bg-slate-50/50 text-brand-dark font-bold focus:ring-4 focus:ring-brand-orange/10 focus:border-brand-orange focus:bg-white outline-none transition-all duration-300 cursor-pointer text-base"
-              >
-                <option value="">Any Budget</option>
-                <option value="0-500000">Under ₹5 Lakh</option>
-                <option value="500000-1000000">₹5 Lakh - ₹10 Lakh</option>
-                <option value="1000000-2000000">₹10 Lakh - ₹20 Lakh</option>
-                <option value="2000000-99999999">Above ₹20 Lakh</option>
-              </select>
-              <ChevronDown className="absolute right-5 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 pointer-events-none group-focus-within:text-brand-orange transition-colors" />
-            </div>
-
-            {/* Search Button */}
-            <div className="relative h-16">
-              <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={handleSearch}
-                className="w-full h-full bg-gradient-to-br from-brand-orange to-[#e68415] hover:from-[#e68415] hover:to-brand-orange text-white font-bold rounded-2xl flex items-center justify-center gap-2 transition-all duration-500 shadow-[0_12px_24px_-8_rgba(245,148,35,0.4)] hover:shadow-[0_20px_40px_-12px_rgba(245,148,35,0.5)] active:scale-95 group text-base"
-              >
-                <Search className="w-6 h-6 transition-transform duration-500 group-hover:rotate-12" />
-                <span className="tracking-wide uppercase text-base">Search Inventory</span>
-              </motion.button>
-            </div>
-          </div>
-        </div>
-      </motion.div>
 
     </section>
   );

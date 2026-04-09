@@ -10,33 +10,12 @@ import { useCars } from '../context/CarContext';
 import HeroSection from '../components/HeroSection';
 import ArrivingShortly from '../components/ArrivingShortly';
 import GoogleReviews from '../components/GoogleReviews';
+import QuickSearch from '../components/QuickSearch';
 
 
 
 export default function Home() {
   const { cars, isLoading } = useCars();
-
-  // ── Quick Search State ──
-  const navigate = useNavigate();
-  const [searchMake, setSearchMake] = useState('');
-  const [searchBudget, setSearchBudget] = useState('');
-  const [searchFuel, setSearchFuel] = useState('');
-
-  // Extract unique makes from live car data
-  const uniqueMakes = [...new Set(cars.map(c => c.make).filter(Boolean))].sort();
-
-  const handleQuickSearch = () => {
-    const params = new URLSearchParams();
-    if (searchMake) params.set('make', searchMake);
-    if (searchFuel) params.set('fuelType', searchFuel);
-    if (searchBudget) {
-      const [min, max] = searchBudget.split('-');
-      if (min) params.set('priceMin', min);
-      if (max) params.set('priceMax', max);
-    }
-    navigate(`/inventory?${params.toString()}`);
-  };
-
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -97,6 +76,11 @@ export default function Home() {
               <h2 className="font-heading text-3xl md:text-4xl font-extrabold text-primary mb-3">Explore Our Verified Vehicles</h2>
               <p className="font-body text-text-muted max-w-2xl">Quality pre-owned vehicles with complete service history and multi-point inspection.</p>
             </div>
+          </div>
+
+          {/* Quick Search Component */}
+          <div className="mb-12">
+            <QuickSearch />
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
