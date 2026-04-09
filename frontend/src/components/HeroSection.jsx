@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Car, Settings2, Wallet, Search, MapPin, ChevronDown } from 'lucide-react';
+import { Car, Settings2, Wallet, Search, MapPin, ChevronDown, ChevronRight, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import axiosInstance from '../api/axiosConfig';
 
 export default function HeroSection() {
   const navigate = useNavigate();
+  const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
   const [selectedBrand, setSelectedBrand] = useState('');
   const [selectedModel, setSelectedModel] = useState('');
   const [selectedBudget, setSelectedBudget] = useState('');
@@ -120,9 +121,12 @@ export default function HeroSection() {
   };
 
   return (
-    <section className="relative min-h-[85vh] flex items-center pt-4 md:pt-4 pb-52 md:pb-12 font-['Inter',sans-serif]">
-      {/* Background */}
-      <div className="absolute inset-0 z-0 overflow-hidden">
+    <section className="relative flex flex-col min-h-[60vh] md:min-h-[85vh] md:flex-row md:items-center font-['Inter',sans-serif] bg-slate-950 md:bg-transparent overflow-hidden">
+
+      {/* ════════════════════════════════════════════════════════════════
+          DESKTOP BACKGROUND (Hidden on mobile)
+      ════════════════════════════════════════════════════════════════ */}
+      <div className="hidden md:block absolute inset-0 z-0 overflow-hidden">
         <motion.img
           initial="hidden"
           animate="visible"
@@ -131,44 +135,244 @@ export default function HeroSection() {
           alt="Premium Car"
           className="w-full h-full object-cover"
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-slate-950 via-slate-900/60 to-transparent md:bg-gradient-to-r md:from-slate-950 md:via-slate-900/80"></div>
+        <div className="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-900/80 to-transparent"></div>
       </div>
 
-      {/* Content Container */}
-      <motion.div 
-        className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"
+      {/* ════════════════════════════════════════════════════════════════
+          MOBILE 100DVH LUXURY POSTER (Hidden on desktop)
+      ════════════════════════════════════════════════════════════════ */}
+      <div className="md:hidden absolute inset-0 w-full h-[60vh] z-0 overflow-hidden">
+        <motion.img
+          initial={{ scale: 1.1, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ duration: 1.8, ease: "easeOut" }}
+          src="mobile-image.png"
+          alt="Premium Car"
+          className="absolute inset-0 w-full h-full object-cover object-center z-0"
+        />
+        {/* Deep cinematic vignette gradient */}
+        <div className="absolute inset-0 z-0 bg-gradient-to-t from-black via-black/40 to-black/70"></div>
+
+        {/* Mobile Content Overlay */}
+        <div className="absolute inset-x-0 top-[20%] z-10 px-6 flex flex-col items-center text-center">
+          <motion.h1
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 1, delay: 0.2 }}
+            className="text-4xl text-white font-bold tracking-tight leading-[1.1] drop-shadow-2xl"
+          >
+            Your <span className="text-brand-orange">Dream Car,</span><br />Now Within Reach!
+          </motion.h1>
+
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 1, delay: 0.5 }}
+            className="mt-4 text-white/80 text-sm font-medium tracking-wide max-w-[300px]"
+          >
+            Surat&apos;s premier destination for curated luxury and certified pre-owned vehicles. Built on trust, driven by quality.
+          </motion.p>
+
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.8 }}
+            className="mt-8 flex flex-col items-center gap-3 w-full"
+          >
+            {/* Mobile Trust Badge with Google Reviews */}
+            <div className="flex items-center gap-2 bg-white/20 backdrop-blur-md px-3.5 py-1.5 rounded-full border border-white/20">
+              <div className="flex items-center gap-0.5">
+                {[...Array(5)].map((_, i) => (
+                  <svg key={i} className="w-3 h-3 text-yellow-400 fill-yellow-400" viewBox="0 0 20 20">
+                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                  </svg>
+                ))}
+              </div>
+              <span className="text-white font-bold text-xs mt-0.5">4.8</span>
+              <div className="h-3 w-[1px] bg-white/40 mx-0.5"></div>
+              <span className="text-slate-200 text-[10px] uppercase tracking-wider font-semibold mt-0.5">Google Reviews</span>
+            </div>
+
+            {/* Mobile Location Badge */}
+            <button
+              onClick={() => navigate('/contact')}
+              className="flex items-center gap-1.5 bg-white/10 backdrop-blur-md px-4 py-2 rounded-full border border-white/10 active:bg-white/20 transition-colors shadow-lg"
+            >
+              <MapPin className="w-4 h-4 text-brand-orange" />
+              <span className="text-white font-medium text-sm tracking-wide">Varachha, Surat</span>
+              <ChevronRight className="w-4 h-4 text-white/60" />
+            </button>
+          </motion.div>
+        </div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 50 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 1 }}
+          className="absolute bottom-8 inset-x-6 z-20"
+        >
+          <button
+            onClick={() => setIsMobileSearchOpen(true)}
+            className="w-full flex items-center justify-between bg-white/10 backdrop-blur-xl border border-white/20 px-6 py-4 rounded-2xl shadow-2xl active:scale-95 transition-transform"
+          >
+            <div className="flex items-center gap-3">
+              <Search className="w-5 h-5 text-white" />
+              <span className="text-white font-semibold text-lg tracking-wide">Find Your Car</span>
+            </div>
+            <div className="w-8 h-8 rounded-full bg-brand-orange flex items-center justify-center">
+              <ChevronRight className="w-4 h-4 text-white" />
+            </div>
+          </button>
+        </motion.div>
+      </div>
+
+      {/* ════════════════════════════════════════════════════════════════
+          GLASSMORPHIC BOTTOM SHEET (Mobile Search)
+      ════════════════════════════════════════════════════════════════ */}
+      <AnimatePresence>
+        {isMobileSearchOpen && (
+          <motion.div
+            initial={{ y: "100%" }}
+            animate={{ y: 0 }}
+            exit={{ y: "100%" }}
+            transition={{ type: "spring", damping: 25, stiffness: 200 }}
+            className="md:hidden fixed inset-x-0 bottom-0 z-50 h-[75dvh] bg-black/60 backdrop-blur-3xl rounded-t-[2.5rem] border-t border-white/20 shadow-[0_-10px_40px_rgba(0,0,0,0.5)] flex flex-col"
+          >
+            <div className="flex justify-center pt-4 pb-2">
+              <div className="w-12 h-1.5 bg-white/20 rounded-full" />
+            </div>
+
+            <div className="px-6 pb-4 flex items-center justify-between border-b border-white/10">
+              <h2 className="text-2xl font-bold text-white tracking-tight">Search Inventory</h2>
+              <button
+                onClick={() => setIsMobileSearchOpen(false)}
+                className="p-2 bg-white/10 rounded-full text-white/70 hover:text-white transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto px-6 py-6 space-y-5">
+              {/* Brand */}
+              <div className="space-y-2">
+                <label className="text-xs font-bold text-white/50 uppercase tracking-widest pl-1">Make</label>
+                <div className="relative">
+                  <div className="absolute left-4 top-1/2 -translate-y-1/2 w-8 h-8 rounded-xl bg-white/10 flex items-center justify-center pointer-events-none">
+                    <Car className="w-4 h-4 text-white" />
+                  </div>
+                  <select
+                    value={selectedBrand}
+                    onChange={handleBrandChange}
+                    disabled={isLoading}
+                    className="w-full h-14 pl-14 pr-10 rounded-2xl bg-white/5 border border-white/10 text-white font-semibold appearance-none focus:ring-2 focus:ring-brand-orange focus:border-transparent outline-none transition-all disabled:opacity-50"
+                  >
+                    <option value="" className="text-black">{isLoading ? 'Loading...' : 'Any Brand'}</option>
+                    {availableBrands.map(brand => (
+                      <option key={brand} value={brand} className="text-black">{brand}</option>
+                    ))}
+                  </select>
+                  <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/40 pointer-events-none" />
+                </div>
+              </div>
+
+              {/* Model */}
+              <div className="space-y-2">
+                <label className="text-xs font-bold text-white/50 uppercase tracking-widest pl-1">Model</label>
+                <div className="relative">
+                  <div className="absolute left-4 top-1/2 -translate-y-1/2 w-8 h-8 rounded-xl bg-white/10 flex items-center justify-center pointer-events-none">
+                    <Settings2 className="w-4 h-4 text-white" />
+                  </div>
+                  <select
+                    value={selectedModel}
+                    onChange={(e) => setSelectedModel(e.target.value)}
+                    disabled={isLoading || availableModels.length === 0}
+                    className="w-full h-14 pl-14 pr-10 rounded-2xl bg-white/5 border border-white/10 text-white font-semibold appearance-none focus:ring-2 focus:ring-brand-orange focus:border-transparent outline-none transition-all disabled:opacity-50"
+                  >
+                    <option value="" className="text-black">{isLoading ? 'Loading...' : 'Any Model'}</option>
+                    {availableModels.map(model => (
+                      <option key={model} value={model} className="text-black">{model}</option>
+                    ))}
+                  </select>
+                  <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/40 pointer-events-none" />
+                </div>
+              </div>
+
+              {/* Budget */}
+              <div className="space-y-2">
+                <label className="text-xs font-bold text-white/50 uppercase tracking-widest pl-1">Max Budget</label>
+                <div className="relative">
+                  <div className="absolute left-4 top-1/2 -translate-y-1/2 w-8 h-8 rounded-xl bg-white/10 flex items-center justify-center pointer-events-none">
+                    <Wallet className="w-4 h-4 text-white" />
+                  </div>
+                  <select
+                    value={selectedBudget}
+                    onChange={(e) => setSelectedBudget(e.target.value)}
+                    className="w-full h-14 pl-14 pr-10 rounded-2xl bg-white/5 border border-white/10 text-white font-semibold appearance-none focus:ring-2 focus:ring-brand-orange focus:border-transparent outline-none transition-all"
+                  >
+                    <option value="" className="text-black">No Limit</option>
+                    <option value="0-500000" className="text-black">Under ₹5 Lakh</option>
+                    <option value="500000-1000000" className="text-black">₹5 Lakh - ₹10 Lakh</option>
+                    <option value="1000000-2000000" className="text-black">₹10 Lakh - ₹20 Lakh</option>
+                    <option value="2000000-99999999" className="text-black">Above ₹20 Lakh</option>
+                  </select>
+                  <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/40 pointer-events-none" />
+                </div>
+              </div>
+            </div>
+
+            <div className="pt-6 pb-48 px-6 border-t border-white/10 bg-black/20">
+              <button
+                onClick={() => {
+                  setIsMobileSearchOpen(false);
+                  handleSearch();
+                }}
+                className="w-full py-4 bg-brand-orange hover:bg-[#e68415] text-white font-bold rounded-2xl flex items-center justify-center gap-2 shadow-[0_10px_25px_rgba(245,148,35,0.4)] active:scale-[0.98] transition-all"
+              >
+                <Search className="w-5 h-5" />
+                <span className="text-lg tracking-wide">Search Inventory</span>
+              </button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* ════════════════════════════════════════════════════════════════
+          DESKTOP CONTENT (Hidden on mobile)
+      ════════════════════════════════════════════════════════════════ */}
+      <motion.div
+        className="hidden md:block relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-24"
         initial="hidden"
         animate="visible"
         variants={containerVariants}
       >
         <div className="max-w-3xl text-left">
-          <motion.h1 
+          <motion.h1
             variants={itemVariants}
-            className="text-4xl sm:text-5xl md:text-7xl text-white font-bold tracking-tight leading-[1.1] drop-shadow-2xl"
+            className="text-5xl md:text-7xl text-white font-bold tracking-tight leading-[1.1] drop-shadow-2xl"
           >
             Your <span className="text-brand-orange">Dream Car,</span><br />Now Within Your Reach!
           </motion.h1>
-          <motion.p 
+          <motion.p
             variants={itemVariants}
-            className="text-base md:text-xl text-slate-200 mt-6 max-w-2xl font-medium leading-relaxed drop-shadow-md"
+            className="text-xl text-slate-200 mt-6 max-w-2xl font-medium leading-relaxed drop-shadow-md"
           >
             Surat&apos;s premier destination for curated luxury and certified pre-owned vehicles. Built on trust, driven by quality.
           </motion.p>
 
-          {/* Trust Badges */}
-          <motion.div 
+          {/* Trust Badges & Details (Desktop) */}
+          <motion.div
             variants={itemVariants}
-            className="mt-8 flex flex-wrap items-center gap-2 md:gap-8"
+            className="mt-8 flex items-center gap-8"
           >
             <div className="flex items-center gap-3 bg-white/5 backdrop-blur-sm px-4 py-2 rounded-full border border-white/10 group hover:bg-white/10 transition-all duration-300 cursor-default">
               <div className="flex items-center gap-0.5">
                 {[...Array(5)].map((_, i) => (
-                  <motion.svg 
-                    key={i} 
+                  <motion.svg
+                    key={i}
                     initial={{ opacity: 0, scale: 0 }}
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ delay: 0.8 + (i * 0.1) }}
-                    className="w-4 h-4 text-yellow-400 fill-yellow-400 drop-shadow-[0_0_8px_rgba(250,204,21,0.4)]" 
+                    className="w-4 h-4 text-yellow-400 fill-yellow-400 drop-shadow-[0_0_8px_rgba(250,204,21,0.4)]"
                     viewBox="0 0 20 20"
                   >
                     <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
@@ -182,75 +386,42 @@ export default function HeroSection() {
               </div>
             </div>
 
-            <motion.div 
-              whileHover={{ x: 5 }}
-              className="flex items-center gap-2.5 px-4 py-2 bg-white/5 backdrop-blur-sm rounded-full border border-white/10 hover:bg-white/10 transition-all duration-300 cursor-default"
-            >
-              <motion.div
-                animate={{ 
-                  y: [0, -4, 0],
-                }}
-                transition={{ 
-                  duration: 2,
-                  repeat: Infinity,
-                  ease: "easeInOut"
-                }}
-              >
-                <MapPin className="w-4 h-4 text-brand-orange shrink-0" />
-              </motion.div>
-              <span className="text-white font-semibold text-sm tracking-wide">Varachha, Surat</span>
-            </motion.div>
-          </motion.div>
-
-          <motion.div 
-            variants={itemVariants}
-            className="mt-8 grid grid-cols-2 gap-3 sm:flex sm:flex-row sm:gap-4"
-          >
             <motion.button
-              whileHover={{ scale: 1.05, translateY: -2 }}
-              whileTap={{ scale: 0.98 }}
-              onClick={() => navigate('/inventory')}
-              className="px-4 md:px-8 py-3.5 md:py-4 bg-brand-orange hover:bg-brand-orange/90 text-white font-bold rounded-xl transition-all duration-300 shadow-[0_8px_20px_rgba(245,148,35,0.3)] hover:shadow-[0_12px_24px_rgba(245,148,35,0.4)]"
-            >
-              Browse Cars
-            </motion.button>
-            <motion.button
-              whileHover={{ scale: 1.05, translateY: -2, backgroundColor: "rgba(255,255,255,0.15)" }}
-              whileTap={{ scale: 0.98 }}
               onClick={() => navigate('/contact')}
-              className="px-4 md:px-8 py-3.5 md:py-4 bg-white/10 text-white border border-white/30 font-semibold rounded-xl backdrop-blur-md transition-all duration-300"
+              whileHover={{ x: 5 }}
+              className="flex items-center gap-2.5 px-4 py-2 bg-white/5 backdrop-blur-sm rounded-full border border-white/10 hover:bg-white/10 transition-all duration-300 cursor-pointer group"
             >
-              Contact Us
+              <MapPin className="w-4 h-4 text-brand-orange shrink-0" />
+              <span className="text-white font-semibold text-sm tracking-wide group-hover:text-brand-orange transition-colors">Varachha, Surat</span>
+              <ChevronRight className="w-4 h-4 text-white/50 group-hover:text-brand-orange group-hover:translate-x-1 transition-all duration-300" />
             </motion.button>
           </motion.div>
         </div>
       </motion.div>
 
-      {/* Floating Search & Filter Bar */}
-      <motion.div 
+      {/* ════════════════════════════════════════════════════════════════
+          DESKTOP SEARCH BAR (Hidden on Mobile)
+      ════════════════════════════════════════════════════════════════ */}
+      <motion.div
         initial="hidden"
         animate="visible"
         variants={searchBarVariants}
-        className="absolute -bottom-24 md:-bottom-12 left-0 right-0 px-4 sm:px-8 md:px-12 z-20"
+        className="hidden md:block absolute bottom-3 left-0 right-0 px-8 md:px-12 z-20"
       >
-        <div className="max-w-6xl mx-auto backdrop-blur-2xl bg-white/95 border border-white/40 shadow-xl md:shadow-[0_32px_64px_-16px_rgba(0,0,0,0.15),0_16px_32px_-8px_rgba(245,148,35,0.08)] rounded-[2rem] p-3.5 md:p-6">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-3 md:gap-6 items-end">
-
+        <div className="max-w-6xl mx-auto bg-white/95 backdrop-blur-2xl border border-white/40 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.15),0_16px_32px_-8px_rgba(245,148,35,0.08)] rounded-[2rem] p-6">
+          <div className="grid grid-cols-4 gap-6 items-end">
             {/* Brand */}
             <div className="relative group">
-              <motion.div 
-                whileHover={{ scale: 1.1, rotate: 5 }}
-                className="absolute left-4 top-1/2 -translate-y-1/2 flex items-center gap-2 pointer-events-none z-10 transition-transform duration-300 group-focus-within:scale-110"
-              >
-                <div className="w-8 h-8 md:w-10 md:h-10 rounded-xl bg-brand-orange/5 flex items-center justify-center text-brand-orange border border-brand-orange/10 shadow-sm group-hover:bg-brand-orange group-hover:text-white transition-all duration-300">
-                  <Car className="w-4 h-4 md:w-5 md:h-5" />
+              <div className="absolute left-4 top-1/2 -translate-y-1/2 flex items-center gap-2 pointer-events-none z-10 transition-transform duration-300 group-focus-within:scale-110">
+                <div className="w-10 h-10 rounded-xl bg-brand-orange/5 flex items-center justify-center text-brand-orange border border-brand-orange/10 shadow-sm group-hover:bg-brand-orange group-hover:text-white transition-all duration-300">
+                  <Car className="w-5 h-5" />
                 </div>
-              </motion.div>
+              </div>
               <select
                 value={selectedBrand}
                 onChange={handleBrandChange}
                 disabled={isLoading}
-                className="appearance-none w-full h-12 md:h-16 pl-12 md:pl-16 pr-10 md:pr-12 rounded-2xl border-2 border-slate-100 bg-slate-50/50 text-brand-dark font-bold focus:ring-4 focus:ring-brand-orange/10 focus:border-brand-orange focus:bg-white outline-none transition-all duration-300 disabled:opacity-50 cursor-pointer text-[11px] md:text-base"
+                className="appearance-none w-full h-16 pl-16 pr-12 rounded-2xl border-2 border-slate-100 bg-slate-50/50 text-brand-dark font-bold focus:ring-4 focus:ring-brand-orange/10 focus:border-brand-orange focus:bg-white outline-none transition-all duration-300 disabled:opacity-50 cursor-pointer text-base"
               >
                 <option value="">{isLoading ? 'Loading...' : 'Select Brand'}</option>
                 {availableBrands.map(brand => (
@@ -262,19 +433,16 @@ export default function HeroSection() {
 
             {/* Model */}
             <div className="relative group">
-              <motion.div 
-                whileHover={{ scale: 1.1, rotate: -5 }}
-                className="absolute left-4 top-1/2 -translate-y-1/2 flex items-center gap-2 pointer-events-none z-10 transition-transform duration-300 group-focus-within:scale-110"
-              >
-                <div className="w-8 h-8 md:w-10 md:h-10 rounded-xl bg-brand-orange/5 flex items-center justify-center text-brand-orange border border-brand-orange/10 shadow-sm group-hover:bg-brand-orange group-hover:text-white transition-all duration-300">
-                  <Settings2 className="w-4 h-4 md:w-5 md:h-5" />
+              <div className="absolute left-4 top-1/2 -translate-y-1/2 flex items-center gap-2 pointer-events-none z-10 transition-transform duration-300 group-focus-within:scale-110">
+                <div className="w-10 h-10 rounded-xl bg-brand-orange/5 flex items-center justify-center text-brand-orange border border-brand-orange/10 shadow-sm group-hover:bg-brand-orange group-hover:text-white transition-all duration-300">
+                  <Settings2 className="w-5 h-5" />
                 </div>
-              </motion.div>
+              </div>
               <select
                 value={selectedModel}
                 onChange={(e) => setSelectedModel(e.target.value)}
                 disabled={isLoading || availableModels.length === 0}
-                className="appearance-none w-full h-12 md:h-16 pl-12 md:pl-16 pr-10 md:pr-12 rounded-2xl border-2 border-slate-100 bg-slate-50/50 text-brand-dark font-bold focus:ring-4 focus:ring-brand-orange/10 focus:border-brand-orange focus:bg-white outline-none transition-all duration-300 disabled:opacity-50 cursor-pointer text-[11px] md:text-base"
+                className="appearance-none w-full h-16 pl-16 pr-12 rounded-2xl border-2 border-slate-100 bg-slate-50/50 text-brand-dark font-bold focus:ring-4 focus:ring-brand-orange/10 focus:border-brand-orange focus:bg-white outline-none transition-all duration-300 disabled:opacity-50 cursor-pointer text-base"
               >
                 <option value="">{isLoading ? 'Loading...' : 'Select Model'}</option>
                 {availableModels.map(model => (
@@ -286,18 +454,15 @@ export default function HeroSection() {
 
             {/* Budget */}
             <div className="relative group">
-              <motion.div 
-                whileHover={{ scale: 1.1, y: -2 }}
-                className="absolute left-4 top-1/2 -translate-y-1/2 flex items-center gap-2 pointer-events-none z-10 transition-transform duration-300 group-focus-within:scale-110"
-              >
-                <div className="w-8 h-8 md:w-10 md:h-10 rounded-xl bg-brand-orange/5 flex items-center justify-center text-brand-orange border border-brand-orange/10 shadow-sm group-hover:bg-brand-orange group-hover:text-white transition-all duration-300">
-                  <Wallet className="w-4 h-4 md:w-5 md:h-5" />
+              <div className="absolute left-4 top-1/2 -translate-y-1/2 flex items-center gap-2 pointer-events-none z-10 transition-transform duration-300 group-focus-within:scale-110">
+                <div className="w-10 h-10 rounded-xl bg-brand-orange/5 flex items-center justify-center text-brand-orange border border-brand-orange/10 shadow-sm group-hover:bg-brand-orange group-hover:text-white transition-all duration-300">
+                  <Wallet className="w-5 h-5" />
                 </div>
-              </motion.div>
+              </div>
               <select
                 value={selectedBudget}
                 onChange={(e) => setSelectedBudget(e.target.value)}
-                className="appearance-none w-full h-12 md:h-16 pl-12 md:pl-16 pr-10 md:pr-12 rounded-2xl border-2 border-slate-100 bg-slate-50/50 text-brand-dark font-bold focus:ring-4 focus:ring-brand-orange/10 focus:border-brand-orange focus:bg-white outline-none transition-all duration-300 cursor-pointer text-[11px] md:text-base"
+                className="appearance-none w-full h-16 pl-16 pr-12 rounded-2xl border-2 border-slate-100 bg-slate-50/50 text-brand-dark font-bold focus:ring-4 focus:ring-brand-orange/10 focus:border-brand-orange focus:bg-white outline-none transition-all duration-300 cursor-pointer text-base"
               >
                 <option value="">Any Budget</option>
                 <option value="0-500000">Under ₹5 Lakh</option>
@@ -309,20 +474,21 @@ export default function HeroSection() {
             </div>
 
             {/* Search Button */}
-            <div className="relative h-12 md:h-16">
+            <div className="relative h-16">
               <motion.button
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={handleSearch}
-                className="w-full h-full bg-gradient-to-br from-brand-orange to-[#e68415] hover:from-[#e68415] hover:to-brand-orange text-white font-bold rounded-2xl flex items-center justify-center gap-2 transition-all duration-500 shadow-[0_12px_24px_-8_rgba(245,148,35,0.4)] hover:shadow-[0_20px_40px_-12px_rgba(245,148,35,0.5)] active:scale-95 group text-sm md:text-base"
+                className="w-full h-full bg-gradient-to-br from-brand-orange to-[#e68415] hover:from-[#e68415] hover:to-brand-orange text-white font-bold rounded-2xl flex items-center justify-center gap-2 transition-all duration-500 shadow-[0_12px_24px_-8_rgba(245,148,35,0.4)] hover:shadow-[0_20px_40px_-12px_rgba(245,148,35,0.5)] active:scale-95 group text-base"
               >
-                <Search className="w-4 h-4 md:w-6 md:h-6 transition-transform duration-500 group-hover:rotate-12" />
-                <span className="tracking-wide uppercase text-[10px] md:text-base">Search Inventory</span>
+                <Search className="w-6 h-6 transition-transform duration-500 group-hover:rotate-12" />
+                <span className="tracking-wide uppercase text-base">Search Inventory</span>
               </motion.button>
             </div>
           </div>
         </div>
       </motion.div>
+
     </section>
   );
 }

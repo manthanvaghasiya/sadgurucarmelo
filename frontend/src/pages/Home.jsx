@@ -44,7 +44,7 @@ export default function Home() {
       <HeroSection />
 
       {/* 2. Core Services Section */}
-      <section className="pt-32 pb-20 px-4 bg-background">
+      <section className="pt-20 pb-20 px-4 bg-background">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16 max-w-3xl mx-auto">
             <span className="text-sm font-heading font-bold text-[#d1108a] uppercase tracking-widest mb-4 inline-block">
@@ -54,7 +54,7 @@ export default function Home() {
               Complete Buy-Sell-Exchange Solutions in Surat
             </h2>
             <p className="font-body text-text-muted text-lg leading-relaxed">
-              We're constantly striving to elevate your car ownership experience by providing 
+              We're constantly striving to elevate your car ownership experience by providing
               transparent, reliable, and efficient solutions for every automotive need.
             </p>
           </div>
