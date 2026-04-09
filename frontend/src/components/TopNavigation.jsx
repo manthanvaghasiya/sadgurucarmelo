@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import { Phone, User } from 'lucide-react';
+import { Phone, User, MessageCircle } from 'lucide-react';
 
 export default function TopNavigation() {
   const location = useLocation();
@@ -53,13 +53,15 @@ export default function TopNavigation() {
               <Phone className="w-5 h-5 md:w-4 md:h-4 fill-current" />
               <span className="hidden md:inline">Call Me</span>
             </a>
-            <Link
-              to="/login"
-              className="border-2 border-primary text-primary hover:bg-primary hover:text-white p-2 md:px-5 md:py-2.5 rounded-lg font-body font-bold text-sm flex items-center gap-2 transition-colors"
+            <a
+              href="https://wa.me/919913634447"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="border-2 border-[#25D366] text-[#25D366] hover:bg-[#25D366] hover:text-white p-2 md:px-5 md:py-2.5 rounded-lg font-body font-bold text-sm flex items-center gap-2 transition-colors"
             >
-              <User className="w-5 h-5 md:w-4 md:h-4" />
-              <span className="hidden md:inline">Login</span>
-            </Link>
+              <MessageCircle className="w-5 h-5 md:w-4 md:h-4" />
+              <span className="hidden md:inline">WhatsApp</span>
+            </a>
           </div>
         </div>
       </div>

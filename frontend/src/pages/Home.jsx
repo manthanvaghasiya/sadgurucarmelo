@@ -22,51 +22,7 @@ export default function Home() {
       {/* 1. Hero Section */}
       <HeroSection />
 
-      {/* 2. Core Services Section */}
-      <section className="pt-20 pb-20 px-4 bg-background">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16 max-w-3xl mx-auto">
-            <span className="text-sm font-heading font-bold text-[#d1108a] uppercase tracking-widest mb-4 inline-block">
-              Premium Dealership Services
-            </span>
-            <h2 className="font-heading text-4xl md:text-5xl font-extrabold text-[#1a2b3c] mb-6 leading-tight">
-              Complete Buy-Sell-Exchange Solutions in Surat
-            </h2>
-            <p className="font-body text-text-muted text-lg leading-relaxed">
-              We're constantly striving to elevate your car ownership experience by providing
-              transparent, reliable, and efficient solutions for every automotive need.
-            </p>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="bg-surface rounded-3xl p-8 shadow-sm hover:shadow-lg transition-shadow border border-gray-100 flex flex-col items-center text-center group">
-              <div className="w-16 h-16 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                <ShieldCheck className="w-8 h-8" />
-              </div>
-              <h3 className="font-heading text-xl font-bold text-primary mb-3">Buy Certified Cars</h3>
-              <p className="font-body text-text-muted leading-relaxed mb-6">Choose from 150+ rigorously inspected cars for total peace of mind.</p>
-              <Link to="/about?service=buy" className="font-heading font-semibold text-primary hover:underline mt-auto flex items-center gap-2">View Details →</Link>
-            </div>
 
-            <div className="bg-surface rounded-3xl p-8 shadow-sm hover:shadow-lg transition-shadow border border-gray-100 flex flex-col items-center text-center group">
-              <div className="w-16 h-16 rounded-2xl bg-green-50 text-green-600 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                <Banknote className="w-8 h-8" />
-              </div>
-              <h3 className="font-heading text-xl font-bold text-primary mb-3">Sell Your Car Instantly</h3>
-              <p className="font-body text-text-muted leading-relaxed mb-6">Get the best market value with instant payment and transparent processes.</p>
-              <Link to="/about?service=sell" className="font-heading font-semibold text-primary hover:underline mt-auto flex items-center gap-2">View Details →</Link>
-            </div>
-
-            <div className="bg-surface rounded-3xl p-8 shadow-sm hover:shadow-lg transition-shadow border border-gray-100 flex flex-col items-center text-center group">
-              <div className="w-16 h-16 rounded-2xl bg-orange-50 text-orange-600 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                <Search className="w-8 h-8" />
-              </div>
-              <h3 className="font-heading text-xl font-bold text-primary mb-3">Best Value Exchange</h3>
-              <p className="font-body text-text-muted leading-relaxed mb-6">Quality cars available for attractive exchange bonuses when you trade in.</p>
-              <Link to="/about?service=exchange" className="font-heading font-semibold text-primary hover:underline mt-auto flex items-center gap-2">View Details →</Link>
-            </div>
-          </div>
-        </div>
-      </section>
 
       {/* 3. Inventory Grid Section */}
       <section className="py-20 px-4 bg-gray-50">
@@ -116,6 +72,50 @@ export default function Home() {
             <Link to="/inventory" className="inline-block px-8 py-3 rounded-full border-2 border-primary text-primary font-heading font-bold hover:bg-primary hover:text-white transition-colors cursor-pointer">
               View Full Inventory
             </Link>
+          </div>
+        </div>
+      </section>
+      {/* 2. Core Services Section */}
+      <section className="pt-20 pb-20 px-4 bg-background">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-16 max-w-3xl mx-auto">
+            <span className="text-sm font-heading font-bold text-[#d1108a] uppercase tracking-widest mb-4 inline-block">
+              પ્રીમિયમ ડીલરશીપ સેવાઓ
+            </span>
+            <h2 className="font-heading text-4xl md:text-5xl font-extrabold text-[#1a2b3c] mb-6 leading-tight">
+              સુરતમાં ખરીદ-વેચાણ અને એક્સચેન્જ માટેનું સંપૂર્ણ સોલ્યુશન
+            </h2>
+            <p className="font-body text-text-muted text-lg leading-relaxed">
+              "પારદર્શક અને ભરોસાપાત્ર સેવાઓ દ્વારા અમે તમારા કારના અનુભવને નવી ઊંચાઈએ લઈ જવા માંગીએ છીએ. તમારી દરેક જરૂરિયાત માટે સુરતનું શ્રેષ્ઠ ઓટોમોટિવ ડેસ્ટિનેશન.અમારું લક્ષ્ય પારદર્શિતા અને અતૂટ વિશ્વાસ સાથે તમને કારની શ્રેષ્ઠ સુવિધાઓ આપવાનું છે. અમે દરેક ગ્રાહકની સુવિધા અને સંતોષ માટે સતત પ્રયત્નશીલ છીએ."
+            </p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="bg-surface rounded-3xl p-8 shadow-sm hover:shadow-lg transition-shadow border border-gray-100 flex flex-col items-center text-center group">
+              <div className="w-16 h-16 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                <ShieldCheck className="w-8 h-8" />
+              </div>
+              <h3 className="font-heading text-xl font-bold text-primary mb-3">સર્ટિફાઈડ કાર ખરીદો</h3>
+              <p className="font-body text-text-muted leading-relaxed mb-6">તમારા ભરોસા માટે ૧૫૦+ પ્રીમિયમ સર્ટિફાઈડ કાર. દરેક કારની સચોટ તપાસ, તમારી સંપૂર્ણ સુરક્ષા.</p>
+              <Link to="/about?service=buy" className="font-heading font-semibold text-primary hover:underline mt-auto flex items-center gap-2">વધુ માહિતી માટે →</Link>
+            </div>
+
+            <div className="bg-surface rounded-3xl p-8 shadow-sm hover:shadow-lg transition-shadow border border-gray-100 flex flex-col items-center text-center group">
+              <div className="w-16 h-16 rounded-2xl bg-green-50 text-green-600 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                <Banknote className="w-8 h-8" />
+              </div>
+              <h3 className="font-heading text-xl font-bold text-primary mb-3">તમારી કાર તરત જ વેચો</h3>
+              <p className="font-body text-text-muted leading-relaxed mb-6">પારદર્શક પ્રક્રિયા અને સુરક્ષિત પેમેન્ટ સાથે તમારી કારનું મેળવો શ્રેષ્ઠ બજાર મૂલ્ય.</p>
+              <Link to="/about?service=sell" className="font-heading font-semibold text-primary hover:underline mt-auto flex items-center gap-2">વધુ માહિતી માટે →</Link>
+            </div>
+
+            <div className="bg-surface rounded-3xl p-8 shadow-sm hover:shadow-lg transition-shadow border border-gray-100 flex flex-col items-center text-center group">
+              <div className="w-16 h-16 rounded-2xl bg-orange-50 text-orange-600 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                <Search className="w-8 h-8" />
+              </div>
+              <h3 className="font-heading text-xl font-bold text-primary mb-3">તમારી જૂની કારનું શ્રેષ્ઠ એક્સચેન્જ</h3>
+              <p className="font-body text-text-muted leading-relaxed mb-6">શ્રેષ્ઠ એક્સચેન્જ વેલ્યુ અને આકર્ષક ફાયદાઓ સાથે તમારી મનપસંદ કાર મેળવો.</p>
+              <Link to="/about?service=exchange" className="font-heading font-semibold text-primary hover:underline mt-auto flex items-center gap-2">વધુ માહિતી માટે →</Link>
+            </div>
           </div>
         </div>
       </section>
