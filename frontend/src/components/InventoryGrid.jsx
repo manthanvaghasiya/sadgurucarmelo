@@ -1,8 +1,9 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, Fragment } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import axiosInstance from '../api/axiosConfig';
 import CarCard from './CarCard';
+import PromoBanner from './PromoBanner';
 
 // ── Format helpers ──
 function formatPrice(num) {
@@ -133,19 +134,26 @@ export default function InventoryGrid({ filters = {} }) {
         </div>
       ) : (
         <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-          {cars.map((car) => (
-            <CarCard
-              key={car._id || car.id}
-              id={car._id || car.id}
-              image={car.image}
-              title={`${car.year} ${car.make} ${car.model}`}
-              price={formatPrice(car.price)}
-              fuel={car.fuelType}
-              transmission={car.transmission}
-              owner={car.owner}
-              kms={formatKm(car.kms)}
-              badges={car.badges || []}
-            />
+          {cars.map((car, index) => (
+            <Fragment key={car._id || car.id}>
+              <CarCard
+                id={car._id || car.id}
+                image={car.image}
+                title={`${car.year} ${car.make} ${car.model}`}
+                price={formatPrice(car.price)}
+                fuel={car.fuelType}
+                transmission={car.transmission}
+                owner={car.owner}
+                kms={formatKm(car.kms)}
+                badges={car.badges || []}
+              />
+              {/* Insert PromoBanner after every 8 cars exclusively for mobile screens */}
+              {(index + 1) % 8 === 0 && (
+                <div className="col-span-full hidden max-md:block">
+                  <PromoBanner />
+                </div>
+              )}
+            </Fragment>
           ))}
         </div>
       )}

@@ -105,7 +105,7 @@ export default function SidebarFilter({
 
           {/* Track Active Highlight */}
           <div
-            className="absolute h-1.5 bg-red-600 rounded-full transition-all duration-100"
+            className="absolute h-1.5 bg-brand-orange rounded-full transition-all duration-100"
             style={{
               left: `${currentMinPercent}%`,
               width: `${currentMaxPercent - currentMinPercent}%`
@@ -158,7 +158,7 @@ export default function SidebarFilter({
       {availableBrands.length > 0 && (
         <div className="flex flex-col gap-4">
           <h3 className="font-heading font-semibold text-sm text-text-muted tracking-widest uppercase">Brand</h3>
-          <div className="flex flex-col gap-3 font-body text-sm text-text max-h-48 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-200">
+          <div className="flex flex-col gap-3 font-body text-sm text-text max-h-48 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-200 lg:max-h-none lg:overflow-visible max-md:max-h-none max-md:overflow-visible">
             {availableBrands.map(make => (
               <label key={make} className="flex items-center justify-between cursor-pointer group">
                 <div className="flex items-center gap-3">
@@ -185,7 +185,7 @@ export default function SidebarFilter({
               id="fuelType"
               value={filters.fuelType || ''}
               onChange={(e) => setFilters({ ...filters, fuelType: e.target.value })}
-              className="w-full appearance-none bg-slate-50 border border-slate-200 text-slate-700 py-3 px-4 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent transition-all cursor-pointer font-body text-sm font-semibold shadow-sm hover:border-slate-300 hover:bg-white"
+              className="w-full appearance-none bg-slate-50 border border-slate-200 text-slate-700 py-3 px-4 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-orange focus:border-transparent transition-all cursor-pointer font-body text-sm font-semibold shadow-sm hover:border-slate-300 hover:bg-white"
             >
               <option value="">All Fuel Types</option>
               {availableFuels.map(ft => (
@@ -206,7 +206,7 @@ export default function SidebarFilter({
               id="bodyType"
               value={filters.bodyType || ''}
               onChange={(e) => setFilters({ ...filters, bodyType: e.target.value })}
-              className="w-full appearance-none bg-slate-50 border border-slate-200 text-slate-700 py-3 px-4 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent transition-all cursor-pointer font-body text-sm font-semibold shadow-sm hover:border-slate-300 hover:bg-white"
+              className="w-full appearance-none bg-slate-50 border border-slate-200 text-slate-700 py-3 px-4 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-orange focus:border-transparent transition-all cursor-pointer font-body text-sm font-semibold shadow-sm hover:border-slate-300 hover:bg-white"
             >
               <option value="">All Body Types</option>
               {availableBodyTypes.map(bt => (
