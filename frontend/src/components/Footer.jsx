@@ -1,6 +1,6 @@
-import { 
-  MapPin, Mail, Phone, 
-  ChevronRight, ArrowUpRight 
+import {
+  MapPin, Mail, Phone,
+  ChevronRight, ArrowUpRight
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
@@ -10,7 +10,7 @@ export default function Footer() {
   return (
     <footer className="bg-[#0A0A0A] text-gray-400 pt-20 pb-10 border-t border-white/5 selection:bg-primary/30">
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
-        
+
         {/* Main Footer Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 lg:gap-8 mb-16">
 
@@ -23,13 +23,13 @@ export default function Footer() {
               <div className="h-0.5 w-0 group-hover:w-full bg-accent transition-all duration-500 mt-1 shadow-[0_0_8px_rgba(37,211,102,0.4)]"></div>
             </Link>
             <p className="font-body text-sm leading-relaxed pr-4">
-              Elevating Surat's pre-owned car experience since 2012. 
+              Elevating Surat's pre-owned car experience since 2012.
               We deal in certified luxury and premium vehicles with 100% transparency.
             </p>
             <div className="pt-2">
-               <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-[10px] font-bold uppercase tracking-widest text-accent shadow-inner">
-                  Certified Dealer
-               </div>
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-[10px] font-bold uppercase tracking-widest text-accent shadow-inner">
+                Certified Dealer
+              </div>
             </div>
           </div>
 
@@ -47,8 +47,8 @@ export default function Footer() {
                 { name: 'Staff Login', path: '/login' }
               ].map((link) => (
                 <li key={link.name}>
-                  <Link 
-                    to={link.path} 
+                  <Link
+                    to={link.path}
                     className="flex items-center gap-3 hover:text-white transition-all group w-fit"
                   >
                     <ChevronRight className="w-4 h-4 text-primary group-hover:translate-x-1 transition-transform" />
@@ -75,7 +75,7 @@ export default function Footer() {
                   Canal Chokdi, Varachha, Surat
                 </p>
               </div>
-              
+
               {/* Phone */}
               <a href="tel:+919913634447" className="flex items-center gap-4 group">
                 <div className="w-11 h-11 shrink-0 rounded-xl bg-white/[0.08] border border-white/10 flex items-center justify-center group-hover:bg-accent group-hover:border-accent transition-all duration-500 shadow-xl group-hover:shadow-accent/20">
@@ -108,11 +108,11 @@ export default function Footer() {
               Social Presence
             </h3>
             <div className="flex flex-col gap-4">
-              
+
               {/* Instagram Card */}
-              <a 
-                href="https://instagram.com/sadgurucarmelo" 
-                target="_blank" 
+              <a
+                href="https://instagram.com/sadgurucarmelo"
+                target="_blank"
                 rel="noopener noreferrer"
                 className="group flex items-center justify-between p-2.5 rounded-xl bg-white/[0.04] border border-white/[0.05] hover:bg-white/[0.08] hover:border-pink-500/40 transition-all duration-500"
               >
@@ -131,9 +131,9 @@ export default function Footer() {
               </a>
 
               {/* Facebook Card */}
-              <a 
-                href="https://facebook.com/sadgurucarmelo" 
-                target="_blank" 
+              <a
+                href="https://facebook.com/sadgurucarmelo"
+                target="_blank"
                 rel="noopener noreferrer"
                 className="group flex items-center justify-between p-2.5 rounded-xl bg-white/[0.04] border border-white/[0.05] hover:bg-white/[0.08] hover:border-blue-500/40 transition-all duration-500"
               >
@@ -152,9 +152,9 @@ export default function Footer() {
               </a>
 
               {/* YouTube Card */}
-              <a 
-                href="https://youtube.com/@sadgurucarmelo" 
-                target="_blank" 
+              <a
+                href="https://youtube.com/@sadgurucarmelo"
+                target="_blank"
                 rel="noopener noreferrer"
                 className="group flex items-center justify-between p-2.5 rounded-xl bg-white/[0.04] border border-white/[0.05] hover:bg-white/[0.08] hover:border-red-500/40 transition-all duration-500"
               >

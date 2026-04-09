@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { 
-  CheckCircle, Banknote, ShieldCheck, 
+import {
+  CheckCircle, Banknote, ShieldCheck,
   Search, Play, Star, Landmark, Headphones, Loader2,
   Quote, ChevronLeft, ChevronRight, MapPin, Phone
 } from 'lucide-react';
@@ -14,7 +14,6 @@ import GoogleReviews from '../components/GoogleReviews';
 
 
 export default function Home() {
-  const [inventoryTab, setInventoryTab] = useState('present'); // 'present' or 'soon'
   const { cars, isLoading } = useCars();
 
   // ── Quick Search State ──
@@ -47,8 +46,17 @@ export default function Home() {
       {/* 2. Core Services Section */}
       <section className="pt-32 pb-20 px-4 bg-background">
         <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="font-heading text-3xl md:text-4xl font-extrabold text-primary mb-4">Complete Buy-Sell-Exchange Solutions in Surat</h2>
+          <div className="text-center mb-16 max-w-3xl mx-auto">
+            <span className="text-sm font-heading font-bold text-[#d1108a] uppercase tracking-widest mb-4 inline-block">
+              Premium Dealership Services
+            </span>
+            <h2 className="font-heading text-4xl md:text-5xl font-extrabold text-[#1a2b3c] mb-6 leading-tight">
+              Complete Buy-Sell-Exchange Solutions in Surat
+            </h2>
+            <p className="font-body text-text-muted text-lg leading-relaxed">
+              We're constantly striving to elevate your car ownership experience by providing 
+              transparent, reliable, and efficient solutions for every automotive need.
+            </p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="bg-surface rounded-3xl p-8 shadow-sm hover:shadow-lg transition-shadow border border-gray-100 flex flex-col items-center text-center group">
@@ -59,7 +67,7 @@ export default function Home() {
               <p className="font-body text-text-muted leading-relaxed mb-6">Choose from 150+ rigorously inspected cars for total peace of mind.</p>
               <Link to="/about?service=buy" className="font-heading font-semibold text-primary hover:underline mt-auto flex items-center gap-2">View Details →</Link>
             </div>
-            
+
             <div className="bg-surface rounded-3xl p-8 shadow-sm hover:shadow-lg transition-shadow border border-gray-100 flex flex-col items-center text-center group">
               <div className="w-16 h-16 rounded-2xl bg-green-50 text-green-600 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
                 <Banknote className="w-8 h-8" />
@@ -89,32 +97,9 @@ export default function Home() {
               <h2 className="font-heading text-3xl md:text-4xl font-extrabold text-primary mb-3">Explore Our Verified Vehicles</h2>
               <p className="font-body text-text-muted max-w-2xl">Quality pre-owned vehicles with complete service history and multi-point inspection.</p>
             </div>
-            
-            <div className="bg-gray-200 p-1.5 rounded-xl inline-flex selbst-start">
-              <button 
-                onClick={() => setInventoryTab('present')}
-                className={`px-6 py-2.5 rounded-lg font-heading font-bold text-sm transition-all sm:w-auto w-1/2 ${
-                  inventoryTab === 'present' 
-                    ? 'bg-surface text-primary shadow-sm' 
-                    : 'text-text-muted hover:text-text'
-                }`}
-              >
-                Available Now
-              </button>
-              <button 
-                onClick={() => setInventoryTab('soon')}
-                className={`px-6 py-2.5 rounded-lg font-heading font-bold text-sm transition-all sm:w-auto w-1/2 ${
-                  inventoryTab === 'soon' 
-                    ? 'bg-surface text-primary shadow-sm' 
-                    : 'text-text-muted hover:text-text'
-                }`}
-              >
-                Coming Soon
-              </button>
-            </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
             {isLoading ? (
               <div className="col-span-full flex flex-col items-center justify-center py-20">
                 <Loader2 className="w-10 h-10 animate-spin text-primary mb-4" />
@@ -160,7 +145,7 @@ export default function Home() {
           <div className="text-center mb-16">
             <h2 className="font-heading text-3xl md:text-4xl font-extrabold text-primary mb-4">Why Choose Us?</h2>
           </div>
-          
+
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 text-center px-4">
             <div className="flex flex-col items-center">
               <div className="w-20 h-20 rounded-full bg-blue-50 flex items-center justify-center mb-6 shadow-sm">
@@ -169,7 +154,7 @@ export default function Home() {
               <h3 className="font-heading text-xl font-bold text-text mb-3">Certified & Tested Cars</h3>
               <p className="font-body text-text-muted text-sm">Every vehicle undergoes a 120+ point inspection for your peace of mind.</p>
             </div>
-            
+
             <div className="flex flex-col items-center">
               <div className="w-20 h-20 rounded-full bg-blue-50 flex items-center justify-center mb-6 shadow-sm">
                 <Landmark className="w-10 h-10 text-primary" />

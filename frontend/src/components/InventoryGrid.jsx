@@ -18,7 +18,6 @@ export default function InventoryGrid({ filters = {} }) {
   const [cars, setCars] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [stockTab, setStockTab] = useState('available');
   const [sortBy, setSortBy] = useState('newest');
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -33,12 +32,12 @@ export default function InventoryGrid({ filters = {} }) {
       const params = new URLSearchParams();
       params.set('page', page);
       params.set('limit', '12');
-      params.set('status', stockTab === 'available' ? 'Available' : 'Coming Soon');
+      params.set('status', 'Available');
 
       if (sortBy !== 'newest') params.set('sort', sortBy);
       if (filters.fuelType) params.set('fuelType', filters.fuelType);
       if (filters.bodyType) params.set('bodyType', filters.bodyType);
-      
+
       // Map new budget array back to min/max API requirements
       if (filters.budget && filters.budget.length === 2) {
         params.set('priceMin', filters.budget[0]);
@@ -51,7 +50,7 @@ export default function InventoryGrid({ filters = {} }) {
       if (filters.makes && filters.makes.length === 1) {
         params.set('make', filters.makes[0]);
       }
-      
+
       if (currentModelParam) {
         params.set('model', currentModelParam);
       }
@@ -72,7 +71,7 @@ export default function InventoryGrid({ filters = {} }) {
     } finally {
       setIsLoading(false);
     }
-  }, [page, stockTab, sortBy, filters, currentModelParam]);
+  }, [page, sortBy, filters, currentModelParam]);
 
   useEffect(() => {
     fetchCars();
@@ -81,7 +80,7 @@ export default function InventoryGrid({ filters = {} }) {
   // Reset to page 1 when filters or sort change
   useEffect(() => {
     setPage(1);
-  }, [stockTab, sortBy, filters]);
+  }, [sortBy, filters]);
 
   return (
     <div className="flex flex-col gap-6">
@@ -89,28 +88,10 @@ export default function InventoryGrid({ filters = {} }) {
       {/* Top Bar */}
       <div className="flex flex-col sm:flex-row justify-between items-center bg-transparent border-b border-gray-200 pb-4 gap-4">
 
-        {/* Toggle Pills */}
-        <div className="bg-gray-100 p-1.5 rounded-full inline-flex w-full sm:w-auto">
-          <button
-            onClick={() => setStockTab('available')}
-            className={`flex-1 sm:flex-none px-6 py-2 rounded-full font-heading font-bold text-sm transition-all ${
-              stockTab === 'available'
-                ? 'bg-primary text-white shadow-md'
-                : 'text-text hover:text-primary'
-            }`}
-          >
-            Available Stock
-          </button>
-          <button
-            onClick={() => setStockTab('soon')}
-            className={`flex-1 sm:flex-none px-6 py-2 rounded-full font-heading font-bold text-sm transition-all ${
-              stockTab === 'soon'
-                ? 'bg-primary text-white shadow-md'
-                : 'text-text hover:text-primary'
-            }`}
-          >
-            Coming Soon
-          </button>
+        {/* Header Title */}
+        <div className="flex flex-col">
+          <h2 className="font-heading font-extrabold text-2xl text-primary">Live Inventory</h2>
+          <p className="font-body text-sm text-text-muted hidden lg:block">Available stock in Surat</p>
         </div>
 
         {/* Sort By + Count */}
@@ -147,11 +128,11 @@ export default function InventoryGrid({ filters = {} }) {
         <div className="py-16 text-center">
           <p className="font-heading font-bold text-lg text-text-muted">No vehicles found</p>
           <p className="font-body text-sm text-text-muted/60 mt-1">
-            {stockTab === 'available' ? 'Try adjusting your filters or check back soon!' : 'No upcoming vehicles at the moment.'}
+            Try adjusting your filters or check back soon!
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
           {cars.map((car) => (
             <CarCard
               key={car._id || car.id}
@@ -202,11 +183,10 @@ export default function InventoryGrid({ filters = {} }) {
                 <button
                   key={pageNum}
                   onClick={() => setPage(pageNum)}
-                  className={`w-9 h-9 rounded-lg font-body text-sm font-bold flex items-center justify-center transition-colors ${
-                    pageNum === page
-                      ? 'bg-primary text-white shadow-sm shadow-primary/20'
-                      : 'bg-background text-text-muted hover:text-text'
-                  }`}
+                  className={`w-9 h-9 rounded-lg font-body text-sm font-bold flex items-center justify-center transition-colors ${pageNum === page
+                    ? 'bg-primary text-white shadow-sm shadow-primary/20'
+                    : 'bg-background text-text-muted hover:text-text'
+                    }`}
                 >
                   {pageNum}
                 </button>

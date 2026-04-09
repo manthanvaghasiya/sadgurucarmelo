@@ -40,53 +40,53 @@ export default function CarCard({
       </div>
 
       {/* Card Content */}
-      <div className="p-5 flex flex-col flex-grow">
+      <div className="p-3 sm:p-5 flex flex-col flex-grow">
 
         {/* Title & Price */}
-        <div className="mb-4">
-          <h3 className="font-heading font-bold text-lg text-text leading-tight mb-1 line-clamp-1">
+        <div className="mb-3 sm:mb-4">
+          <h3 className="font-heading font-bold text-sm sm:text-lg text-text leading-tight mb-1 line-clamp-1">
             {title}
           </h3>
-          <p className="font-heading font-extrabold text-2xl text-accent">
+          <p className="font-heading font-extrabold text-lg sm:text-2xl text-[#10b981] sm:text-accent">
             {price}
           </p>
         </div>
 
         {/* Specs Grid */}
-        <div className="grid grid-cols-2 gap-y-3 gap-x-2 mb-6 font-body text-xs text-text-muted mt-auto">
-          <div className="flex items-center gap-1.5">
-            <Gauge className="w-4 h-4 text-primary" />
-            <span className="font-semibold">{kms}</span>
+        <div className="grid grid-cols-2 gap-y-2 sm:gap-y-3 gap-x-1 sm:gap-x-2 mb-4 sm:mb-6 font-body text-[10px] sm:text-xs text-text-muted mt-auto">
+          <div className="flex items-center gap-1 sm:gap-1.5 bg-gray-50 p-1 sm:p-0 rounded sm:bg-transparent">
+            <Fuel className="w-3 h-3 sm:w-4 sm:h-4 text-primary" />
+            <span className="font-semibold truncate">{fuel}</span>
           </div>
-          <div className="flex items-center gap-1.5">
-            <Fuel className="w-4 h-4 text-primary" />
-            <span className="font-semibold">{fuel}</span>
+          <div className="flex items-center gap-1 sm:gap-1.5 bg-gray-50 p-1 sm:p-0 rounded sm:bg-transparent">
+            <Settings2 className="w-3 h-3 sm:w-4 sm:h-4 text-primary" />
+            <span className="font-semibold truncate">{transmission}</span>
           </div>
-          <div className="flex items-center gap-1.5">
-            <Settings2 className="w-4 h-4 text-primary" />
-            <span className="font-semibold">{transmission}</span>
+          <div className="flex items-center gap-1 sm:gap-1.5 bg-gray-50 p-1 sm:p-0 rounded sm:bg-transparent">
+            <Gauge className="w-3 h-3 sm:w-4 sm:h-4 text-primary" />
+            <span className="font-semibold truncate">{kms}</span>
           </div>
-          <div className="flex items-center gap-1.5">
-            <User className="w-4 h-4 text-primary" />
-            <span className="font-semibold">{owner}</span>
+          <div className="flex items-center gap-1 sm:gap-1.5 bg-gray-50 p-1 sm:p-0 rounded sm:bg-transparent">
+            <User className="w-3 h-3 sm:w-4 sm:h-4 text-primary" />
+            <span className="font-semibold truncate">{owner}</span>
           </div>
         </div>
 
         {/* Action Buttons */}
-        <div className="flex gap-2 mt-auto pt-4 border-t border-gray-100">
+        <div className="flex flex-row gap-2 mt-auto pt-3 sm:pt-4 border-t border-gray-100">
           <Link
             to={`/car-details/${id}`}
-            className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-lg border border-primary text-primary font-body font-bold text-xs hover:bg-primary/5 transition-colors"
+            className="flex-1 flex items-center justify-center gap-1 py-1.5 sm:py-2.5 rounded-lg border border-primary text-primary font-body font-bold text-[9px] sm:text-xs hover:bg-primary/5 transition-colors"
           >
-            <Eye className="w-4 h-4" /> View
+            <Eye className="w-3 h-3 sm:w-4 sm:h-4" /> View
           </Link>
           <a
             href={whatsappUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-lg bg-[#25D366] text-white font-body font-bold text-xs hover:bg-[#20bd5a] transition-all shadow-md shadow-green-500/10 active:scale-95"
+            className="flex-1 flex items-center justify-center gap-1 py-1.5 sm:py-2.5 rounded-lg bg-[#25D366] text-white font-body font-bold text-[9px] sm:text-xs hover:bg-[#20bd5a] transition-all shadow-md shadow-green-500/10 active:scale-95 uppercase"
           >
-            <MessageCircle className="w-4 h-4 fill-current" /> Chat
+            <MessageCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4 fill-current" /> WHATSAPP
           </a>
         </div>
       </div>

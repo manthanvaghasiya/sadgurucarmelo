@@ -8,7 +8,8 @@ export default function SidebarFilter({
   availableBrands = [],
   availableFuels = [],
   availableBodyTypes = [],
-  priceRangeBounds = [0, 5000000]
+  priceRangeBounds = [0, 5000000],
+  onClose
 }) {
 
   // Range Slider implementation directly integrated
@@ -76,10 +77,10 @@ export default function SidebarFilter({
   const activeMakes = filters.makes || [];
 
   return (
-    <aside className="w-full sticky top-28 h-fit max-h-[calc(100vh-7rem)] overflow-y-auto scrollbar-thin scrollbar-thumb-slate-200 scrollbar-track-transparent bg-white p-6 rounded-2xl shadow-xl ring-1 ring-black/[0.03] flex flex-col gap-6">
+    <aside className="w-full lg:sticky lg:top-28 h-full lg:h-fit lg:max-h-[calc(100vh-7rem)] overflow-y-auto bg-white p-6 lg:rounded-2xl lg:shadow-xl lg:ring-1 lg:ring-black/[0.03] flex flex-col gap-6">
 
-      {/* Header */}
-      <div className="flex items-center justify-between pb-4 border-b border-gray-100">
+      {/* Header (Desktop Only, Mobile has its own in drawer) */}
+      <div className="hidden lg:flex items-center justify-between pb-4 border-b border-gray-100">
         <h2 className="font-heading font-bold text-lg text-text">Advanced Filters</h2>
         <button onClick={clearAll} className="text-primary font-body text-sm font-semibold hover:underline">Clear All</button>
       </div>
@@ -217,29 +218,23 @@ export default function SidebarFilter({
         </div>
       )}
 
-      {/* Active Filters Summary */}
-      {(activeMakes.length > 0 || filters.fuelType || filters.bodyType || filters.budget) && (
-        <div className="flex flex-wrap gap-2 pt-4 border-t border-gray-100">
-          {activeMakes.map(m => (
-            <span key={m} className="inline-flex items-center gap-1 px-2.5 py-1 bg-primary/10 text-primary rounded-full font-body text-xs font-bold transition-all hover:bg-primary/20">
-              {m}
-              <button onClick={() => toggleMake(m)}><X className="w-3 h-3" /></button>
-            </span>
-          ))}
-          {filters.fuelType && (
-            <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-primary/10 text-primary rounded-full font-body text-xs font-bold transition-all hover:bg-primary/20">
-              {filters.fuelType}
-              <button onClick={() => setFilters({ ...filters, fuelType: '' })}><X className="w-3 h-3" /></button>
-            </span>
-          )}
-          {filters.bodyType && (
-            <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-primary/10 text-primary rounded-full font-body text-xs font-bold transition-all hover:bg-primary/20">
-              {filters.bodyType}
-              <button onClick={() => setFilters({ ...filters, bodyType: '' })}><X className="w-3 h-3" /></button>
-            </span>
-          )}
-        </div>
-      )}
+
+
+      {/* Apply Button (Mobile Only) */}
+      <div className="lg:hidden mt-auto pt-6 border-t border-gray-100 flex gap-3">
+        <button 
+          onClick={clearAll}
+          className="flex-1 py-4 border border-gray-200 rounded-2xl font-heading font-bold text-text hover:bg-gray-50 transition-colors"
+        >
+          Reset
+        </button>
+        <button 
+          onClick={onClose}
+          className="flex-2 py-4 bg-primary text-white rounded-2xl font-heading font-bold shadow-lg shadow-primary/20 hover:bg-primary/90 transition-all active:scale-95"
+        >
+          Show Vehicles
+        </button>
+      </div>
     </aside>
   );
 }
