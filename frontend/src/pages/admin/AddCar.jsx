@@ -349,10 +349,10 @@ export default function AddCar() {
     defaultValues: {
       make: '', model: '', year: '', price: '',
       kmDriven: '', fuelType: '', transmission: '', ownership: '',
-      bodyType: '', color: '', registration: '', description: '', features: [{ key: '', value: '' }],
+      bodyType: '', variantTier: '', color: '', registration: '', description: '', features: [{ key: '', value: '' }],
       airConditioner: '', powerWindows: '', sunroof: '', parkingSensors: '',
       displacement: '', maxPower: '', driveType: '', cylinders: '',
-      isCertified: false, isPetipack: false, validVimo: false,
+      isCertified: false, isPetipack: false, validVimo: false, loanAvailable: false,
       spinImages: []
     }
   });
@@ -361,6 +361,7 @@ export default function AddCar() {
   const isCertified = watch('isCertified');
   const isPetipack = watch('isPetipack');
   const validVimo = watch('validVimo');
+  const loanAvailable = watch('loanAvailable');
 
   // Files
   const [photos, setPhotos] = useState([]);
@@ -378,6 +379,7 @@ export default function AddCar() {
       formData.append('transmission', data.transmission);
       formData.append('owner', data.ownership);
       formData.append('bodyType', data.bodyType);
+      if (data.variantTier) formData.append('variantTier', data.variantTier);
       formData.append('color', data.color);
       formData.append('registration', data.registration);
       formData.append('description', data.description);
@@ -412,6 +414,7 @@ export default function AddCar() {
       if (data.isCertified) formData.append('badges', 'Certified');
       if (data.isPetipack) formData.append('badges', 'Peti-pack');
       if (data.validVimo) formData.append('badges', 'Valid Vimo');
+      formData.append('loanAvailable', String(data.loanAvailable));
 
       // Inject the image files
       if (photos.length > 0) {
@@ -527,6 +530,13 @@ export default function AddCar() {
               placeholder="e.g. SUV"
               options={['SUV', 'Sedan', 'Hatchback', 'MUV', 'Coupe', 'Convertible']}
             />
+            <FormSelect
+              label="Variant Tier"
+              register={register('variantTier')}
+              error={errors.variantTier}
+              placeholder="e.g. Top"
+              options={['Top', 'Medium', 'Low']}
+            />
             <FormInput
               label="Color"
               register={register('color')}
@@ -616,6 +626,12 @@ export default function AddCar() {
               description="Vehicle has valid insurance coverage"
               checked={validVimo}
               onChange={(val) => setValue('validVimo', val)}
+            />
+            <ToggleSwitch
+              label="Loan Available?"
+              description="Car loan / EMI options can be arranged"
+              checked={loanAvailable}
+              onChange={(val) => setValue('loanAvailable', val)}
             />
           </div>
 

@@ -272,11 +272,11 @@ export default function EditCar() {
     defaultValues: {
       make: '', model: '', year: '', price: '',
       kmDriven: '', fuelType: '', transmission: '', ownership: '',
-      bodyType: '', color: '', registration: '', description: '', 
+      bodyType: '', variantTier: '', color: '', registration: '', description: '', 
       features: [{ key: '', value: '' }],
       airConditioner: '', powerWindows: '', sunroof: '', parkingSensors: '',
       displacement: '', maxPower: '', driveType: '', cylinders: '',
-      isCertified: false, isPetipack: false, validVimo: false,
+      isCertified: false, isPetipack: false, validVimo: false, loanAvailable: false,
       spinImages: []
     }
   });
@@ -302,6 +302,7 @@ export default function EditCar() {
           transmission: car.transmission || '',
           ownership: car.owner || '',
           bodyType: car.bodyType || '',
+          variantTier: car.variantTier || '',
           color: car.color || '',
           registration: car.registration || '',
           description: car.description || '',
@@ -323,6 +324,7 @@ export default function EditCar() {
           isCertified: badges.includes('Certified'),
           isPetipack: badges.includes('Peti-pack'),
           validVimo: badges.includes('Valid Vimo'),
+          loanAvailable: Boolean(car.loanAvailable),
         });
       } catch (err) {
         toast.error('Failed to load car data.');
@@ -337,6 +339,7 @@ export default function EditCar() {
   const isCertified = watch('isCertified');
   const isPetipack = watch('isPetipack');
   const validVimo = watch('validVimo');
+  const loanAvailable = watch('loanAvailable');
 
   const onSubmit = async (data) => {
     try {
@@ -350,6 +353,7 @@ export default function EditCar() {
       formData.append('transmission', data.transmission);
       formData.append('owner', data.ownership);
       formData.append('bodyType', data.bodyType);
+      if (data.variantTier) formData.append('variantTier', data.variantTier);
       formData.append('color', data.color);
       formData.append('registration', data.registration);
       formData.append('description', data.description);
@@ -384,6 +388,7 @@ export default function EditCar() {
       if (data.isCertified) formData.append('badges', 'Certified');
       if (data.isPetipack) formData.append('badges', 'Peti-pack');
       if (data.validVimo) formData.append('badges', 'Valid Vimo');
+      formData.append('loanAvailable', String(data.loanAvailable));
 
       // Append any new images
       if (photos.length > 0) {
@@ -507,6 +512,13 @@ export default function EditCar() {
               placeholder="e.g. SUV"
               options={['SUV', 'Sedan', 'Hatchback', 'MUV', 'Coupe', 'Convertible']}
             />
+            <FormSelect
+              label="Variant Tier"
+              register={register('variantTier')}
+              error={errors.variantTier}
+              placeholder="e.g. Top"
+              options={['Top', 'Medium', 'Low']}
+            />
             <FormInput
               label="Color"
               register={register('color')}
@@ -596,6 +608,12 @@ export default function EditCar() {
               description="Vehicle has valid insurance coverage"
               checked={validVimo}
               onChange={(val) => setValue('validVimo', val)}
+            />
+            <ToggleSwitch
+              label="Loan Available?"
+              description="Car loan / EMI options can be arranged"
+              checked={loanAvailable}
+              onChange={(val) => setValue('loanAvailable', val)}
             />
           </div>
 

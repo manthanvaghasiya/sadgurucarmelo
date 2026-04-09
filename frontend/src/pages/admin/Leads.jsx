@@ -164,7 +164,7 @@ export default function Leads() {
       // Car filter
       const matchesCar = !columnFilters.car || (
         lead.carOfInterest && (
-          `${lead.carOfInterest.make} ${lead.carOfInterest.model} ${lead.carOfInterest.year}`
+          `${lead.carOfInterest.make} ${lead.carOfInterest.model} (${lead.carOfInterest.year})`
             .toLowerCase()
             .includes(columnFilters.car.toLowerCase())
         )
@@ -857,7 +857,7 @@ export default function Leads() {
                                   {lead.carOfInterest.make} {lead.carOfInterest.model}
                                 </span>
                                 <span className="font-body text-[11px] text-text-muted truncate max-w-[150px]">
-                                  {lead.carOfInterest.year}
+                                  ({lead.carOfInterest.year})
                                 </span>
                               </div>
                             ) : (
@@ -953,7 +953,9 @@ export default function Leads() {
                           {lead.carOfInterest && (
                             <p className="font-body text-xs text-primary flex items-center gap-1 mt-1">
                               <Car className="w-3 h-3" />
-                              {lead.carOfInterest.year} {lead.carOfInterest.make} {lead.carOfInterest.model}
+                              <span className="font-heading font-bold text-sm text-text truncate">
+                                {lead.carOfInterest.make} {lead.carOfInterest.model} ({lead.carOfInterest.year})
+                              </span>
                             </p>
                           )}
 

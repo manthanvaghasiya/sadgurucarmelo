@@ -140,10 +140,24 @@ export default function AdminLayout() {
       {/* ── Main Content Area ── */}
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
 
-
+        {/* ── Mobile Header ── */}
+        <header className="lg:hidden flex items-center justify-between px-4 py-3 bg-surface border-b border-gray-100 shrink-0">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 bg-accent rounded-lg flex items-center justify-center font-heading font-black text-white text-lg shadow-[0_2px_10px_rgba(255,51,102,0.3)]">
+              S
+            </div>
+            <span className="font-heading font-bold text-sm text-primary">Admin Panel</span>
+          </div>
+          <button
+            onClick={() => setMobileOpen(true)}
+            className="p-2 -mr-2 text-text-muted hover:bg-gray-100 rounded-lg transition-colors"
+          >
+            <Menu className="w-6 h-6" />
+          </button>
+        </header>
 
         {/* Page Content */}
-        <main className="flex-1 overflow-y-auto p-6">
+        <main className="flex-1 overflow-y-auto p-4 sm:p-6">
           <Outlet />
         </main>
       </div>

@@ -94,8 +94,13 @@ export default function CarDetails() {
                             <li aria-current="page" className="text-text">{car.model}</li>
                         </ol>
                     </nav>
-                    <h1 className="font-heading font-extrabold text-3xl sm:text-4xl text-text leading-tight tracking-tight">
-                        {car.make} {car.model} {car.year}
+                    <h1 className="font-heading font-extrabold text-3xl sm:text-4xl text-text leading-tight tracking-tight flex flex-wrap items-center gap-3">
+                        {car.make} {car.model} ({car.year})
+                        {car.variantTier && (
+                            <span className="text-lg sm:text-xl font-body font-bold text-text-muted bg-gray-100 px-3 py-1 rounded-lg">
+                                {car.variantTier} Variant
+                            </span>
+                        )}
                     </h1>
                 </div>
 
@@ -280,7 +285,17 @@ export default function CarDetails() {
                                 </div>
 
                                 <h2 className="font-heading font-extrabold text-[36px] text-accent mb-1 leading-none">₹{car.price?.toLocaleString('en-IN')}</h2>
-                                <p className="font-body text-xs text-text-muted mb-6">Last updated: {new Date(car.updatedAt || Date.now()).toLocaleDateString()}</p>
+                                <p className="font-body text-xs text-text-muted mb-4">Last updated: {new Date(car.updatedAt || Date.now()).toLocaleDateString()}</p>
+
+                                {car.loanAvailable && (
+                                    <div className="flex items-center gap-2 mb-6 px-3 py-3 bg-blue-50/50 border border-blue-100 rounded-xl text-blue-700">
+                                        <ShieldCheck className="w-5 h-5" />
+                                        <div className="flex flex-col">
+                                            <span className="font-heading text-[10px] font-bold uppercase tracking-widest text-blue-600/70 mb-0.5">Financing Support</span>
+                                            <span className="font-body text-sm font-bold leading-none">Car Loan / EMI Available</span>
+                                        </div>
+                                    </div>
+                                )}
 
                                 <div className="grid grid-cols-2 gap-4 mb-8">
                                     <div className="flex items-center gap-3">
@@ -395,7 +410,7 @@ export default function CarDetails() {
                                     key={relatedCar._id || relatedCar.id}
                                     id={relatedCar._id || relatedCar.id}
                                     image={relatedCar.image || (relatedCar.images && relatedCar.images[0])}
-                                    title={`${relatedCar.make} ${relatedCar.model} ${relatedCar.year}`}
+                                    title={`${relatedCar.make} ${relatedCar.model} (${relatedCar.year})`}
                                     price={`₹${relatedCar.price?.toLocaleString('en-IN')}`}
                                     fuel={relatedCar.fuelType}
                                     transmission={relatedCar.transmission}

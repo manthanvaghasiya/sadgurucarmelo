@@ -55,6 +55,14 @@ const carSchema = new mongoose.Schema(
       type: String,
       trim: true,
     },
+    variantTier: {
+      type: String,
+      enum: {
+        values: ['Top', 'Medium', 'Low', ''],
+        message: '{VALUE} is not a valid variant tier'
+      },
+      default: '',
+    },
     color: {
       type: String,
       trim: true,
@@ -113,7 +121,7 @@ const carSchema = new mongoose.Schema(
       default: '',
     },
 
-    // ── Status ──
+    // ── Status & Offers ──
     status: {
       type: String,
       enum: {
@@ -121,6 +129,10 @@ const carSchema = new mongoose.Schema(
         message: '{VALUE} is not a valid status',
       },
       default: 'Available',
+    },
+    loanAvailable: {
+      type: Boolean,
+      default: false,
     },
 
     // ── Home Page Featured ──
@@ -143,7 +155,7 @@ const carSchema = new mongoose.Schema(
 // ── Virtual: Auto-generate title if not set ──
 carSchema.pre('save', function () {
   if (!this.title) {
-    this.title = `${this.year} ${this.make} ${this.model}`;
+    this.title = `${this.make} ${this.model} (${this.year})`;
   }
 });
 

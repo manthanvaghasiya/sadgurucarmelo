@@ -52,7 +52,7 @@ export default function ArrivingShortly() {
             <img 
               src={poster.mobileImageUrl} 
               alt="Arriving Shortly Promotional Poster" 
-              className="w-full h-auto max-h-[80vh] md:max-h-[700px] object-cover transition-transform duration-1000 ease-[cubic-bezier(0.25,0.46,0.45,0.94)] group-hover:scale-105"
+              className="w-full h-auto max-h-[60vh] md:max-h-[500px] object-cover transition-transform duration-1000 ease-[cubic-bezier(0.25,0.46,0.45,0.94)] group-hover:scale-105"
             />
           </picture>
         </div>

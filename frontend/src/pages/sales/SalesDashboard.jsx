@@ -356,21 +356,21 @@ export default function SalesDashboard() {
                 const uCfg = urgencyConfig[lead.urgency] || urgencyConfig['Warm'];
                 const UrgencyIcon = uCfg.icon;
                 return (
-                  <div key={lead._id} className={`flex items-center justify-between py-3 rounded-xl transition-all duration-300 ${callingLeadId === lead._id ? 'bg-green-500/10 border border-green-200 px-3 -mx-3 shadow-sm' : isActuallyDone ? 'bg-green-50 px-3 -mx-3 border border-green-100 shadow-sm' : ''}`}>
-                    <div className="flex items-center gap-3 min-w-0">
-                      <div className={`w-8 h-8 ${uCfg.bg} rounded-lg flex items-center justify-center shrink-0`}>
+                  <div key={lead._id} className={`flex flex-col sm:flex-row sm:items-center justify-between py-4 rounded-xl gap-3 sm:gap-0 transition-all duration-300 ${callingLeadId === lead._id ? 'bg-green-500/10 border border-green-200 px-3 -mx-3 shadow-sm' : isActuallyDone ? 'bg-green-50 px-3 -mx-3 border border-green-100 shadow-sm' : ''}`}>
+                    <div className="flex items-start sm:items-center gap-3 min-w-0 w-full sm:w-auto">
+                      <div className={`w-8 h-8 ${uCfg.bg} rounded-lg flex items-center justify-center shrink-0 mt-0.5 sm:mt-0`}>
                         <UrgencyIcon className={`w-4 h-4 ${uCfg.text}`} />
                       </div>
-                      <div className="min-w-0 space-y-0.5">
+                      <div className="min-w-0 space-y-0.5 w-full">
                         <p className="font-body text-sm font-semibold text-text truncate">{lead.customerName}</p>
-                        <p className="font-body text-xs text-text-muted flex items-center gap-3">
+                        <div className="font-body text-xs text-text-muted flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3">
                           <span className="flex items-center gap-1"><Phone className="w-3 h-3" />{lead.phone}</span>
                           <span className="flex items-center gap-1"><MapPin className="w-3 h-3 text-primary/60" />{lead.source}</span>
-                        </p>
+                        </div>
                         {lead.carOfInterest && (
-                          <p className="font-body text-xs text-primary flex items-center gap-1">
-                            <Car className="w-3 h-3" />
-                            {lead.carOfInterest.year} {lead.carOfInterest.make} {lead.carOfInterest.model}
+                          <p className="font-body text-xs text-primary flex items-center gap-1 mt-1 truncate">
+                            <Car className="w-3.5 h-3.5 shrink-0" />
+                            <span className="truncate">{lead.carOfInterest.make} {lead.carOfInterest.model} ({lead.carOfInterest.year})</span>
                           </p>
                         )}
                         {lead.notes && (
@@ -380,7 +380,7 @@ export default function SalesDashboard() {
                         )}
                       </div>
                     </div>
-                    <div className="flex items-center gap-3 shrink-0">
+                    <div className="flex items-center justify-between sm:justify-end gap-3 shrink-0 w-full sm:w-auto mt-2 sm:mt-0 pt-3 sm:pt-0 border-t border-gray-100 sm:border-0">
                       {isActuallyDone ? (
                         <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-green-50 text-green-700 rounded-full font-body text-[10px] font-bold ring-1 ring-green-200">
                           ✅ {lead.status === 'Closed' ? 'Complete' : 'Done'}
@@ -438,30 +438,30 @@ export default function SalesDashboard() {
 
                 return (
                   <div key={lead._id} className="p-4 hover:bg-background/40 transition-colors">
-                    <div className="flex items-start justify-between gap-3 mb-2">
-                      <div className="flex items-center gap-3 min-w-0">
-                        <div className="w-9 h-9 bg-primary/5 rounded-xl flex items-center justify-center shrink-0">
+                    <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 mb-2">
+                      <div className="flex items-start sm:items-center gap-3 min-w-0 w-full sm:w-auto">
+                        <div className="w-9 h-9 bg-primary/5 rounded-xl flex items-center justify-center shrink-0 mt-0.5 sm:mt-0">
                           <UserCircle className="w-5 h-5 text-primary/40" />
                         </div>
-                        <div className="min-w-0 space-y-0.5">
+                        <div className="min-w-0 space-y-0.5 w-full">
                           <div className="flex items-center gap-2">
                             <p className="font-body text-sm font-semibold text-text truncate">{lead.customerName}</p>
                             <span className="inline-flex items-center gap-1 px-1.5 py-0.5 bg-primary/5 text-primary rounded font-body text-[10px] font-bold">
                               <MapPin className="w-2.5 h-2.5" />{lead.source}
                             </span>
                           </div>
-                          <p className="font-body text-xs text-text-muted flex items-center gap-3">
-                            <span className="flex items-center gap-1"><Phone className="w-3 h-3" />{lead.phone}</span>
+                          <div className="font-body text-xs text-text-muted flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3 pt-0.5">
+                            <span className="flex items-center gap-1"><Phone className="w-3 h-3 shrink-0" />{lead.phone}</span>
                             {lead.carOfInterest && (
                               <span className="flex items-center gap-1 text-primary">
-                                <Car className="w-3 h-3" />
-                                {lead.carOfInterest.year} {lead.carOfInterest.make} {lead.carOfInterest.model}
+                                <Car className="w-3 h-3 shrink-0" />
+                                <span className="truncate">{lead.carOfInterest.make} {lead.carOfInterest.model} ({lead.carOfInterest.year})</span>
                               </span>
                             )}
-                          </p>
+                          </div>
                         </div>
                       </div>
-                      <div className="flex items-center gap-2 shrink-0">
+                      <div className="flex items-center gap-2 shrink-0 w-full sm:w-auto justify-end border-t border-gray-50 sm:border-0 pt-2 sm:pt-0 mt-1 sm:mt-0">
                         <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full font-body text-[10px] font-bold ${uCfg.bg} ${uCfg.text}`}>
                           <UrgencyIcon className="w-2.5 h-2.5" />{lead.urgency}
                         </span>

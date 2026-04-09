@@ -59,7 +59,7 @@ export default function Inventory() {
     return cars.map((c) => ({
       id: c._id || c.id,
       image: c.image || 'https://placehold.co/120x80/e2e8f0/64748b?text=Car',
-      title: `${c.year} ${c.make} ${c.model}`,
+      title: `${c.make} ${c.model} (${c.year})`,
       make: c.make || '',
       model: c.model || '',
       km: `${(c.kms || 0).toLocaleString('en-IN')} KM`,

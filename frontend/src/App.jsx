@@ -5,6 +5,7 @@ import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import TopNavigation from './components/TopNavigation';
 import Footer from './components/Footer';
+import ScrollToTop from './components/ScrollToTop';
 import Home from './pages/Home';
 import Inventory from './pages/Inventory';
 import AboutPage from './pages/AboutPage';
@@ -37,6 +38,7 @@ function App() {
   return (
     <AuthProvider>
       <BrowserRouter>
+        <ScrollToTop />
         <CarProvider>
           <Toaster position="top-right" toastOptions={{ style: { fontFamily: 'var(--font-body)' } }} />
           {/* This wrapper ensures the Footer is always pushed to the bottom 

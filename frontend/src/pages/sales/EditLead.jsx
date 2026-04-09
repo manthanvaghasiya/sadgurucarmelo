@@ -210,7 +210,7 @@ export default function EditLead() {
                   <option value="">Not specific / General inquiry</option>
                   {availableCars.map((car) => (
                     <option key={car._id || car.id} value={car._id || car.id}>
-                      {car.year} {car.make} {car.model} — ₹{car.price?.toLocaleString('en-IN')}
+                      {car.make} {car.model} ({car.year}) — ₹{car.price?.toLocaleString('en-IN')}
                     </option>
                   ))}
                 </select>

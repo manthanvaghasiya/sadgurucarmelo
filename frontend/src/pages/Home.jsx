@@ -116,7 +116,7 @@ export default function Home() {
                   key={car._id}
                   id={car._id}
                   image={car.image}
-                  title={`${car.year} ${car.make} ${car.model}`}
+                  title={`${car.make} ${car.model} (${car.year})`}
                   price={car.price >= 100000 ? `₹${(car.price / 100000).toFixed(2)} Lakhs` : `₹${(car.price || 0).toLocaleString('en-IN')}`}
                   badges={car.badges || []}
                   fuel={car.fuelType}

@@ -90,7 +90,7 @@ export default function InventoryGrid({ filters = {} }) {
       <div className="flex flex-col sm:flex-row justify-between items-center bg-transparent border-b border-gray-200 pb-4 gap-4">
 
         {/* Header Title */}
-        <div className="flex flex-col">
+        <div className="flex flex-col max-md:hidden">
           <h2 className="font-heading font-extrabold text-2xl text-primary">Live Inventory</h2>
           <p className="font-body text-sm text-text-muted hidden lg:block">Available stock in Surat</p>
         </div>
@@ -139,7 +139,7 @@ export default function InventoryGrid({ filters = {} }) {
               <CarCard
                 id={car._id || car.id}
                 image={car.image}
-                title={`${car.year} ${car.make} ${car.model}`}
+                title={`${car.make} ${car.model} (${car.year})`}
                 price={formatPrice(car.price)}
                 fuel={car.fuelType}
                 transmission={car.transmission}
