@@ -27,16 +27,16 @@ export default function Home() {
       {/* 3. Inventory Grid Section */}
       <section className="py-20 px-4 bg-gray-50">
         <div className="max-w-7xl mx-auto">
-          <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-12 gap-6">
-            <div>
-              <h2 className="font-heading text-3xl md:text-4xl font-extrabold text-primary mb-3">Explore Our Verified Vehicles</h2>
-              <p className="font-body text-text-muted max-w-2xl">Quality pre-owned vehicles with complete service history and multi-point inspection.</p>
+          <div className="flex flex-col xl:flex-row xl:items-center justify-between mb-10 gap-6">
+            <div className="xl:flex-1 pr-4">
+              <h2 className="font-heading text-3xl md:text-4xl font-extrabold text-primary mb-2">Explore Our Verified Vehicles</h2>
+              <p className="font-body text-text-muted">Quality pre-owned vehicles with complete service history and multi-point inspection.</p>
             </div>
-          </div>
-
-          {/* Quick Search Component */}
-          <div className="mb-12">
-            <QuickSearch />
+            
+            {/* Quick Search Component */}
+            <div className="w-full xl:w-[680px] shrink-0">
+              <QuickSearch compact={true} />
+            </div>
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">

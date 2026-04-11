@@ -37,7 +37,7 @@ export default function Poster1({ car }) {
   if (!car) return null;
 
   return (
-    <div className="w-full relative rounded-3xl overflow-hidden bg-[#020617] border border-[#0c4a6e] min-h-[260px] lg:min-h-[280px] shadow-[0_0_80px_rgba(2,132,199,0.15)] group/poster">
+    <div className="w-full relative rounded-[2rem] overflow-hidden bg-[#020617] border border-[#0c4a6e] min-h-[260px] lg:min-h-[200px] shadow-[0_0_80px_rgba(2,132,199,0.15)] group/poster">
       
       {/* --- BACKGROUND ANIMATIONS --- */}
       {/* Base Grid */}
@@ -59,7 +59,7 @@ export default function Poster1({ car }) {
         <div className="flex-1 w-full flex flex-col relative mt-4 lg:mt-0">
           
           {/* Header HUD */}
-          <div className="flex items-center justify-between mb-6 border-b border-sky-800/50 pb-4 relative z-20">
+          <div className="flex items-center justify-between mb-4 lg:mb-2 border-b border-sky-800/50 pb-3 lg:pb-2 relative z-20">
             <div className="flex items-center gap-4">
               <div className="w-12 h-12 rounded bg-sky-950 border border-sky-500/30 flex items-center justify-center relative overflow-hidden">
                 <Radar className="text-cyan-400 w-6 h-6 animate-[spin_4s_linear_infinite]" />
@@ -67,7 +67,7 @@ export default function Poster1({ car }) {
               </div>
               <div>
                 <h3 className="text-cyan-400 font-mono text-xs tracking-[0.3em] uppercase opacity-80">System Classification:</h3>
-                <h2 className="text-white font-heading text-2xl md:text-3xl font-black uppercase tracking-wider drop-shadow-[0_0_15px_rgba(255,255,255,0.3)]">
+                <h2 className="text-white font-heading text-2xl md:text-3xl lg:text-2xl font-black uppercase tracking-wider drop-shadow-[0_0_15px_rgba(255,255,255,0.3)]">
                   {car.make} <span className="text-transparent bg-clip-text bg-gradient-to-r from-sky-400 to-cyan-300">{car.model}</span>
                 </h2>
               </div>
@@ -87,7 +87,7 @@ export default function Poster1({ car }) {
           </div>
 
           {/* Holographic Image Frame */}
-          <div className="relative w-full aspect-[16/9] lg:flex-1 bg-[#020815] rounded-xl border border-sky-400/20 flex flex-col items-center justify-center overflow-hidden group/image shadow-[inset_0_0_60px_rgba(2,132,199,0.3)]">
+          <div className="relative w-full aspect-[16/9] lg:aspect-auto lg:h-[300px] flex-1 bg-[#020815] rounded-xl border border-sky-400/20 flex flex-col items-center justify-center overflow-hidden group/image shadow-[inset_0_0_60px_rgba(2,132,199,0.3)]">
             
             {/* Hexagon tech background behind car */}
             <div className="absolute inset-0 opacity-[0.15] bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyOCIgaGVpZ2h0PSI0OSIgdmlld0JveD0iMCAwIDI4IDQ5Ij48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiMzOGJkZjgiIGZpbGwtb3BhY2l0eT0iMSI+PHBhdGggZD0iTTEzLjk5IDEzLjYybS0xNC40IDEwLjkxbTE0LjQtMTAuOTFsMTQuNCAxMC45MW0tMTQuNC0xMC45MXYyOC44Mm0tMTQuNC0xMC45MWwxNC40LTEwLjkxbTAtMTAuOTFMMi4zOSAwTDI4IDI1LjQxbS0yOCAwTDI1LjYxIDQ5SDBWMHoiLz48L2c+PC9nPjwvc3ZnPg==')] pointer-events-none"></div>
@@ -143,13 +143,21 @@ export default function Poster1({ car }) {
           </div>
 
           {/* Specs List */}
-          <div className="p-5 flex-1 flex flex-col gap-3 font-mono">
+          <div className="p-4 lg:p-2.5 flex-1 flex flex-col justify-center gap-3 lg:gap-1.5 font-mono">
             <SpecItem icon={<Fuel className="w-4 h-4"/>} label="PWR.SRC" value={car.fuelType} />
             <SpecItem icon={<Settings className="w-4 h-4"/>} label="TRNS.SYS" value={car.transmission} />
             <SpecItem icon={<Shield className="w-4 h-4"/>} label="OWN.CLR" value={car.owner} />
             <SpecItem icon={<Gauge className="w-4 h-4"/>} label="DIST.LOG" value={`${car.kms?.toLocaleString('en-IN') || 0} KM`} />
             <SpecItem icon={<CarIcon className="w-4 h-4"/>} label="CHASIS.F" value={car.bodyType || 'N/A'} />
             <SpecItem icon={<Palette className="w-4 h-4"/>} label="EXT.SKN" value={car.color || 'N/A'} colorDot={car.color} />
+          </div>
+
+          {/* Notify Me Button */}
+          <div className="px-5 lg:px-3 pb-5 lg:pb-3 mt-auto">
+            <button className="w-full py-3 lg:py-2 bg-gradient-to-r from-sky-500 to-cyan-400 hover:from-sky-400 hover:to-cyan-300 text-[#020815] lg:text-sm font-black tracking-widest uppercase rounded-lg shadow-[0_0_20px_rgba(34,211,238,0.4)] hover:shadow-[0_0_30px_rgba(34,211,238,0.6)] transition-all duration-300 transform hover:scale-[1.02] flex items-center justify-center gap-2">
+              <Radar className="w-5 h-5 lg:w-4 lg:h-4 animate-[spin_4s_linear_infinite]" />
+              Notify Me
+            </button>
           </div>
 
           {/* Abstract Footer Bar */}

@@ -56,7 +56,7 @@ export default function ComingSoonCarousel({ noPadding = false }) {
   };
 
   return (
-    <section className={`${noPadding ? 'my-4' : 'py-16 md:py-24'} bg-transparent px-4`}>
+    <section className={`${noPadding ? 'my-2' : 'py-8 lg:py-4'} bg-transparent px-4`}>
       <div className="max-w-7xl mx-auto relative group">
 
         {/* Carousel Window */}

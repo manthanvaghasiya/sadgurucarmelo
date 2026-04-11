@@ -56,7 +56,9 @@ export default function Inventory() {
 
   // Map backend cars to the local unified format dynamically
   const allCars = useMemo(() => {
-    return cars.map((c) => ({
+    return cars
+      .filter((c) => c.status !== 'Coming Soon')
+      .map((c) => ({
       id: c._id || c.id,
       image: c.image || 'https://placehold.co/120x80/e2e8f0/64748b?text=Car',
       title: `${c.make} ${c.model} (${c.year})`,
@@ -133,7 +135,7 @@ export default function Inventory() {
 
   // Status counts for filter pills
   const counts = useMemo(() => {
-    const c = { All: allCars.length, Available: 0, Sold: 0, 'Coming Soon': 0 };
+    const c = { All: allCars.length, Available: 0, Sold: 0 };
     allCars.forEach((car) => {
       if (c[car.status] !== undefined) c[car.status]++;
     });
@@ -260,7 +262,6 @@ export default function Inventory() {
             <option value="All">All Status</option>
             <option value="Available">Available</option>
             <option value="Sold">Sold</option>
-            <option value="Coming Soon">Coming Soon</option>
           </select>
         </div>
       </div>
