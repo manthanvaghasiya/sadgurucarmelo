@@ -56,9 +56,7 @@ export default function Inventory() {
 
   // Map backend cars to the local unified format dynamically
   const allCars = useMemo(() => {
-    return cars
-      .filter((c) => c.status !== 'Coming Soon')
-      .map((c) => ({
+    return cars.map((c) => ({
       id: c._id || c.id,
       image: c.image || 'https://placehold.co/120x80/e2e8f0/64748b?text=Car',
       title: `${c.make} ${c.model} (${c.year})`,
@@ -135,7 +133,7 @@ export default function Inventory() {
 
   // Status counts for filter pills
   const counts = useMemo(() => {
-    const c = { All: allCars.length, Available: 0, Sold: 0 };
+    const c = { All: allCars.length, Available: 0, Sold: 0, 'Coming Soon': 0 };
     allCars.forEach((car) => {
       if (c[car.status] !== undefined) c[car.status]++;
     });
@@ -241,11 +239,10 @@ export default function Inventory() {
         {/* Sort by Price Toggle */}
         <button
           onClick={() => toggleSort('price')}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl font-body text-sm font-semibold transition-colors whitespace-nowrap ${
-            sortField === 'price'
+          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl font-body text-sm font-semibold transition-colors whitespace-nowrap ${sortField === 'price'
               ? 'bg-primary/10 text-primary border border-primary/20'
               : 'bg-background text-text-muted hover:text-text border border-transparent'
-          }`}
+            }`}
         >
           <ArrowUpDown className="w-4 h-4" />
           Price {sortField === 'price' ? (sortDir === 'asc' ? '↑' : '↓') : ''}
@@ -262,6 +259,7 @@ export default function Inventory() {
             <option value="All">All Status</option>
             <option value="Available">Available</option>
             <option value="Sold">Sold</option>
+            <option value="Coming Soon">Coming Soon</option>
           </select>
         </div>
       </div>
@@ -372,14 +370,12 @@ export default function Inventory() {
                               toast.error('Failed to update featured status');
                             }
                           }}
-                          className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 ${
-                            car.isFeaturedOnHome ? 'bg-primary' : 'bg-gray-200'
-                          }`}
+                          className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 ${car.isFeaturedOnHome ? 'bg-primary' : 'bg-gray-200'
+                            }`}
                         >
                           <span
-                            className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                              car.isFeaturedOnHome ? 'translate-x-6' : 'translate-x-1'
-                            }`}
+                            className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${car.isFeaturedOnHome ? 'translate-x-6' : 'translate-x-1'
+                              }`}
                           />
                         </button>
                       </td>
@@ -461,14 +457,12 @@ export default function Inventory() {
                               toast.error('Failed to update');
                             }
                           }}
-                          className={`relative inline-flex h-5 w-10 items-center rounded-full transition-colors focus:outline-none ${
-                            car.isFeaturedOnHome ? 'bg-primary' : 'bg-gray-200'
-                          }`}
+                          className={`relative inline-flex h-5 w-10 items-center rounded-full transition-colors focus:outline-none ${car.isFeaturedOnHome ? 'bg-primary' : 'bg-gray-200'
+                            }`}
                         >
                           <span
-                            className={`inline-block h-3 w-3 transform rounded-full bg-white transition-transform ${
-                              car.isFeaturedOnHome ? 'translate-x-6' : 'translate-x-1'
-                            }`}
+                            className={`inline-block h-3 w-3 transform rounded-full bg-white transition-transform ${car.isFeaturedOnHome ? 'translate-x-6' : 'translate-x-1'
+                              }`}
                           />
                         </button>
                       </div>
@@ -532,11 +526,10 @@ export default function Inventory() {
                 <button
                   key={page}
                   onClick={() => setCurrentPage(page)}
-                  className={`w-9 h-9 rounded-lg font-body text-sm font-bold flex items-center justify-center transition-colors ${
-                    page === currentPage
+                  className={`w-9 h-9 rounded-lg font-body text-sm font-bold flex items-center justify-center transition-colors ${page === currentPage
                       ? 'bg-primary text-white shadow-sm shadow-primary/20'
                       : 'bg-background text-text-muted hover:text-text'
-                  }`}
+                    }`}
                 >
                   {page}
                 </button>
