@@ -103,7 +103,7 @@ export default function HeroSection() {
 
           {/* Description */}
           <motion.p variants={itemVariants} className="text-base lg:text-lg text-slate-400 mt-6 font-medium leading-relaxed max-w-lg drop-shadow-sm">
-            સુરતનું સૌથી વિશ્વાસપાત્ર લક્ઝરી કાર ડેસ્ટિનેશન. જ્યાં અતૂટ ભરોસો અને શ્રેષ્ઠતા મળે છે.<br />
+            સુરતનું સૌથી વિશ્વાસપાત્ર લક્ઝરી કાર ડેસ્ટિનેશન. જ્યાં અતૂટ ભરોસો અને શ્રેષ્ઠતા મળે છે.
             સર્વોત્તમ ગુણવત્તા અને વિશ્વાસનું અજોડ સંગમ.
           </motion.p>
 
@@ -150,7 +150,7 @@ export default function HeroSection() {
                   className="whitespace-nowrap"
                 >
                   <h2 className="text-[3rem] lg:text-[6rem] font-black uppercase text-transparent bg-clip-text bg-gradient-to-r from-transparent via-amber-500/[0.12] to-transparent select-none tracking-tighter">
-                    COMING SOON • INCOMING • ARRIVING • COMING SOON • INCOMING • ARRIVING •
+                    COMING SOON • COMING SOON • COMING SOON •
                   </h2>
                 </motion.div>
               </div>

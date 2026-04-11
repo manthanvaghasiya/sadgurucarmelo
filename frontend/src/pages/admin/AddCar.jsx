@@ -373,12 +373,12 @@ export default function AddCar() {
       const formData = new FormData();
       formData.append('make', data.make);
       formData.append('model', data.model);
-      formData.append('year', data.year);
-      formData.append('price', data.price);
-      formData.append('kms', data.kmDriven);
-      formData.append('fuelType', data.fuelType);
-      formData.append('transmission', data.transmission);
-      formData.append('owner', data.ownership);
+      if (data.year) formData.append('year', data.year);
+      if (data.price) formData.append('price', data.price);
+      if (data.kmDriven) formData.append('kms', data.kmDriven);
+      if (data.fuelType) formData.append('fuelType', data.fuelType);
+      if (data.transmission) formData.append('transmission', data.transmission);
+      if (data.ownership) formData.append('owner', data.ownership);
       formData.append('bodyType', data.bodyType);
       if (data.variantTier) formData.append('variantTier', data.variantTier);
       formData.append('color', data.color);
@@ -491,14 +491,14 @@ export default function AddCar() {
             <FormInput
               label="Year"
               type="number"
-              register={register('year', { required: 'Year is required', min: { value: 1990, message: 'Invalid year' } })}
+              register={register('year', { min: { value: 1990, message: 'Invalid year' } })}
               error={errors.year}
               placeholder="e.g. 2022"
             />
             <FormInput
               label="Price"
               type="number"
-              register={register('price', { required: 'Price is required', min: { value: 1000, message: 'Invalid price' } })}
+              register={register('price', { min: { value: 1000, message: 'Invalid price' } })}
               error={errors.price}
               placeholder="e.g. 585000"
               prefix="₹"
@@ -506,27 +506,27 @@ export default function AddCar() {
             <FormInput
               label="KMs Driven"
               type="number"
-              register={register('kmDriven', { required: 'KMs Driven is required' })}
+              register={register('kmDriven')}
               error={errors.kmDriven}
               placeholder="e.g. 23000"
             />
             <FormSelect
               label="Fuel Type"
-              register={register('fuelType', { required: 'Fuel Type is required' })}
+              register={register('fuelType')}
               error={errors.fuelType}
               placeholder="Select fuel type"
               options={['Petrol', 'Diesel', 'CNG', 'Electric', 'Hybrid']}
             />
             <FormSelect
               label="Transmission"
-              register={register('transmission', { required: 'Transmission is required' })}
+              register={register('transmission')}
               error={errors.transmission}
               placeholder="Select transmission"
               options={['Manual', 'Automatic']}
             />
             <FormSelect
               label="Ownership"
-              register={register('ownership', { required: 'Ownership is required' })}
+              register={register('ownership')}
               error={errors.ownership}
               placeholder="Select ownership"
               options={['1st Owner', '2nd Owner', '3rd Owner', '4th Owner+', 'Unregistered']}

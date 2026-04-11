@@ -19,18 +19,15 @@ const carSchema = new mongoose.Schema(
     },
     year: {
       type: Number,
-      required: [true, 'Year is required'],
       min: [1990, 'Year must be 1990 or later'],
       max: [new Date().getFullYear() + 1, 'Year cannot be in the future'],
     },
     price: {
       type: Number,
-      required: [true, 'Price is required'],
       min: [0, 'Price must be positive'],
     },
     kms: {
       type: Number,
-      required: [true, 'Kilometer reading is required'],
       min: [0, 'KMs must be positive'],
     },
 
@@ -41,7 +38,6 @@ const carSchema = new mongoose.Schema(
         values: ['Petrol', 'Diesel', 'CNG', 'Electric', 'Hybrid'],
         message: '{VALUE} is not a supported fuel type',
       },
-      required: [true, 'Fuel type is required'],
     },
     transmission: {
       type: String,
@@ -49,7 +45,6 @@ const carSchema = new mongoose.Schema(
         values: ['Manual', 'Automatic'],
         message: '{VALUE} is not a supported transmission',
       },
-      required: [true, 'Transmission is required'],
     },
     bodyType: {
       type: String,
