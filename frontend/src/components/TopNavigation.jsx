@@ -21,9 +21,11 @@ export default function TopNavigation() {
 
           {/* Logo / Branding */}
           <Link to="/" className="flex items-center gap-3 group">
-            <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center font-heading font-black text-xl text-white shadow-md group-hover:bg-primary-hover transition-colors">
-              S
-            </div>
+            <img
+              src="/logo.png"
+              alt="Sadguru Car Melo"
+              className="h-7 w-auto object-contain group-hover:scale-105 transition-transform duration-300"
+            />
             <div className="flex flex-col">
               <span className="font-heading font-extrabold text-xl text-primary leading-tight tracking-tight">Sadguru Car Melo</span>
               <span className="font-body text-[10px] text-text-muted font-bold uppercase tracking-widest">Premium Used Cars</span>

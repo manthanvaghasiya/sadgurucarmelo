@@ -1,5 +1,5 @@
 import React from 'react';
-import { Home, Search, Heart, User, MapPin, Menu, Car } from 'lucide-react';
+import { Home, Search, Heart, User, MapPin, Menu } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 
 export default function MobileNavigation() {
@@ -12,14 +12,14 @@ export default function MobileNavigation() {
             <nav className="md:hidden fixed top-0 left-0 right-0 h-16 bg-white shadow-sm border-b border-slate-100 px-4 flex items-center justify-between z-[60]">
                 {/* Left Side: Brand Logo */}
                 <Link to="/" className="flex items-center gap-2">
-                    {/* Orange Car Icon */}
-                    <div className="text-brand-orange">
-                        <Car className="w-8 h-8 fill-current" />
-                    </div>
-                    {/* Brand Name Stacked */}
+                    <img
+                      src="/logo.png"
+                      alt="Sadguru Car Melo"
+                      className="h-11 w-auto object-contain"
+                    />
                     <div className="flex flex-col">
-                        <span className="text-brand-dark font-black text-lg leading-none tracking-tight">SADGURU</span>
-                        <span className="text-brand-dark font-medium text-xs leading-none tracking-wide mt-0.5">CAR MELO</span>
+                        <span className="text-brand-dark font-black text-base leading-none tracking-tight">SADGURU</span>
+                        <span className="text-brand-dark font-medium text-[10px] leading-none tracking-wide mt-0.5">CAR MELO</span>
                     </div>
                 </Link>
 
