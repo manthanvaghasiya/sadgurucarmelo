@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Fuel, Settings2, User, Gauge, MessageCircle, Eye } from 'lucide-react';
 import { getCarWhatsAppLink } from '../utils/whatsapp';
 
@@ -13,9 +13,18 @@ export default function CarCard({
   owner = '1st Owner',
   kms = '45,000 KM'
 }) {
+  const navigate = useNavigate();
   const whatsappUrl = getCarWhatsAppLink({ title, price });
+
+  const handleCardClick = () => {
+    navigate(`/car-details/${id}`);
+  };
+
   return (
-    <div className="bg-surface rounded-2xl border border-gray-100 overflow-hidden group hover:shadow-lg transition-all duration-300 flex flex-col h-full">
+    <div
+      onClick={handleCardClick}
+      className="bg-surface rounded-2xl border border-gray-100 overflow-hidden group hover:shadow-lg transition-all duration-300 flex flex-col h-full cursor-pointer"
+    >
 
       {/* Image Container with Badges */}
       <div className="relative aspect-[4/3] overflow-hidden bg-gray-100">
@@ -76,6 +85,7 @@ export default function CarCard({
         <div className="flex flex-row gap-2 mt-auto pt-3 sm:pt-4 border-t border-gray-100">
           <Link
             to={`/car-details/${id}`}
+            onClick={(e) => e.stopPropagation()}
             className="flex-1 flex items-center justify-center gap-1 py-1.5 sm:py-2.5 rounded-lg border border-primary text-primary font-body font-bold text-[9px] sm:text-xs hover:bg-primary/5 transition-colors"
           >
             <Eye className="w-3 h-3 sm:w-4 sm:h-4" /> View
@@ -84,6 +94,7 @@ export default function CarCard({
             href={whatsappUrl}
             target="_blank"
             rel="noopener noreferrer"
+            onClick={(e) => e.stopPropagation()}
             className="flex-1 flex items-center justify-center gap-1 py-1.5 sm:py-2.5 rounded-lg bg-[#25D366] text-white font-body font-bold text-[9px] sm:text-xs hover:bg-[#20bd5a] transition-all shadow-md shadow-green-500/10 active:scale-95 uppercase"
           >
             <MessageCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4 fill-current" /> WHATSAPP

@@ -226,11 +226,13 @@ export default function HeroSection() {
                         </h3>
 
                         {/* Spec Chips */}
-                        <div className="flex items-center gap-2.5 flex-wrap lg:hidden">
-                          <span className="px-3 py-1 rounded-lg bg-white/[0.06] border border-white/[0.08] text-slate-300 text-xs font-bold uppercase tracking-wider">{currentCar.year}</span>
-                          <span className="px-3 py-1 rounded-lg bg-white/[0.06] border border-white/[0.08] text-slate-300 text-xs font-bold uppercase tracking-wider">{currentCar.fuelType || 'Fuel'}</span>
-                          <span className="px-3 py-1 rounded-lg bg-white/[0.06] border border-white/[0.08] text-slate-300 text-xs font-bold uppercase tracking-wider">{currentCar.transmission || 'Auto'}</span>
-                        </div>
+                        {(currentCar.year || currentCar.fuelType || currentCar.transmission) && (
+                          <div className="flex items-center gap-2.5 flex-wrap lg:hidden">
+                            {currentCar.year && <span className="px-3 py-1 rounded-lg bg-white/[0.06] border border-white/[0.08] text-slate-300 text-xs font-bold uppercase tracking-wider">{currentCar.year}</span>}
+                            {currentCar.fuelType && <span className="px-3 py-1 rounded-lg bg-white/[0.06] border border-white/[0.08] text-slate-300 text-xs font-bold uppercase tracking-wider">{currentCar.fuelType}</span>}
+                            {currentCar.transmission && <span className="px-3 py-1 rounded-lg bg-white/[0.06] border border-white/[0.08] text-slate-300 text-xs font-bold uppercase tracking-wider">{currentCar.transmission}</span>}
+                          </div>
+                        )}
                       </div>
 
                       {/* Vertical / Horizontal Divider */}
@@ -239,21 +241,25 @@ export default function HeroSection() {
                       {/* Right: Price & CTA */}
                       <div className="flex items-center justify-between lg:justify-end lg:flex-col lg:items-end gap-3 w-full lg:w-auto relative z-10">
                         {/* Spec chips — only visible on lg+ (above price) */}
-                        <div className="hidden lg:flex items-center gap-2 flex-wrap justify-end">
-                          <span className="px-3 py-1 rounded-lg bg-white/[0.06] border border-white/[0.08] text-slate-300 text-xs font-bold uppercase tracking-wider">{currentCar.year}</span>
-                          <span className="px-3 py-1 rounded-lg bg-white/[0.06] border border-white/[0.08] text-slate-300 text-xs font-bold uppercase tracking-wider">{currentCar.fuelType || 'Fuel'}</span>
-                          <span className="px-3 py-1 rounded-lg bg-white/[0.06] border border-white/[0.08] text-slate-300 text-xs font-bold uppercase tracking-wider">{currentCar.transmission || 'Auto'}</span>
-                        </div>
+                        {(currentCar.year || currentCar.fuelType || currentCar.transmission) && (
+                          <div className="hidden lg:flex items-center gap-2 flex-wrap justify-end">
+                            {currentCar.year && <span className="px-3 py-1 rounded-lg bg-white/[0.06] border border-white/[0.08] text-slate-300 text-xs font-bold uppercase tracking-wider">{currentCar.year}</span>}
+                            {currentCar.fuelType && <span className="px-3 py-1 rounded-lg bg-white/[0.06] border border-white/[0.08] text-slate-300 text-xs font-bold uppercase tracking-wider">{currentCar.fuelType}</span>}
+                            {currentCar.transmission && <span className="px-3 py-1 rounded-lg bg-white/[0.06] border border-white/[0.08] text-slate-300 text-xs font-bold uppercase tracking-wider">{currentCar.transmission}</span>}
+                          </div>
+                        )}
                         {/* Price + Arrow */}
                         <div className="flex items-center gap-5 w-full lg:w-auto justify-between lg:justify-end">
-                          <div className="flex flex-col lg:items-end lg:text-right">
-                            <p className="text-[10px] text-amber-500/70 uppercase tracking-[0.15em] font-bold mb-1.5 flex items-center gap-1.5">
-                              Expected Pricing
-                            </p>
-                            <p className="text-2xl sm:text-3xl font-black text-white tracking-tight drop-shadow-md">
-                              {formatPrice(currentCar.price)}
-                            </p>
-                          </div>
+                          {currentCar.price > 0 && (
+                            <div className="flex flex-col lg:items-end lg:text-right">
+                              <p className="text-[10px] text-amber-500/70 uppercase tracking-[0.15em] font-bold mb-1.5 flex items-center gap-1.5">
+                                Expected Pricing
+                              </p>
+                              <p className="text-2xl sm:text-3xl font-black text-white tracking-tight drop-shadow-md">
+                                {formatPrice(currentCar.price)}
+                              </p>
+                            </div>
+                          )}
                           <motion.div
                             whileHover={{ scale: 1.1, rotate: -15 }}
                             whileTap={{ scale: 0.9 }}
