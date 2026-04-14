@@ -67,7 +67,7 @@ export default function AdminSettings() {
     try {
       const res = await axiosInstance.get('/auth/users');
       if (res.data.success) {
-        setStaff(res.data.data || []);
+        setStaff((res.data.data || []).filter(user => user.role !== 'admin'));
       }
     } catch (err) {
       console.error('Failed to fetch staff:', err);

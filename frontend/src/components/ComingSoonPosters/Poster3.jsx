@@ -5,7 +5,7 @@ function NeonStat({ label, value, icon }) {
   return (
     <div className="flex items-center gap-2.5 bg-black/60 border border-fuchsia-600/30 p-2 backdrop-blur-md group hover:bg-[#1a0b2e]/80 transition-colors duration-300 relative overflow-hidden rounded-md min-w-0">
       <div className="absolute right-0 top-0 bottom-0 w-0.5 bg-gradient-to-b from-fuchsia-500 to-cyan-500 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-      
+
       <div className="text-fuchsia-400 group-hover:text-cyan-300 w-7 h-7 flex items-center justify-center shrink-0 transition-colors drop-shadow-[0_0_8px_currentColor]">
         {React.cloneElement(icon, { className: "w-4 h-4" })}
       </div>
@@ -51,7 +51,7 @@ export default function Poster3({ car }) {
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-3">
             <div className="flex items-center gap-2 bg-black/40 px-3 py-1 border border-fuchsia-500/30 rounded backdrop-blur text-fuchsia-400 font-mono text-[10px] tracking-widest uppercase">
               <Terminal className="w-3.5 h-3.5 animate-pulse" />
-              SYS_OVERRIDE
+              Sadguru car melo
             </div>
 
             {/* Glitch Title */}
@@ -101,10 +101,10 @@ export default function Poster3({ car }) {
                 {specs.length > 0 ? specs.map((s, i) => (
                   <NeonStat key={i} icon={s.icon} label={s.label} value={s.value} />
                 )) : (
-                   <div className="col-span-2 text-fuchsia-500/50 flex flex-col items-center justify-center p-4 border border-dashed border-fuchsia-900/50 bg-black/30 rounded-md">
-                      <Terminal className="w-5 h-5 animate-pulse mb-2" />
-                      <span className="text-[10px] tracking-[0.2em] font-mono uppercase">SYSTEM.DAT MISSING</span>
-                   </div>
+                  <div className="col-span-2 text-fuchsia-500/50 flex flex-col items-center justify-center p-4 border border-dashed border-fuchsia-900/50 bg-black/30 rounded-md">
+                    <Terminal className="w-5 h-5 animate-pulse mb-2" />
+                    <span className="text-[10px] tracking-[0.2em] font-mono uppercase">SYSTEM.DAT MISSING</span>
+                  </div>
                 )}
               </div>
 

@@ -5,6 +5,7 @@ import {
   Search, Play, Star, Landmark, Headphones, Loader2,
   Quote, ChevronLeft, ChevronRight, MapPin, Phone
 } from 'lucide-react';
+import { motion } from "framer-motion";
 import CarCard from '../components/CarCard';
 import { useCars } from '../context/CarContext';
 import HeroSection from '../components/HeroSection';
@@ -76,16 +77,46 @@ export default function Home() {
               )}
             </div>
 
+
+
+
             <div className="mt-12 text-center">
-              <Link to="/inventory" className="inline-block px-8 py-3 rounded-full border-2 border-primary text-primary font-heading font-bold hover:bg-primary hover:text-white transition-colors cursor-pointer">
-                View Full Inventory
-              </Link>
+              <motion.button
+                whileHover="hover"
+                className="group relative inline-flex items-center gap-2 overflow-hidden px-10 py-4 rounded-full border-2 border-primary text-primary font-heading font-bold hover:text-white transition-colors duration-300"
+              >
+                {/* Background Slide Effect */}
+                <motion.span
+                  className="absolute inset-0 bg-primary -z-10"
+                  initial={{ x: "-100%" }}
+                  variants={{ hover: { x: 0 } }}
+                  transition={{ type: "spring", stiffness: 100, damping: 20 }}
+                />
+
+                <span>View Full Inventory</span>
+
+                {/* High-Performance Pulse/Slide Arrows */}
+                <motion.span
+                  variants={{
+                    hover: { x: 5, scale: [1, 1.2, 1] }
+                  }}
+                  transition={{
+                    x: { type: "spring", stiffness: 300 },
+                    scale: { repeat: Infinity, duration: 0.6 }
+                  }}
+                  className="inline-block"
+                >
+                  &gt;&gt;
+                </motion.span>
+              </motion.button>
             </div>
+
+
           </div>
         </section>
 
         {/* 2. Core Services Section (Removed bg-background) */}
-        <section className="pt-20 pb-20 px-4 bg-transparent">
+        <section className="pt-05 pb-10 px-4 bg-transparent">
           <div className="max-w-7xl mx-auto">
             <div className="text-center mb-16 max-w-3xl mx-auto">
               <span className="text-sm font-heading font-bold text-[#d1108a] uppercase tracking-widest mb-4 inline-block">

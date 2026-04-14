@@ -178,7 +178,15 @@ export default function SalesDashboard() {
     },
     {
       title: "Today's Follow-ups",
-      value: todayFollowUps.length,
+      value: todayFollowUps.filter((lead) => {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const tomorrow = new Date(today);
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        const isUpdatedToday = new Date(lead.updatedAt) >= today && new Date(lead.updatedAt) < tomorrow;
+        const isActuallyDone = isUpdatedToday && (lead.status === 'Closed' || (lead.followUpDate && new Date(lead.followUpDate) >= tomorrow));
+        return !isActuallyDone;
+      }).length,
       icon: CalendarClock,
       iconBg: 'bg-[#8b5cf6]/10',
       iconColor: 'text-[#8b5cf6]',

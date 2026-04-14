@@ -3,7 +3,7 @@ import { useSearchParams } from 'react-router-dom';
 import SidebarFilter from '../components/SidebarFilter';
 import InventoryGrid from '../components/InventoryGrid';
 import { useCars } from '../context/CarContext';
-import PromoBanner from '../components/PromoBanner';
+import ArrivingShortly from '../components/ArrivingShortly';
 
 export default function Inventory() {
   const [searchParams] = useSearchParams();
@@ -63,7 +63,7 @@ export default function Inventory() {
       const distFromBottom = document.documentElement.scrollHeight - (window.innerHeight + window.scrollY);
       setIsNearFooter(distFromBottom < 800);
     };
-    
+
     // Check initially
     handleScroll();
 
@@ -112,7 +112,7 @@ export default function Inventory() {
                 <span className="text-[11px] font-bold text-red-600 uppercase tracking-wider leading-none">Live Inventory</span>
               </div>
               <span className="text-text-muted text-[13px] font-medium flex items-center gap-1.5">
-                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-primary/60"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-primary/60"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" /><circle cx="12" cy="10" r="3" /></svg>
                 Available stock in Surat
               </span>
             </div>
@@ -168,8 +168,8 @@ export default function Inventory() {
         </div>
 
         {/* Promotional Banner (Hidden on mobile since it's injected inside grid) */}
-        <div className="max-md:hidden">
-          <PromoBanner />
+        <div className="max-md:hidden pt-05">
+          <ArrivingShortly />
         </div>
 
       </div>

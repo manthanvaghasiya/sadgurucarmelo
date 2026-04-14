@@ -81,6 +81,7 @@ export default function Leads() {
   const [viewTarget, setViewTarget] = useState(null);
   const [leadStats, setLeadStats] = useState({ total: 0, newCount: 0, followUp: 0, todayFollowUps: 0 });
   const [showTodayTracker, setShowTodayTracker] = useState(false);
+  const [showNewTracker, setShowNewTracker] = useState(false);
 
   // New Filters Refactor
   const [columnFilters, setColumnFilters] = useState({
@@ -246,6 +247,8 @@ export default function Leads() {
     }
   };
 
+  const newLeads = useMemo(() => leads.filter(l => l.status === 'New'), [leads]);
+
   // ── KPI Cards ──
   const kpiCards = [
     {
@@ -255,13 +258,23 @@ export default function Leads() {
     },
     {
       title: 'New / Unread', subtitle: 'Needs attention',
-      value: leadStats.newCount, icon: MessageCircle,
+      value: newLeads.length, icon: MessageCircle,
       iconBg: 'bg-[#f59e0b]/10', iconColor: 'text-[#d97706]',
-      highlight: true,
+      highlight: newLeads.length > 0,
+      interactive: true,
+      onClick: () => setShowNewTracker(true),
     },
     {
       title: 'Today\'s Follow-ups', subtitle: 'Requires attention today',
-      value: leadStats.todayFollowUps, icon: CalendarClock,
+      value: todayLeads.filter((lead) => {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const tomorrow = new Date(today);
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        const isUpdatedToday = new Date(lead.updatedAt) >= today && new Date(lead.updatedAt) < tomorrow;
+        const isActuallyDone = isUpdatedToday && (lead.status === 'Closed' || (lead.followUpDate && new Date(lead.followUpDate) >= tomorrow));
+        return !isActuallyDone;
+      }).length, icon: CalendarClock,
       iconBg: 'bg-red-50', iconColor: 'text-red-500',
       interactive: true,
       onClick: () => setShowTodayTracker(true),
@@ -490,6 +503,127 @@ export default function Leads() {
                                 title="View Interaction Log"
                               >
                                 <ClipboardList className="w-5 h-5" />
+                              </button>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* New / Unread Tracker Slide-Over */}
+      {showNewTracker && (
+        <div className="fixed inset-0 z-50 flex justify-end">
+          <div className="absolute inset-0 bg-primary/40 backdrop-blur-sm" onClick={() => setShowNewTracker(false)} />
+          <div className="relative bg-surface w-full max-w-4xl h-full shadow-2xl flex flex-col animate-in slide-in-from-right duration-300 border-l border-gray-100">
+            <div className="p-6 border-b border-gray-100 flex items-center justify-between bg-surface shrink-0">
+              <div>
+                <h3 className="font-heading font-bold text-lg text-text">New / Unread Leads</h3>
+                <p className="font-body text-xs text-text-muted mt-0.5">Needs attention</p>
+              </div>
+              <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2 px-3 py-1.5 bg-background rounded-lg border border-gray-100">
+                  <div className="w-2 h-2 rounded-full bg-[#f59e0b]/80 animate-pulse" />
+                  <span className="font-body text-[10px] font-bold text-text-muted uppercase">Unread</span>
+                </div>
+                <button
+                  onClick={() => setShowNewTracker(false)}
+                  className="p-2 text-text-muted hover:bg-gray-100 rounded-lg transition-colors"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+
+            <div className="flex-1 overflow-y-auto bg-surface scrollbar-none">
+              {newLeads.length === 0 ? (
+                <div className="h-full flex flex-col items-center justify-center text-center p-12">
+                  <div className="w-16 h-16 bg-background rounded-2xl flex items-center justify-center mb-4">
+                    <MessageCircle className="w-8 h-8 text-text-muted/20" />
+                  </div>
+                  <p className="font-body text-sm font-semibold text-text-muted">No new leads right now</p>
+                  <p className="font-body text-xs text-text-muted/60 mt-1">Check back later or view general leads.</p>
+                </div>
+              ) : (
+                <div className="inline-block min-w-full align-middle">
+                  <table className="min-w-full divide-y divide-slate-100">
+                    <thead>
+                      <tr className="bg-background/50">
+                        <th className="px-6 py-4 text-left text-[10px] font-bold text-slate-500 uppercase tracking-wider font-heading">Customer</th>
+                        <th className="px-6 py-4 text-left text-[10px] font-bold text-slate-500 uppercase tracking-wider font-heading">Salesman</th>
+                        <th className="px-6 py-4 text-left text-[10px] font-bold text-slate-500 uppercase tracking-wider font-heading">Car of Interest</th>
+                        <th className="px-6 py-4 text-left text-[10px] font-bold text-slate-500 uppercase tracking-wider font-heading">Source</th>
+                        <th className="px-6 py-4 text-center text-[10px] font-bold text-slate-500 uppercase tracking-wider font-heading">Status</th>
+                        <th className="px-6 py-4 text-right text-[10px] font-bold text-slate-500 uppercase tracking-wider font-heading">View Log</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-50">
+                      {newLeads.map((lead) => {
+                        const sCfg = sourceConfig[lead.source] || sourceConfig['Website'];
+                        const stCfg = statusConfig[lead.status] || statusConfig['New'];
+
+                        return (
+                          <tr key={lead._id} className="hover:bg-slate-50/80 transition-colors group">
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <div className="flex flex-col">
+                                <span className="font-body text-sm font-bold text-text">{lead.customerName}</span>
+                                <span className="font-body text-[11px] text-text-muted flex items-center gap-1.5 mt-0.5">
+                                  <Phone className="w-3 h-3" />{lead.phone}
+                                </span>
+                              </div>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <div className="flex items-center gap-1.5">
+                                <UserCircle className="w-4 h-4 text-text-muted/60" />
+                                <span className="font-body text-xs font-semibold text-text-muted capitalize">
+                                  {lead.assignedTo?.name || 'Unassigned'}
+                                </span>
+                              </div>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              {lead.carOfInterest ? (
+                                <div className="flex items-center gap-2">
+                                  <div className="w-8 h-8 bg-background rounded-lg flex items-center justify-center shrink-0">
+                                    <Car className="w-4 h-4 text-text-muted/60" />
+                                  </div>
+                                  <div className="flex flex-col min-w-0">
+                                    <span className="font-body text-xs font-semibold text-text truncate max-w-[120px]">
+                                      {lead.carOfInterest.make} {lead.carOfInterest.model}
+                                    </span>
+                                    <span className="font-body text-[10px] text-text-muted">{lead.carOfInterest.year}</span>
+                                  </div>
+                                </div>
+                              ) : (
+                                <span className="font-body text-xs text-text-muted/40 italic">Not specified</span>
+                              )}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full font-body text-[10px] font-bold ring-1 ${sCfg.bg} ${sCfg.text} ${sCfg.ring}`}>
+                                {lead.source}
+                              </span>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-center">
+                               <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full font-body text-[10px] font-bold ring-1 ${stCfg.bg} ${stCfg.text} ${stCfg.ring}`}>
+                                 <span className={`w-1.5 h-1.5 rounded-full ${stCfg.dot} animate-pulse`} />
+                                 New Lead
+                               </span>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-right">
+                              <button
+                                onClick={() => {
+                                  setShowNewTracker(false);
+                                  setViewTarget(lead);
+                                }}
+                                className="p-2 text-text-muted hover:text-primary hover:bg-primary/5 rounded-lg transition-all active:scale-90"
+                                title="View Details"
+                              >
+                                <Eye className="w-5 h-5" />
                               </button>
                             </td>
                           </tr>

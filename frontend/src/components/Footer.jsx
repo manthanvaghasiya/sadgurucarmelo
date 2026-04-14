@@ -44,7 +44,7 @@ export default function Footer() {
                 { name: 'About Our Mission', path: '/about' },
                 { name: 'Core Services', path: '/about?service=buy' },
                 { name: 'Contact Support', path: '/contact' },
-                { name: 'Staff Login', path: '/login' }
+                { name: 'Admin Login', path: '/login' }
               ].map((link) => (
                 <li key={link.name}>
                   <Link
@@ -111,7 +111,7 @@ export default function Footer() {
 
               {/* Instagram Card */}
               <a
-                href="https://instagram.com/sadgurucarmelo"
+                href="https://www.instagram.com/sadguru_car_surat?igsh=azEwNzN2eG9hOG5y"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="group flex items-center justify-between p-2.5 rounded-xl bg-white/[0.04] border border-white/[0.05] hover:bg-white/[0.08] hover:border-pink-500/40 transition-all duration-500"
@@ -134,7 +134,7 @@ export default function Footer() {
               <a
                 href="https://facebook.com/sadgurucarmelo"
                 target="_blank"
-                rel="noopener noreferrer"
+                rel="https://www.facebook.com/share/1EMursSoTv/"
                 className="group flex items-center justify-between p-2.5 rounded-xl bg-white/[0.04] border border-white/[0.05] hover:bg-white/[0.08] hover:border-blue-500/40 transition-all duration-500"
               >
                 <div className="flex items-center gap-3">
@@ -151,26 +151,7 @@ export default function Footer() {
                 <ArrowUpRight className="w-3.5 h-3.5 text-gray-700 group-hover:text-blue-400 transition-all" />
               </a>
 
-              {/* YouTube Card */}
-              <a
-                href="https://youtube.com/@sadgurucarmelo"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="group flex items-center justify-between p-2.5 rounded-xl bg-white/[0.04] border border-white/[0.05] hover:bg-white/[0.08] hover:border-red-500/40 transition-all duration-500"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-lg bg-red-600 flex items-center justify-center text-white shadow-lg shadow-red-600/20">
-                    <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
-                      <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
-                    </svg>
-                  </div>
-                  <div>
-                    <p className="text-[9px] text-gray-500 font-bold uppercase tracking-widest mb-0.5 opacity-60">YouTube</p>
-                    <p className="text-[12px] font-heading font-bold text-white group-hover:text-primary transition-colors leading-none">@sadgurucarmelo</p>
-                  </div>
-                </div>
-                <ArrowUpRight className="w-3.5 h-3.5 text-gray-700 group-hover:text-red-400 transition-all" />
-              </a>
+
 
             </div>
           </div>

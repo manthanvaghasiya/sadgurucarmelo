@@ -3,7 +3,7 @@ import { useSearchParams } from 'react-router-dom';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import axiosInstance from '../api/axiosConfig';
 import CarCard from './CarCard';
-import PromoBanner from './PromoBanner';
+import ComingSoonCarousel from './ComingSoonCarousel';
 
 // ── Format helpers ──
 function formatPrice(num) {
@@ -150,7 +150,7 @@ export default function InventoryGrid({ filters = {} }) {
               {/* Insert PromoBanner after every 8 cars exclusively for mobile screens */}
               {(index + 1) % 8 === 0 && (
                 <div className="col-span-full hidden max-md:block">
-                  <PromoBanner />
+                  <ComingSoonCarousel />
                 </div>
               )}
             </Fragment>

@@ -46,7 +46,7 @@ export default function Poster5({ car }) {
         <div className="flex flex-col sm:flex-row items-center justify-between gap-2 z-20">
           <div className="flex items-center gap-2 bg-white/50 backdrop-blur-xl px-4 py-1.5 rounded-full border border-white/60 shadow-[0_4px_20px_rgba(0,0,0,0.03)]">
             <Leaf className="text-emerald-500 w-4 h-4" />
-            <span className="text-emerald-900 font-bold text-[11px] uppercase tracking-[0.15em]">Next Generation Fleet</span>
+            <span className="text-emerald-900 font-bold text-[11px] uppercase tracking-[0.15em]">Sadguru car melo</span>
           </div>
 
           <div className="flex flex-col items-center sm:items-end">
@@ -94,13 +94,13 @@ export default function Poster5({ car }) {
               {specs.length > 0 ? specs.map((s, i) => (
                 <EcoSpec key={i} icon={s.icon} label={s.label} value={s.value} />
               )) : (
-                 <div className="col-span-2 text-emerald-800/50 flex flex-col items-center justify-center p-4 border border-dashed border-emerald-400/50 bg-white/40 backdrop-blur-md rounded-2xl">
-                    <ShieldCheck className="w-8 h-8 animate-pulse mb-2" />
-                    <span className="text-[10px] tracking-[0.2em] font-bold uppercase text-center">PARAMETERS PENDING</span>
-                 </div>
+                <div className="col-span-2 text-emerald-800/50 flex flex-col items-center justify-center p-4 border border-dashed border-emerald-400/50 bg-white/40 backdrop-blur-md rounded-2xl">
+                  <ShieldCheck className="w-8 h-8 animate-pulse mb-2" />
+                  <span className="text-[10px] tracking-[0.2em] font-bold uppercase text-center">PARAMETERS PENDING</span>
+                </div>
               )}
             </div>
-            
+
             {/* Notify Me Button */}
             <button className="w-full mt-2 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-black text-sm uppercase tracking-[0.15em] rounded-xl shadow-[0_10px_30px_rgba(16,185,129,0.3)] transition-all duration-500 hover:shadow-[0_15px_40px_rgba(16,185,129,0.4)] flex items-center justify-center gap-2">
               <ShieldCheck className="w-4 h-4 animate-pulse" /> Notify Me
