@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Car, MapPin, ChevronRight, Sparkles, ArrowRight } from 'lucide-react';
+import { Car, MapPin, ChevronRight, Sparkles, ArrowRight, X } from 'lucide-react';
+import axiosInstance from '../api/axiosConfig';
+import toast from 'react-hot-toast';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useCars } from '../context/CarContext';
 
@@ -11,6 +13,34 @@ export default function HeroSection() {
   // Coming Soon Carousel State
   const [currentCarIndex, setCurrentCarIndex] = useState(0);
   const comingSoonCars = cars.filter(c => c.status === 'Coming Soon');
+
+  // Notify Modal State
+  const [showModal, setShowModal] = useState(false);
+  const [formData, setFormData] = useState({ name: '', phone: '' });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!formData.name || !formData.phone) return toast.error('Please fill in both fields');
+    try {
+      setIsSubmitting(true);
+      const currentCar = comingSoonCars[currentCarIndex];
+      const message = `I am interested in the coming soon car: ${currentCar?.make} ${currentCar?.model} ${currentCar?.year ? `(${currentCar.year})` : ''}`;
+      await axiosInstance.post('/messages', {
+        name: formData.name,
+        phone: formData.phone,
+        message,
+        type: 'Notify'
+      });
+      toast.success("We'll notify you when it's available!");
+      setShowModal(false);
+      setFormData({ name: '', phone: '' });
+    } catch (error) {
+      toast.error('Failed to submit. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   useEffect(() => {
     if (comingSoonCars.length <= 1) return;
@@ -178,7 +208,10 @@ export default function HeroSection() {
                   className="relative z-10 flex flex-col items-center w-full"
                 >
                   {/* ── CAR IMAGE ── */}
-                  <div className="relative w-full flex items-center justify-center pointer-events-none pt-0 lg:pt-6 pb-0">
+                  <div 
+                    className="relative w-full flex items-center justify-center pt-0 lg:pt-6 pb-0 cursor-pointer z-20 group"
+                    onClick={() => setShowModal(true)}
+                  >
                     <motion.div
                       animate={{ y: [0, -16, 0], rotateZ: [0, -0.5, 0, 0.5, 0] }}
                       transition={{
@@ -190,7 +223,7 @@ export default function HeroSection() {
                       <img
                         src={currentCar.image || 'https://placehold.co/800x400/111/333?text=Incoming+Vehicle'}
                         alt={`${currentCar.make} ${currentCar.model}`}
-                        className="w-[90%] sm:w-[85%] lg:w-[95%] xl:w-full h-auto object-contain drop-shadow-[0_40px_60px_rgba(0,0,0,0.75)] max-h-[35vh] sm:max-h-[38vh] lg:max-h-[42vh] xl:max-h-[50vh] transform-gpu"
+                        className="w-[90%] sm:w-[85%] lg:w-[95%] xl:w-full h-auto object-contain drop-shadow-[0_40px_60px_rgba(0,0,0,0.75)] max-h-[35vh] sm:max-h-[38vh] lg:max-h-[42vh] xl:max-h-[50vh] transform-gpu transition-transform duration-500 group-hover:scale-105"
                       />
                     </motion.div>
                   </div>
@@ -201,7 +234,7 @@ export default function HeroSection() {
                       initial={{ opacity: 0, y: 40 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.9, delay: 0.35, type: "spring", bounce: 0.35 }}
-                      onClick={() => navigate(`/car/${currentCar.id}`)}
+                      onClick={() => setShowModal(true)}
                       className="relative bg-white/[0.04] backdrop-blur-[50px] border border-white/[0.08] p-5 sm:p-6 lg:px-8 lg:py-6 rounded-[1.75rem] cursor-pointer shadow-[0_8px_32px_rgba(0,0,0,0.5),_inset_0_1px_0_rgba(255,255,255,0.06)] overflow-hidden transform-gpu hover:-translate-y-1.5 hover:bg-white/[0.06] hover:border-amber-500/25 hover:shadow-[0_12px_48px_rgba(245,158,11,0.12)] transition-all duration-500 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 lg:gap-0"
                     >
                       {/* Shimmer sweep on hover */}
@@ -250,16 +283,20 @@ export default function HeroSection() {
                         )}
                         {/* Price + Arrow */}
                         <div className="flex items-center gap-5 w-full lg:w-auto justify-between lg:justify-end">
-                          {currentCar.price > 0 && (
                             <div className="flex flex-col lg:items-end lg:text-right">
                               <p className="text-[10px] text-amber-500/70 uppercase tracking-[0.15em] font-bold mb-1.5 flex items-center gap-1.5">
                                 Expected Pricing
                               </p>
-                              <p className="text-2xl sm:text-3xl font-black text-white tracking-tight drop-shadow-md">
-                                {formatPrice(currentCar.price)}
-                              </p>
+                              {currentCar.price > 0 ? (
+                                <p className="text-2xl sm:text-3xl font-black text-white tracking-tight drop-shadow-md">
+                                  {formatPrice(currentCar.price)}
+                                </p>
+                              ) : (
+                                <p className="text-xl sm:text-2xl font-black text-white/85 tracking-tight drop-shadow-md bg-white/10 px-3 py-1 rounded-md">
+                                  Revealing Soon
+                                </p>
+                              )}
                             </div>
-                          )}
                           <motion.div
                             whileHover={{ scale: 1.1, rotate: -15 }}
                             whileTap={{ scale: 0.9 }}
@@ -299,6 +336,55 @@ export default function HeroSection() {
 
       </div>
 
+        {/* Notify Modal */}
+        {showModal && (
+          <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm px-4 pb-28 sm:p-4 animate-fade-in" onClick={() => setShowModal(false)}>
+            <div className="bg-white rounded-3xl sm:rounded-2xl w-full max-w-md overflow-hidden shadow-2xl animate-[slide-up_0.4s_cubic-bezier(0.16,1,0.3,1)] sm:animate-scale-in" onClick={(e) => e.stopPropagation()}>
+              <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-slate-50">
+                <h3 className="font-heading font-bold text-xl text-slate-800">Get Notified</h3>
+                <button onClick={() => setShowModal(false)} className="text-gray-400 hover:text-gray-700 transition">
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+              <form onSubmit={handleSubmit} className="p-6 space-y-4 font-body">
+                {currentCar && (
+                  <p className="text-sm text-slate-500 mb-4">
+                    Register your interest for the <span className="font-semibold text-brand-orange">{currentCar.make} {currentCar.model}</span>.
+                  </p>
+                )}
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 mb-1">Full Name</label>
+                  <input 
+                    type="text" 
+                    value={formData.name}
+                    onChange={(e) => setFormData({...formData, name: e.target.value})}
+                    className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:border-brand-orange focus:ring-1 focus:ring-brand-orange outline-none transition-all text-slate-800"
+                    placeholder="Enter your name"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 mb-1">Mobile Number</label>
+                  <input 
+                    type="tel" 
+                    value={formData.phone}
+                    onChange={(e) => setFormData({...formData, phone: e.target.value})}
+                    className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:border-brand-orange focus:ring-1 focus:ring-brand-orange outline-none transition-all text-slate-800"
+                    placeholder="Enter your phone number"
+                    required
+                  />
+                </div>
+                <button 
+                  type="submit" 
+                  disabled={isSubmitting}
+                  className="w-full bg-brand-orange hover:bg-orange-600 text-white font-semibold py-3 rounded-xl transition-all disabled:opacity-70 mt-2"
+                >
+                  {isSubmitting ? 'Submitting...' : 'Notify Me'}
+                </button>
+              </form>
+            </div>
+          </div>
+        )}
     </section>
   );
 }

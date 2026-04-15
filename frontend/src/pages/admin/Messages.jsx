@@ -6,6 +6,7 @@ import { Mail, Trash2, CheckCircle2, User, Phone } from 'lucide-react';
 export default function Messages() {
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [filterType, setFilterType] = useState('All'); // 'All', 'Contact Us', 'Notify'
 
   useEffect(() => {
     fetchMessages();
@@ -62,8 +63,24 @@ export default function Messages() {
         </p>
       </div>
 
+      <div className="flex gap-4 border-b border-gray-200">
+        {['All', 'Contact Us', 'Notify'].map((type) => (
+          <button
+            key={type}
+            onClick={() => setFilterType(type)}
+            className={`pb-2 px-1 text-sm font-semibold transition-colors border-b-2 ${
+              filterType === type 
+                ? 'border-primary text-primary' 
+                : 'border-transparent text-gray-500 hover:text-gray-700'
+            }`}
+          >
+            {type}
+          </button>
+        ))}
+      </div>
+
       <div className="bg-surface rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-        {messages.length === 0 ? (
+        {messages.filter(m => filterType === 'All' || m.type === filterType || (!m.type && filterType === 'Contact Us')).length === 0 ? (
           <div className="p-12 text-center flex flex-col items-center">
             <Mail className="w-16 h-16 text-gray-300 mb-4" />
             <h3 className="font-heading font-bold text-xl text-text mb-2">No messages yet</h3>
@@ -71,7 +88,7 @@ export default function Messages() {
           </div>
         ) : (
           <div className="divide-y divide-gray-100">
-            {messages.map((msg) => (
+            {messages.filter(m => filterType === 'All' || m.type === filterType || (!m.type && filterType === 'Contact Us')).map((msg) => (
               <div 
                 key={msg._id} 
                 className={`p-6 transition-colors hover:bg-gray-50/50 flex flex-col md:flex-row gap-6 ${msg.status === 'Unread' ? 'bg-primary/5' : ''}`}
@@ -85,6 +102,16 @@ export default function Messages() {
                       )}
                       <h3 className={`font-heading text-lg ${msg.status === 'Unread' ? 'font-bold' : 'font-semibold text-text/90'}`}>
                         {msg.name}
+                        {msg.type === 'Notify' && (
+                          <span className="ml-3 text-xs font-bold px-2 py-1 bg-blue-100 text-blue-700 rounded-md">
+                            Notify
+                          </span>
+                        )}
+                        {(!msg.type || msg.type === 'Contact Us') && (
+                          <span className="ml-3 text-xs font-bold px-2 py-1 bg-gray-100 text-gray-700 rounded-md">
+                            Contact Us
+                          </span>
+                        )}
                       </h3>
                       <span className="text-xs font-body text-text-muted px-2 py-1 bg-gray-100 rounded-md">
                         {new Date(msg.createdAt).toLocaleString()}

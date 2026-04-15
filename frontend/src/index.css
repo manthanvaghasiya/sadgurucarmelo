@@ -76,3 +76,863 @@
 .scrollbar-none::-webkit-scrollbar {
   display: none;
 }
+
+@keyframes slide-up {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+/* ═══════════════════════════════════════════════════
+   PREMIUM INVENTORY GRID — Visual Enhancement Layer
+   ═══════════════════════════════════════════════════ */
+
+/* Staggered fade-in entrance for each card */
+@keyframes card-entrance {
+  from {
+    opacity: 0;
+    transform: translateY(32px) scale(0.97);
+    filter: blur(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0);
+  }
+}
+
+/* Shimmer sweep — a diagonal light streak on hover */
+@keyframes shimmer-sweep {
+  0% {
+    transform: translateX(-100%) rotate(-45deg);
+  }
+  100% {
+    transform: translateX(200%) rotate(-45deg);
+  }
+}
+
+/* Rotating conic-gradient for the animated border */
+@keyframes border-rotate {
+  0% {
+    --border-angle: 0deg;
+  }
+  100% {
+    --border-angle: 360deg;
+  }
+}
+
+/* Subtle floating / breathing animation */
+@keyframes card-float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+/* Pulse glow halo behind a card */
+@keyframes glow-pulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(0, 0, 0, 0), 0 4px 20px -4px rgba(0,0,0,0.06);
+  }
+  50% {
+    box-shadow: 0 0 28px 4px rgba(0, 0, 0, 0.10), 0 8px 32px -4px rgba(0,0,0,0.10);
+  }
+}
+
+/* Badge shine flash */
+@keyframes badge-shine {
+  0% { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+
+/* Section heading gradient text animation */
+@keyframes gradient-text {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+/* ── Inventory section root ── */
+.inventory-grid-section {
+  position: relative;
+}
+
+.inventory-grid-section::before {
+  content: '';
+  position: absolute;
+  top: -1px;
+  left: 5%;
+  right: 5%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(245,148,35,0.25), rgba(245,148,35,0.5), rgba(245,148,35,0.25), transparent);
+}
+
+/* Animated heading gradient */
+.inventory-heading-gradient {
+  background-size: 200% auto;
+  animation: gradient-text 4s ease infinite;
+}
+
+/* ── Each card wrapper — animated border effect ── */
+.car-card-premium {
+  --border-angle: 0deg;
+  position: relative;
+  border-radius: 1rem;
+  animation: card-entrance 0.7s cubic-bezier(0.22, 1, 0.36, 1) both,
+             card-float 5s ease-in-out infinite;
+  animation-fill-mode: both, none;
+  transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.45s ease;
+}
+
+/* Stagger children inside the grid */
+.car-card-premium:nth-child(1) { animation-delay: 0.05s; }
+.car-card-premium:nth-child(2) { animation-delay: 0.12s; }
+.car-card-premium:nth-child(3) { animation-delay: 0.19s; }
+.car-card-premium:nth-child(4) { animation-delay: 0.26s; }
+.car-card-premium:nth-child(5) { animation-delay: 0.33s; }
+.car-card-premium:nth-child(6) { animation-delay: 0.40s; }
+.car-card-premium:nth-child(7) { animation-delay: 0.47s; }
+.car-card-premium:nth-child(8) { animation-delay: 0.54s; }
+
+/* Animated conic border — shown as a pseudo-element behind the card */
+.car-card-premium::before {
+  content: '';
+  position: absolute;
+  inset: -1.5px;
+  border-radius: inherit;
+  padding: 1.5px;
+  background: conic-gradient(
+    from var(--border-angle, 0deg),
+    transparent 25%,
+    rgba(0, 0, 0, 0.45) 35%,
+    rgba(30, 30, 30, 0.6) 50%,
+    rgba(0, 0, 0, 0.45) 65%,
+    transparent 75%
+  );
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.car-card-premium:hover::before {
+  opacity: 1;
+  animation: border-rotate 3s linear infinite;
+}
+
+/* Glow halo on hover */
+.car-card-premium:hover {
+  transform: translateY(-8px) scale(1.02);
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, 0.12),
+    0 8px 40px -8px rgba(0, 0, 0, 0.18),
+    0 20px 60px -16px rgba(0, 0, 0, 0.15);
+}
+
+/* Shimmer sweep overlay inside the card image */
+.car-card-premium .car-card-image-wrap::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    115deg,
+    transparent 20%,
+    rgba(255,255,255,0.35) 40%,
+    rgba(255,255,255,0.55) 50%,
+    rgba(255,255,255,0.35) 60%,
+    transparent 80%
+  );
+  transform: translateX(-100%) rotate(-45deg);
+  transition: none;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.car-card-premium:hover .car-card-image-wrap::after {
+  animation: shimmer-sweep 0.85s ease-out forwards;
+}
+
+/* Premium badge micro-interaction */
+.car-card-premium .premium-badge {
+  background-size: 200% auto;
+  transition: transform 0.3s ease, letter-spacing 0.3s ease;
+}
+
+.car-card-premium:hover .premium-badge {
+  animation: badge-shine 1.5s ease-out;
+  transform: scale(1.05);
+  letter-spacing: 0.08em;
+}
+
+/* Inner card glass surface */
+.car-card-glass {
+  background: linear-gradient(145deg, rgba(255,255,255,0.95), rgba(248,250,252,0.85));
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(226, 232, 240, 0.6);
+  transition: border-color 0.4s ease, background 0.4s ease;
+}
+
+.car-card-premium:hover .car-card-glass {
+  border-color: rgba(0, 0, 0, 0.18);
+  background: linear-gradient(145deg, rgba(255,255,255,1), rgba(248,250,252,0.95));
+}
+
+/* Price glow on hover — dark accent */
+.car-card-premium:hover .car-price-highlight {
+  text-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+}
+
+/* Spec item subtle lift */
+.car-spec-chip {
+  transition: background 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+  border: 1px solid transparent;
+}
+
+.car-card-premium:hover .car-spec-chip {
+  background: rgba(0, 0, 0, 0.03);
+  border-color: rgba(0, 0, 0, 0.10);
+  transform: translateY(-2px);
+  box-shadow: 0 3px 10px -2px rgba(0, 0, 0, 0.08);
+}
+
+/* Action buttons premium upgrade */
+.car-action-btn {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.car-action-btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, transparent, rgba(255,255,255,0.15));
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.car-action-btn:hover::before {
+  opacity: 1;
+}
+
+/* Section decorative orbs */
+.inventory-section-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  pointer-events: none;
+  opacity: 0.5;
+  animation: card-float 6s ease-in-out infinite;
+}
+
+/* View Full Inventory button glow */
+.view-inventory-btn {
+  position: relative;
+}
+
+.view-inventory-btn::after {
+  content: '';
+  position: absolute;
+  inset: -3px;
+  border-radius: inherit;
+  background: linear-gradient(135deg, rgba(15,23,42,0.2), rgba(0,0,0,0.25), rgba(15,23,42,0.2));
+  z-index: -1;
+  opacity: 0;
+  filter: blur(8px);
+  transition: opacity 0.4s ease;
+}
+
+.view-inventory-btn:hover::after {
+  opacity: 1;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   MOBILE-FIRST PREMIUM ENHANCEMENTS (max-width: 640px)
+   On mobile, :hover doesn't exist. So we make premium effects
+   always-on, use :active for tap feedback, and add perpetual
+   subtle animations to make the grid feel alive and expensive.
+   ═══════════════════════════════════════════════════════════════ */
+
+/* Auto shimmer that loops periodically on mobile */
+@keyframes mobile-shimmer-auto {
+  0%, 85% {
+    transform: translateX(-100%) rotate(-45deg);
+  }
+  100% {
+    transform: translateX(200%) rotate(-45deg);
+  }
+}
+
+/* Subtle border pulse for mobile cards */
+@keyframes mobile-border-glow {
+  0%, 100% {
+    border-color: rgba(226, 232, 240, 0.6);
+    box-shadow: 0 1px 8px -2px rgba(0,0,0,0.06);
+  }
+  50% {
+    border-color: rgba(0, 0, 0, 0.15);
+    box-shadow: 0 2px 16px -4px rgba(0, 0, 0, 0.10), 0 1px 4px -1px rgba(0,0,0,0.04);
+  }
+}
+
+/* Spec chip icon color pulse on mobile */
+@keyframes icon-color-pulse {
+  0%, 100% { opacity: 0.75; }
+  50% { opacity: 1; }
+}
+
+/* Badge subtle breathing on mobile */
+@keyframes badge-breathe {
+  0%, 100% {
+    box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+  }
+  50% {
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.18), 0 1px 4px rgba(0,0,0,0.1);
+  }
+}
+
+/* Price shimmer text effect */
+@keyframes price-gleam {
+  0%, 80% { filter: brightness(1); }
+  90% { filter: brightness(1.15); }
+  100% { filter: brightness(1); }
+}
+
+/* Active (tap) scale-down for cards */
+@keyframes tap-ripple {
+  0% { transform: scale(1); }
+  50% { transform: scale(0.97); }
+  100% { transform: scale(1); }
+}
+
+/* Mobile button premium animations */
+@keyframes mobile-btn-gradient {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+@keyframes mobile-btn-shimmer {
+  0%, 70% { left: -100%; }
+  100% { left: 160%; }
+}
+
+@keyframes mobile-btn-glow {
+  0%, 100% {
+    box-shadow: 0 4px 20px -4px rgba(15, 23, 42, 0.35), 0 2px 8px -2px rgba(0, 0, 0, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  }
+  50% {
+    box-shadow: 0 6px 28px -4px rgba(15, 23, 42, 0.45), 0 4px 16px -4px rgba(0, 0, 0, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  }
+}
+
+@media (max-width: 640px) {
+
+  /* ── Section level mobile tweaks ── */
+  .inventory-grid-section {
+    padding-top: 2.5rem;
+    padding-bottom: 2.5rem;
+    padding-left: 0.625rem;
+    padding-right: 0.625rem;
+  }
+
+  /* Gradient line at top — animated position on mobile */
+  .inventory-grid-section::before {
+    height: 2px;
+    left: 6%;
+    right: 6%;
+    background: linear-gradient(90deg,
+      transparent 0%,
+      rgba(245,148,35,0.1) 10%,
+      rgba(245,148,35,0.5) 30%,
+      rgba(251,191,36,0.7) 50%,
+      rgba(245,148,35,0.5) 70%,
+      rgba(245,148,35,0.1) 90%,
+      transparent 100%
+    );
+    background-size: 200% 100%;
+    animation: gradient-text 4s ease infinite;
+  }
+
+  /* Gradient line at bottom of section too */
+  .inventory-grid-section::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 10%;
+    right: 10%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(245,148,35,0.2), rgba(245,148,35,0.35), rgba(245,148,35,0.2), transparent);
+  }
+
+  /* Heading animation more visible on mobile */
+  .inventory-heading-gradient {
+    background-size: 300% auto;
+    animation: gradient-text 2.5s ease infinite;
+  }
+
+  /* ── Card wrapper — always-on animated border ── */
+  .car-card-premium {
+    border-radius: 0.875rem;
+    animation: card-entrance 0.6s cubic-bezier(0.22, 1, 0.36, 1) both,
+               card-float 4.5s ease-in-out infinite;
+    animation-fill-mode: both, none;
+  }
+
+  /* Animated border always visible on mobile — wider visible arc, stronger */
+  .car-card-premium::before {
+    opacity: 0.75;
+    animation: border-rotate 4s linear infinite;
+    inset: -1.5px;
+    background: conic-gradient(
+      from var(--border-angle, 0deg),
+      transparent 10%,
+      rgba(0, 0, 0, 0.25) 20%,
+      rgba(30, 30, 30, 0.45) 35%,
+      rgba(0, 0, 0, 0.55) 50%,
+      rgba(30, 30, 30, 0.45) 65%,
+      rgba(0, 0, 0, 0.25) 80%,
+      transparent 90%
+    );
+  }
+
+  /* Tap feedback — card presses down with orange flash */
+  .car-card-premium:active {
+    transform: scale(0.965);
+    transition: transform 0.15s ease;
+  }
+
+  .car-card-premium:active::before {
+    opacity: 1;
+  }
+
+  .car-card-premium:active .car-card-glass {
+    border-color: rgba(0, 0, 0, 0.3);
+    background: linear-gradient(145deg, rgba(255,255,255,1), rgba(248,250,252,0.95));
+    box-shadow:
+      0 0 0 1px rgba(0, 0, 0, 0.10),
+      0 4px 20px -4px rgba(0, 0, 0, 0.15),
+      inset 0 1px 0 rgba(255,255,255,0.95);
+  }
+
+  /* ── Glass surface — double-layer inset glow + ambient border pulse ── */
+  .car-card-glass {
+    border: 1.5px solid rgba(226, 232, 240, 0.7);
+    border-radius: 0.875rem;
+    background: linear-gradient(155deg, rgba(255,255,255,0.98), rgba(248,250,252,0.92));
+    animation: mobile-border-glow 3.5s ease-in-out infinite;
+    box-shadow:
+      0 1px 10px -2px rgba(0,0,0,0.07),
+      0 4px 20px -8px rgba(0, 0, 0, 0.05),
+      inset 0 1px 0 rgba(255,255,255,0.95),
+      inset 0 -1px 0 rgba(0, 0, 0, 0.02);
+  }
+
+  /* Stagger border glow so cards don't pulse in sync */
+  .car-card-premium:nth-child(1) .car-card-glass { animation-delay: 0s; }
+  .car-card-premium:nth-child(2) .car-card-glass { animation-delay: 0.8s; }
+  .car-card-premium:nth-child(3) .car-card-glass { animation-delay: 1.6s; }
+  .car-card-premium:nth-child(4) .car-card-glass { animation-delay: 2.4s; }
+  .car-card-premium:nth-child(5) .car-card-glass { animation-delay: 0.4s; }
+  .car-card-premium:nth-child(6) .car-card-glass { animation-delay: 1.2s; }
+  .car-card-premium:nth-child(7) .car-card-glass { animation-delay: 2.0s; }
+  .car-card-premium:nth-child(8) .car-card-glass { animation-delay: 2.8s; }
+
+  /* ── Image — auto shimmer every few seconds ── */
+  .car-card-premium .car-card-image-wrap::after {
+    animation: mobile-shimmer-auto 5s ease-in-out infinite;
+    background: linear-gradient(
+      115deg,
+      transparent 20%,
+      rgba(255,255,255,0.2) 38%,
+      rgba(255,255,255,0.5) 50%,
+      rgba(255,255,255,0.2) 62%,
+      transparent 80%
+    );
+  }
+
+  /* Image bottom gradient scrim for depth (overlaps onto content) */
+  .car-card-image-wrap::before {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 40%;
+    background: linear-gradient(to top, rgba(0,0,0,0.08), transparent);
+    z-index: 1;
+    pointer-events: none;
+  }
+
+  /* Stagger shimmer per card — tighter intervals */
+  .car-card-premium:nth-child(1) .car-card-image-wrap::after { animation-delay: 0.3s; }
+  .car-card-premium:nth-child(2) .car-card-image-wrap::after { animation-delay: 1.0s; }
+  .car-card-premium:nth-child(3) .car-card-image-wrap::after { animation-delay: 1.7s; }
+  .car-card-premium:nth-child(4) .car-card-image-wrap::after { animation-delay: 2.4s; }
+  .car-card-premium:nth-child(5) .car-card-image-wrap::after { animation-delay: 0.6s; }
+  .car-card-premium:nth-child(6) .car-card-image-wrap::after { animation-delay: 1.3s; }
+  .car-card-premium:nth-child(7) .car-card-image-wrap::after { animation-delay: 2.0s; }
+  .car-card-premium:nth-child(8) .car-card-image-wrap::after { animation-delay: 2.7s; }
+
+  /* Image rounded corners on mobile */
+  .car-card-image-wrap {
+    border-radius: 0.875rem 0.875rem 0 0;
+  }
+
+  /* ── Badges — glass-frost effect, always glowing ── */
+  .car-card-premium .premium-badge {
+    animation: badge-breathe 2.5s ease-in-out infinite;
+    border: 1px solid rgba(255,255,255,0.25);
+    font-size: 7.5px;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    padding: 3.5px 9px;
+    border-radius: 5px;
+    backdrop-filter: blur(8px) saturate(1.4);
+    -webkit-backdrop-filter: blur(8px) saturate(1.4);
+    box-shadow: 0 2px 8px -2px rgba(0,0,0,0.2);
+  }
+
+  .car-card-premium:nth-child(1) .premium-badge { animation-delay: 0s; }
+  .car-card-premium:nth-child(2) .premium-badge { animation-delay: 0.6s; }
+  .car-card-premium:nth-child(3) .premium-badge { animation-delay: 1.2s; }
+  .car-card-premium:nth-child(4) .premium-badge { animation-delay: 1.8s; }
+  .car-card-premium:nth-child(5) .premium-badge { animation-delay: 0.3s; }
+  .car-card-premium:nth-child(6) .premium-badge { animation-delay: 0.9s; }
+  .car-card-premium:nth-child(7) .premium-badge { animation-delay: 1.5s; }
+  .car-card-premium:nth-child(8) .premium-badge { animation-delay: 2.1s; }
+
+  /* ── Price — brand orange with warm glow ── */
+  .car-price-highlight {
+    color: #F59423 !important;
+    animation: price-gleam 4s ease-in-out infinite;
+    text-shadow:
+      0 0 8px rgba(245, 148, 35, 0.15),
+      0 1px 2px rgba(0,0,0,0.05);
+    position: relative;
+  }
+
+  /* Orange underline accent below price */
+  .car-price-highlight::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 60%;
+    height: 2px;
+    background: linear-gradient(90deg, rgba(245,148,35,0.5), rgba(251,191,36,0.3), transparent);
+    border-radius: 2px;
+  }
+
+  /* ── Spec chips — premium styled with gradient border ── */
+  .car-spec-chip {
+    border: 1px solid rgba(226, 232, 240, 0.85);
+    border-radius: 7px;
+    padding: 5px 7px;
+    background: linear-gradient(145deg, rgba(255,255,255,0.95), rgba(248,250,252,0.8));
+    box-shadow:
+      0 1px 4px -1px rgba(0,0,0,0.05),
+      inset 0 1px 0 rgba(255,255,255,0.7);
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* Left accent bar on each spec chip */
+  .car-spec-chip::before {
+    content: '';
+    position: absolute;
+    top: 15%;
+    bottom: 15%;
+    left: 0;
+    width: 2px;
+    background: linear-gradient(180deg, rgba(245, 148, 35, 0.5), rgba(251, 191, 36, 0.3));
+    border-radius: 2px;
+  }
+
+  /* Top gradient line on spec chip */
+  .car-spec-chip::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 10%;
+    right: 10%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(245, 148, 35, 0.2), transparent);
+  }
+
+  /* Tap on spec chip */
+  .car-spec-chip:active {
+    background: rgba(0, 0, 0, 0.05);
+    border-color: rgba(0, 0, 0, 0.18);
+    transform: scale(0.95);
+    transition: all 0.12s ease;
+  }
+
+  /* ── Card content bottom accent ── */
+  .car-card-glass > div:last-child {
+    position: relative;
+  }
+
+  /* ── Action buttons — premium mobile treatment ── */
+  .car-action-btn {
+    border-radius: 8px;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    position: relative;
+    overflow: hidden;
+    padding-top: 8px;
+    padding-bottom: 8px;
+  }
+
+  /* Subtle inner gradient sheen */
+  .car-action-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 50%;
+    background: linear-gradient(180deg, rgba(255,255,255,0.15), transparent);
+    pointer-events: none;
+    opacity: 1;
+    border-radius: 8px 8px 0 0;
+  }
+
+  /* Active (tap) state for buttons */
+  .car-action-btn:active {
+    transform: scale(0.93);
+    transition: transform 0.1s ease;
+    filter: brightness(0.92);
+  }
+
+  /* View button — gradient border with brand accent */
+  .car-action-btn[class*="border-primary"] {
+    border-color: rgba(0, 0, 0, 0.25);
+    background: linear-gradient(135deg, rgba(248,250,252,0.8), rgba(255,255,255,0.9));
+    color: #0f172a;
+  }
+
+  .car-action-btn[class*="border-primary"]:active {
+    border-color: rgba(0, 0, 0, 0.45);
+    background: linear-gradient(135deg, rgba(0,0,0,0.05), rgba(248,250,252,0.9));
+  }
+
+  /* WhatsApp button — deeper shadow on mobile */
+  .car-action-btn[class*="bg-[#25D366]"] {
+    box-shadow:
+      0 2px 8px -2px rgba(37, 211, 102, 0.3),
+      0 1px 3px rgba(0,0,0,0.08);
+  }
+
+  /* Top border accent on action row — richer gradient */
+  .car-action-row {
+    border-top: none;
+    padding-top: 10px;
+    margin-top: 8px;
+    position: relative;
+  }
+
+  .car-action-row::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 5%;
+    right: 5%;
+    height: 1.5px;
+    background: linear-gradient(90deg,
+      transparent,
+      rgba(245,148,35,0.12),
+      rgba(226,232,240,0.6),
+      rgba(245,148,35,0.25),
+      rgba(226,232,240,0.6),
+      rgba(245,148,35,0.12),
+      transparent
+    );
+    border-radius: 1px;
+  }
+
+  /* ── View Full Inventory button — premium mobile CTA ── */
+  .view-inventory-btn {
+    width: 100%;
+    padding: 16px 24px;
+    font-size: 15px;
+    letter-spacing: 0.04em;
+    border: none;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+    background-size: 200% 200%;
+    color: #ffffff !important;
+    box-shadow:
+      0 4px 20px -4px rgba(15, 23, 42, 0.35),
+      0 2px 8px -2px rgba(0, 0, 0, 0.12),
+      inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    animation: mobile-btn-gradient 4s ease infinite, mobile-btn-glow 3s ease-in-out infinite;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* Shimmer sweep across the button */
+  .view-inventory-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 60%;
+    height: 100%;
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(255, 255, 255, 0.08) 30%,
+      rgba(255, 255, 255, 0.15) 50%,
+      rgba(255, 255, 255, 0.08) 70%,
+      transparent 100%
+    );
+    animation: mobile-btn-shimmer 3.5s ease-in-out infinite;
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  /* Glow ring behind button */
+  .view-inventory-btn::after {
+    opacity: 0.5;
+    background: linear-gradient(135deg, rgba(15,23,42,0.3), rgba(30,41,59,0.4), rgba(15,23,42,0.3));
+    filter: blur(12px);
+    inset: -4px;
+    animation: mobile-btn-glow 3s ease-in-out infinite;
+  }
+
+  /* Tap state */
+  .view-inventory-btn:active {
+    transform: scale(0.97);
+    box-shadow:
+      0 2px 12px -2px rgba(15, 23, 42, 0.4),
+      inset 0 2px 4px rgba(0, 0, 0, 0.15);
+    transition: all 0.12s ease;
+  }
+
+  /* Force text white on mobile since bg is dark */
+  .view-inventory-btn span {
+    color: #ffffff;
+    position: relative;
+    z-index: 2;
+  }
+
+  /* ── Decorative orbs — tuned for mobile ── */
+  .inventory-section-orb {
+    filter: blur(50px);
+    opacity: 0.4;
+  }
+
+  /* ═══════════════════════════════════════════════
+     QUICK SEARCH — Mobile Premium Styles
+     ═══════════════════════════════════════════════ */
+
+  /* Container — subtle glass card feel */
+  .quick-search-mobile {
+    background: linear-gradient(145deg, rgba(255,255,255,0.6), rgba(248,250,252,0.4));
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(226, 232, 240, 0.5);
+    border-radius: 14px;
+    padding: 10px;
+    box-shadow:
+      0 2px 12px -3px rgba(0,0,0,0.06),
+      inset 0 1px 0 rgba(255,255,255,0.7);
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* Top gradient accent on container */
+  .quick-search-mobile::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 10%;
+    right: 10%;
+    height: 1.5px;
+    background: linear-gradient(90deg, transparent, rgba(245,148,35,0.35), rgba(251,191,36,0.5), rgba(245,148,35,0.35), transparent);
+    border-radius: 1px;
+  }
+
+  /* Select inputs — premium glass effect */
+  .quick-search-select {
+    background: linear-gradient(155deg, rgba(255,255,255,0.95), rgba(248,250,252,0.85)) !important;
+    border: 1px solid rgba(226, 232, 240, 0.7) !important;
+    border-radius: 10px !important;
+    box-shadow:
+      0 1px 4px -1px rgba(0,0,0,0.04),
+      inset 0 1px 0 rgba(255,255,255,0.8) !important;
+    transition: all 0.25s ease !important;
+  }
+
+  .quick-search-select:focus {
+    border-color: rgba(245, 148, 35, 0.4) !important;
+    box-shadow:
+      0 0 0 3px rgba(245, 148, 35, 0.08),
+      0 2px 8px -2px rgba(245, 148, 35, 0.12),
+      inset 0 1px 0 rgba(255,255,255,0.9) !important;
+  }
+
+  .quick-search-select:active {
+    transform: scale(0.97);
+    background: linear-gradient(155deg, rgba(255,251,243,0.95), rgba(255,248,235,0.9)) !important;
+  }
+
+  /* Search button — premium with animated shine */
+  .quick-search-btn {
+    border-radius: 10px !important;
+    font-weight: 800 !important;
+    letter-spacing: 0.05em;
+    position: relative;
+    overflow: hidden;
+    box-shadow:
+      0 4px 15px -3px rgba(245, 148, 35, 0.35),
+      0 2px 6px -2px rgba(0,0,0,0.1),
+      inset 0 1px 0 rgba(255,255,255,0.2) !important;
+  }
+
+  /* Inner shine gradient */
+  .quick-search-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 50%;
+    background: linear-gradient(180deg, rgba(255,255,255,0.18), transparent);
+    pointer-events: none;
+    border-radius: 10px 10px 0 0;
+  }
+
+  /* Shimmer sweep on button */
+  .quick-search-btn::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      115deg,
+      transparent 30%,
+      rgba(255,255,255,0.2) 45%,
+      rgba(255,255,255,0.35) 50%,
+      rgba(255,255,255,0.2) 55%,
+      transparent 70%
+    );
+    animation: mobile-shimmer-auto 5s ease-in-out infinite;
+    pointer-events: none;
+  }
+
+  .quick-search-btn:active {
+    transform: scale(0.96) !important;
+    filter: brightness(0.93);
+    box-shadow:
+      0 2px 8px -2px rgba(245, 148, 35, 0.3),
+      inset 0 1px 0 rgba(255,255,255,0.15) !important;
+  }
+}

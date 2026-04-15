@@ -53,10 +53,10 @@ export default function AboutPage() {
       <section className="bg-primary pt-24 pb-40 px-4 text-center">
         <div className="max-w-4xl mx-auto">
           <h1 className="font-heading font-extrabold text-[40px] md:text-[56px] text-white leading-[1.1] mb-6 tracking-tight">
-            Driving Trust in Surat<br className="hidden md:block" /> Since 2010
+            ૨૦૧૦ થી   <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-orange via-amber-400 to-yellow-500">સુરતમાં વિશ્વાસ</span> <br className="hidden md:block" />પ્રસ્થાપિત કરી રહ્યા છીએ
           </h1>
           <p className="font-body text-lg md:text-xl text-blue-100/90 font-medium max-w-2xl mx-auto">
-            Varachha's top destination for premium, verified pre-owned cars.
+            પ્રીમિયમ, પ્રમાણિત પ્રી-ઓન્ડ કાર્સ માટે વરાછાનું શ્રેષ્ઠ સ્થળ.
           </p>
         </div>
       </section>
@@ -97,14 +97,14 @@ export default function AboutPage() {
           </div>
           <div className="flex flex-col">
             <h2 className="font-heading font-extrabold text-3xl md:text-4xl text-text mb-6 leading-tight">
-              More Than Just a Car Bazar
+              માત્ર એક કાર બજારથી ઘણું વિશેષ
             </h2>
             <div className="font-body text-base text-text-muted space-y-6 leading-relaxed mb-10">
               <p>
-                At Sadguru Car Melo, we believe that buying a pre-owned vehicle should be as prestigious as buying a new one. Founded in 2010, we have built our reputation on the pillars of transparency and absolute quality.
+                સદગુરુ કાર મેળો ખાતે, અમારું માનવું છે કે પ્રી-ઓન્ડ વાહન ખરીદવું એ નવી કાર ખરીદવા જેટલું જ ગૌરવપૂર્ણ હોવું જોઈએ. ૨૦૧૦ માં સ્થપાયેલ, અમે પારદર્શિતા અને શ્રેષ્ઠ ગુણવત્તાના સ્તંભો પર અમારી પ્રતિષ્ઠાનું નિર્માણ કર્યું છે.
               </p>
               <p>
-                Every vehicle at our showroom undergoes a rigorous vetting process. Our focus remains exclusively on <span className="font-bold text-text">non-accidental, RTO-verified vehicles</span>. We are proud partners of Trilok Car Bazar, ensuring a legacy of trust that the people of Varachha have relied on for over a decade.
+                અમારા શોરૂમમાં રહેલું દરેક વાહન કડક ચકાસણી પ્રક્રિયામાંથી પસાર થાય છે. અમારું ધ્યાન સંપૂર્ણપણે <span className="font-bold text-text">નોન-એક્સિડેન્ટલ અને RTO-પ્રમાણિત</span>વાહનો પર જ કેન્દ્રિત રહે છે. અમે 'ત્રિલોક કાર બજાર'ના ગૌરવપૂર્ણ ભાગીદાર છીએ, જે વિશ્વાસનો એવો વારસો સુનિશ્ચિત કરે છે જેના પર વરાછાના લોકોએ એક દાયકાથી વધુ સમયથી ભરોસો મૂક્યો છે.
               </p>
             </div>
             <button className="bg-primary text-white font-heading font-bold text-sm px-8 py-4 rounded-xl shadow-lg hover:bg-primary-hover hover:shadow-xl transition-all w-max hover:-translate-y-0.5">

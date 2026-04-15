@@ -9,14 +9,14 @@ const router = express.Router();
 // @access  Public
 router.post('/', async (req, res, next) => {
   try {
-    const { name, email, phone, message } = req.body;
+    const { name, email, phone, message, type } = req.body;
     
     // Basic validation
-    if (!name || !phone || !message) {
-      return res.status(400).json({ success: false, message: 'Name, phone, and message are required' });
+    if (!name || (!phone && !email) || !message) {
+      return res.status(400).json({ success: false, message: 'Name, contact info, and message are required' });
     }
 
-    const newMessage = await Message.create({ name, email, phone, message });
+    const newMessage = await Message.create({ name, email, phone, message, type });
     res.status(201).json({ success: true, data: newMessage });
   } catch (error) {
     next(error);

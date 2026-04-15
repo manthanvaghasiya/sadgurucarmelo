@@ -16,6 +16,7 @@ import WhyChooseUs from '../components/WhyChooseUs';
 
 export default function Home() {
   const { cars, isLoading } = useCars();
+  const navigate = useNavigate();
 
   return (
     <div className="min-h-screen flex flex-col relative bg-gradient-to-b from-slate-50 via-white to-slate-50">
@@ -33,12 +34,16 @@ export default function Home() {
         {/* 1. Hero Section */}
         <HeroSection />
 
-        {/* 3. Inventory Grid Section (Removed bg-gray-50) */}
-        <section className="py-20 px-4 bg-transparent">
-          <div className="max-w-7xl mx-auto">
+        {/* 3. Inventory Grid Section — Premium Enhanced */}
+        <section className="inventory-grid-section py-20 px-4 bg-transparent overflow-hidden">
+          {/* Decorative ambient orbs */}
+          <div className="inventory-section-orb w-72 h-72 bg-brand-orange/10 -top-20 -left-36" />
+          <div className="inventory-section-orb w-56 h-56 bg-amber-300/10 -bottom-16 -right-24" style={{ animationDelay: '3s' }} />
+
+          <div className="max-w-7xl mx-auto relative">
             <div className="flex flex-col xl:flex-row xl:items-center justify-between mb-10 gap-6">
               <div className="xl:flex-1 pr-4">
-                <h2 className="font-heading text-3xl md:text-4xl font-extrabold text-primary mb-2">Explore Our <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-orange via-amber-400 to-yellow-500">Verified Vehicles</span></h2>
+                <h2 className="font-heading text-3xl md:text-4xl font-extrabold text-primary mb-2">Explore Our <span className="inventory-heading-gradient text-transparent bg-clip-text bg-gradient-to-r from-brand-orange via-amber-400 to-yellow-500">Verified Vehicles</span></h2>
                 <p className="font-body text-text-muted">Quality pre-owned vehicles with complete service history and multi-point inspection.</p>
               </div>
 
@@ -61,29 +66,28 @@ export default function Home() {
                 </div>
               ) : (
                 cars.filter(car => car.isFeaturedOnHome).slice(0, 8).map((car) => (
-                  <CarCard
-                    key={car._id}
-                    id={car._id}
-                    image={car.image}
-                    title={`${car.make} ${car.model} (${car.year})`}
-                    price={car.price >= 100000 ? `₹${(car.price / 100000).toFixed(2)} Lakhs` : `₹${(car.price || 0).toLocaleString('en-IN')}`}
-                    badges={car.badges || []}
-                    fuel={car.fuelType}
-                    transmission={car.transmission}
-                    owner={car.owner || '1st Owner'}
-                    kms={`${(car.kms || 0).toLocaleString('en-IN')} KM`}
-                  />
+                  <div key={car._id} className="car-card-premium">
+                    <CarCard
+                      id={car._id}
+                      image={car.image}
+                      title={`${car.make} ${car.model} (${car.year})`}
+                      price={car.price >= 100000 ? `₹${(car.price / 100000).toFixed(2)} Lakhs` : `₹${(car.price || 0).toLocaleString('en-IN')}`}
+                      badges={car.badges || []}
+                      fuel={car.fuelType}
+                      transmission={car.transmission}
+                      owner={car.owner || '1st Owner'}
+                      kms={`${(car.kms || 0).toLocaleString('en-IN')} KM`}
+                    />
+                  </div>
                 ))
               )}
             </div>
 
-
-
-
-            <div className="mt-12 text-center">
+            <div className="mt-8 sm:mt-12 text-center px-2 sm:px-0">
               <motion.button
                 whileHover="hover"
-                className="group relative inline-flex items-center gap-2 overflow-hidden px-10 py-4 rounded-full border-2 border-primary text-primary font-heading font-bold hover:text-white transition-colors duration-300"
+                onClick={() => navigate('/inventory')}
+                className="view-inventory-btn group relative inline-flex items-center justify-center gap-2 overflow-hidden px-10 py-4 rounded-full border-2 border-primary text-primary font-heading font-bold hover:text-white transition-colors duration-300"
               >
                 {/* Background Slide Effect */}
                 <motion.span
@@ -110,7 +114,6 @@ export default function Home() {
                 </motion.span>
               </motion.button>
             </div>
-
 
           </div>
         </section>

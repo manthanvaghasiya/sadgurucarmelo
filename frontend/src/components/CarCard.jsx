@@ -23,11 +23,11 @@ export default function CarCard({
   return (
     <div
       onClick={handleCardClick}
-      className="bg-surface rounded-2xl border border-gray-100 overflow-hidden group hover:shadow-lg transition-all duration-300 flex flex-col h-full cursor-pointer"
+      className="car-card-glass rounded-2xl overflow-hidden group hover:shadow-lg transition-all duration-300 flex flex-col h-full cursor-pointer"
     >
 
       {/* Image Container with Badges */}
-      <div className="relative aspect-[4/3] overflow-hidden bg-gray-100">
+      <div className="car-card-image-wrap relative aspect-[4/3] overflow-hidden bg-gray-100">
         <img
           src={image}
           alt={title}
@@ -39,7 +39,7 @@ export default function CarCard({
           {badges.map((badge, index) => (
             <span
               key={index}
-              className={`text-[10px] font-heading font-extrabold uppercase tracking-widest px-2.5 py-1 rounded shadow-sm ${badge === 'CERTIFIED' ? 'bg-[#10b981] text-white' : 'bg-primary text-white'
+              className={`premium-badge text-[10px] font-heading font-extrabold uppercase tracking-widest px-2.5 py-1 rounded shadow-sm ${badge === 'CERTIFIED' ? 'bg-[#10b981] text-white' : 'bg-primary text-white'
                 }`}
             >
               {badge}
@@ -56,37 +56,37 @@ export default function CarCard({
           <h3 className="font-heading font-bold text-sm sm:text-lg text-text leading-tight mb-1 line-clamp-1">
             {title}
           </h3>
-          <p className="font-heading font-extrabold text-lg sm:text-2xl text-[#10b981] sm:text-accent">
+          <p className="car-price-highlight font-heading font-extrabold text-lg sm:text-2xl text-accent transition-all duration-300">
             {price}
           </p>
         </div>
 
         {/* Specs Grid */}
         <div className="grid grid-cols-2 gap-y-2 sm:gap-y-3 gap-x-1 sm:gap-x-2 mb-4 sm:mb-6 font-body text-[10px] sm:text-xs text-text-muted mt-auto">
-          <div className="flex items-center gap-1 sm:gap-1.5 bg-gray-50 p-1 sm:p-0 rounded sm:bg-transparent">
+          <div className="car-spec-chip flex items-center gap-1 sm:gap-1.5 bg-gray-50 p-1 sm:p-1.5 rounded-md sm:bg-gray-50/80">
             <Fuel className="w-3 h-3 sm:w-4 sm:h-4 text-primary" />
             <span className="font-semibold truncate">{fuel}</span>
           </div>
-          <div className="flex items-center gap-1 sm:gap-1.5 bg-gray-50 p-1 sm:p-0 rounded sm:bg-transparent">
+          <div className="car-spec-chip flex items-center gap-1 sm:gap-1.5 bg-gray-50 p-1 sm:p-1.5 rounded-md sm:bg-gray-50/80">
             <Settings2 className="w-3 h-3 sm:w-4 sm:h-4 text-primary" />
             <span className="font-semibold truncate">{transmission}</span>
           </div>
-          <div className="flex items-center gap-1 sm:gap-1.5 bg-gray-50 p-1 sm:p-0 rounded sm:bg-transparent">
+          <div className="car-spec-chip flex items-center gap-1 sm:gap-1.5 bg-gray-50 p-1 sm:p-1.5 rounded-md sm:bg-gray-50/80">
             <Gauge className="w-3 h-3 sm:w-4 sm:h-4 text-primary" />
             <span className="font-semibold truncate">{kms}</span>
           </div>
-          <div className="flex items-center gap-1 sm:gap-1.5 bg-gray-50 p-1 sm:p-0 rounded sm:bg-transparent">
+          <div className="car-spec-chip flex items-center gap-1 sm:gap-1.5 bg-gray-50 p-1 sm:p-1.5 rounded-md sm:bg-gray-50/80">
             <User className="w-3 h-3 sm:w-4 sm:h-4 text-primary" />
             <span className="font-semibold truncate">{owner}</span>
           </div>
         </div>
 
         {/* Action Buttons */}
-        <div className="flex flex-row gap-2 mt-auto pt-3 sm:pt-4 border-t border-gray-100">
+        <div className="car-action-row flex flex-row gap-2 mt-auto pt-3 sm:pt-4 border-t border-gray-100">
           <Link
             to={`/car-details/${id}`}
             onClick={(e) => e.stopPropagation()}
-            className="flex-1 flex items-center justify-center gap-1 py-1.5 sm:py-2.5 rounded-lg border border-primary text-primary font-body font-bold text-[9px] sm:text-xs hover:bg-primary/5 transition-colors"
+            className="car-action-btn flex-1 flex items-center justify-center gap-1 py-1.5 sm:py-2.5 rounded-lg border border-primary text-primary font-body font-bold text-[9px] sm:text-xs hover:bg-primary hover:text-white transition-all duration-300"
           >
             <Eye className="w-3 h-3 sm:w-4 sm:h-4" /> View
           </Link>
@@ -95,7 +95,7 @@ export default function CarCard({
             target="_blank"
             rel="noopener noreferrer"
             onClick={(e) => e.stopPropagation()}
-            className="flex-1 flex items-center justify-center gap-1 py-1.5 sm:py-2.5 rounded-lg bg-[#25D366] text-white font-body font-bold text-[9px] sm:text-xs hover:bg-[#20bd5a] transition-all shadow-md shadow-green-500/10 active:scale-95 uppercase"
+            className="car-action-btn flex-1 flex items-center justify-center gap-1 py-1.5 sm:py-2.5 rounded-lg bg-[#25D366] text-white font-body font-bold text-[9px] sm:text-xs hover:bg-[#20bd5a] transition-all shadow-md shadow-green-500/10 active:scale-95 uppercase"
           >
             <MessageCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4 fill-current" /> WHATSAPP
           </a>

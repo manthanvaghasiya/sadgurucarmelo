@@ -22,6 +22,11 @@ const messageSchema = new mongoose.Schema(
       enum: ['Unread', 'Read'],
       default: 'Unread',
     },
+    type: {
+      type: String,
+      enum: ['Contact Us', 'Notify'],
+      default: 'Contact Us',
+    },
   },
   { timestamps: true }
 );
