@@ -20,7 +20,7 @@ import {
 import { useCars } from '../../context/CarContext';
 import toast from 'react-hot-toast';
 
-const ITEMS_PER_PAGE = 10;
+
 
 // Status badge style map
 const statusConfig = {
@@ -48,8 +48,8 @@ export default function Inventory() {
   const { cars, deleteCar, toggleFeatured } = useCars();
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState('All');
-  const [currentPage, setCurrentPage] = useState(1);
+  const [statusFilter, setStatusFilter] = useState('Available');
+
   const [sortField, setSortField] = useState(null);
   const [sortDir, setSortDir] = useState('asc');
   const [deleteTarget, setDeleteTarget] = useState(null);
@@ -57,9 +57,9 @@ export default function Inventory() {
   // Map backend cars to the local unified format dynamically
   const allCars = useMemo(() => {
     return cars
-      .filter((c) => c.status !== 'Coming Soon')
       .map((c) => ({
         id: c._id || c.id,
+        registration: c.registration || 'N/A',
         image: c.image || 'https://placehold.co/120x80/e2e8f0/64748b?text=Car',
         title: `${c.make} ${c.model} (${c.year})`,
         make: c.make || '',
@@ -105,23 +105,14 @@ export default function Inventory() {
     return list;
   }, [allCars, searchQuery, statusFilter, sortField, sortDir]);
 
-  // ── Pagination ──
-  const totalPages = Math.max(1, Math.ceil(filtered.length / ITEMS_PER_PAGE));
-  const paginated = filtered.slice(
-    (currentPage - 1) * ITEMS_PER_PAGE,
-    currentPage * ITEMS_PER_PAGE
-  );
-  const showingFrom = filtered.length === 0 ? 0 : (currentPage - 1) * ITEMS_PER_PAGE + 1;
-  const showingTo = Math.min(currentPage * ITEMS_PER_PAGE, filtered.length);
 
-  // Reset to page 1 when filters change
+
+  // Reset filters change
   const handleSearch = (v) => {
     setSearchQuery(v);
-    setCurrentPage(1);
   };
   const handleStatusFilter = (v) => {
     setStatusFilter(v);
-    setCurrentPage(1);
   };
 
   const toggleSort = (field) => {
@@ -135,7 +126,7 @@ export default function Inventory() {
 
   // Status counts for filter pills
   const counts = useMemo(() => {
-    const c = { All: allCars.length, Available: 0, Sold: 0 };
+    const c = { All: allCars.length, Available: 0, Sold: 0, 'Coming Soon': 0 };
     allCars.forEach((car) => {
       if (c[car.status] !== undefined) c[car.status]++;
     });
@@ -261,6 +252,7 @@ export default function Inventory() {
             <option value="All">All Status</option>
             <option value="Available">Available</option>
             <option value="Sold">Sold</option>
+            <option value="Coming Soon">Coming Soon</option>
           </select>
         </div>
       </div>
@@ -298,7 +290,7 @@ export default function Inventory() {
               </tr>
             </thead>
             <tbody>
-              {paginated.length === 0 ? (
+              {filtered.length === 0 ? (
                 <tr>
                   <td colSpan={5} className="text-center py-16">
                     <div className="flex flex-col items-center gap-3">
@@ -315,7 +307,7 @@ export default function Inventory() {
                   </td>
                 </tr>
               ) : (
-                paginated.map((car) => {
+                filtered.map((car) => {
                   const cfg = statusConfig[car.status] || statusConfig['Available'];
                   return (
                     <tr
@@ -346,7 +338,7 @@ export default function Inventory() {
                               </span>
                               <span className="w-1 h-1 rounded-full bg-gray-300" />
                               <span className="font-body text-[11px] text-text-muted/60 font-mono">
-                                {car.id}
+                                {car.registration}
                               </span>
                             </div>
                           </div>
@@ -420,7 +412,7 @@ export default function Inventory() {
 
         {/* ── Mobile Card List ── */}
         <div className="md:hidden divide-y divide-gray-50">
-          {paginated.length === 0 ? (
+          {filtered.length === 0 ? (
             <div className="flex flex-col items-center gap-3 py-16">
               <div className="w-14 h-14 bg-background rounded-2xl flex items-center justify-center">
                 <Car className="w-7 h-7 text-text-muted/40" />
@@ -430,7 +422,7 @@ export default function Inventory() {
               </p>
             </div>
           ) : (
-            paginated.map((car) => {
+            filtered.map((car) => {
               const cfg = statusConfig[car.status] || statusConfig['Available'];
               return (
                 <div key={car.id} className="p-4 hover:bg-background/40 transition-colors">
@@ -499,54 +491,6 @@ export default function Inventory() {
           )}
         </div>
 
-        {/* ═══════════════════════════════════════════════
-            Pagination Footer
-           ═══════════════════════════════════════════════ */}
-        {filtered.length > 0 && (
-          <div className="flex flex-col sm:flex-row items-center justify-between px-6 py-4 border-t border-gray-100 gap-4">
-            <p className="font-body text-sm text-text-muted">
-              Showing{' '}
-              <span className="font-semibold text-text">{showingFrom}</span> to{' '}
-              <span className="font-semibold text-text">{showingTo}</span> of{' '}
-              <span className="font-semibold text-text">{filtered.length}</span>{' '}
-              entries
-            </p>
-
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                disabled={currentPage === 1}
-                className="flex items-center gap-1 px-3.5 py-2 bg-background rounded-lg font-body text-sm font-semibold text-text-muted hover:text-text transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-              >
-                <ChevronLeft className="w-4 h-4" />
-                Previous
-              </button>
-
-              {/* Page Number Buttons */}
-              {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                <button
-                  key={page}
-                  onClick={() => setCurrentPage(page)}
-                  className={`w-9 h-9 rounded-lg font-body text-sm font-bold flex items-center justify-center transition-colors ${page === currentPage
-                      ? 'bg-primary text-white shadow-sm shadow-primary/20'
-                      : 'bg-background text-text-muted hover:text-text'
-                    }`}
-                >
-                  {page}
-                </button>
-              ))}
-
-              <button
-                onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-                disabled={currentPage === totalPages}
-                className="flex items-center gap-1 px-3.5 py-2 bg-background rounded-lg font-body text-sm font-semibold text-text-muted hover:text-text transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-              >
-                Next
-                <ChevronRight className="w-4 h-4" />
-              </button>
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );

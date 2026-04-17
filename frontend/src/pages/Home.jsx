@@ -65,7 +65,7 @@ export default function Home() {
                   <p className="font-body text-text-muted">Check back soon for the latest arrivals!</p>
                 </div>
               ) : (
-                cars.filter(car => car.isFeaturedOnHome).slice(0, 8).map((car) => (
+                cars.filter(car => car.isFeaturedOnHome && car.status === 'Available').slice(0, 8).map((car) => (
                   <div key={car._id} className="car-card-premium">
                     <CarCard
                       id={car._id}

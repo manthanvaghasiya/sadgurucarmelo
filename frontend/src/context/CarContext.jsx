@@ -13,7 +13,7 @@ export function CarProvider({ children }) {
     setIsLoading(true);
     setError(null);
     try {
-      const response = await axiosInstance.get('/cars');
+      const response = await axiosInstance.get('/cars?limit=1000');
       setCars(response.data.data || response.data);
     } catch (err) {
       setError(err.response?.data?.message || err.message || 'Failed to fetch cars');
