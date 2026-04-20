@@ -87,13 +87,13 @@ export default function WhyChooseUs() {
                         className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-orange-50 border border-orange-100 mb-6 shadow-sm"
                     >
                         <Shield className="w-3.5 h-3.5 text-brand-orange" />
-                        <span className="text-brand-orange text-xs font-bold tracking-[0.15em] uppercase">Our Promise</span>
+                        <span className="text-brand-orange text-xs font-bold tracking-[0.15em] uppercase">અમારું Promise</span>
                     </motion.div>
-                    <h2 className="font-heading text-3xl md:text-5xl font-extrabold text-slate-900 mb-6">
-                        Why <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-orange to-amber-500">Choose Us</span>?
+                    <h2 className="font-heading text-3xl md:text-5xl font-bold text-slate-900 mb-6 leading-tight">
+                        અમને શા માટે <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-orange to-amber-500">Choose</span> કરશો?
                     </h2>
-                    <p className="font-body text-slate-600 text-lg max-w-xl mx-auto">
-                        Trusted by hundreds of families in Surat for a seamless car experience.
+                    <p className="font-body text-slate-600 text-lg max-w-xl mx-auto leading-relaxed">
+                        સુરતના હજારો પરિવારોનો અતૂટ વિશ્વાસ. <span className="font-bold text-slate-800">Premium Car</span> ખરીદવાનો સુરક્ષિત અને સરળ અનુભવ.
                     </p>
                 </motion.div>
 
@@ -119,9 +119,9 @@ export default function WhyChooseUs() {
                             <div className="absolute inset-0 rounded-3xl border border-blue-200 border-dashed animate-[spin_8s_linear_infinite]" />
                             <CheckCircle className="w-11 h-11 text-blue-500 relative z-10" />
                         </motion.div>
-                        <h3 className="font-heading text-xl font-bold text-slate-900 mb-3">Certified & Tested Cars</h3>
-                        <p className="font-body text-slate-600 text-sm leading-relaxed max-w-xs">
-                            Every vehicle undergoes a 120+ point inspection for your peace of mind.
+                        <h3 className="font-heading text-xl font-bold text-slate-900 mb-3">Certified અને 100% Tested Cars</h3>
+                        <p className="font-body text-slate-600 text-[15px] leading-relaxed max-w-xs">
+                            તમારી સુરક્ષા માટે દરેક <span className="font-semibold text-brand-orange">Car</span> નું 120+ પોઈન્ટનું કડક <span className="font-semibold text-brand-orange">Inspection</span> કરવામાં આવે છે.
                         </p>
                     </motion.div>
 
@@ -137,9 +137,9 @@ export default function WhyChooseUs() {
                             <div className="absolute inset-0 rounded-3xl border border-emerald-200 border-dashed animate-[spin_10s_linear_infinite_reverse]" />
                             <Landmark className="w-11 h-11 text-emerald-500 relative z-10" />
                         </motion.div>
-                        <h3 className="font-heading text-xl font-bold text-slate-900 mb-3">Easy Loan Assistance</h3>
-                        <p className="font-body text-slate-600 text-sm leading-relaxed max-w-xs">
-                            Get quick approval and flexible EMI options from top banks.
+                        <h3 className="font-heading text-xl font-bold text-slate-900 mb-3">ઝડપી Loan અને Finance</h3>
+                        <p className="font-body text-slate-600 text-[15px] leading-relaxed max-w-xs">
+                            <span className="font-semibold text-brand-orange">Top Banks</span> માંથી સરળ <span className="font-semibold text-brand-orange">EMI</span> અને 100% <span className="font-semibold text-brand-orange">Quick Approval</span> ની ગેરંટી.
                         </p>
                     </motion.div>
 
@@ -155,9 +155,9 @@ export default function WhyChooseUs() {
                             <div className="absolute inset-0 rounded-3xl border border-purple-200 border-dashed animate-[spin_12s_linear_infinite]" />
                             <Headphones className="w-11 h-11 text-purple-500 relative z-10" />
                         </motion.div>
-                        <h3 className="font-heading text-xl font-bold text-slate-900 mb-3">Local Surat Support</h3>
-                        <p className="font-body text-slate-600 text-sm leading-relaxed max-w-xs">
-                            Dedicated local team providing post-purchase assistance and service.
+                        <h3 className="font-heading text-xl font-bold text-slate-900 mb-3">સુરતની શ્રેષ્ઠ Local Support</h3>
+                        <p className="font-body text-slate-600 text-[15px] leading-relaxed max-w-xs">
+                            કાર ખરીદ્યા પછી પણ <span className="font-semibold text-brand-orange">Service</span> અને <span className="font-semibold text-brand-orange">Support</span> માટે હંમેશા હાજર.
                         </p>
                     </motion.div>
                 </motion.div>

@@ -182,7 +182,7 @@ export default function GoogleReviews() {
                 <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05" />
                 <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335" />
               </svg>
-              <h2 className="font-heading font-extrabold text-3xl md:text-4xl text-text">
+              <h2 className="font-heading font-bold text-3xl md:text-4xl text-text">
                 Google Reviews
               </h2>
             </div>
@@ -193,7 +193,7 @@ export default function GoogleReviews() {
 
           <div className="flex items-center gap-5 bg-white rounded-2xl px-8 py-5 shadow-sm border border-gray-100 shrink-0">
             <div className="text-center">
-              <span className="font-heading text-4xl font-extrabold text-text">4.8</span>
+              <span className="font-heading text-4xl font-bold text-text">4.8</span>
               <div className="flex items-center gap-0.5 mt-1">
                 {[...Array(5)].map((_, i) => (
                   <Star key={i} className="w-4 h-4 fill-yellow-400 text-yellow-400" />

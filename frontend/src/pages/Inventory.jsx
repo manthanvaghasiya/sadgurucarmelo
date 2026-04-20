@@ -12,25 +12,30 @@ export default function Inventory() {
 
   const { cars } = useCars();
 
-  const availableBrands = useMemo(() => {
-    return [...new Set(cars.map(c => c.make))].filter(Boolean).sort();
+  // Only use 'Available' cars for filter options — exclude 'Coming Soon', 'Sold', etc.
+  const availableCars = useMemo(() => {
+    return cars.filter(c => c.status === 'Available');
   }, [cars]);
+
+  const availableBrands = useMemo(() => {
+    return [...new Set(availableCars.map(c => c.make))].filter(Boolean).sort();
+  }, [availableCars]);
 
   const availableFuels = useMemo(() => {
-    return [...new Set(cars.map(c => c.fuelType))].filter(Boolean).sort();
-  }, [cars]);
+    return [...new Set(availableCars.map(c => c.fuelType))].filter(Boolean).sort();
+  }, [availableCars]);
 
   const availableBodyTypes = useMemo(() => {
-    return [...new Set(cars.map(c => c.bodyType))].filter(Boolean).sort();
-  }, [cars]);
+    return [...new Set(availableCars.map(c => c.bodyType))].filter(Boolean).sort();
+  }, [availableCars]);
 
   const priceRangeBounds = useMemo(() => {
-    if (!cars || cars.length === 0) return [0, 5000000];
-    const prices = cars.map(c => Number(c.price)).filter(p => !isNaN(p));
+    if (!availableCars || availableCars.length === 0) return [0, 5000000];
+    const prices = availableCars.map(c => Number(c.price)).filter(p => !isNaN(p));
     // Provide a default fallback if price maps fail
     if (prices.length === 0) return [0, 5000000];
     return [Math.min(...prices), Math.max(...prices)];
-  }, [cars]);
+  }, [availableCars]);
 
   // Initialize filters from URL query params (from Home page search)
   const [filters, setFilters] = useState(() => {
@@ -100,7 +105,7 @@ export default function Inventory() {
         {/* Page Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-6 sm:mb-10 lg:pt-0 pt-16">
           <div className="flex flex-col">
-            <h1 className="font-heading font-extrabold text-[36px] sm:text-[42px] text-primary leading-tight tracking-tight">
+            <h1 className="font-heading font-bold text-[36px] sm:text-[42px] text-primary leading-tight tracking-tight">
               Explore Verified Cars
             </h1>
             <div className="flex items-center gap-3 mt-2 lg:hidden">

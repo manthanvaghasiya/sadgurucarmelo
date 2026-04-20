@@ -43,7 +43,7 @@ export default function Home() {
           <div className="max-w-7xl mx-auto relative">
             <div className="flex flex-col xl:flex-row xl:items-center justify-between mb-10 gap-6">
               <div className="xl:flex-1 pr-4">
-                <h2 className="font-heading text-3xl md:text-4xl font-extrabold text-primary mb-2">Explore Our <span className="inventory-heading-gradient text-transparent bg-clip-text bg-gradient-to-r from-brand-orange via-amber-400 to-yellow-500">Verified Vehicles</span></h2>
+                <h2 className="font-heading text-3xl md:text-4xl font-bold text-primary mb-2">Explore Our <span className="inventory-heading-gradient text-transparent bg-clip-text bg-gradient-to-r from-brand-orange via-amber-400 to-yellow-500">Verified Vehicles</span></h2>
                 <p className="font-body text-text-muted">Quality pre-owned vehicles with complete service history and multi-point inspection.</p>
               </div>
 
@@ -125,7 +125,7 @@ export default function Home() {
               <span className="text-sm font-heading font-bold text-[#d1108a] uppercase tracking-widest mb-4 inline-block">
                 પ્રીમિયમ ડીલરશીપ સેવાઓ
               </span>
-              <h2 className="font-heading text-4xl md:text-5xl font-extrabold text-[#1a2b3c] mb-6 leading-tight">
+              <h2 className="font-heading text-4xl md:text-5xl font-bold text-[#1a2b3c] mb-6 leading-tight">
                 સુરતમાં <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-orange via-amber-400 to-yellow-500">ખરીદ-વેચાણ અને એક્સચેન્જ</span> માટેનું સંપૂર્ણ સોલ્યુશન
               </h2>
               <p className="font-body text-text-muted text-lg leading-relaxed">

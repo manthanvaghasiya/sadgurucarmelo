@@ -67,9 +67,8 @@ export default function QuickSearch({ compact = false }) {
   };
 
   return (
-    <div className={`w-full mx-auto relative z-20 ${
-      compact ? 'p-0 bg-transparent quick-search-mobile' : 'bg-white border border-gray-200 shadow-xl rounded-[2rem] p-6 max-w-6xl'
-    }`}>
+    <div className={`w-full mx-auto relative z-20 ${compact ? 'p-0 bg-transparent quick-search-mobile' : 'bg-white border border-gray-200 shadow-xl rounded-[2rem] p-6 max-w-6xl'
+      }`}>
       {compact ? (
         /* ═══ COMPACT MODE — Mobile-optimized layout ═══ */
         <div className="flex flex-col gap-2 sm:gap-3">
@@ -139,7 +138,7 @@ export default function QuickSearch({ compact = false }) {
             className="quick-search-btn w-full h-10 sm:h-11 bg-brand-orange hover:bg-[#e68415] text-white font-bold flex items-center justify-center gap-2 transition-all duration-300 active:scale-[0.97] rounded-lg sm:rounded-xl text-sm shadow-[0_4px_15px_rgba(245,148,35,0.3)]"
           >
             <Search className="w-4 h-4" />
-            <span className="tracking-wider uppercase text-xs sm:text-sm font-extrabold">Search Cars</span>
+            <span className="tracking-wider uppercase text-xs sm:text-sm font-bold">Search Cars</span>
           </button>
         </div>
       ) : (

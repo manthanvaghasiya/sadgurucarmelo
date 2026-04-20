@@ -55,7 +55,7 @@ export default function Messages() {
   return (
     <div className="p-6 md:p-10 max-w-7xl mx-auto space-y-8 animate-fade-in">
       <div className="flex flex-col gap-2">
-        <h1 className="font-heading text-3xl md:text-4xl font-extrabold text-text tracking-tight">
+        <h1 className="font-heading text-3xl md:text-4xl font-bold text-text tracking-tight">
           Inbox
         </h1>
         <p className="font-body text-text-muted">
@@ -68,11 +68,10 @@ export default function Messages() {
           <button
             key={type}
             onClick={() => setFilterType(type)}
-            className={`pb-2 px-1 text-sm font-semibold transition-colors border-b-2 ${
-              filterType === type 
-                ? 'border-primary text-primary' 
+            className={`pb-2 px-1 text-sm font-semibold transition-colors border-b-2 ${filterType === type
+                ? 'border-primary text-primary'
                 : 'border-transparent text-gray-500 hover:text-gray-700'
-            }`}
+              }`}
           >
             {type}
           </button>
@@ -89,8 +88,8 @@ export default function Messages() {
         ) : (
           <div className="divide-y divide-gray-100">
             {messages.filter(m => filterType === 'All' || m.type === filterType || (!m.type && filterType === 'Contact Us')).map((msg) => (
-              <div 
-                key={msg._id} 
+              <div
+                key={msg._id}
                 className={`p-6 transition-colors hover:bg-gray-50/50 flex flex-col md:flex-row gap-6 ${msg.status === 'Unread' ? 'bg-primary/5' : ''}`}
               >
                 {/* Left: Message details */}
@@ -142,7 +141,7 @@ export default function Messages() {
                 {/* Right: Actions */}
                 <div className="flex sm:flex-col gap-3 shrink-0 justify-end md:justify-start">
                   {msg.status === 'Unread' && (
-                    <button 
+                    <button
                       onClick={() => markAsRead(msg._id)}
                       className="flex items-center justify-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-xl hover:border-primary hover:text-primary transition-colors text-sm font-semibold text-text shadow-sm"
                     >
@@ -150,7 +149,7 @@ export default function Messages() {
                       Mark Read
                     </button>
                   )}
-                  <button 
+                  <button
                     onClick={() => deleteMessage(msg._id)}
                     className="flex items-center justify-center gap-2 px-4 py-2 bg-white border border-red-200 rounded-xl hover:border-red-600 hover:text-red-600 hover:bg-red-50 transition-colors text-sm font-semibold text-red-500 shadow-sm"
                   >

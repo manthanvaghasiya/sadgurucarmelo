@@ -27,7 +27,7 @@ export default function TopNavigation() {
               className="h-7 w-auto object-contain group-hover:scale-105 transition-transform duration-300"
             />
             <div className="flex flex-col">
-              <span className="font-heading font-extrabold text-xl text-primary leading-tight tracking-tight">Sadguru Car Melo</span>
+              <span className="font-heading font-bold text-xl text-primary leading-tight tracking-tight">Sadguru Car Melo</span>
               <span className="font-body text-[10px] text-text-muted font-bold uppercase tracking-widest">Premium Used Cars</span>
             </div>
           </Link>

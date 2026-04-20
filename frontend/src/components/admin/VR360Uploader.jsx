@@ -101,7 +101,7 @@ const VR360Uploader = ({ onUploadComplete, initialImages = [] }) => {
   return (
     <div className="p-6 bg-surface border border-gray-100 rounded-3xl shadow-sm">
       <div className="flex items-center justify-between mb-2">
-        <h3 className="text-lg font-heading font-extrabold text-text uppercase tracking-tight">Upload 360° Spin Photos</h3>
+        <h3 className="text-lg font-heading font-bold text-text uppercase tracking-tight">Upload 360° Spin Photos</h3>
         {uploadedUrls.length > 0 && (
           <span className="px-3 py-1 bg-accent/10 text-accent text-[10px] font-bold rounded-full uppercase tracking-widest">
             {uploadedUrls.length} Live Frames

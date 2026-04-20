@@ -46,7 +46,7 @@ export default function HeroSection() {
     if (comingSoonCars.length <= 1) return;
     const interval = setInterval(() => {
       setCurrentCarIndex((prev) => (prev + 1) % comingSoonCars.length);
-    }, 5000);
+    }, 8000); // Slower carousel speed for better user focus
     return () => clearInterval(interval);
   }, [comingSoonCars.length]);
 
@@ -60,6 +60,16 @@ export default function HeroSection() {
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: { opacity: 1, transition: { staggerChildren: 0.15, delayChildren: 0.1 } }
+  };
+
+  const textStaggerVariants = {
+    hidden: { opacity: 0 },
+    visible: { opacity: 1, transition: { staggerChildren: 0.12, delayChildren: 0.2 } }
+  };
+
+  const wordVariants = {
+    hidden: { opacity: 0, y: 20, filter: 'blur(8px)' },
+    visible: { opacity: 1, y: 0, filter: 'blur(0px)', transition: { duration: 0.8, ease: [0.22, 1, 0.36, 1] } }
   };
 
   const itemVariants = {
@@ -80,6 +90,10 @@ export default function HeroSection() {
   };
 
   const currentCar = comingSoonCars[currentCarIndex];
+
+  // Headline broken down for word-by-word reveal
+  const headlineLine1 = ["તમારી", "મનપસંદ", "કાર,"];
+  const headlineLine2 = ["મેળવવી", "સાવ", "સરળ."];
 
   return (
     <section className="relative w-full min-h-[100dvh] bg-[#030303] overflow-hidden font-['Inter',sans-serif]">
@@ -111,7 +125,7 @@ export default function HeroSection() {
             LEFT COLUMN: TYPOGRAPHY & CTA
         ────────────────────────────────────────────────── */}
         <motion.div
-          className="col-span-1 lg:col-span-5 flex flex-col justify-center order-2 lg:order-1 pt-2 lg:pt-0"
+          className="col-span-1 lg:col-span-6 flex flex-col justify-center order-2 lg:order-1 pt-2 lg:pt-0"
           initial="hidden"
           animate="visible"
           variants={containerVariants}
@@ -119,22 +133,38 @@ export default function HeroSection() {
           {/* Brand pill */}
           <motion.div variants={itemVariants} className="flex items-center gap-3 mb-6">
             <div className="h-[2px] w-12 bg-gradient-to-r from-brand-orange to-transparent"></div>
-            <span className="text-brand-orange text-sm font-bold tracking-[0.2em] uppercase">સદગુરુ કાર મેળો– વિશ્વાસ અને ગુણવત્તા સાથે.</span>
+            <span className="text-brand-orange text-sm font-bold tracking-[0.2em] uppercase">સદગુરુ કાર મેળો– વિશ્વાસ અને ગુણવત્તા.</span>
           </motion.div>
 
-          {/* Main headline */}
+          {/* Main headline with Staggered Word Reveal — 2 lines on all screens */}
           <motion.h1
-            variants={itemVariants}
-            className="text-[2.6rem] sm:text-5xl lg:text-[3.5rem] xl:text-[4.2rem] text-white font-black tracking-tight leading-[1.08]"
+            variants={textStaggerVariants}
+            className="text-[2.6rem] sm:text-5xl lg:text-[3.5rem] xl:text-[4.2rem] text-white font-black tracking-tight leading-[1.15] py-1"
           >
-            તમારી <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-orange via-amber-400 to-yellow-500">સપનાની કાર,</span><br className="lg:hidden" />
-            {" "}હવે તમારી નજીકમાં મળશે.
+            {/* Line 1: તમારી સપનાની કાર, */}
+            <div className="flex flex-wrap gap-x-2 sm:gap-x-3 lg:gap-x-4 overflow-hidden">
+              {headlineLine1.map((word, i) => (
+                <motion.span key={`w1-${i}`} variants={wordVariants} className="inline-block">
+                  {(word === "મનપસંદ" || word === "કાર,") ? (
+                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-orange via-amber-400 to-yellow-500 drop-shadow-sm">{word}</span>
+                  ) : word}
+                </motion.span>
+              ))}
+            </div>
+            {/* Line 2: હવે તમારી નજીકમાં મળશે. */}
+            <div className="flex flex-wrap gap-x-2 sm:gap-x-3 lg:gap-x-4 overflow-hidden text-slate-100">
+              {headlineLine2.map((word, i) => (
+                <motion.span key={`w2-${i}`} variants={wordVariants} className="inline-block">
+                  {word}
+                </motion.span>
+              ))}
+            </div>
           </motion.h1>
 
           {/* Description */}
-          <motion.p variants={itemVariants} className="text-base lg:text-lg text-slate-400 mt-6 font-medium leading-relaxed max-w-lg drop-shadow-sm">
-            સુરતનું સૌથી વિશ્વાસપાત્ર લક્ઝરી કાર ડેસ્ટિનેશન. જ્યાં અતૂટ ભરોસો અને શ્રેષ્ઠતા મળે છે.
-            સર્વોત્તમ ગુણવત્તા અને વિશ્વાસનું અજોડ સંગમ.
+          <motion.p variants={itemVariants} className="text-base lg:text-lg text-slate-400 mt-6 lg:mt-8 font-medium leading-relaxed max-w-lg drop-shadow-sm border-l-2 border-white/10 pl-4 py-1">
+            સુરતનું સૌથી વિશ્વાસપાત્ર લક્ઝરી કાર ડેસ્ટિનેશન.
+            શ્રેષ્ઠ કિંમત, સર્વોત્તમ ગુણવત્તા અને અતૂટ ભરોસાનું એકમાત્ર નામ.
           </motion.p>
 
           {/* Trust badges & Location */}
@@ -169,7 +199,7 @@ export default function HeroSection() {
         {/* ──────────────────────────────────────────────────
             RIGHT COLUMN: CAR SHOWCASE — FIXED LAYOUT (NO OVERLAP)
         ────────────────────────────────────────────────── */}
-        <div className="col-span-1 lg:col-span-7 relative order-1 lg:order-2 w-full mt-6 lg:mt-0">
+        <div className="col-span-1 lg:col-span-6 relative order-1 lg:order-2 w-full mt-6 lg:mt-0">
           {comingSoonCars.length > 0 ? (
             <>
               {/* Infinite Marquee Text Background */}
@@ -208,7 +238,7 @@ export default function HeroSection() {
                   className="relative z-10 flex flex-col items-center w-full"
                 >
                   {/* ── CAR IMAGE ── */}
-                  <div 
+                  <div
                     className="relative w-full flex items-center justify-center pt-0 lg:pt-6 pb-0 cursor-pointer z-20 group"
                     onClick={() => setShowModal(true)}
                   >
@@ -248,22 +278,26 @@ export default function HeroSection() {
                             <div className="absolute w-full h-full rounded-full border border-amber-500/40 animate-[spin_4s_linear_infinite]" />
                             <Sparkles className="w-4 h-4 text-amber-500" />
                           </div>
-                          <span className="text-[10px] sm:text-xs font-black tracking-[0.2em] uppercase text-amber-400">
+                          <span className="relative inline-flex items-center justify-center whitespace-nowrap px-4 py-1.5 text-[11px] sm:text-[13px] font-black tracking-[0.2em] uppercase rounded-full bg-gradient-to-r from-amber-400 via-yellow-400 to-brand-orange text-[#0a0a0a] shadow-[0_0_25px_rgba(245,158,11,0.6)] transform hover:scale-105 transition-all duration-300 animate-pulse">
                             COMING SOON
                           </span>
                         </div>
 
                         {/* Car Name */}
-                        <h3 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-white mb-2.5 leading-tight group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-white group-hover:to-amber-200 transition-all duration-500">
+                        <h3 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-2.5 leading-tight group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-white group-hover:to-amber-200 transition-all duration-500">
                           {currentCar.make} <span className="font-light">{currentCar.model}</span>
                         </h3>
 
                         {/* Spec Chips */}
                         {(currentCar.year || currentCar.fuelType || currentCar.transmission) && (
-                          <div className="flex items-center gap-2.5 flex-wrap lg:hidden">
-                            {currentCar.year && <span className="px-3 py-1 rounded-lg bg-white/[0.06] border border-white/[0.08] text-slate-300 text-xs font-bold uppercase tracking-wider">{currentCar.year}</span>}
-                            {currentCar.fuelType && <span className="px-3 py-1 rounded-lg bg-white/[0.06] border border-white/[0.08] text-slate-300 text-xs font-bold uppercase tracking-wider">{currentCar.fuelType}</span>}
-                            {currentCar.transmission && <span className="px-3 py-1 rounded-lg bg-white/[0.06] border border-white/[0.08] text-slate-300 text-xs font-bold uppercase tracking-wider">{currentCar.transmission}</span>}
+                          <div className="flex items-center gap-2 lg:hidden">
+                            <span className="flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-white/[0.06] border border-white/[0.08] text-slate-300 text-xs font-bold uppercase tracking-wider whitespace-nowrap">
+                              {currentCar.year && <span>{currentCar.year}</span>}
+                              {currentCar.year && currentCar.fuelType && <span className="text-amber-500/60">•</span>}
+                              {currentCar.fuelType && <span>{currentCar.fuelType}</span>}
+                              {currentCar.fuelType && currentCar.transmission && <span className="text-amber-500/60">•</span>}
+                              {currentCar.transmission && <span>{currentCar.transmission}</span>}
+                            </span>
                           </div>
                         )}
                       </div>
@@ -276,27 +310,31 @@ export default function HeroSection() {
                         {/* Spec chips — only visible on lg+ (above price) */}
                         {(currentCar.year || currentCar.fuelType || currentCar.transmission) && (
                           <div className="hidden lg:flex items-center gap-2 flex-wrap justify-end">
-                            {currentCar.year && <span className="px-3 py-1 rounded-lg bg-white/[0.06] border border-white/[0.08] text-slate-300 text-xs font-bold uppercase tracking-wider">{currentCar.year}</span>}
-                            {currentCar.fuelType && <span className="px-3 py-1 rounded-lg bg-white/[0.06] border border-white/[0.08] text-slate-300 text-xs font-bold uppercase tracking-wider">{currentCar.fuelType}</span>}
-                            {currentCar.transmission && <span className="px-3 py-1 rounded-lg bg-white/[0.06] border border-white/[0.08] text-slate-300 text-xs font-bold uppercase tracking-wider">{currentCar.transmission}</span>}
+                            <span className="flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-white/[0.06] border border-white/[0.08] text-slate-300 text-xs font-bold uppercase tracking-wider whitespace-nowrap">
+                              {currentCar.year && <span>{currentCar.year}</span>}
+                              {currentCar.year && currentCar.fuelType && <span className="text-amber-500/60">•</span>}
+                              {currentCar.fuelType && <span>{currentCar.fuelType}</span>}
+                              {currentCar.fuelType && currentCar.transmission && <span className="text-amber-500/60">•</span>}
+                              {currentCar.transmission && <span>{currentCar.transmission}</span>}
+                            </span>
                           </div>
                         )}
                         {/* Price + Arrow */}
                         <div className="flex items-center gap-5 w-full lg:w-auto justify-between lg:justify-end">
-                            <div className="flex flex-col lg:items-end lg:text-right">
-                              <p className="text-[10px] text-amber-500/70 uppercase tracking-[0.15em] font-bold mb-1.5 flex items-center gap-1.5">
-                                Expected Pricing
+                          <div className="flex flex-col lg:items-end lg:text-right">
+                            <p className="text-[10px] text-amber-500/70 uppercase tracking-[0.15em] font-bold mb-1.5 flex items-center gap-1.5">
+                              Expected Pricing
+                            </p>
+                            {currentCar.price > 0 ? (
+                              <p className="text-2xl sm:text-3xl font-black text-white tracking-tight drop-shadow-md">
+                                {formatPrice(currentCar.price)}
                               </p>
-                              {currentCar.price > 0 ? (
-                                <p className="text-2xl sm:text-3xl font-black text-white tracking-tight drop-shadow-md">
-                                  {formatPrice(currentCar.price)}
-                                </p>
-                              ) : (
-                                <p className="text-xl sm:text-2xl font-black text-white/85 tracking-tight drop-shadow-md bg-white/10 px-3 py-1 rounded-md">
-                                  Revealing Soon
-                                </p>
-                              )}
-                            </div>
+                            ) : (
+                              <p className="text-xl sm:text-2xl font-black text-white/85 tracking-tight drop-shadow-md bg-white/10 px-3 py-1 rounded-md">
+                                Revealing Soon
+                              </p>
+                            )}
+                          </div>
                           <motion.div
                             whileHover={{ scale: 1.1, rotate: -15 }}
                             whileTap={{ scale: 0.9 }}
@@ -336,55 +374,55 @@ export default function HeroSection() {
 
       </div>
 
-        {/* Notify Modal */}
-        {showModal && (
-          <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm px-4 pb-28 sm:p-4 animate-fade-in" onClick={() => setShowModal(false)}>
-            <div className="bg-white rounded-3xl sm:rounded-2xl w-full max-w-md overflow-hidden shadow-2xl animate-[slide-up_0.4s_cubic-bezier(0.16,1,0.3,1)] sm:animate-scale-in" onClick={(e) => e.stopPropagation()}>
-              <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-slate-50">
-                <h3 className="font-heading font-bold text-xl text-slate-800">Get Notified</h3>
-                <button onClick={() => setShowModal(false)} className="text-gray-400 hover:text-gray-700 transition">
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
-              <form onSubmit={handleSubmit} className="p-6 space-y-4 font-body">
-                {currentCar && (
-                  <p className="text-sm text-slate-500 mb-4">
-                    Register your interest for the <span className="font-semibold text-brand-orange">{currentCar.make} {currentCar.model}</span>.
-                  </p>
-                )}
-                <div>
-                  <label className="block text-sm font-semibold text-slate-700 mb-1">Full Name</label>
-                  <input 
-                    type="text" 
-                    value={formData.name}
-                    onChange={(e) => setFormData({...formData, name: e.target.value})}
-                    className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:border-brand-orange focus:ring-1 focus:ring-brand-orange outline-none transition-all text-slate-800"
-                    placeholder="Enter your name"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-slate-700 mb-1">Mobile Number</label>
-                  <input 
-                    type="tel" 
-                    value={formData.phone}
-                    onChange={(e) => setFormData({...formData, phone: e.target.value})}
-                    className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:border-brand-orange focus:ring-1 focus:ring-brand-orange outline-none transition-all text-slate-800"
-                    placeholder="Enter your phone number"
-                    required
-                  />
-                </div>
-                <button 
-                  type="submit" 
-                  disabled={isSubmitting}
-                  className="w-full bg-brand-orange hover:bg-orange-600 text-white font-semibold py-3 rounded-xl transition-all disabled:opacity-70 mt-2"
-                >
-                  {isSubmitting ? 'Submitting...' : 'Notify Me'}
-                </button>
-              </form>
+      {/* Notify Modal */}
+      {showModal && (
+        <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm px-4 pb-28 sm:p-4 animate-fade-in" onClick={() => setShowModal(false)}>
+          <div className="bg-white rounded-3xl sm:rounded-2xl w-full max-w-md overflow-hidden shadow-2xl animate-[slide-up_0.4s_cubic-bezier(0.16,1,0.3,1)] sm:animate-scale-in" onClick={(e) => e.stopPropagation()}>
+            <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-slate-50">
+              <h3 className="font-heading font-bold text-xl text-slate-800">Get Notified</h3>
+              <button onClick={() => setShowModal(false)} className="text-gray-400 hover:text-gray-700 transition">
+                <X className="w-5 h-5" />
+              </button>
             </div>
+            <form onSubmit={handleSubmit} className="p-6 space-y-4 font-body">
+              {currentCar && (
+                <p className="text-sm text-slate-500 mb-4">
+                  Register your interest for the <span className="font-semibold text-brand-orange">{currentCar.make} {currentCar.model}</span>.
+                </p>
+              )}
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 mb-1">Full Name</label>
+                <input
+                  type="text"
+                  value={formData.name}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:border-brand-orange focus:ring-1 focus:ring-brand-orange outline-none transition-all text-slate-800"
+                  placeholder="Enter your name"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 mb-1">Mobile Number</label>
+                <input
+                  type="tel"
+                  value={formData.phone}
+                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                  className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:border-brand-orange focus:ring-1 focus:ring-brand-orange outline-none transition-all text-slate-800"
+                  placeholder="Enter your phone number"
+                  required
+                />
+              </div>
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className="w-full bg-brand-orange hover:bg-orange-600 text-white font-semibold py-3 rounded-xl transition-all disabled:opacity-70 mt-2"
+              >
+                {isSubmitting ? 'Submitting...' : 'Notify Me'}
+              </button>
+            </form>
           </div>
-        )}
+        </div>
+      )}
     </section>
   );
 }

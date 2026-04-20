@@ -39,7 +39,7 @@ export default function CarCard({
           {badges.map((badge, index) => (
             <span
               key={index}
-              className={`premium-badge text-[10px] font-heading font-extrabold uppercase tracking-widest px-2.5 py-1 rounded shadow-sm ${badge === 'CERTIFIED' ? 'bg-[#10b981] text-white' : 'bg-primary text-white'
+              className={`premium-badge text-[10px] font-heading font-bold uppercase tracking-widest px-2.5 py-1 rounded shadow-sm ${badge === 'CERTIFIED' ? 'bg-[#10b981] text-white' : 'bg-primary text-white'
                 }`}
             >
               {badge}
@@ -56,7 +56,7 @@ export default function CarCard({
           <h3 className="font-heading font-bold text-sm sm:text-lg text-text leading-tight mb-1 line-clamp-1">
             {title}
           </h3>
-          <p className="car-price-highlight font-heading font-extrabold text-lg sm:text-2xl text-accent transition-all duration-300">
+          <p className="car-price-highlight font-heading font-bold text-lg sm:text-2xl text-accent transition-all duration-300">
             {price}
           </p>
         </div>

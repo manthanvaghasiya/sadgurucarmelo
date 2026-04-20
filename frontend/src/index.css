@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Mukta+Vaani:wght@200;300;400;500;600;700;800&family=Noto+Sans+Gujarati:wght@100..900&family=Outfit:wght@400;500;600;700;800;900&family=Rasa:ital,wght@0,300..700;1,300..700&display=swap');
 @import "tailwindcss";
 
 @theme {
@@ -23,9 +23,10 @@
   --color-text-muted: #64748b;
   /* Muted text for specs and labels */
 
-  /* Dual-Font Typography System */
-  --font-heading: 'Outfit', sans-serif;
-  --font-body: 'Inter', sans-serif;
+  /* Premium Gujarati Typography System */
+  --font-heading: 'Mukta Vaani', 'Outfit', sans-serif;
+  --font-body: 'Noto Sans Gujarati', 'Inter', sans-serif;
+  --font-serif: 'Rasa', serif;
 }
 
 @layer base {

@@ -91,7 +91,7 @@ export default function InventoryGrid({ filters = {} }) {
 
         {/* Header Title */}
         <div className="flex flex-col max-md:hidden">
-          <h2 className="font-heading font-extrabold text-2xl text-primary">Live Inventory</h2>
+          <h2 className="font-heading font-bold text-2xl text-primary">Live Inventory</h2>
           <p className="font-body text-sm text-text-muted hidden lg:block">Available stock in Surat</p>
         </div>
 

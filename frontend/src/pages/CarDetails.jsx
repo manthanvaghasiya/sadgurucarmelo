@@ -94,7 +94,7 @@ export default function CarDetails() {
                             <li aria-current="page" className="text-text">{car.model}</li>
                         </ol>
                     </nav>
-                    <h1 className="font-heading font-extrabold text-3xl sm:text-4xl text-text leading-tight tracking-tight flex flex-wrap items-center gap-3">
+                    <h1 className="font-heading font-bold text-3xl sm:text-4xl text-text leading-tight tracking-tight flex flex-wrap items-center gap-3">
                         {car.make} {car.model} ({car.year})
                         {car.variantTier && (
                             <span className="text-lg sm:text-xl font-body font-bold text-text-muted bg-gray-100 px-3 py-1 rounded-lg">
@@ -104,13 +104,11 @@ export default function CarDetails() {
                     </h1>
                 </div>
 
-                {/* Main Layout */}
+                {/* Main Layout — 3 direct children for mobile reordering */}
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
-                    {/* Left Column (Media & Specs) */}
-                    <div className="lg:col-span-2 flex flex-col gap-8">
-
-                        {/* Media Gallery */}
+                    {/* 1. Media Gallery — Always first */}
+                    <div className="lg:col-span-2 order-1">
                         <div className="bg-surface p-4 rounded-2xl shadow-sm border border-gray-100">
 
                             {/* Main Big Screen Viewer */}
@@ -124,7 +122,7 @@ export default function CarDetails() {
                                 {/* Simple Status Badge (No longer a toggle button) */}
                                 {viewMode !== '360' && (
                                     <div className="absolute top-4 left-4 flex gap-2 z-10 pointer-events-none">
-                                        <div className="bg-primary text-white text-[10px] font-heading font-extrabold px-3 py-1.5 rounded flex items-center gap-1.5 uppercase tracking-wider shadow-sm backdrop-blur-md bg-opacity-90">
+                                        <div className="bg-primary text-white text-[10px] font-heading font-bold px-3 py-1.5 rounded flex items-center gap-1.5 uppercase tracking-wider shadow-sm backdrop-blur-md bg-opacity-90">
                                             GALLERY VIEW
                                         </div>
                                     </div>
@@ -170,107 +168,10 @@ export default function CarDetails() {
                                 })}
                             </div>
                         </div>
-
-                        {/* Detailed Specs */}
-                        <div className="flex flex-col gap-8 bg-surface p-6 sm:p-8 rounded-2xl shadow-sm border border-gray-100">
-                            {/* Specific Feature Grids */}
-                            <div className="flex flex-col gap-6">
-                                <div>
-                                    <h3 className="font-heading font-bold text-xl text-text mb-6 border-l-4 border-primary pl-3">Comfort Features</h3>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-4 font-body text-sm">
-                                        <div className="flex justify-between items-center border-b border-gray-100 pb-3">
-                                            <span className="text-text-muted">Air Conditioner</span>
-                                            <span className="font-semibold text-text">{car.airConditioner || 'N/A'}</span>
-                                        </div>
-                                        <div className="flex justify-between items-center border-b border-gray-100 pb-3">
-                                            <span className="text-text-muted">Power Windows</span>
-                                            <span className="font-semibold text-text">{car.powerWindows || 'N/A'}</span>
-                                        </div>
-                                        <div className="flex justify-between items-center border-b border-gray-100 pb-3">
-                                            <span className="text-text-muted">Sunroof</span>
-                                            <span className="font-semibold text-text">{car.sunroof || 'N/A'}</span>
-                                        </div>
-                                        <div className="flex justify-between items-center border-b border-gray-100 pb-3">
-                                            <span className="text-text-muted">Parking Sensors</span>
-                                            <span className="font-semibold text-text">{car.parkingSensors || 'N/A'}</span>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div>
-                                    <h3 className="font-heading font-bold text-xl text-text mb-6 border-l-4 border-primary pl-3">Engine & Performance</h3>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-4 font-body text-sm">
-                                        <div className="flex justify-between items-center border-b border-gray-100 pb-3">
-                                            <span className="text-text-muted">Displacement</span>
-                                            <span className="font-semibold text-text">{car.displacement || 'N/A'}</span>
-                                        </div>
-                                        <div className="flex justify-between items-center border-b border-gray-100 pb-3">
-                                            <span className="text-text-muted">Max Power</span>
-                                            <span className="font-semibold text-text">{car.maxPower || 'N/A'}</span>
-                                        </div>
-                                        <div className="flex justify-between items-center border-b border-gray-100 pb-3">
-                                            <span className="text-text-muted">Drive Type</span>
-                                            <span className="font-semibold text-text">{car.driveType || 'N/A'}</span>
-                                        </div>
-                                        <div className="flex justify-between items-center border-b border-gray-100 pb-3">
-                                            <span className="text-text-muted">No. of Cylinders</span>
-                                            <span className="font-semibold text-text">{car.cylinders || 'N/A'}</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {car.description && (
-                                <div>
-                                    <h3 className="font-heading font-bold text-xl text-text mb-4 border-l-4 border-primary pl-3">Description</h3>
-                                    <p className="font-body text-sm text-text whitespace-pre-line leading-relaxed">{car.description}</p>
-                                </div>
-                            )}
-
-                            {car.features && car.features.length > 0 && (
-                                <div className={car.description ? 'mt-8' : ''}>
-                                    <h3 className="font-heading font-bold text-xl text-text mb-6 border-l-4 border-primary pl-3">Key Features</h3>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-4 font-body text-sm">
-                                        {car.features.map((f, i) => {
-                                            const featureStr = String(f || '');
-                                            const hasColon = featureStr.includes(':');
-                                            
-                                            // Split at the FIRST colon
-                                            let key = featureStr.trim();
-                                            let value = (
-                                                <span className="flex items-center gap-1 text-[#10b981]">
-                                                    <Check className="w-4 h-4 stroke-[3]" /> Yes
-                                                </span>
-                                            );
-
-                                            if (hasColon) {
-                                                const colonIndex = featureStr.indexOf(':');
-                                                key = featureStr.substring(0, colonIndex).trim();
-                                                value = featureStr.substring(colonIndex + 1).trim();
-                                            }
-
-                                            return (
-                                                <div key={i} className="flex justify-between items-center border-b border-gray-100 pb-3">
-                                                    <span className="text-text-muted capitalize">{key}</span>
-                                                    <span className="font-semibold text-text text-right">{value}</span>
-                                                </div>
-                                            );
-                                        })}
-                                    </div>
-                                </div>
-                            )}
-
-                            {(!car.description && (!car.features || car.features.length === 0)) && (
-                                <div className="py-6 text-center text-text-muted font-body text-sm">
-                                    No description or features provided for this vehicle.
-                                </div>
-                            )}
-                        </div>
-
                     </div>
 
-                    {/* Right Column (Sticky Action Card) */}
-                    <div className="lg:col-span-1">
+                    {/* 2. Right Column (Pricing/Action Card) — Appears 2nd on mobile, right side on desktop */}
+                    <div className="lg:col-span-1 lg:row-span-2 order-2">
                         <div className="sticky top-24 flex flex-col gap-6">
 
                             {/* Pricing Card */}
@@ -278,20 +179,20 @@ export default function CarDetails() {
                                 <div className="flex justify-between items-start mb-4">
                                     <span className="font-heading font-bold text-[11px] text-text-muted tracking-widest uppercase">{car.registration || 'UNREGISTERED'}</span>
                                     {car.badges && car.badges.map((b) => (
-                                        <span key={b} className="bg-[#10b981]/10 text-[#10b981] px-2.5 py-1 rounded text-[10px] font-heading font-extrabold uppercase tracking-widest flex items-center gap-1">
+                                        <span key={b} className="bg-[#10b981]/10 text-[#10b981] px-2.5 py-1 rounded text-[10px] font-heading font-bold uppercase tracking-widest flex items-center gap-1">
                                             {typeof b === 'string' ? b.toUpperCase() : b}
                                         </span>
                                     ))}
                                 </div>
 
-                                <h2 className="font-heading font-extrabold text-[36px] text-accent mb-1 leading-none">₹{car.price?.toLocaleString('en-IN')}</h2>
+                                <h2 className="font-heading font-bold text-[36px] text-accent mb-1 leading-none">₹{car.price?.toLocaleString('en-IN')}</h2>
                                 <p className="font-body text-xs text-text-muted mb-4">Last updated: {new Date(car.updatedAt || Date.now()).toLocaleDateString()}</p>
 
                                 {car.loanAvailable && (
                                     <div className="flex items-center gap-2 mb-6 px-3 py-3 bg-blue-50/50 border border-blue-100 rounded-xl text-blue-700">
                                         <ShieldCheck className="w-5 h-5" />
                                         <div className="flex flex-col">
-                                            <span className="font-heading text-[10px] font-bold uppercase tracking-widest text-blue-600/70 mb-0.5">Financing Support</span>
+                                            <span className="font-heading text-[10px] font-bold uppercase tracking-widest text-/70 mb-0.5">Financing Support</span>
                                             <span className="font-body text-sm font-bold leading-none">Car Loan / EMI Available</span>
                                         </div>
                                     </div>
@@ -367,8 +268,8 @@ export default function CarDetails() {
                                 </div>
                             </div>
 
-                            {/* Dealer Info Box */}
-                            <div className="bg-gray-50 rounded-2xl p-6 border border-gray-100 flex items-start gap-4">
+                            {/* Dealer Info Box (Hidden on Mobile) */}
+                            <div className="hidden lg:flex bg-gray-50 rounded-2xl p-6 border border-gray-100 items-start gap-4">
                                 <div className="w-12 h-12 bg-white rounded-xl shadow-sm border border-gray-100 flex items-center justify-center font-heading font-black text-xl text-primary shrink-0">
                                     S
                                 </div>
@@ -392,6 +293,129 @@ export default function CarDetails() {
                                 </div>
                             </div>
 
+                        </div>
+                    </div>
+
+                    {/* 3. Detailed Specs — Appears 3rd on mobile (after pricing), stays below gallery on desktop */}
+                    <div className="lg:col-span-2 order-3">
+                        <div className="flex flex-col gap-8 bg-surface p-6 sm:p-8 rounded-2xl shadow-sm border border-gray-100">
+                            {/* Specific Feature Grids */}
+                            <div className="flex flex-col gap-6">
+                                <div>
+                                    <h3 className="font-heading font-bold text-xl text-text mb-6 border-l-4 border-primary pl-3">Comfort Features</h3>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-4 font-body text-sm">
+                                        <div className="flex justify-between items-center border-b border-gray-100 pb-3">
+                                            <span className="text-text-muted">Air Conditioner</span>
+                                            <span className="font-semibold text-text">{car.airConditioner || 'N/A'}</span>
+                                        </div>
+                                        <div className="flex justify-between items-center border-b border-gray-100 pb-3">
+                                            <span className="text-text-muted">Power Windows</span>
+                                            <span className="font-semibold text-text">{car.powerWindows || 'N/A'}</span>
+                                        </div>
+                                        <div className="flex justify-between items-center border-b border-gray-100 pb-3">
+                                            <span className="text-text-muted">Sunroof</span>
+                                            <span className="font-semibold text-text">{car.sunroof || 'N/A'}</span>
+                                        </div>
+                                        <div className="flex justify-between items-center border-b border-gray-100 pb-3">
+                                            <span className="text-text-muted">Parking Sensors</span>
+                                            <span className="font-semibold text-text">{car.parkingSensors || 'N/A'}</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <h3 className="font-heading font-bold text-xl text-text mb-6 border-l-4 border-primary pl-3">Engine & Performance</h3>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-4 font-body text-sm">
+                                        <div className="flex justify-between items-center border-b border-gray-100 pb-3">
+                                            <span className="text-text-muted">Displacement</span>
+                                            <span className="font-semibold text-text">{car.displacement || 'N/A'}</span>
+                                        </div>
+                                        <div className="flex justify-between items-center border-b border-gray-100 pb-3">
+                                            <span className="text-text-muted">Max Power</span>
+                                            <span className="font-semibold text-text">{car.maxPower || 'N/A'}</span>
+                                        </div>
+                                        <div className="flex justify-between items-center border-b border-gray-100 pb-3">
+                                            <span className="text-text-muted">Drive Type</span>
+                                            <span className="font-semibold text-text">{car.driveType || 'N/A'}</span>
+                                        </div>
+                                        <div className="flex justify-between items-center border-b border-gray-100 pb-3">
+                                            <span className="text-text-muted">No. of Cylinders</span>
+                                            <span className="font-semibold text-text">{car.cylinders || 'N/A'}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {car.description && (
+                                <div>
+                                    <h3 className="font-heading font-bold text-xl text-text mb-4 border-l-4 border-primary pl-3">Description</h3>
+                                    <p className="font-body text-sm text-text whitespace-pre-line leading-relaxed">{car.description}</p>
+                                </div>
+                            )}
+
+                            {car.features && car.features.length > 0 && (
+                                <div className={car.description ? 'mt-8' : ''}>
+                                    <h3 className="font-heading font-bold text-xl text-text mb-6 border-l-4 border-primary pl-3">Key Features</h3>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-4 font-body text-sm">
+                                        {car.features.map((f, i) => {
+                                            const featureStr = String(f || '');
+                                            const hasColon = featureStr.includes(':');
+
+                                            // Split at the FIRST colon
+                                            let key = featureStr.trim();
+                                            let value = (
+                                                <span className="flex items-center gap-1 text-[#10b981]">
+                                                    <Check className="w-4 h-4 stroke-[3]" /> Yes
+                                                </span>
+                                            );
+
+                                            if (hasColon) {
+                                                const colonIndex = featureStr.indexOf(':');
+                                                key = featureStr.substring(0, colonIndex).trim();
+                                                value = featureStr.substring(colonIndex + 1).trim();
+                                            }
+
+                                            return (
+                                                <div key={i} className="flex justify-between items-center border-b border-gray-100 pb-3">
+                                                    <span className="text-text-muted capitalize">{key}</span>
+                                                    <span className="font-semibold text-text text-right">{value}</span>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+                            )}
+
+                            {(!car.description && (!car.features || car.features.length === 0)) && (
+                                <div className="py-6 text-center text-text-muted font-body text-sm">
+                                    No description or features provided for this vehicle.
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Dealer Info Box (Mobile Only) - Appears after specs */}
+                        <div className="flex lg:hidden bg-gray-50 rounded-2xl p-6 border border-gray-100 items-start gap-4 mt-6">
+                            <div className="w-12 h-12 bg-white rounded-xl shadow-sm border border-gray-100 flex items-center justify-center font-heading font-black text-xl text-primary shrink-0">
+                                S
+                            </div>
+                            <div className="flex flex-col">
+                                <h4 className="font-heading font-bold text-text text-sm mb-1">Sadguru Car Melo</h4>
+                                <p className="font-body text-xs text-text-muted mb-2">Trimruti Compound, Opp. Yoginagar BRTS, Varachha Road, Surat</p>
+                                <div className="flex items-center gap-1 mb-3">
+                                    <span className="font-heading font-bold text-xs text-text">4.9</span>
+                                    <div className="flex">
+                                        <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
+                                        <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
+                                        <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
+                                        <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
+                                        <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
+                                    </div>
+                                    <span className="font-body text-[10px] text-text-muted ml-1">Google Reviews</span>
+                                </div>
+                                <a href="https://www.google.com/maps/place/Sadguru+Car+Melo/" target="_blank" rel="noopener noreferrer" className="font-body text-[11px] font-bold text-primary flex items-center gap-1 hover:underline tracking-wide uppercase">
+                                    <MapPin className="w-3 h-3" /> Get Directions
+                                </a>
+                            </div>
                         </div>
                     </div>
 
