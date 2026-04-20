@@ -1,5 +1,6 @@
 import { Phone, MapPin, Clock, Plus, Minus, Car, MessageCircle } from 'lucide-react';
 import { useForm } from 'react-hook-form';
+import { Helmet } from 'react-helmet-async';
 import toast from 'react-hot-toast';
 import axiosInstance from '../api/axiosConfig';
 
@@ -18,6 +19,12 @@ export default function Contact() {
 
   return (
     <div className="bg-background min-h-screen py-10 px-4">
+      <Helmet>
+        <title>Contact Sadguru Car Melo — Visit Our Showroom in Surat</title>
+        <meta name="description" content="Contact Sadguru Car Melo for car inquiries, test drives, or selling your vehicle. Located at Trilok Car Bazar, Varachha, Surat. Call +91 99136 34447." />
+        <meta property="og:title" content="Contact Sadguru Car Melo — Visit Our Showroom" />
+        <meta property="og:description" content="Call +91 99136 34447 or visit us at Trilok Car Bazar, Varachha, Surat." />
+      </Helmet>
       <div className="max-w-7xl mx-auto">
 
         {/* 1. Page Header Section */}

@@ -91,7 +91,7 @@ export default function Poster1({ car }) {
 
             {car.image ? (
               <>
-                <img src={car.image} alt={car.title} className="w-full h-full object-contain p-3 md:p-4 filter drop-shadow-[0_20px_40px_rgba(0,0,0,0.8)] z-10 max-h-[200px] md:max-h-[300px] lg:max-h-[350px]" />
+                <img src={car.image} alt={car.title} loading="lazy" className="w-full h-full object-contain p-3 md:p-4 filter drop-shadow-[0_20px_40px_rgba(0,0,0,0.8)] z-10 max-h-[200px] md:max-h-[300px] lg:max-h-[350px]" />
                 <div className="absolute bottom-6 w-[60%] h-4 bg-cyan-500/20 blur-[20px] rounded-full pointer-events-none z-0"></div>
               </>
             ) : (

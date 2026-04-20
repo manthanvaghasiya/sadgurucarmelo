@@ -13,6 +13,9 @@ const storage = new CloudinaryStorage({
   params: {
     folder: 'sadguru_cars',
     allowedFormats: ['jpeg', 'png', 'jpg', 'webp'],
+    transformation: [
+      { quality: 'auto', fetch_format: 'auto' },
+    ],
   },
 });
 

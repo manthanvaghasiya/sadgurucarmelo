@@ -72,7 +72,7 @@ export default function Poster5({ car }) {
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[55%] max-w-[280px] aspect-square rounded-full bg-white blur-[40px] pointer-events-none z-0"></div>
 
             {car.image ? (
-              <img src={car.image} alt={car.title} className="w-full h-full max-h-[160px] md:max-h-[240px] lg:max-h-[280px] object-contain drop-shadow-[0_40px_50px_rgba(0,0,0,0.2)] hover:scale-105 hover:-translate-y-1 transition-all duration-[1s] ease-out relative z-10 p-2" style={{ transformOrigin: 'center bottom' }} />
+              <img src={car.image} alt={car.title} loading="lazy" className="w-full h-full max-h-[160px] md:max-h-[240px] lg:max-h-[280px] object-contain drop-shadow-[0_40px_50px_rgba(0,0,0,0.2)] hover:scale-105 hover:-translate-y-1 transition-all duration-[1s] ease-out relative z-10 p-2" style={{ transformOrigin: 'center bottom' }} />
             ) : (
               <div className="w-[70%] min-h-[120px] border border-dashed border-emerald-300/50 rounded-2xl bg-emerald-50/30 backdrop-blur-lg flex flex-col items-center justify-center text-emerald-800/40 font-heading font-medium tracking-[0.15em] relative z-10 shadow-[inset_0_0_30px_rgba(255,255,255,0.8)] gap-2">
                 <ShieldCheck className="w-8 h-8 opacity-50" />

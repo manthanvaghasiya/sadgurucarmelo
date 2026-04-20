@@ -66,7 +66,7 @@ export default function Poster4({ car }) {
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-2/3 bg-red-600/15 blur-[50px] rounded-full z-0 pointer-events-none"></div>
 
             {car.image ? (
-              <img src={car.image} alt={car.title} className="w-full h-full object-contain max-h-[160px] md:max-h-[240px] lg:max-h-[280px] relative z-10 drop-shadow-[0_20px_30px_rgba(0,0,0,0.9)] hover:scale-105 transition-transform duration-[1s] ease-out p-2" style={{ transformOrigin: 'center bottom' }} />
+              <img src={car.image} alt={car.title} loading="lazy" className="w-full h-full object-contain max-h-[160px] md:max-h-[240px] lg:max-h-[280px] relative z-10 drop-shadow-[0_20px_30px_rgba(0,0,0,0.9)] hover:scale-105 transition-transform duration-[1s] ease-out p-2" style={{ transformOrigin: 'center bottom' }} />
             ) : (
               <div className="w-[85%] min-h-[120px] border border-dashed border-red-600/40 bg-black/50 backdrop-blur rounded flex flex-col items-center justify-center z-10 text-center">
                 <span className="text-red-600/80 font-black text-lg tracking-[0.1em]">CLASSIFIED</span>

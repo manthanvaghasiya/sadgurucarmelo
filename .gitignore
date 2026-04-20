@@ -1,2 +1,16 @@
-node_modules/ 
-backend/node_modules/ 
+node_modules/
+backend/node_modules/
+
+# Environment files (NEVER commit secrets)
+.env
+.env.local
+.env.production
+backend/.env
+
+# Temporary/scratch files
+temp.txt
+temp.jpg
+temp_sidebar.js
+
+# Build output
+dist/

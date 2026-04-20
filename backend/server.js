@@ -11,6 +11,9 @@
 import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
+import helmet from 'helmet';
+import rateLimit from 'express-rate-limit';
+import mongoSanitize from 'express-mongo-sanitize';
 import connectDB from './config/db.js';
 
 // Route imports
@@ -29,10 +32,30 @@ connectDB();
 // ── Initialize Express ──
 const app = express();
 
+// ── Security Middleware ──
+app.use(helmet());
+app.use(mongoSanitize());
+
+// ── Rate Limiting ──
+const apiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { success: false, message: 'Too many requests, please try again later.' },
+});
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  message: { success: false, message: 'Too many login attempts. Try again in 15 minutes.' },
+});
+app.use('/api', apiLimiter);
+app.use('/api/auth/login', loginLimiter);
+
 // ── Core Middleware ──
 app.use(cors({
   origin: process.env.NODE_ENV === 'production'
-    ? 'https://sadgurucarmelo.com'
+    ? (process.env.FRONTEND_URL || 'https://sadgurucarmelo.com')
     : ['http://localhost:5173', 'http://localhost:5175', 'http://localhost:3000'],
   credentials: true,
 }));

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import { ShieldCheck, FileText, Landmark, Tag, Star, Banknote, RefreshCw, CarFront, CheckCircle, Clock, SearchCheck, Award, MapPin, Zap, Handshake, ShieldAlert } from 'lucide-react';
 import GoogleReviews from '../components/GoogleReviews';
 
@@ -40,6 +41,12 @@ export default function AboutPage() {
 
   return (
     <div className="flex flex-col flex-grow min-h-screen bg-background">
+      <Helmet>
+        <title>About Sadguru Car Melo — Surat's Trusted Car Dealership Since 2010</title>
+        <meta name="description" content="Learn about Sadguru Car Melo — Surat's most trusted pre-owned car dealership since 2010. Buy, sell, or exchange certified vehicles with 100% transparency." />
+        <meta property="og:title" content="About Sadguru Car Melo — Surat's Trusted Car Dealership" />
+        <meta property="og:description" content="Buy, sell, or exchange certified pre-owned cars. 500+ happy customers, 4.8 Google rating." />
+      </Helmet>
       <style>{`
         @keyframes customFadeIn {
           from { opacity: 0; transform: translateY(15px); }
@@ -133,6 +140,7 @@ export default function AboutPage() {
                 <img
                   src="about.png"
                   alt="Premium Car Showcase"
+                  loading="lazy"
                   className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-slate-900/10 to-transparent"></div>
@@ -408,7 +416,7 @@ export default function AboutPage() {
 
                 <div className="w-full lg:w-5/12 flex items-center justify-center relative order-1 lg:order-2 mb-8 lg:mb-0">
                   <div className="relative w-full aspect-[4/5] sm:aspect-square lg:aspect-[4/5] rounded-[2.5rem] overflow-hidden shadow-[0_20px_40px_rgba(0,0,0,0.1)] group">
-                    <img src="https://images.unsplash.com/photo-1550355291-bbee04a92027?q=80&w=1000&auto=format&fit=crop" alt="Buy a Premium Car" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
+                    <img src="https://images.unsplash.com/photo-1550355291-bbee04a92027?q=80&w=1000&auto=format&fit=crop" alt="Buy a Premium Car" loading="lazy" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
                     <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/20 to-transparent"></div>
 
                     {/* Floating Badge */}
@@ -492,7 +500,7 @@ export default function AboutPage() {
 
                 <div className="w-full lg:w-5/12 flex items-center justify-center relative order-1 lg:order-2 mb-8 lg:mb-0">
                   <div className="relative w-full aspect-[4/5] sm:aspect-square lg:aspect-[4/5] rounded-[2.5rem] overflow-hidden shadow-[0_20px_40px_rgba(0,0,0,0.1)] group">
-                    <img src="https://images.unsplash.com/photo-1600880292203-757bb62b4baf?q=80&w=1000&auto=format&fit=crop" alt="Sell Your Car" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
+                    <img src="https://images.unsplash.com/photo-1600880292203-757bb62b4baf?q=80&w=1000&auto=format&fit=crop" alt="Sell Your Car" loading="lazy" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
                     <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/20 to-transparent"></div>
 
 
@@ -575,7 +583,7 @@ export default function AboutPage() {
 
                 <div className="w-full lg:w-5/12 flex items-center justify-center relative order-1 lg:order-2 mb-8 lg:mb-0">
                   <div className="relative w-full aspect-[4/5] sm:aspect-square lg:aspect-[4/5] rounded-[2.5rem] overflow-hidden shadow-[0_20px_40px_rgba(0,0,0,0.1)] group">
-                    <img src="https://images.unsplash.com/photo-1542282088-fe8426682b8f?q=80&w=1000&auto=format&fit=crop" alt="Exchange Your Car" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
+                    <img src="https://images.unsplash.com/photo-1542282088-fe8426682b8f?q=80&w=1000&auto=format&fit=crop" alt="Exchange Your Car" loading="lazy" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
                     <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/20 to-transparent"></div>
 
 

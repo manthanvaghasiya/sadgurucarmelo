@@ -75,7 +75,7 @@ export default function Poster3({ car }) {
               {car.image ? (
                 <div className="relative w-full flex items-center justify-center">
                   <div className="absolute inset-0 bg-gradient-to-t from-fuchsia-600/15 to-transparent blur-[20px] rounded-full pointer-events-none"></div>
-                  <img src={car.image} alt={car.title} className="w-full h-full object-contain max-h-[160px] md:max-h-[240px] lg:max-h-[280px] relative z-10 drop-shadow-[0_20px_50px_rgba(0,0,0,0.8)] hover:scale-105 transition-transform duration-[1.5s] ease-[cubic-bezier(0.2,0.8,0.2,1)] p-2" style={{ transformOrigin: 'center bottom' }} />
+                  <img src={car.image} alt={car.title} loading="lazy" className="w-full h-full object-contain max-h-[160px] md:max-h-[240px] lg:max-h-[280px] relative z-10 drop-shadow-[0_20px_50px_rgba(0,0,0,0.8)] hover:scale-105 transition-transform duration-[1.5s] ease-[cubic-bezier(0.2,0.8,0.2,1)] p-2" style={{ transformOrigin: 'center bottom' }} />
                   <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-[70%] h-4 bg-black blur-[15px] opacity-80 rounded-full pointer-events-none"></div>
                 </div>
               ) : (

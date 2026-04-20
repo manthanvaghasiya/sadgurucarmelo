@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import {
   CheckCircle, Banknote, ShieldCheck,
   Search, Play, Star, Landmark, Headphones, Loader2,
@@ -20,6 +21,12 @@ export default function Home() {
 
   return (
     <div className="min-h-screen flex flex-col relative bg-gradient-to-b from-slate-50 via-white to-slate-50">
+      <Helmet>
+        <title>Sadguru Car Melo — Surat's Trusted Pre-Owned Car Dealership</title>
+        <meta name="description" content="Buy, sell, or exchange certified pre-owned cars at Sadguru Car Melo, Varachha, Surat. 150+ verified vehicles, transparent pricing, and trusted since 2010." />
+        <meta property="og:title" content="Sadguru Car Melo — Surat's Trusted Pre-Owned Car Dealership" />
+        <meta property="og:description" content="Buy, sell, or exchange certified pre-owned cars. 150+ verified vehicles with transparent pricing." />
+      </Helmet>
 
       {/* Global Decorative Background Overlay */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden z-0">

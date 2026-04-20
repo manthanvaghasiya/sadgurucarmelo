@@ -84,7 +84,7 @@ export default function Poster2({ car }) {
 
             <div className="relative w-full flex items-center justify-center z-20">
               {car.image ? (
-                <img src={car.image} alt={car.title} className="w-full h-full object-contain max-h-[160px] md:max-h-[240px] lg:max-h-[280px] drop-shadow-[0_40px_50px_rgba(0,0,0,0.9)] hover:scale-105 transition-transform duration-[2s] ease-[cubic-bezier(0.25,1,0.5,1)] p-2" style={{ transformOrigin: 'center bottom' }} />
+                <img src={car.image} alt={car.title} loading="lazy" className="w-full h-full object-contain max-h-[160px] md:max-h-[240px] lg:max-h-[280px] drop-shadow-[0_40px_50px_rgba(0,0,0,0.9)] hover:scale-105 transition-transform duration-[2s] ease-[cubic-bezier(0.25,1,0.5,1)] p-2" style={{ transformOrigin: 'center bottom' }} />
               ) : (
                 <div className="w-full min-h-[120px] border border-dashed border-[#594d30] rounded-xl flex items-center justify-center bg-[#0d0a04]/50 backdrop-blur">
                   <span className="text-[#a18a58] font-heading tracking-[0.2em] uppercase text-sm">Upload Elite Asset</span>

@@ -17,6 +17,20 @@ router.post('/', async (req, res, next) => {
     }
 
     const newMessage = await Message.create({ name, email, phone, message, type });
+
+    // ── Webhook: Forward lead to n8n / automation (fire-and-forget) ──
+    if (process.env.N8N_WEBHOOK_URL) {
+      fetch(process.env.N8N_WEBHOOK_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          event: 'new_lead',
+          name, email, phone, message, type,
+          timestamp: new Date().toISOString(),
+        }),
+      }).catch(() => {}); // Silently fail — never lose the lead
+    }
+
     res.status(201).json({ success: true, data: newMessage });
   } catch (error) {
     next(error);
