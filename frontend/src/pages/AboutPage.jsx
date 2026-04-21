@@ -93,8 +93,8 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* --- Seamless Wrapper for Stats & Legacy Sections --- */}
-      <div className="bg-white relative border-b border-slate-100">
+      {/* --- Seamless Wrapper for Stats, Legacy, Standard & Services Sections --- */}
+      <div className="bg-white relative">
 
         {/* 2. Overlapping Stats Card (Premium Integration) */}
         <section className="px-4 relative z-20 border-t border-transparent">
@@ -120,7 +120,7 @@ export default function AboutPage() {
         </section>
 
         {/* 3. More Than Just a Car Bazar Section (50x Premium Upgrade) */}
-        <section className="py-24 md:py-32 px-4 relative overflow-hidden">
+        <section className="py-16 md:py-24 px-4 relative overflow-hidden">
 
           {/* Dynamic Abstract Background Elements (Light Mode) */}
           <div className="absolute top-1/2 left-0 -translate-y-1/2 -translate-x-1/3 w-[800px] h-[800px] bg-brand-orange/5 rounded-full blur-[150px] pointer-events-none mix-blend-multiply"></div>
@@ -209,13 +209,9 @@ export default function AboutPage() {
             </div>
           </div>
         </section>
-      </div>
 
-      {/* 4. The Sadguru Standard (Premium 10x UI) */}
-      <section className="py-28 px-4 bg-slate-50 relative overflow-hidden">
-        {/* Decorative Grid Overlay for Section */}
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#0000000a_1px,transparent_1px),linear-gradient(to_bottom,#0000000a_1px,transparent_1px)] bg-[size:24px_24px] pointer-events-none"></div>
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[500px] bg-white rounded-full blur-[100px] pointer-events-none"></div>
+        {/* 4. The Sadguru Standard (Premium 10x UI) */}
+        <section className="py-16 md:py-24 px-4 relative overflow-hidden">
 
         <div className="max-w-7xl mx-auto relative z-10">
           <div className="text-center mb-20 flex flex-col items-center">
@@ -287,14 +283,13 @@ export default function AboutPage() {
             </div>
           </div>
         </div>
-      </section>
+        </section>
 
-      {/* 50x Premium Core Services Section - LIGHT MODE UPGRADE */}
-      <section id="core-services" className="py-24 md:py-32 px-4 bg-slate-50 relative z-10 scroll-mt-20 overflow-hidden shadow-[0_-10px_40px_rgba(0,0,0,0.02)] border-t border-slate-200 border-b">
+        {/* 50x Premium Core Services Section - LIGHT MODE UPGRADE */}
+        <section id="core-services" className="py-16 md:py-24 px-4 relative z-10 scroll-mt-20 overflow-hidden">
         {/* Dynamic Abstract Background Elements (Light Mode) */}
-        <div className="absolute top-1/4 right-0 w-[600px] h-[600px] bg-brand-orange/10 rounded-full blur-[120px] pointer-events-none mix-blend-multiply"></div>
-        <div className="absolute bottom-0 left-1/4 w-[600px] h-[600px] bg-primary/10 rounded-full blur-[120px] pointer-events-none mix-blend-multiply"></div>
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#00000004_1px,transparent_1px),linear-gradient(to_bottom,#00000004_1px,transparent_1px)] bg-[size:40px_40px] pointer-events-none mix-blend-multiply"></div>
+        <div className="absolute top-1/4 right-0 w-[600px] h-[600px] bg-brand-orange/5 rounded-full blur-[120px] pointer-events-none"></div>
+        <div className="absolute bottom-0 left-1/4 w-[600px] h-[600px] bg-primary/5 rounded-full blur-[120px] pointer-events-none"></div>
 
         <div className="max-w-7xl mx-auto relative z-20">
           <div className="text-center mb-16 md:mb-20 flex flex-col items-center">
@@ -594,6 +589,7 @@ export default function AboutPage() {
           </div>
         </div>
       </section>
+      </div>
 
       {/* 5. Google Reviews Section (Dynamic API + CSS Marquee) */}
       <GoogleReviews />
