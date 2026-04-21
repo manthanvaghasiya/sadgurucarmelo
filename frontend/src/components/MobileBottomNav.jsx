@@ -1,12 +1,12 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Home, Car, Info, Phone } from 'lucide-react';
+import { Home, Car, Users, Phone } from 'lucide-react';
 
 const navItems = [
   { name: 'Home', path: '/', icon: Home },
   { name: 'Catalog', path: '/inventory', icon: Car },
-  { name: 'About', path: '/about', icon: Info },
+  { name: 'About', path: '/about', icon: Users },
   { name: 'Contact', path: '/contact', icon: Phone },
 ];
 

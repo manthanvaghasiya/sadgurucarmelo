@@ -13,8 +13,30 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
-import mongoSanitize from 'express-mongo-sanitize';
 import connectDB from './config/db.js';
+
+// ── Custom Mongo Sanitizer (Express 5 compatible) ──
+// express-mongo-sanitize v2 is incompatible with Express 5 (req.query is read-only).
+// This lightweight replacement strips MongoDB operator keys ($) from req.body & req.params.
+function sanitizeObject(obj) {
+  if (obj && typeof obj === 'object') {
+    for (const key of Object.keys(obj)) {
+      if (key.startsWith('$')) {
+        delete obj[key];
+      } else if (typeof obj[key] === 'object') {
+        sanitizeObject(obj[key]);
+      }
+    }
+  }
+  return obj;
+}
+function mongoSanitize() {
+  return (req, _res, next) => {
+    if (req.body) sanitizeObject(req.body);
+    if (req.params) sanitizeObject(req.params);
+    next();
+  };
+}
 
 // Route imports
 import authRoutes from './routes/auth.routes.js';

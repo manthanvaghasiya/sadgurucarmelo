@@ -36,7 +36,7 @@ export default function Contact() {
               <li aria-current="page" className="text-text">Contact</li>
             </ol>
           </nav>
-          <h1 className="font-heading font-bold text-[36px] sm:text-[44px] text-text leading-tight tracking-tight mb-4">
+          <h1 className="font-heading font-bold text-[30px] sm:text-[40px] md:text-[50px] text-text leading-tight tracking-tight mb-4 whitespace-nowrap">
             અમારો સંપર્ક કરો | <span className="text-primary">Contact Us</span>
           </h1>
           <p className="font-body text-lg text-text-muted max-w-2xl leading-relaxed">
