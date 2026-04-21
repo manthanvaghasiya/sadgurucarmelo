@@ -30,6 +30,7 @@ export const protect = async (req, res, next) => {
 };
 
 export const admin = (req, res, next) => {
+  console.log('🔍 Admin check — req.user:', JSON.stringify(req.user));
   if (req.user && req.user.role === 'admin') {
     return next();
   }

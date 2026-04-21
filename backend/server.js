@@ -14,6 +14,8 @@ import cors from 'cors';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import connectDB from './config/db.js';
+import fs from 'fs';
+import path from 'path';
 
 // ── Custom Mongo Sanitizer (Express 5 compatible) ──
 // express-mongo-sanitize v2 is incompatible with Express 5 (req.query is read-only).
@@ -116,6 +118,15 @@ app.use((_req, res) => {
 // ── Global Error Handler ──
 app.use((err, _req, res, _next) => {
   console.error('❌ Server Error:', err);
+
+  // Write to a local log file if in production
+  if (process.env.NODE_ENV === 'production') {
+    const logPath = path.join(process.cwd(), 'errors.log');
+    const logLine = `[${new Date().toISOString()}] ${err.name}: ${err.message}\n${err.stack}\n\n`;
+    fs.appendFile(logPath, logLine, (appendErr) => {
+      if (appendErr) console.error('Failed to write to error log:', appendErr);
+    });
+  }
 
   const statusCode = err.statusCode || 500;
   res.status(statusCode).json({

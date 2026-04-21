@@ -35,5 +35,46 @@
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
+    
+    <!-- AutoDealer Rich Snippet / JSON-LD for Local SEO -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "AutoDealer",
+      "name": "Sadguru Car Melo",
+      "image": "https://sadgurucarmelo.com/og-image.jpg",
+      "@id": "https://sadgurucarmelo.com/",
+      "url": "https://sadgurucarmelo.com/",
+      "telephone": "+919913634447",
+      "priceRange": "₹₹₹",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "Trilok Car Bazar, Simada Canal BRTS Rd, Canal Chokdi, Varachha",
+        "addressLocality": "Surat",
+        "postalCode": "395013",
+        "addressRegion": "GJ",
+        "addressCountry": "IN"
+      },
+      "geo": {
+        "@type": "GeoCoordinates",
+        "latitude": 21.2111767,
+        "longitude": 72.8951542
+      },
+      "openingHoursSpecification": {
+        "@type": "OpeningHoursSpecification",
+        "dayOfWeek": [
+          "Monday",
+          "Tuesday",
+          "Wednesday",
+          "Thursday",
+          "Friday",
+          "Saturday",
+          "Sunday"
+        ],
+        "opens": "09:00",
+        "closes": "19:00"
+      }
+    }
+    </script>
   </body>
 </html>

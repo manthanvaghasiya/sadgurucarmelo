@@ -1,7 +1,7 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { Fuel, Settings2, User, Gauge, MessageCircle, Eye } from 'lucide-react';
 import { getCarWhatsAppLink } from '../utils/whatsapp';
-
+import { getOptimizedUrl } from '../utils/imageUtils';
 export default function CarCard({
   id = '1',
   image = 'https://placehold.co/600x400/e2e8f0/64748b?text=Premium+Car',
@@ -29,7 +29,7 @@ export default function CarCard({
       {/* Image Container with Badges */}
       <div className="car-card-image-wrap relative aspect-[4/3] overflow-hidden bg-gray-100">
         <img
-          src={image}
+          src={getOptimizedUrl(image)}
           alt={title}
           loading="lazy"
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"

@@ -1,6 +1,7 @@
 import express from 'express';
 import Lead from '../models/Lead.js';
 import { protect } from '../middleware/authMiddleware.js';
+import axios from 'axios';
 
 const router = express.Router();
 
@@ -100,6 +101,13 @@ router.post('/', protect, async (req, res) => {
     };
 
     const lead = await Lead.create(leadData);
+
+    // Forward to n8n Webhook in production/automation
+    if (process.env.N8N_WEBHOOK_URL) {
+      axios.post(process.env.N8N_WEBHOOK_URL, lead)
+        .catch(err => console.error("Webhook forwarding failed quietly:", err.message));
+    }
+
     res.status(201).json({ success: true, data: lead });
   } catch (error) {
     console.error('Create lead error:', error);
