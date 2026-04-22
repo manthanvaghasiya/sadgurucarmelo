@@ -7,6 +7,7 @@ import { getOptimizedUrl } from '../utils/imageUtils';
 export default function HappyCustomers() {
   const [customers, setCustomers] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [activeCard, setActiveCard] = useState(null);
 
   useEffect(() => {
     const fetchCustomers = async () => {
@@ -58,26 +59,29 @@ export default function HappyCustomers() {
               whileHover={{ y: -8 }}
               className="break-inside-avoid cursor-pointer"
             >
-              <div className="group relative rounded-xl sm:rounded-3xl overflow-hidden shadow-lg hover:shadow-[0_20px_40px_-15px_rgba(235,9,14,0.3)] transition-all duration-500 bg-white border border-gray-100/50 sm:border-white ring-1 ring-white/50 justify-center items-center">
+              <div
+                className="group relative rounded-xl sm:rounded-3xl overflow-hidden shadow-lg hover:shadow-[0_20px_40px_-15px_rgba(235,9,14,0.3)] transition-all duration-500 bg-white border border-gray-100/50 sm:border-white ring-1 ring-white/50 justify-center items-center"
+                onClick={() => customer.reviewText && setActiveCard(activeCard === customer._id ? null : customer._id)}
+              >
                 {/* Delivery Photo */}
                 <img
                   src={getOptimizedUrl(customer.photo, 600)}
                   alt={`Delivery to ${customer.customerName}`}
                   loading="lazy"
-                  className="w-full h-auto object-cover group-hover:scale-105 transition-transform duration-700"
+                  className={`w-full h-auto object-cover transition-transform duration-700 ${activeCard === customer._id ? 'scale-105' : 'sm:group-hover:scale-105'}`}
                 />
 
                 {/* Always-visible Name Overlay (Bottom gradient) */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent pointer-events-none transition-opacity duration-500 group-hover:opacity-40" />
+                <div className={`absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent pointer-events-none transition-opacity duration-500 ${activeCard === customer._id ? 'opacity-40' : 'sm:group-hover:opacity-40'}`} />
                 
                 {/* Review Glassmorphism Overlay (Fades in on hover) */}
                 {customer.reviewText && (
-                  <div className="absolute inset-0 bg-gradient-to-br from-primary/95 to-accent/95 backdrop-blur-md p-4 sm:p-8 flex flex-col justify-center items-center text-center opacity-0 group-hover:opacity-100 transition-all duration-500 z-10">
-                    <Quote className="w-6 h-6 sm:w-12 sm:h-12 text-white/30 mb-2 sm:mb-4 transform -translate-y-2 sm:-translate-y-4 group-hover:translate-y-0 transition-transform duration-500 delay-100" />
-                    <p className="font-body text-white font-medium italic text-[11px] leading-snug sm:text-base sm:leading-relaxed line-clamp-4 sm:line-clamp-6 mb-3 sm:mb-6 transform translate-y-4 group-hover:translate-y-0 transition-transform duration-500 delay-150">
+                  <div className={`absolute inset-0 bg-gradient-to-br from-primary/95 to-accent/95 backdrop-blur-md p-4 sm:p-8 flex flex-col justify-center items-center text-center transition-all duration-500 z-10 ${activeCard === customer._id ? 'opacity-100' : 'opacity-0 sm:group-hover:opacity-100'}`}>
+                    <Quote className={`w-6 h-6 sm:w-12 sm:h-12 text-white/30 mb-2 sm:mb-4 transform transition-transform duration-500 delay-100 ${activeCard === customer._id ? 'translate-y-0' : '-translate-y-2 sm:-translate-y-4 sm:group-hover:translate-y-0'}`} />
+                    <p className={`font-body text-white font-medium italic text-[11px] leading-snug sm:text-base sm:leading-relaxed line-clamp-4 sm:line-clamp-6 mb-3 sm:mb-6 transform transition-transform duration-500 delay-150 ${activeCard === customer._id ? 'translate-y-0' : 'translate-y-4 sm:group-hover:translate-y-0'}`}>
                       "{customer.reviewText}"
                     </p>
-                    <div className="flex flex-col items-center transform translate-y-4 group-hover:translate-y-0 transition-transform duration-500 delay-200">
+                    <div className={`flex flex-col items-center transform transition-transform duration-500 delay-200 ${activeCard === customer._id ? 'translate-y-0' : 'translate-y-4 sm:group-hover:translate-y-0'}`}>
                       <h3 className="font-heading font-bold text-white tracking-wider mb-2 text-xs sm:text-base">
                         — {customer.customerName}
                       </h3>
@@ -87,7 +91,7 @@ export default function HappyCustomers() {
                 )}
 
                 {/* Name Tag (Always at bottom, z-index above initial gradient but below blur) */}
-                <div className="absolute bottom-0 left-0 right-0 p-3 sm:p-6 z-20 flex justify-between items-end transform transition-transform duration-500 group-hover:translate-y-2 opacity-100 group-hover:opacity-0">
+                <div className={`absolute bottom-0 left-0 right-0 p-3 sm:p-6 z-20 flex justify-between items-end transform transition-all duration-500 ${activeCard === customer._id ? 'opacity-0 translate-y-2' : 'opacity-100 translate-y-0 sm:group-hover:opacity-0 sm:group-hover:translate-y-2'}`}>
                   <div className="flex flex-col">
                     <h3 className="font-heading font-black text-white text-sm sm:text-xl tracking-wide drop-shadow-lg leading-tight">
                       {customer.customerName}
