@@ -56,6 +56,10 @@ connectDB();
 // ── Initialize Express ──
 const app = express();
 
+// ── Render Reverse Proxy Configuration ──
+// REQUIRED for express-rate-limit to work securely on Render/Vercel
+app.set('trust proxy', 1);
+
 // ── Security Middleware ──
 app.use(helmet());
 app.use(mongoSanitize());
@@ -86,16 +90,21 @@ app.use(cors({
     }
 
     const allowedStr = process.env.FRONTEND_URL || 'https://sadgurucarsurat.com';
-    // Split by comma, trim spaces, and remove trailing slashes for strict matching
-    const allowedOrigins = allowedStr.split(',').map(s => s.trim().replace(/\/$/, ''));
     
-    // Check if the request origin (cleaned) is in the array
-    const cleanOrigin = origin.trim().replace(/\/$/, '');
+    // Clean target configurations
+    const allowedOrigins = allowedStr.split(',').map(s => {
+      let cleaned = s.trim().replace(/\/$/, '');
+      return cleaned.replace('https://www.', 'https://'); // Normalize inner string
+    });
+    
+    // Clean incoming browser origin
+    let cleanOrigin = origin.trim().replace(/\/$/, '');
+    cleanOrigin = cleanOrigin.replace('https://www.', 'https://'); 
     
     if (allowedOrigins.includes(cleanOrigin) || allowedOrigins.includes('*')) {
       callback(null, true);
     } else {
-      console.warn(`🚨 CORS Blocked: Origin ${origin} not in FRONTEND_URL`);
+      console.warn(`🚨 CORS Blocked: Incoming request from [${origin}] is NOT in FRONTEND_URL list: [${allowedStr}]`);
       callback(null, false); // Return false instead of Error to prevent 500s on preflight
     }
   },
