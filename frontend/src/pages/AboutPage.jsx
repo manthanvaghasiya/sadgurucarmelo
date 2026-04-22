@@ -77,7 +77,7 @@ export default function AboutPage() {
         {/* High-End Technical CSS Grid Background with Fading Mask */}
         <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff0a_1px,transparent_1px),linear-gradient(to_bottom,#ffffff0a_1px,transparent_1px)] bg-[size:30px_30px] md:bg-[size:40px_40px] [mask-image:radial-gradient(ellipse_80%_60%_at_50%_0%,#000_60%,transparent_100%)] pointer-events-none"></div>
 
-        <motion.div 
+        <motion.div
           className="max-w-4xl mx-auto relative z-10 flex flex-col items-center"
           initial="hidden"
           animate="visible"
@@ -111,7 +111,7 @@ export default function AboutPage() {
 
         {/* 2. Overlapping Stats Card (Premium Integration) */}
         <section className="px-4 relative z-20 border-t border-transparent">
-          <motion.div 
+          <motion.div
             className="-mt-20 md:-mt-24 max-w-4xl mx-auto bg-white rounded-[2rem] md:rounded-3xl shadow-[0_20px_40px_rgba(0,0,0,0.06)] ring-1 ring-slate-100 p-8 md:p-10 flex flex-col md:flex-row items-center justify-between divide-y md:divide-y-0 md:divide-x divide-slate-100 gap-8 md:gap-0 text-center relative z-20"
             initial="hidden"
             whileInView="visible"
@@ -150,7 +150,7 @@ export default function AboutPage() {
           <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-24 items-center relative z-10">
 
             {/* Image & Showcase - Takes up 5 columns */}
-            <motion.div 
+            <motion.div
               className="lg:col-span-5 relative group order-2 lg:order-1"
               initial="hidden"
               whileInView="visible"
@@ -181,7 +181,7 @@ export default function AboutPage() {
             </motion.div>
 
             {/* Typography & Text Content - Takes up 7 columns */}
-            <motion.div 
+            <motion.div
               className="flex flex-col lg:col-span-7 order-1 lg:order-2"
               initial="hidden"
               whileInView="visible"
@@ -243,7 +243,7 @@ export default function AboutPage() {
         {/* 4. The Sadguru Standard (Premium 10x UI) */}
         <section className="py-16 md:py-24 px-4 relative overflow-hidden bg-slate-50/50">
           <div className="max-w-7xl mx-auto relative z-10">
-            <motion.div 
+            <motion.div
               className="text-center mb-12 md:mb-20 flex flex-col items-center"
               initial="hidden"
               whileInView="visible"
@@ -260,7 +260,7 @@ export default function AboutPage() {
               </p>
             </motion.div>
 
-            <motion.div 
+            <motion.div
               className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8 xl:gap-10"
               initial="hidden"
               whileInView="visible"
@@ -333,7 +333,7 @@ export default function AboutPage() {
           <div className="absolute bottom-0 left-1/4 w-[400px] md:w-[600px] h-[400px] md:h-[600px] bg-primary/5 rounded-full blur-[100px] md:blur-[120px] pointer-events-none"></div>
 
           <div className="max-w-7xl mx-auto relative z-20">
-            <motion.div 
+            <motion.div
               className="text-center mb-12 md:mb-20 flex flex-col items-center"
               initial="hidden"
               whileInView="visible"
@@ -351,7 +351,7 @@ export default function AboutPage() {
             </motion.div>
 
             {/* Premium Tab Navigation (Light Mode) */}
-            <motion.div 
+            <motion.div
               className="flex flex-row flex-wrap items-center justify-center gap-3 md:gap-4 mb-10 md:mb-12"
               initial="hidden"
               whileInView="visible"
@@ -418,7 +418,7 @@ export default function AboutPage() {
                               <span className="font-body text-slate-600 text-xs md:text-sm mt-1 block leading-relaxed">બમ્પરથી બમ્પર સુધી Mechanical પરફેક્શન માટે કડક ટેસ્ટિંગ.</span>
                             </div>
                           </div>
-                          
+
                           <div className="flex items-start gap-3 md:gap-4 group">
                             <div className="w-12 h-12 md:w-14 md:h-14 rounded-xl md:rounded-2xl bg-emerald-50 border border-emerald-100 flex items-center justify-center shrink-0 mt-1 md:group-hover:bg-emerald-100 md:group-hover:scale-110 transition-all duration-300 shadow-sm">
                               <ShieldCheck className="w-5 h-5 md:w-6 md:h-6 text-emerald-600" />
@@ -428,7 +428,7 @@ export default function AboutPage() {
                               <span className="font-body text-slate-600 text-xs md:text-sm mt-1 block leading-relaxed">સ્ટ્રક્ચરલ મજબૂતાઈ અને 100% Genuine હિસ્ટ્રીની ખાતરી.</span>
                             </div>
                           </div>
-                          
+
                           <div className="flex items-start gap-3 md:gap-4 group">
                             <div className="w-12 h-12 md:w-14 md:h-14 rounded-xl md:rounded-2xl bg-purple-50 border border-purple-100 flex items-center justify-center shrink-0 mt-1 md:group-hover:bg-purple-100 md:group-hover:scale-110 transition-all duration-300 shadow-sm">
                               <Landmark className="w-5 h-5 md:w-6 md:h-6 text-purple-600" />
@@ -438,7 +438,7 @@ export default function AboutPage() {
                               <span className="font-body text-slate-600 text-xs md:text-sm mt-1 block leading-relaxed">100% સુધી સરળ અને Fast-track ફાઇનાન્સિંગ ઓપ્શન્સ.</span>
                             </div>
                           </div>
-                          
+
                           <div className="flex items-start gap-3 md:gap-4 group">
                             <div className="w-12 h-12 md:w-14 md:h-14 rounded-xl md:rounded-2xl bg-orange-50 border border-orange-100 flex items-center justify-center shrink-0 mt-1 md:group-hover:bg-orange-100 md:group-hover:scale-110 transition-all duration-300 shadow-sm">
                               <CarFront className="w-5 h-5 md:w-6 md:h-6 text-brand-orange" />
@@ -551,7 +551,7 @@ export default function AboutPage() {
                               <span className="font-body text-slate-600 text-xs md:text-sm mt-1 block leading-relaxed">માત્ર એક્સચેન્જ પર મળતા Special Price બેનિફિટ્સનો લાભ લો.</span>
                             </div>
                           </div>
-                          
+
                           <div className="flex items-start gap-3 md:gap-4 group">
                             <div className="w-12 h-12 md:w-14 md:h-14 rounded-xl md:rounded-2xl bg-blue-50 border border-blue-100 flex items-center justify-center shrink-0 mt-1 md:group-hover:bg-blue-100 md:group-hover:scale-110 transition-all duration-300 shadow-sm">
                               <CarFront className="w-5 h-5 md:w-6 md:h-6 text-brand-orange" />
