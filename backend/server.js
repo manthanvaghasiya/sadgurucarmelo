@@ -79,7 +79,7 @@ app.use('/api/auth/login', loginLimiter);
 // ── Core Middleware ──
 app.use(cors({
   origin: process.env.NODE_ENV === 'production'
-    ? (process.env.FRONTEND_URL || 'https://sadgurucarmelo.com')
+    ? (process.env.FRONTEND_URL ? process.env.FRONTEND_URL.split(',') : 'https://sadgurucarsurat.com')
     : ['http://localhost:5173', 'http://localhost:5175', 'http://localhost:3000'],
   credentials: true,
 }));
@@ -101,6 +101,11 @@ app.get('/api/health', (_req, res) => {
     service: 'Sadguru Car Melo API',
     timestamp: new Date().toISOString(),
   });
+});
+
+// Root route for Render cron-job keep-alive pings
+app.get('/', (_req, res) => {
+  res.status(200).send('Sadguru Car Melo API is awake and running.');
 });
 
 // ── API Routes ──

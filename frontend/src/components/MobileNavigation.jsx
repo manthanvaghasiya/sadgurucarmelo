@@ -13,9 +13,9 @@ export default function MobileNavigation() {
                 {/* Left Side: Brand Logo */}
                 <Link to="/" className="flex items-center gap-2">
                     <img
-                      src="/logo.png"
-                      alt="Sadguru Car Melo"
-                      className="h-11 w-auto object-contain"
+                        src="/logo.png"
+                        alt="Sadguru Car Melo"
+                        className="h-11 w-auto object-contain"
                     />
                     <div className="flex flex-col">
                         <span className="text-brand-dark font-black text-base leading-none tracking-tight">SADGURU</span>
