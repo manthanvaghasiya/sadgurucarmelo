@@ -12,6 +12,7 @@ import { useCars } from '../context/CarContext';
 import HeroSection from '../components/HeroSection';
 import ArrivingShortly from '../components/ArrivingShortly';
 import GoogleReviews from '../components/GoogleReviews';
+import HappyCustomers from '../components/HappyCustomers';
 import QuickSearch from '../components/QuickSearch';
 import WhyChooseUs from '../components/WhyChooseUs';
 
@@ -180,6 +181,9 @@ export default function Home() {
 
         {/* 6. Google Reviews Section (Dynamic API + CSS Marquee) */}
         <GoogleReviews />
+
+        {/* 7. Happy Customers Gallery */}
+        <HappyCustomers />
       </div>
     </div>
   );

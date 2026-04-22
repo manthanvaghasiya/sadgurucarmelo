@@ -47,6 +47,7 @@ import carRoutes from './routes/car.routes.js';
 import leadRoutes from './routes/lead.routes.js';
 import messageRoutes from './routes/message.routes.js';
 import promoPosterRoutes from './routes/promoPoster.routes.js';
+import happyCustomerRoutes from './routes/happyCustomer.routes.js';
 
 // ── Load env variables ──
 // (done automatically via 'dotenv/config' at top)
@@ -143,6 +144,7 @@ app.use('/api/cars', carRoutes);
 app.use('/api/leads', leadRoutes);
 app.use('/api/messages', messageRoutes);
 app.use('/api/promo-posters', promoPosterRoutes);
+app.use('/api/happy-customers', happyCustomerRoutes);
 
 // ── 404 Handler ──
 app.use((_req, res) => {

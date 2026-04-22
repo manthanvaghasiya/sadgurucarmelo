@@ -28,6 +28,7 @@ const AdminAddLead = lazy(() => import('./pages/admin/AddLead'));
 const AdminMessages = lazy(() => import('./pages/admin/Messages'));
 const AdminSettings = lazy(() => import('./pages/admin/Settings'));
 const AdminPosters = lazy(() => import('./pages/admin/Posters'));
+const AdminHappyCustomers = lazy(() => import('./pages/admin/HappyCustomersAdmin'));
 
 // Sales Portal Imports
 const SalesDashboard = lazy(() => import('./pages/sales/SalesDashboard'));
@@ -101,6 +102,7 @@ function App() {
                 <Route path="messages" element={<AdminMessages />} />
                 <Route path="settings" element={<AdminSettings />} />
                 <Route path="posters" element={<AdminPosters />} />
+                <Route path="happy-customers" element={<AdminHappyCustomers />} />
               </Route>
 
               {/* ── Sales Portal Routes ── */}

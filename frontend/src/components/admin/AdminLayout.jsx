@@ -23,6 +23,7 @@ const navItems = [
   { name: 'Add New Car', path: '/admin/add-car', icon: PlusCircle },
   { name: 'Leads', path: '/admin/leads', icon: Users },
   { name: 'Messages', path: '/admin/messages', icon: Mail },
+  { name: 'Happy Customers', path: '/admin/happy-customers', icon: ImageIcon },
   { name: 'Coming Soon', path: '/admin/posters', icon: Clock },
   { name: 'Settings', path: '/admin/settings', icon: Settings },
 ];
