@@ -718,7 +718,7 @@ export default function Leads() {
                 <thead>
                   <tr className="border-b border-gray-100">
                     {/* Date Column with Filter */}
-                    <th className="font-body text-[11px] font-bold text-text-muted uppercase tracking-wider py-4 bg-background/40 pl-6 pr-4 text-left relative filter-container">
+                    <th className={`font-body text-[11px] font-bold text-text-muted uppercase tracking-wider py-4 px-4 pl-6 text-left relative filter-container transition-colors duration-300 ${columnFilters.date ? 'bg-emerald-50' : 'bg-background/40'}`}>
                       <div
                         className="flex items-center justify-between cursor-pointer group hover:text-primary transition-colors"
                         onClick={() => toggleFilter('date')}
@@ -763,7 +763,7 @@ export default function Leads() {
                     </th>
 
                     {/* Customer Column with Filter */}
-                    <th className="font-body text-[11px] font-bold text-text-muted uppercase tracking-wider py-4 bg-background/40 px-4 text-left relative filter-container">
+                    <th className={`font-body text-[11px] font-bold text-text-muted uppercase tracking-wider py-4 px-4 text-left relative filter-container transition-colors duration-300 ${columnFilters.customer ? 'bg-emerald-50' : 'bg-background/40'}`}>
                       <div
                         className="flex items-center justify-between cursor-pointer group hover:text-primary transition-colors"
                         onClick={() => toggleFilter('customer')}
@@ -809,7 +809,7 @@ export default function Leads() {
                     </th>
 
                     {/* Car Column with Filter */}
-                    <th className="font-body text-[11px] font-bold text-text-muted uppercase tracking-wider py-4 bg-background/40 px-4 text-left relative filter-container">
+                    <th className={`font-body text-[11px] font-bold text-text-muted uppercase tracking-wider py-4 px-4 text-left relative filter-container transition-colors duration-300 ${columnFilters.car ? 'bg-emerald-50' : 'bg-background/40'}`}>
                       <div
                         className="flex items-center justify-between cursor-pointer group hover:text-primary transition-colors"
                         onClick={() => toggleFilter('car')}
@@ -854,7 +854,7 @@ export default function Leads() {
                       )}
                     </th>
                     {/* Salesman Column with Filter */}
-                    <th className="font-body text-[11px] font-bold text-text-muted uppercase tracking-wider py-4 bg-background/40 px-4 text-left relative filter-container">
+                    <th className={`font-body text-[11px] font-bold text-text-muted uppercase tracking-wider py-4 px-4 text-left relative filter-container transition-colors duration-300 ${columnFilters.salesman ? 'bg-emerald-50' : 'bg-background/40'}`}>
                       <div
                         className="flex items-center justify-between cursor-pointer group hover:text-primary transition-colors"
                         onClick={() => toggleFilter('salesman')}
@@ -899,7 +899,7 @@ export default function Leads() {
                       )}
                     </th>
                     <th className="font-body text-[11px] font-bold text-text-muted uppercase tracking-wider py-4 bg-background/40 px-4 text-left">History</th>
-                    <th className="font-body text-[11px] font-bold text-text-muted uppercase tracking-wider py-4 bg-background/40 px-4 text-left relative group">
+                    <th className={`font-body text-[11px] font-bold text-text-muted uppercase tracking-wider py-4 px-4 text-left relative group transition-colors duration-300 ${sourceFilter !== 'All' ? 'bg-emerald-50' : 'bg-background/40'}`}>
                       <div className="flex items-center gap-1 cursor-pointer w-max h-full">
                         Source
                         <ChevronDown className="w-3 h-3 transition-transform group-hover:text-primary" />
@@ -917,7 +917,7 @@ export default function Leads() {
                         </select>
                       </div>
                     </th>
-                    <th className="font-body text-[11px] font-bold text-text-muted uppercase tracking-wider py-4 bg-background/40 px-4 text-left relative group">
+                    <th className={`font-body text-[11px] font-bold text-text-muted uppercase tracking-wider py-4 px-4 text-left relative group transition-colors duration-300 ${urgencyFilter !== 'All' ? 'bg-emerald-50' : 'bg-background/40'}`}>
                       <div className="flex items-center gap-1 cursor-pointer w-max h-full">
                         Urgency
                         <ChevronDown className="w-3 h-3 transition-transform group-hover:text-primary" />
@@ -934,7 +934,7 @@ export default function Leads() {
                         </select>
                       </div>
                     </th>
-                    <th className="font-body text-[11px] font-bold text-text-muted uppercase tracking-wider py-4 bg-background/40 px-4 text-left relative group">
+                    <th className={`font-body text-[11px] font-bold text-text-muted uppercase tracking-wider py-4 px-4 text-left relative group transition-colors duration-300 ${statusFilter !== 'All' ? 'bg-emerald-50' : 'bg-background/40'}`}>
                       <div className="flex items-center gap-1 cursor-pointer w-max h-full">
                         Status
                         <ChevronDown className="w-3 h-3 transition-transform group-hover:text-primary" />
@@ -977,7 +977,7 @@ export default function Leads() {
 
                       return (
                         <tr key={lead._id} className="border-t border-gray-50 hover:bg-background/40 transition-colors group">
-                          <td className="pl-6 pr-4 py-4">
+                          <td className={`pl-6 pr-4 py-4 transition-colors duration-300 ${columnFilters.date ? 'bg-emerald-50/50' : ''}`}>
                             <div className="flex items-center gap-1.5">
                               <CalendarClock className="w-3.5 h-3.5 text-text-muted/40 shrink-0" />
                               <span className="font-body text-sm text-text-muted whitespace-nowrap">
@@ -985,7 +985,7 @@ export default function Leads() {
                               </span>
                             </div>
                           </td>
-                          <td className="px-4 py-4">
+                          <td className={`px-4 py-4 transition-colors duration-300 ${columnFilters.customer ? 'bg-emerald-50/50' : ''}`}>
                             <div className="min-w-0">
                               <p className="font-body text-sm font-semibold text-text">{lead.customerName}</p>
                               <p className="font-body text-xs text-text-muted mt-0.5 flex items-center gap-1">
@@ -993,7 +993,7 @@ export default function Leads() {
                               </p>
                             </div>
                           </td>
-                          <td className="px-4 py-4">
+                          <td className={`px-4 py-4 transition-colors duration-300 ${columnFilters.car ? 'bg-emerald-50/50' : ''}`}>
                             {lead.carOfInterest ? (
                               <div className="flex flex-col">
                                 <span className="font-body text-xs font-semibold text-text truncate max-w-[150px]">
@@ -1019,7 +1019,7 @@ export default function Leads() {
                             )}
                           </td>
 
-                          <td className="px-4 py-4">
+                          <td className={`px-4 py-4 transition-colors duration-300 ${columnFilters.salesman ? 'bg-emerald-50/50' : ''}`}>
                             <div className="flex items-center gap-2 px-2 py-1 bg-primary/5 rounded-lg w-fit ring-1 ring-primary/10">
                               <Briefcase className="w-3 h-3 text-primary/50" />
                               <span className="font-body text-xs font-semibold text-text whitespace-nowrap">
@@ -1032,17 +1032,17 @@ export default function Leads() {
                               <Eye className="w-3.5 h-3.5" /> View Log
                             </button>
                           </td>
-                          <td className="px-4 py-4">
+                          <td className={`px-4 py-4 transition-colors duration-300 ${sourceFilter !== 'All' ? 'bg-emerald-50/50' : ''}`}>
                             <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full font-body text-[11px] font-bold ring-1 ${sCfg.bg} ${sCfg.text} ${sCfg.ring}`}>
                               {lead.source}
                             </span>
                           </td>
-                          <td className="px-4 py-4">
+                          <td className={`px-4 py-4 transition-colors duration-300 ${urgencyFilter !== 'All' ? 'bg-emerald-50/50' : ''}`}>
                             <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full font-body text-[11px] font-bold ring-1 ${uCfg.bg} ${uCfg.text} ${uCfg.ring}`}>
                               <UrgencyIcon className="w-3 h-3" />{lead.urgency}
                             </span>
                           </td>
-                          <td className="px-4 py-4">
+                          <td className={`px-4 py-4 transition-colors duration-300 ${statusFilter !== 'All' ? 'bg-emerald-50/50' : ''}`}>
                             <select
                               value={lead.status}
                               onChange={(e) => handleStatusChange(lead._id, e.target.value)}
