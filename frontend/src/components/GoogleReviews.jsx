@@ -158,7 +158,7 @@ export default function GoogleReviews() {
   const duplicatedReviews = [...STATIC_REVIEWS, ...STATIC_REVIEWS];
 
   return (
-    <section className="py-24 px-4 bg-gradient-to-b from-gray-50 to-background overflow-hidden relative">
+    <section className="py-24 px-4 bg-transparent overflow-hidden relative">
       <style>{`
         @keyframes customMarquee {
           0% { transform: translateX(0); }
@@ -209,8 +209,8 @@ export default function GoogleReviews() {
       </div>
 
       <div className="relative w-full overflow-hidden flex select-none py-4">
-        <div className="absolute top-0 bottom-0 left-0 w-24 bg-gradient-to-r from-gray-50/80 to-transparent z-10 pointer-events-none"></div>
-        <div className="absolute top-0 bottom-0 right-0 w-24 bg-gradient-to-l from-background to-transparent z-10 pointer-events-none"></div>
+        <div className="absolute top-0 bottom-0 left-0 w-24 bg-gradient-to-r from-slate-50/90 to-transparent z-10 pointer-events-none"></div>
+        <div className="absolute top-0 bottom-0 right-0 w-24 bg-gradient-to-l from-slate-50/90 to-transparent z-10 pointer-events-none"></div>
 
         <div className="flex w-max animate-marquee pause-on-hover gap-6 px-3">
           {duplicatedReviews.map((review, idx) => (
