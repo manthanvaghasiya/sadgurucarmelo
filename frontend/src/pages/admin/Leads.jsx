@@ -27,6 +27,7 @@ import {
   Calendar,
   ClipboardList,
   Briefcase,
+  Plus,
 } from 'lucide-react';
 import axiosInstance from '../../api/axiosConfig';
 import toast from 'react-hot-toast';
@@ -639,9 +640,17 @@ export default function Leads() {
       )}
 
       {/* Page Header */}
-      <div>
-        <h1 className="font-heading font-bold text-2xl text-text">Lead Management</h1>
-        <p className="font-body text-sm text-text-muted mt-1 max-w-xl">Track and respond to inquiries, walk-ins, and contact requests.</p>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="font-heading font-bold text-2xl text-text">Lead Management</h1>
+          <p className="font-body text-sm text-text-muted mt-1 max-w-xl">Track and respond to inquiries, walk-ins, and contact requests.</p>
+        </div>
+        <button
+          onClick={() => navigate('/admin/add-lead')}
+          className="flex items-center gap-2 px-5 py-2.5 bg-primary hover:bg-primary-hover text-white rounded-xl font-body text-sm font-bold transition-all shadow-lg shadow-primary/20 active:scale-95 whitespace-nowrap"
+        >
+          <Plus className="w-4 h-4" /> Add Lead
+        </button>
       </div>
 
       {/* KPI Stats Row */}
@@ -995,7 +1004,18 @@ export default function Leads() {
                                 </span>
                               </div>
                             ) : (
-                              <span className="font-body text-xs text-text-muted/60 italic">-</span>
+                              (lead.notes && lead.notes.match(/Looking for:\s*(.*?)(?:\n|$)/)) ? (
+                                <div className="flex flex-col items-start gap-1">
+                                  <span className="font-body text-xs font-semibold text-text truncate max-w-[150px]" title={lead.notes.match(/Looking for:\s*(.*?)(?:\n|$)/)[1].trim()}>
+                                    {lead.notes.match(/Looking for:\s*(.*?)(?:\n|$)/)[1].trim()}
+                                  </span>
+                                  <span className="px-1.5 py-0.5 bg-[#8b5cf6]/10 text-[#8b5cf6] ring-1 ring-[#8b5cf6]/20 rounded-md font-body text-[9px] font-bold uppercase tracking-wider">
+                                    Custom
+                                  </span>
+                                </div>
+                              ) : (
+                                <span className="font-body text-xs text-text-muted/60 italic">-</span>
+                              )
                             )}
                           </td>
 

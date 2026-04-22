@@ -95,9 +95,15 @@ router.get('/:id', protect, async (req, res) => {
 router.post('/', protect, async (req, res) => {
   try {
     // 🚨 THE FIX: Automatically assign the new lead to the person creating it
+    // If Admin creates the lead and specifies 'assignedTo', honor it
+    let assignedToId = req.user.id;
+    if (req.user.role === 'admin' && req.body.assignedTo) {
+      assignedToId = req.body.assignedTo;
+    }
+
     const leadData = {
       ...req.body,
-      assignedTo: req.user.id
+      assignedTo: assignedToId
     };
 
     const lead = await Lead.create(leadData);

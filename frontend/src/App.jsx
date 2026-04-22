@@ -24,6 +24,7 @@ const AddCar = lazy(() => import('./pages/admin/AddCar'));
 const EditCar = lazy(() => import('./pages/admin/EditCar'));
 const AdminInventory = lazy(() => import('./pages/admin/Inventory'));
 const AdminLeads = lazy(() => import('./pages/admin/Leads'));
+const AdminAddLead = lazy(() => import('./pages/admin/AddLead'));
 const AdminMessages = lazy(() => import('./pages/admin/Messages'));
 const AdminSettings = lazy(() => import('./pages/admin/Settings'));
 const AdminPosters = lazy(() => import('./pages/admin/Posters'));
@@ -96,6 +97,7 @@ function App() {
                 <Route path="add-car" element={<AddCar />} />
                 <Route path="edit-car/:id" element={<EditCar />} />
                 <Route path="leads" element={<AdminLeads />} />
+                <Route path="add-lead" element={<AdminAddLead />} />
                 <Route path="messages" element={<AdminMessages />} />
                 <Route path="settings" element={<AdminSettings />} />
                 <Route path="posters" element={<AdminPosters />} />
