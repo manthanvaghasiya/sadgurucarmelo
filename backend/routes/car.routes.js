@@ -1,14 +1,41 @@
 import express from 'express';
+import NodeCache from 'node-cache';
 import Car from '../models/Car.js';
 import { upload } from '../config/cloudinary.js';
 import { protect, admin } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
+// ── Shared In-Memory Cache ──
+// 3600 seconds = 1 hour maximum memory lifetime
+const carCache = new NodeCache({ stdTTL: 3600 });
+
+// ── Cache Interceptor Middleware ──
+// Synthesizes a unique memory key based on exact query params and paths
+const checkCache = (req, res, next) => {
+  const key = req.originalUrl;
+  const cachedData = carCache.get(key);
+  
+  if (cachedData) {
+    console.log(`⚡ API CACHE HIT: ${key}`);
+    return res.json(cachedData); // Instantly reply without Mongoose
+  }
+  
+  // Hijack res.json to automatically capture and cache the MongoDB payload
+  const originalJson = res.json;
+  res.json = (body) => {
+    if (body && body.success !== false) {
+      carCache.set(key, body);
+    }
+    originalJson.call(res, body);
+  };
+  next();
+};
+
 // ═══════════════════════════════════════════════
 //  GET /api/cars — Get all cars (Public) with filtering + pagination
 // ═══════════════════════════════════════════════
-router.get('/', async (req, res) => {
+router.get('/', checkCache, async (req, res) => {
   try {
     const {
       status, fuelType, transmission, sort, limit,
@@ -85,7 +112,7 @@ router.get('/', async (req, res) => {
 // ═══════════════════════════════════════════════
 //  GET /api/cars/stats — Dashboard stats (Admin)
 // ═══════════════════════════════════════════════
-router.get('/stats', protect, admin, async (req, res) => {
+router.get('/stats', protect, admin, checkCache, async (req, res) => {
   try {
     const now = new Date();
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
@@ -118,7 +145,7 @@ router.get('/stats', protect, admin, async (req, res) => {
 // ═══════════════════════════════════════════════
 //  GET /api/cars/filters — Get unique filter values (Public)
 // ═══════════════════════════════════════════════
-router.get('/filters', async (req, res) => {
+router.get('/filters', checkCache, async (req, res) => {
   try {
     const [makes, bodyTypes, years, brandModelMap] = await Promise.all([
       Car.distinct('make', { status: { $ne: 'Sold' } }),
@@ -149,7 +176,7 @@ router.get('/filters', async (req, res) => {
 // ═══════════════════════════════════════════════
 //  GET /api/cars/:id — Get single car
 // ═══════════════════════════════════════════════
-router.get('/:id', async (req, res) => {
+router.get('/:id', checkCache, async (req, res) => {
   try {
     const car = await Car.findById(req.params.id);
     if (!car) {
@@ -186,6 +213,10 @@ router.post('/', protect, admin, upload.array('images', 10), async (req, res) =>
     }
 
     const car = await Car.create(carData);
+    
+    // Auto-Invalidate global Cache so public site updates instantly!
+    carCache.flushAll();
+    
     res.status(201).json({ success: true, data: car });
   } catch (error) {
     console.error('Create car error:', error);
@@ -221,6 +252,9 @@ router.put('/:id', protect, admin, upload.array('images', 10), async (req, res) 
     if (!car) {
       return res.status(404).json({ success: false, message: 'Car not found' });
     }
+    
+    carCache.flushAll(); // Delete stale cache records
+    
     res.json({ success: true, data: car });
   } catch (error) {
     res.status(400).json({ success: false, message: error.message });
@@ -236,6 +270,9 @@ router.delete('/:id', protect, admin, async (req, res) => {
     if (!car) {
       return res.status(404).json({ success: false, message: 'Car not found' });
     }
+    
+    carCache.flushAll();
+    
     res.json({ success: true, message: 'Vehicle successfully marked as Sold.' });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Server error' });
@@ -253,6 +290,9 @@ router.patch('/:id/toggle-featured', protect, admin, async (req, res) => {
     }
     car.isFeaturedOnHome = !car.isFeaturedOnHome;
     await car.save();
+    
+    carCache.flushAll();
+    
     res.json({ success: true, data: car });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Server error' });
