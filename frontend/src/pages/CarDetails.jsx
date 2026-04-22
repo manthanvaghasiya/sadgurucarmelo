@@ -1,7 +1,7 @@
 import { useParams } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { Fuel, Settings2, User, Gauge, MessageCircle, MapPin, Star, Tag, Check, ShieldCheck, Palette, RotateCw } from 'lucide-react';
+import { Fuel, Settings2, User, Gauge, MessageCircle, MapPin, Star, Tag, Check, ShieldCheck, Palette, RotateCw, CheckCircle2 } from 'lucide-react';
 import axiosInstance from '../api/axiosConfig';
 import CarCard from '../components/CarCard';
 import Car360Viewer from '../components/Car360Viewer';
@@ -241,7 +241,14 @@ export default function CarDetails() {
                                             <Gauge className="w-5 h-5 text-primary stroke-[2]" />
                                         </div>
                                         <div className="flex flex-col">
-                                            <span className="font-heading text-[10px] uppercase tracking-widest text-text-muted">Mileage</span>
+                                            <div className="flex items-center gap-1.5">
+                                                <span className="font-heading text-[10px] uppercase tracking-widest text-text-muted">Mileage</span>
+                                                {car.isKmGenuine && (
+                                                    <span className="text-[#10b981] flex items-center bg-[#10b981]/10 px-1 py-0.5 rounded text-[8px] font-bold uppercase tracking-wider leading-none">
+                                                        <CheckCircle2 className="w-2.5 h-2.5 mr-0.5" /> Genuine
+                                                    </span>
+                                                )}
+                                            </div>
                                             <span className="font-body font-bold text-[13px] text-text">{car.kms?.toLocaleString('en-IN')} KM</span>
                                         </div>
                                     </div>
@@ -450,6 +457,7 @@ export default function CarDetails() {
                                     transmission={relatedCar.transmission}
                                     owner={relatedCar.owner}
                                     kms={`${relatedCar.kms?.toLocaleString('en-IN')} KM`}
+                                    isKmGenuine={relatedCar.isKmGenuine}
                                     badges={relatedCar.badges || []}
                                 />
                             ))}

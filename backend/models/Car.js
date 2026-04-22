@@ -17,10 +17,18 @@ const carSchema = new mongoose.Schema(
       required: [true, 'Model is required'],
       trim: true,
     },
-    year: {
+    manufacturingYear: {
       type: Number,
       min: [1990, 'Year must be 1990 or later'],
       max: [new Date().getFullYear() + 1, 'Year cannot be in the future'],
+    },
+    registerYear: {
+      type: Number,
+      min: [1990, 'Year must be 1990 or later'],
+      max: [new Date().getFullYear() + 1, 'Year cannot be in the future'],
+    },
+    year: {
+      type: Number, 
     },
     price: {
       type: Number,
@@ -29,6 +37,10 @@ const carSchema = new mongoose.Schema(
     kms: {
       type: Number,
       min: [0, 'KMs must be positive'],
+    },
+    isKmGenuine: {
+      type: Boolean,
+      default: false,
     },
 
     // ── Specs ──
@@ -50,13 +62,10 @@ const carSchema = new mongoose.Schema(
       type: String,
       trim: true,
     },
-    variantTier: {
+    variant: {
       type: String,
-      enum: {
-        values: ['Top', 'Medium', 'Low', ''],
-        message: '{VALUE} is not a valid variant tier'
-      },
       default: '',
+      trim: true,
     },
     color: {
       type: String,
@@ -150,7 +159,7 @@ const carSchema = new mongoose.Schema(
 // ── Virtual: Auto-generate title if not set ──
 carSchema.pre('save', function () {
   if (!this.title) {
-    this.title = `${this.make} ${this.model} (${this.year})`;
+    this.title = `${this.make} ${this.model} (${this.manufacturingYear || this.year})`;
   }
 });
 

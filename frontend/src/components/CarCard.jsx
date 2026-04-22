@@ -1,5 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { Fuel, Settings2, User, Gauge, MessageCircle, Eye } from 'lucide-react';
+import { Fuel, Settings2, User, Gauge, MessageCircle, Eye, CheckCircle2 } from 'lucide-react';
 import { getCarWhatsAppLink } from '../utils/whatsapp';
 import { getOptimizedUrl } from '../utils/imageUtils';
 export default function CarCard({
@@ -11,7 +11,8 @@ export default function CarCard({
   fuel = 'Diesel',
   transmission = 'Manual',
   owner = '1st Owner',
-  kms = '45,000 KM'
+  kms = '45,000 KM',
+  isKmGenuine = false
 }) {
   const navigate = useNavigate();
   const whatsappUrl = getCarWhatsAppLink({ title, price });
@@ -75,6 +76,11 @@ export default function CarCard({
           <div className="car-spec-chip flex items-center gap-1 sm:gap-1.5 bg-gray-50 p-1 sm:p-1.5 rounded-md sm:bg-gray-50/80">
             <Gauge className="w-3 h-3 sm:w-4 sm:h-4 text-primary" />
             <span className="font-semibold truncate">{kms}</span>
+            {isKmGenuine && (
+              <span className="ml-auto text-[#10b981] flex items-center bg-[#10b981]/10 px-1 py-0.5 rounded text-[8px] font-bold uppercase tracking-wider">
+                 <CheckCircle2 className="w-2 h-2 mr-0.5" /> Genuine
+              </span>
+            )}
           </div>
           <div className="car-spec-chip flex items-center gap-1 sm:gap-1.5 bg-gray-50 p-1 sm:p-1.5 rounded-md sm:bg-gray-50/80">
             <User className="w-3 h-3 sm:w-4 sm:h-4 text-primary" />

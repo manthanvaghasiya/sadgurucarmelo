@@ -164,12 +164,18 @@ export default function Leads() {
         lead.customerName?.toLowerCase().includes(columnFilters.customer.toLowerCase());
 
       // Car filter
-      const matchesCar = !columnFilters.car || (
-        lead.carOfInterest && (
+      const customCarMatch = lead.notes?.match(/Looking for:\s*(.*?)(?:\n|$)/);
+      const customCarString = customCarMatch ? customCarMatch[1].trim() : '';
+      const filterCarStr = columnFilters.car.toLowerCase().trim();
+
+      const matchesCar = !filterCarStr || (
+        (lead.carOfInterest && (
           `${lead.carOfInterest.make} ${lead.carOfInterest.model} (${lead.carOfInterest.year})`
             .toLowerCase()
-            .includes(columnFilters.car.toLowerCase())
-        )
+            .includes(filterCarStr)
+        )) ||
+        (customCarString && customCarString.toLowerCase().includes(filterCarStr)) ||
+        (customCarString && filterCarStr === 'custom car')
       );
 
       // Salesman filter
@@ -850,6 +856,18 @@ export default function Leads() {
                               </button>
                             )}
                           </div>
+                          <button 
+                            className="mt-2 w-full text-left px-2 py-1.5 text-xs text-[#8b5cf6] font-bold hover:bg-[#8b5cf6]/10 rounded-md transition-colors flex items-center justify-between group"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setColumnFilters({ ...columnFilters, car: 'Custom Car' });
+                              setCurrentPage(1);
+                              setActiveFilterBox(null);
+                            }}
+                          >
+                            <span>Custom Cars Only</span>
+                            <span className="px-1.5 py-0.5 bg-[#8b5cf6]/10 text-[#8b5cf6] rounded font-body text-[9px] uppercase tracking-wider group-hover:bg-[#8b5cf6]/20 transition-colors">Apply</span>
+                          </button>
                         </div>
                       )}
                     </th>

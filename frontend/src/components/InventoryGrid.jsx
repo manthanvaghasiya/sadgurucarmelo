@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, Fragment } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Search } from 'lucide-react';
 import axiosInstance from '../api/axiosConfig';
 import CarCard from './CarCard';
 import ComingSoonCarousel from './ComingSoonCarousel';
@@ -25,6 +25,7 @@ export default function InventoryGrid({ filters = {} }) {
   const [totalCount, setTotalCount] = useState(0);
   const [searchParams] = useSearchParams();
   const currentModelParam = searchParams.get('model');
+  const [searchTerm, setSearchTerm] = useState('');
 
   const fetchCars = useCallback(async () => {
     setIsLoading(true);
@@ -83,6 +84,16 @@ export default function InventoryGrid({ filters = {} }) {
     setPage(1);
   }, [sortBy, filters]);
 
+  // Derived filtered cars based on universal local search
+  const displayedCars = cars.filter((car) => {
+    if (!searchTerm.trim()) return true;
+    const q = searchTerm.toLowerCase().trim();
+    const corpus = `${car.make || ''} ${car.model || ''} ${car.variant || ''} ${car.year || ''} ${car.color || ''} ${car.owner || ''} ${car.fuelType || ''} ${car.transmission || ''} ${car.title || ''} ${car.price || ''}`.toLowerCase();
+    return corpus.includes(q);
+  });
+
+  const displayCount = searchTerm.trim() ? displayedCars.length : totalCount;
+
   return (
     <div className="flex flex-col gap-6">
 
@@ -95,10 +106,24 @@ export default function InventoryGrid({ filters = {} }) {
           <p className="font-body text-sm text-text-muted hidden lg:block">Available stock in Surat</p>
         </div>
 
+        {/* Universal Local Search */}
+        <div className="flex-1 w-full flex items-center justify-center px-0 sm:px-4">
+          <div className="relative w-full max-w-sm">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
+            <input
+              type="text"
+              placeholder="Quick search loaded cars... (e.g. White, Swift)"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-9 pr-4 py-2 border border-gray-200 rounded-lg text-sm font-body text-text focus:outline-none focus:border-primary shadow-sm hover:border-gray-300 transition-colors bg-surface"
+            />
+          </div>
+        </div>
+
         {/* Sort By + Count */}
         <div className="flex items-center gap-3 w-full sm:w-auto justify-end">
           <span className="font-body text-sm text-text-muted">
-            <span className="font-semibold text-text">{totalCount}</span> cars found
+            <span className="font-semibold text-text">{displayCount}</span> cars found
           </span>
           <select
             value={sortBy}
@@ -134,7 +159,7 @@ export default function InventoryGrid({ filters = {} }) {
         </div>
       ) : (
         <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-          {cars.map((car, index) => (
+          {displayedCars.map((car, index) => (
             <Fragment key={car._id || car.id}>
               <CarCard
                 id={car._id || car.id}
@@ -145,6 +170,7 @@ export default function InventoryGrid({ filters = {} }) {
                 transmission={car.transmission}
                 owner={car.owner}
                 kms={formatKm(car.kms)}
+                isKmGenuine={car.isKmGenuine}
                 badges={car.badges || []}
               />
               {/* Insert PromoBanner after every 8 cars exclusively for mobile screens */}
@@ -158,8 +184,8 @@ export default function InventoryGrid({ filters = {} }) {
         </div>
       )}
 
-      {/* Pagination */}
-      {totalPages > 1 && (
+      {/* Pagination (Hide when searching) */}
+      {!searchTerm.trim() && totalPages > 1 && (
         <div className="flex flex-col sm:flex-row items-center justify-between pt-4 border-t border-gray-100 gap-4">
           <p className="font-body text-sm text-text-muted">
             Page <span className="font-semibold text-text">{page}</span> of{' '}

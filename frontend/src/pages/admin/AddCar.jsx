@@ -348,12 +348,12 @@ export default function AddCar() {
   } = useForm({
     defaultValues: {
       status: 'Available',
-      make: '', model: '', year: '', price: '',
+      make: '', model: '', manufacturingYear: '', registerYear: '', price: '',
       kmDriven: '', fuelType: '', transmission: '', ownership: '',
-      bodyType: '', variantTier: '', color: '', registration: '', description: '', features: [{ key: '', value: '' }],
+      bodyType: '', variant: '', color: '', registration: '', description: '', features: [{ key: '', value: '' }],
       airConditioner: '', powerWindows: '', sunroof: '', parkingSensors: '',
       displacement: '', maxPower: '', driveType: '', cylinders: '',
-      isCertified: false, isPetipack: false, validVimo: false, loanAvailable: false,
+      isCertified: false, isPetipack: false, validVimo: false, loanAvailable: false, isKmGenuine: false,
       spinImages: []
     }
   });
@@ -373,14 +373,18 @@ export default function AddCar() {
       const formData = new FormData();
       formData.append('make', data.make);
       formData.append('model', data.model);
-      if (data.year) formData.append('year', data.year);
+      if (data.manufacturingYear) {
+        formData.append('manufacturingYear', data.manufacturingYear);
+        formData.append('year', data.manufacturingYear); // Legacy fallback
+      }
+      if (data.registerYear) formData.append('registerYear', data.registerYear);
       if (data.price) formData.append('price', data.price);
       if (data.kmDriven) formData.append('kms', data.kmDriven);
       if (data.fuelType) formData.append('fuelType', data.fuelType);
       if (data.transmission) formData.append('transmission', data.transmission);
       if (data.ownership) formData.append('owner', data.ownership);
       formData.append('bodyType', data.bodyType);
-      if (data.variantTier) formData.append('variantTier', data.variantTier);
+      if (data.variant) formData.append('variant', data.variant);
       formData.append('color', data.color);
       formData.append('registration', data.registration);
       formData.append('description', data.description);
@@ -416,6 +420,7 @@ export default function AddCar() {
       if (data.isPetipack) formData.append('badges', 'Peti-pack');
       if (data.validVimo) formData.append('badges', 'Valid Vimo');
       formData.append('loanAvailable', String(data.loanAvailable));
+      formData.append('isKmGenuine', String(data.isKmGenuine));
 
       // Inject the image files
       if (photos.length > 0) {
@@ -489,11 +494,18 @@ export default function AddCar() {
               placeholder="e.g. Swift VXI"
             />
             <FormInput
-              label="Year"
+              label="Mfg. Year"
               type="number"
-              register={register('year', { min: { value: 1990, message: 'Invalid year' } })}
-              error={errors.year}
+              register={register('manufacturingYear', { min: { value: 1990, message: 'Invalid year' } })}
+              error={errors.manufacturingYear}
               placeholder="e.g. 2022"
+            />
+            <FormInput
+              label="Reg. Year"
+              type="number"
+              register={register('registerYear', { min: { value: 1990, message: 'Invalid year' } })}
+              error={errors.registerYear}
+              placeholder="e.g. 2023"
             />
             <FormInput
               label="Price"
@@ -503,13 +515,34 @@ export default function AddCar() {
               placeholder="e.g. 585000"
               prefix="₹"
             />
-            <FormInput
-              label="KMs Driven"
-              type="number"
-              register={register('kmDriven')}
-              error={errors.kmDriven}
-              placeholder="e.g. 23000"
-            />
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <label className="font-body text-sm font-semibold text-text">
+                  KMs Driven
+                </label>
+                <label className="flex items-center gap-1.5 cursor-pointer group">
+                  <div className={`w-3.5 h-3.5 rounded border flex items-center justify-center transition-colors ${watch('isKmGenuine') ? 'bg-[#10b981] border-[#10b981]' : 'border-gray-300 bg-background group-hover:border-[#10b981]/50'}`}>
+                    <CheckCircle2 className={`w-2.5 h-2.5 text-white ${watch('isKmGenuine') ? 'opacity-100' : 'opacity-0'}`} />
+                  </div>
+                  <input type="checkbox" {...register('isKmGenuine')} className="hidden" />
+                  <span className="font-body text-[11px] font-bold text-text-muted group-hover:text-text transition-colors uppercase tracking-wider">Genuine?</span>
+                </label>
+              </div>
+              <div className="relative">
+                <input
+                  type="number"
+                  {...register('kmDriven')}
+                  placeholder="e.g. 23000"
+                  className={`w-full px-4 py-3 bg-background border ${errors.kmDriven ? 'border-red-500' : 'border-transparent'} focus:border-primary/30 rounded-xl font-body text-sm text-text placeholder:text-text-muted/50 outline-none transition-all focus:ring-2 focus:ring-primary/10`}
+                />
+              </div>
+              {watch('isKmGenuine') && (
+                <p className="mt-1 font-body text-[11px] font-bold text-[#10b981] flex items-center gap-1">
+                  <CheckCircle2 className="w-3 h-3" /> Genuine
+                </p>
+              )}
+              {errors.kmDriven && <span className="text-red-500 text-xs font-body">{errors.kmDriven.message}</span>}
+            </div>
             <FormSelect
               label="Fuel Type"
               register={register('fuelType')}
@@ -538,12 +571,11 @@ export default function AddCar() {
               placeholder="e.g. SUV"
               options={['SUV', 'Sedan', 'Hatchback', 'MUV', 'Coupe', 'Convertible']}
             />
-            <FormSelect
-              label="Variant Tier"
-              register={register('variantTier')}
-              error={errors.variantTier}
-              placeholder="e.g. Top"
-              options={['Top', 'Medium', 'Low']}
+            <FormInput
+              label="Variant"
+              register={register('variant')}
+              error={errors.variant}
+              placeholder="e.g. LXI, VXI, Top"
             />
             <FormInput
               label="Color"

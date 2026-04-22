@@ -84,6 +84,7 @@ export default function Home() {
                       transmission={car.transmission}
                       owner={car.owner || '1st Owner'}
                       kms={`${(car.kms || 0).toLocaleString('en-IN')} KM`}
+                      isKmGenuine={car.isKmGenuine}
                     />
                   </div>
                 ))
