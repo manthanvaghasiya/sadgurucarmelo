@@ -110,7 +110,7 @@ export default function Inventory() {
         </nav>
 
         {/* Page Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-6 sm:mb-10 mt-14 lg:mt-0">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-6 sm:mb-10">
           <div className="flex flex-col">
             <h1 className="font-heading font-bold text-[36px] sm:text-[42px] text-primary leading-tight tracking-tight">
               Explore Verified Cars

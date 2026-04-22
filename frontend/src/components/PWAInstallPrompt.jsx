@@ -85,7 +85,7 @@ export default function PWAInstallPrompt() {
             </div>
 
             <h3 className="font-heading font-bold text-xl text-slate-900 leading-tight">
-              Sadguru Car Melo App
+              Sadguru Car Surat App
             </h3>
             <p className="font-body text-sm text-slate-500 mt-1.5 max-w-xs leading-relaxed">
               Install our app for faster access, offline browsing, and a native experience.
