@@ -48,11 +48,8 @@ export default function Contact() {
         {/* 2. Main Layout (2 Columns) */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
 
-          {/* 3. Left Column (Details & Form) */}
-          <div className="flex flex-col gap-8">
-
-            {/* Showroom Details Card */}
-            <div className="bg-surface rounded-2xl shadow-sm border border-gray-100 p-8">
+          {/* Showroom Details Card (Mobile: 1, Desktop: Row 1 Col 1) */}
+          <div className="order-1 lg:col-start-1 lg:row-start-1 bg-surface rounded-2xl shadow-sm border border-gray-100 p-8">
               <h2 className="font-heading font-bold text-2xl text-text mb-8">Showroom ની માહિતી</h2>
 
               <div className="flex flex-col gap-8">
@@ -102,8 +99,8 @@ export default function Contact() {
               </div>
             </div>
 
-            {/* Send us a Message Card (Form) */}
-            <div className="bg-surface rounded-2xl shadow-sm border border-gray-100 p-8">
+          {/* Send us a Message Card Form (Mobile: 3, Desktop: Row 2 Col 1) */}
+          <div className="order-3 lg:col-start-1 lg:row-start-2 bg-surface rounded-2xl shadow-sm border border-gray-100 p-8">
               <h2 className="font-heading font-bold text-2xl text-text mb-8">અમને Message મોકલો</h2>
 
               <form className="flex flex-col gap-6" onSubmit={handleSubmit(onSubmit)}>
@@ -174,11 +171,8 @@ export default function Contact() {
                 </button>
               </form>
             </div>
-
-          </div>
-
-          {/* 4. Right Column (Real Live Map & WhatsApp) */}
-          <div className="relative h-[600px] lg:h-auto bg-[#e2e8f0]/40 rounded-3xl overflow-hidden border border-gray-200">
+          {/* Real Live Map & WhatsApp (Mobile: 2, Desktop: Right Column Span 2) */}
+          <div className="order-2 lg:col-start-2 lg:row-start-1 lg:row-span-2 relative h-[600px] min-h-[400px] lg:h-auto bg-[#e2e8f0]/40 rounded-3xl overflow-hidden border border-gray-200">
             {/* Real Google Map Embed */}
             <iframe
               src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3719.5210617841512!2d72.89515417470535!3d21.211176681489203!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3be04fdde8bfb4e5%3A0x834add64072864dc!2sSadguru%20Car%20Melo!5e0!3m2!1sen!2sin!4v1775327556300!5m2!1sen!2sin"
