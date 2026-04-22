@@ -8,6 +8,7 @@ const finalBaseURL = cleanEnvUrl
 
 const axiosInstance = axios.create({
   baseURL: finalBaseURL,
+  withCredentials: true, // Absolutely required to automatically attach/send HttpOnly cookies to the backend
 });
 
 // 1. Dynamic Request Interceptor
@@ -16,12 +17,6 @@ axiosInstance.interceptors.request.use(
     // Strip leading slash from url to prevent Axios/URL parser from wiping out the '/api' base path!
     if (config.url && config.url.startsWith('/')) {
       config.url = config.url.substring(1);
-    }
-    
-    // MUST be inside the interceptor to get a fresh token on every request!
-    const token = localStorage.getItem('token');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
     }
     return config;
   },

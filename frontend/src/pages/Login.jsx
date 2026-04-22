@@ -21,8 +21,8 @@ export default function Login() {
       });
       
       const userData = response.data.data;
-      // Properly hydrate the Context API
-      login(userData, userData.token);
+      // Properly hydrate the Context API (token is now automated securely via HttpOnly cookies)
+      login(userData);
       toast.success('Welcome to the Dashboard!');
       
       if (userData.role === 'admin') {

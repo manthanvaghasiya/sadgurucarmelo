@@ -51,6 +51,16 @@ router.post('/login', async (req, res) => {
       });
     }
 
+    const token = generateToken(user._id, user.role);
+
+    // Set cookie
+    res.cookie('token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict', // Cross-site required if API and Frontend domain differ in Vercel
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    });
+
     res.json({
       success: true,
       data: {
@@ -58,13 +68,24 @@ router.post('/login', async (req, res) => {
         name: user.name,
         email: user.email,
         role: user.role,
-        token: generateToken(user._id, user.role),
       },
     });
   } catch (error) {
     console.error('Login error:', error);
     res.status(500).json({ success: false, message: 'Server error' });
   }
+});
+
+// ═══════════════════════════════════════════════
+//  POST /api/auth/logout — Logout
+// ═══════════════════════════════════════════════
+router.post('/logout', (req, res) => {
+  res.clearCookie('token', {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
+  });
+  res.json({ success: true, message: 'Logged out successfully' });
 });
 
 // ═══════════════════════════════════════════════

@@ -12,7 +12,6 @@ export const AuthProvider = ({ children }) => {
       return null;
     }
   });
-  const [token, setToken] = useState(() => localStorage.getItem('token') || null);
   
   // 2. CRITICAL: Force isLoading to be TRUE on the very first render cycle
   const [isLoading, setIsLoading] = useState(true);
@@ -23,23 +22,28 @@ export const AuthProvider = ({ children }) => {
     setIsLoading(false);
   }, []);
 
-  const login = (userData, userToken) => {
+  const login = (userData) => {
     setUser(userData);
-    setToken(userToken);
     localStorage.setItem('user', JSON.stringify(userData));
-    localStorage.setItem('token', userToken);
   };
 
-  const logout = () => {
-    setUser(null);
-    setToken(null);
-    localStorage.removeItem('user');
-    localStorage.removeItem('token');
-    window.location.href = '/';
+  const logout = async () => {
+    try {
+      // Intelligently import axiosInstance so it isn't circularly loaded
+      const { default: axiosInstance } = await import('../api/axiosConfig');
+      await axiosInstance.post('/auth/logout');
+    } catch (error) {
+      console.error('Logout error:', error);
+    } finally {
+      setUser(null);
+      localStorage.removeItem('user');
+      localStorage.removeItem('token'); // Just in case a legacy token exists
+      window.location.href = '/';
+    }
   };
 
   return (
-    <AuthContext.Provider value={{ user, token, isLoading, login, logout }}>
+    <AuthContext.Provider value={{ user, isLoading, login, logout }}>
       {children}
     </AuthContext.Provider>
   );
