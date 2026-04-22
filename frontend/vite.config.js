@@ -10,6 +10,9 @@ export default defineConfig({
     tailwindcss(),
     VitePWA({
       registerType: 'autoUpdate',
+      devOptions: {
+        enabled: true, // Enables SW + manifest in dev mode so beforeinstallprompt fires on localhost
+      },
       manifest: {
         name: 'Sadguru Car Melo',
         short_name: 'Sadguru',
@@ -19,14 +22,20 @@ export default defineConfig({
         display: 'standalone',
         icons: [
           {
-            src: '/logo.png',
+            src: '/icon-192x192.png',
             sizes: '192x192',
             type: 'image/png'
           },
           {
-            src: '/logo.png',
+            src: '/icon-512x512.png',
             sizes: '512x512',
             type: 'image/png'
+          },
+          {
+            src: '/icon-512x512.png',
+            sizes: '512x512',
+            type: 'image/png',
+            purpose: 'any maskable'
           }
         ]
       }
