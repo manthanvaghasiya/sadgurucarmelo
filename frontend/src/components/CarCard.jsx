@@ -73,12 +73,12 @@ export default function CarCard({
             <Settings2 className="w-3 h-3 sm:w-4 sm:h-4 text-primary" />
             <span className="font-semibold truncate">{transmission}</span>
           </div>
-          <div className="car-spec-chip flex items-center gap-1 sm:gap-1.5 bg-gray-50 p-1 sm:p-1.5 rounded-md sm:bg-gray-50/80">
-            <Gauge className="w-3 h-3 sm:w-4 sm:h-4 text-primary" />
+          <div className="car-spec-chip flex items-center gap-1 sm:gap-1.5 bg-gray-50 p-1 sm:p-1.5 rounded-md sm:bg-gray-50/80 overflow-hidden">
+            <Gauge className="w-3 h-3 sm:w-4 sm:h-4 text-primary shrink-0" />
             <span className="font-semibold truncate">{kms}</span>
             {isKmGenuine && (
-              <span className="ml-auto text-[#10b981] flex items-center bg-[#10b981]/10 px-1 py-0.5 rounded text-[8px] font-bold uppercase tracking-wider">
-                 <CheckCircle2 className="w-2 h-2 mr-0.5" /> Genuine
+              <span className="ml-auto text-[#10b981] flex items-center bg-[#10b981]/10 px-1 py-0.5 rounded text-[7px] sm:text-[8px] font-bold uppercase tracking-wider shrink-0 whitespace-nowrap">
+                 <CheckCircle2 className="w-2 h-2 sm:w-2.5 sm:h-2.5 mr-0.5" /> Genuine
               </span>
             )}
           </div>

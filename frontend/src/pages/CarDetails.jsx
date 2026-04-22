@@ -122,7 +122,7 @@ export default function CarDetails() {
                         <div className="bg-surface p-4 rounded-2xl shadow-sm border border-gray-100">
 
                             {/* Main Big Screen Viewer */}
-                            <div className="relative w-full aspect-video bg-gray-200 rounded-2xl overflow-hidden mb-4 shadow-lg group">
+                            <div className="relative w-full aspect-[4/3] lg:aspect-video bg-gray-200 rounded-2xl overflow-hidden mb-4 shadow-lg group">
                                 {viewMode === '360' && car.spinImages?.length > 0 ? (
                                     <Car360Viewer images={car.spinImages} title="360° EXTERIOR SPIN" />
                                 ) : (
@@ -240,16 +240,16 @@ export default function CarDetails() {
                                         <div className="w-10 h-10 shrink-0 rounded-lg bg-[#f1f5f9] flex items-center justify-center">
                                             <Gauge className="w-5 h-5 text-primary stroke-[2]" />
                                         </div>
-                                        <div className="flex flex-col">
-                                            <div className="flex items-center gap-1.5">
+                                        <div className="flex flex-col min-w-0">
+                                            <div className="flex flex-wrap items-center gap-1 sm:gap-1.5 mb-0.5">
                                                 <span className="font-heading text-[10px] uppercase tracking-widest text-text-muted">Mileage</span>
                                                 {car.isKmGenuine && (
-                                                    <span className="text-[#10b981] flex items-center bg-[#10b981]/10 px-1 py-0.5 rounded text-[8px] font-bold uppercase tracking-wider leading-none">
-                                                        <CheckCircle2 className="w-2.5 h-2.5 mr-0.5" /> Genuine
+                                                    <span className="text-[#10b981] flex items-center bg-[#10b981]/10 px-1 sm:px-1.5 py-0.5 rounded text-[7px] sm:text-[8px] font-bold uppercase tracking-wider leading-none shrink-0 whitespace-nowrap">
+                                                        <CheckCircle2 className="w-2 h-2 sm:w-2.5 sm:h-2.5 mr-0.5" /> Genuine
                                                     </span>
                                                 )}
                                             </div>
-                                            <span className="font-body font-bold text-[13px] text-text">{car.kms?.toLocaleString('en-IN')} KM</span>
+                                            <span className="font-body font-bold text-[12px] sm:text-[13px] text-text truncate">{car.kms?.toLocaleString('en-IN')} KM</span>
                                         </div>
                                     </div>
                                     <div className="flex items-center gap-3">

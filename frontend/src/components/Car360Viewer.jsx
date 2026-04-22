@@ -100,7 +100,7 @@ const Car360Viewer = ({ images = [], title = "360° SPIN" }) => {
 
   if (!images || images.length === 0) {
     return (
-      <div className="w-full aspect-[16/9] bg-gray-50 rounded-3xl flex items-center justify-center border border-dashed border-gray-200">
+      <div className="w-full h-full min-h-[300px] lg:min-h-0 bg-gray-50 rounded-3xl flex items-center justify-center border border-dashed border-gray-200">
         <p className="font-body text-sm text-text-muted italic">No 360° spin images available.</p>
       </div>
     );
@@ -111,7 +111,7 @@ const Car360Viewer = ({ images = [], title = "360° SPIN" }) => {
       {/* Viewer Container */}
       <div
         ref={containerRef}
-        className={`relative w-full aspect-[16/9] bg-white rounded-3xl overflow-hidden cursor-grab active:cursor-grabbing transition-all duration-500 ${isDragging ? 'shadow-2xl scale-[0.995]' : 'shadow-lg'}`}
+        className={`relative w-full h-full min-h-[300px] lg:min-h-0 bg-white rounded-3xl overflow-hidden cursor-grab active:cursor-grabbing transition-all duration-500 ${isDragging ? 'shadow-2xl scale-[0.995]' : 'shadow-lg'}`}
         onMouseDown={onMouseDown}
         onMouseMove={onMouseMove}
         onMouseUp={onMouseUp}
