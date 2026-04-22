@@ -3,8 +3,8 @@ import toast from 'react-hot-toast';
 
 const cleanEnvUrl = import.meta.env.VITE_API_URL ? import.meta.env.VITE_API_URL.replace(/\/+$/, '') : '';
 const finalBaseURL = cleanEnvUrl 
-  ? (cleanEnvUrl.endsWith('/api') ? cleanEnvUrl : `${cleanEnvUrl}/api`)
-  : 'http://localhost:5000/api';
+  ? (cleanEnvUrl.endsWith('/api') ? `${cleanEnvUrl}/` : `${cleanEnvUrl}/api/`)
+  : 'http://localhost:5000/api/';
 
 const axiosInstance = axios.create({
   baseURL: finalBaseURL,
@@ -13,6 +13,11 @@ const axiosInstance = axios.create({
 // 1. Dynamic Request Interceptor
 axiosInstance.interceptors.request.use(
   (config) => {
+    // Strip leading slash from url to prevent Axios/URL parser from wiping out the '/api' base path!
+    if (config.url && config.url.startsWith('/')) {
+      config.url = config.url.substring(1);
+    }
+    
     // MUST be inside the interceptor to get a fresh token on every request!
     const token = localStorage.getItem('token');
     if (token) {
