@@ -1,8 +1,13 @@
 import axios from 'axios';
 import toast from 'react-hot-toast';
 
+const cleanEnvUrl = import.meta.env.VITE_API_URL ? import.meta.env.VITE_API_URL.replace(/\/+$/, '') : '';
+const finalBaseURL = cleanEnvUrl 
+  ? (cleanEnvUrl.endsWith('/api') ? cleanEnvUrl : `${cleanEnvUrl}/api`)
+  : 'http://localhost:5000/api';
+
 const axiosInstance = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5000/api',
+  baseURL: finalBaseURL,
 });
 
 // 1. Dynamic Request Interceptor

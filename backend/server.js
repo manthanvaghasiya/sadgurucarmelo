@@ -78,9 +78,27 @@ app.use('/api/auth/login', loginLimiter);
 
 // ── Core Middleware ──
 app.use(cors({
-  origin: process.env.NODE_ENV === 'production'
-    ? (process.env.FRONTEND_URL ? process.env.FRONTEND_URL.split(',') : 'https://sadgurucarsurat.com')
-    : ['http://localhost:5173', 'http://localhost:5175', 'http://localhost:3000'],
+  origin: function (origin, callback) {
+    if (!origin) return callback(null, true); // Allow non-browser requests
+    
+    if (process.env.NODE_ENV !== 'production') {
+      return callback(null, true);
+    }
+
+    const allowedStr = process.env.FRONTEND_URL || 'https://sadgurucarsurat.com';
+    // Split by comma, trim spaces, and remove trailing slashes for strict matching
+    const allowedOrigins = allowedStr.split(',').map(s => s.trim().replace(/\/$/, ''));
+    
+    // Check if the request origin (cleaned) is in the array
+    const cleanOrigin = origin.trim().replace(/\/$/, '');
+    
+    if (allowedOrigins.includes(cleanOrigin) || allowedOrigins.includes('*')) {
+      callback(null, true);
+    } else {
+      console.warn(`🚨 CORS Blocked: Origin ${origin} not in FRONTEND_URL`);
+      callback(null, false); // Return false instead of Error to prevent 500s on preflight
+    }
+  },
   credentials: true,
 }));
 app.use(express.json({ limit: '10mb' }));
