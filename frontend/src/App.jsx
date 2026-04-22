@@ -36,6 +36,7 @@ const AddLead = lazy(() => import('./pages/sales/AddLead'));
 const EditLead = lazy(() => import('./pages/sales/EditLead'));
 
 import MobileBottomNav from './components/MobileBottomNav';
+import PWAInstallPrompt from './components/PWAInstallPrompt';
 
 // ── Loading Fallback Component ──
 const PageLoader = () => (
@@ -53,6 +54,7 @@ function App() {
       <BrowserRouter>
         <ScrollToTop />
         <CarProvider>
+          <PWAInstallPrompt />
           <Toaster position="top-right" toastOptions={{ style: { fontFamily: 'var(--font-body)' } }} />
           {/* This wrapper ensures the Footer is always pushed to the bottom 
         even if the page content is short.
