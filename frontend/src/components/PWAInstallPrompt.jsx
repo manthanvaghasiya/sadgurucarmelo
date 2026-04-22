@@ -7,20 +7,21 @@ export default function PWAInstallPrompt() {
   const [showPrompt, setShowPrompt] = useState(false);
 
   useEffect(() => {
-    // Listen for the beforeinstallprompt event
     const handleBeforeInstallPrompt = (e) => {
       // Prevent the mini-infobar from appearing on mobile
       e.preventDefault();
       // Stash the event so it can be triggered later.
       setDeferredPrompt(e);
+      // Immediately display the custom installation prompt
+      setShowPrompt(true);
     };
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
 
     // Setup the 2-minute recurring interval
     const interval = setInterval(() => {
-      // Only show the prompt if we have a deferredPrompt saved (meaning app is not installed and browser supports it)
-      // AND we are not currently already showing it natively
+      // If we have a deferredPrompt saved (meaning app is not installed and browser supports it),
+      // we show the prompt again.
       setDeferredPrompt((prevPrompt) => {
         if (prevPrompt) {
           setShowPrompt(true);
@@ -31,7 +32,6 @@ export default function PWAInstallPrompt() {
 
     // Stop recurring if app gets installed
     const handleAppInstalled = () => {
-      clearInterval(interval);
       setDeferredPrompt(null);
       setShowPrompt(false);
     };

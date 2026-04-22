@@ -127,8 +127,8 @@ export default function Dashboard() {
                   <Icon className={`w-6 h-6 ${stat.iconColor}`} strokeWidth={2} />
                 </div>
                 <div className={`flex items-center gap-1 font-body text-xs font-bold px-2.5 py-1 rounded-full ${stat.trend === 'up'
-                    ? 'bg-[#10b981]/10 text-[#059669]'
-                    : 'bg-red-50 text-red-500'
+                  ? 'bg-[#10b981]/10 text-[#059669]'
+                  : 'bg-red-50 text-red-500'
                   }`}>
                   {stat.trend === 'up' ? (
                     <TrendingUp className="w-3 h-3" />
