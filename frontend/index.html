@@ -1,15 +1,30 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" dir="ltr">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    
+    <!-- Preconnect for performance -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    
+    <!-- Icons -->
+    <link rel="icon" type="image/png" href="/logo.png" />
+    <link rel="apple-touch-icon" href="/logo.png" />
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0" />
 
-    <!-- Primary Meta Tags -->
+    <!-- iOS Native PWA Experience -->
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Sadguru Cars" />
+    <meta name="format-detection" content="telephone=no" />
+
+    <!-- Primary Meta Tags & Advanced SEO -->
     <title>Sadguru Car Melo — Surat's Trusted Pre-Owned Car Dealership</title>
     <meta name="description" content="Buy, sell, or exchange certified pre-owned cars at Sadguru Car Melo, Varachha, Surat. 150+ verified vehicles, transparent pricing, and trusted since 2014." />
     <meta name="keywords" content="used cars surat, pre-owned cars surat, second hand cars varachha, sadguru car melo, car dealership surat, certified used cars" />
     <meta name="author" content="Sadguru Car Melo" />
+    <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
     <link rel="canonical" href="https://sadgurucarmelo.com/" />
 
     <!-- Open Graph / WhatsApp / Facebook -->
@@ -20,6 +35,7 @@
     <meta property="og:image" content="https://sadgurucarmelo.com/og-image.jpg" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Sadguru Car Melo Showroom" />
     <meta property="og:site_name" content="Sadguru Car Melo" />
     <meta property="og:locale" content="en_IN" />
 
@@ -29,10 +45,19 @@
     <meta name="twitter:description" content="Buy, sell, or exchange certified pre-owned cars. 150+ verified vehicles." />
     <meta name="twitter:image" content="https://sadgurucarmelo.com/og-image.jpg" />
 
-    <!-- Theme Color for mobile browsers -->
-    <meta name="theme-color" content="#1a2b3c" />
+    <!-- Mobile UI Settings -->
+    <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0f172a" media="(prefers-color-scheme: dark)" />
   </head>
   <body>
+    <!-- Fallback for JavaScript Disabled Browsers -->
+    <noscript>
+      <div style="font-family: sans-serif; padding: 2rem; text-align: center; color: #1e293b;">
+        <h2>JavaScript is disabled</h2>
+        <p>Please enable JavaScript to view and interact with the Sadguru Car Melo platform.</p>
+      </div>
+    </noscript>
+
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
     
@@ -72,7 +97,7 @@
           "Sunday"
         ],
         "opens": "09:00",
-        "closes": "19:00"
+        "closes": "20:00"
       }
     }
     </script>
