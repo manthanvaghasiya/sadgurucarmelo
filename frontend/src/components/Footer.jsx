@@ -96,7 +96,7 @@ export default function Footer() {
                 </div>
                 <div className="flex flex-col">
                   <span className="text-[10px] text-gray-500 font-bold uppercase tracking-wider mb-0.5 group-hover:text-accent transition-colors">Email Us</span>
-                  <span className="text-gray-400 group-hover:text-white transition-colors">info@sadgurucarmelo.com</span>
+                  <span className="text-gray-400 group-hover:text-white transition-colors">sadgurucarsurat@gmail.com</span>
                 </div>
               </a>
             </div>
