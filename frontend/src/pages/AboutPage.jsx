@@ -4,6 +4,7 @@ import { Helmet } from 'react-helmet-async';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ShieldCheck, FileText, Landmark, Tag, Star, Banknote, RefreshCw, CarFront, CheckCircle, Clock, SearchCheck, Award, MapPin, Zap, Handshake, ShieldAlert } from 'lucide-react';
 import GoogleReviews from '../components/GoogleReviews';
+import HappyCustomers from '../components/HappyCustomers';
 
 // Animation variants for Framer Motion
 const fadeInUp = {
@@ -62,9 +63,9 @@ export default function AboutPage() {
   return (
     <div className="flex flex-col flex-grow min-h-screen bg-background overflow-x-hidden">
       <Helmet>
-        <title>About Sadguru Car Melo — Surat's Trusted Car Dealership Since 2010</title>
-        <meta name="description" content="Learn about Sadguru Car Melo — Surat's most trusted pre-owned car dealership since 2010. Buy, sell, or exchange certified vehicles with 100% transparency." />
-        <meta property="og:title" content="About Sadguru Car Melo — Surat's Trusted Car Dealership" />
+        <title>About Sadguru Car Surat — Surat's Trusted Car Dealership Since 2011</title>
+        <meta name="description" content="Learn about Sadguru Car Surat — Surat's most trusted pre-owned car dealership since 2011. Buy, sell, or exchange certified vehicles with 100% transparency." />
+        <meta property="og:title" content="About Sadguru Car Surat — Surat's Trusted Car Dealership" />
         <meta property="og:description" content="Buy, sell, or exchange certified pre-owned cars. 500+ happy customers, 4.8 Google rating." />
       </Helmet>
 
@@ -90,18 +91,18 @@ export default function AboutPage() {
               <span className="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
             </span>
             <span className="font-heading font-bold text-xs sm:text-sm uppercase tracking-wider text-slate-200">
-              સુરતમાં ૨૦૧૦ થી કાર્યરત
+              સુરતમાં 2011 થી કાર્યરત
             </span>
           </motion.div>
 
           {/* Main Heading - Simple English */}
           <motion.h1 variants={fadeInUp} className="font-heading font-bold text-4xl sm:text-5xl md:text-[72px] text-white leading-[1.15] md:leading-[1.1] mb-5 md:mb-6 tracking-tight">
-            100% ભરોસા સાથે <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-orange via-amber-400 to-yellow-500 block sm:inline">Premium Cars</span> ખરીદો અને વેચો
+            100% ભરોસા સાથે <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-orange via-amber-400 to-yellow-500 block sm:inline">Verified Cars</span> ખરીદો અને વેચો
           </motion.h1>
 
           {/* Basic Gujarati + English Mix Subtext */}
           <motion.p variants={fadeInUp} className="font-body text-base md:text-[22px] text-slate-300 font-medium max-w-2xl mx-auto leading-relaxed px-2">
-            સુરતનું સૌથી ભરોસાપાત્ર કાર બજાર. શ્રેષ્ઠ કિંમતે ખરીદો ૧૦૦% <span className="text-white font-bold bg-white/10 px-2 py-0.5 rounded-md mx-0.5 border border-white/5 inline-block mt-1 sm:mt-0">Non-Accidental</span> અને <span className="text-white font-bold bg-white/10 px-2 py-0.5 rounded-md mx-0.5 border border-white/5 inline-block mt-1 sm:mt-0">Certified</span> વપરાયેલી કાર્સ.
+            સુરતનું સૌથી ભરોસાપાત્ર Car Showroom. શ્રેષ્ઠ કિંમતે ખરીદો 100% <span className="text-white font-bold bg-white/10 px-2 py-0.5 rounded-md mx-0.5 border border-white/5 inline-block mt-1 sm:mt-0">Non-Accidental</span> અને <span className="text-white font-bold bg-white/10 px-2 py-0.5 rounded-md mx-0.5 border border-white/5 inline-block mt-1 sm:mt-0">Certified Used Cars</span>
           </motion.p>
         </motion.div>
       </section>
@@ -119,7 +120,7 @@ export default function AboutPage() {
             variants={scaleUp}
           >
             <div className="flex flex-col items-center justify-center w-full pb-8 md:pb-0 group">
-              <span className="font-heading font-bold text-4xl md:text-5xl text-slate-900 mb-2 group-hover:scale-105 transition-transform">500<span className="text-brand-orange font-medium">+</span></span>
+              <span className="font-heading font-bold text-4xl md:text-5xl text-slate-900 mb-2 group-hover:scale-105 transition-transform">5000<span className="text-brand-orange font-medium">+</span></span>
               <span className="font-body text-[11px] font-bold text-slate-400 uppercase tracking-[0.2em]">Happy Customers</span>
             </div>
 
@@ -171,10 +172,10 @@ export default function AboutPage() {
 
                 {/* Floating Legacy Badge */}
                 <div className="absolute top-4 left-4 right-4 md:top-8 md:left-8 md:right-8 bg-white/95 backdrop-blur-md p-5 md:p-6 rounded-2xl md:rounded-3xl flex items-center gap-4 md:gap-5 shadow-2xl transform md:-translate-y-2 md:group-hover:translate-y-0 transition-all duration-500 ring-1 ring-slate-200/50">
-                  <div className="font-heading font-black text-4xl md:text-5xl text-brand-orange">14+</div>
+                  <div className="font-heading font-black text-4xl md:text-5xl text-brand-orange">13+</div>
                   <div>
                     <div className="font-heading font-bold text-base md:text-lg text-slate-900 mb-0.5">વર્ષોનો અતૂટ વિશ્વાસ</div>
-                    <div className="font-body text-xs md:text-sm text-slate-500 font-medium leading-tight line-clamp-2 md:line-clamp-none">૨૦૧૦ થી પ્રીમિયમ કાર્સ માટેનું સૌથી પ્રતિષ્ઠિત અને ભરોસાપાત્ર સરનામું</div>
+                    <div className="font-body text-xs md:text-sm text-slate-500 font-medium leading-tight line-clamp-2 md:line-clamp-none">2011 થી પ્રીમિયમ કાર્સ માટેનું સૌથી પ્રતિષ્ઠિત અને ભરોસાપાત્ર સરનામું</div>
                   </div>
                 </div>
               </div>
@@ -194,17 +195,17 @@ export default function AboutPage() {
               </motion.div>
 
               <motion.h2 variants={fadeInUp} className="font-heading font-bold text-3xl sm:text-4xl md:text-5xl lg:text-6xl text-slate-900 mb-6 md:mb-8 leading-[1.2] md:leading-[1.15] tracking-tight">
-                માત્ર એક કાર બજારથી <br className="hidden lg:block" />
+                માત્ર એક કાર કલેક્શનથી <br className="hidden lg:block" />
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-orange to-amber-500">ઘણું વિશેષ</span>
               </motion.h2>
 
               <motion.div variants={fadeInUp} className="font-body text-base md:text-lg text-slate-600 space-y-5 md:space-y-6 leading-relaxed mb-8 md:mb-12 relative">
                 <div className="absolute left-0 top-2 bottom-2 w-1 md:w-1.5 bg-gradient-to-b from-brand-orange to-yellow-400 rounded-full"></div>
                 <p className="pl-6 md:pl-8 text-lg md:text-xl font-medium text-slate-800">
-                  સદગુરુ કાર મેળો ખાતે, અમારું માનવું છે કે પ્રી-ઓન્ડ વાહન ખરીદવું એ નવી કાર ખરીદવા જેટલું જ ગૌરવપૂર્ણ હોવું જોઈએ. ૨૦૧૦ માં સ્થપાયેલ, અમે પારદર્શિતા અને શ્રેષ્ઠ ગુણવત્તાના સ્તંભો પર અમારી પ્રતિષ્ઠાનું નિર્માણ કર્યું છે.
+                  સદગુરુ કાર મેળો ખાતે, અમારું માનવું છે કે પ્રી-ઓન્ડ વાહન ખરીદવું એ નવી કાર ખરીદવા જેટલું જ ગૌરવપૂર્ણ હોવું જોઈએ. 2011 માં સ્થપાયેલ, અમે પારદર્શિતા અને શ્રેષ્ઠ ગુણવત્તાના સ્તંભો પર અમારી પ્રતિષ્ઠાનું નિર્માણ કર્યું છે.
                 </p>
                 <p className="pl-6 md:pl-8">
-                  અમારા શોરૂમમાં રહેલું દરેક વાહન કડક ચકાસણી પ્રક્રિયામાંથી પસાર થાય છે. અમારું ધ્યાન સંપૂર્ણપણે <span className="font-bold">નોન-એક્સિડેન્ટલ અને RTO-પ્રમાણિત</span> વાહનો પર જ કેન્દ્રિત રહે છે. અમે 'ત્રિલોક કાર બજાર'ના ગૌરવપૂર્ણ ભાગીદાર છીએ, જે વિશ્વાસનો એવો વારસો સુનિશ્ચિત કરે છે જેના પર વરાછાના લોકોએ એક દાયકાથી વધુ સમયથી ભરોસો મૂક્યો છે.
+                  અમારા શોરૂમમાં રહેલું દરેક વાહન કડક ચકાસણી પ્રક્રિયામાંથી પસાર થાય છે. અમારું ધ્યાન સંપૂર્ણપણે <span className="font-bold">નોન-એક્સિડેન્ટલ અને RTO-પ્રમાણિત</span> વાહનો પર જ કેન્દ્રિત રહે છે. અમે 'ત્રિલોક Car Showroom'ના ગૌરવપૂર્ણ ભાગીદાર છીએ, જે વિશ્વાસનો એવો વારસો સુનિશ્ચિત કરે છે જેના પર વરાછાના લોકોએ એક દાયકાથી વધુ સમયથી ભરોસો મૂક્યો છે.
                 </p>
               </motion.div>
 
@@ -346,7 +347,7 @@ export default function AboutPage() {
               </h2>
               <div className="w-16 md:w-24 h-1.5 bg-gradient-to-r from-brand-orange to-yellow-400 rounded-full mb-6 md:mb-8 shadow-sm"></div>
               <p className="font-body text-base md:text-xl text-slate-600 max-w-3xl px-2">
-                પ્રી-ઓન્ડ કાર માર્કેટનો સૌથી શ્રેષ્ઠ અનુભવ. 100% <span className="font-bold text-slate-800">Quality Inspection</span> થી લઈને <span className="font-bold text-slate-800">15-minute Instant Payment</span> સુધીની તમામ સુવિધાઓ.
+                Pre-owned કલેક્શનનો સૌથી શ્રેષ્ઠ અનુભવ. 100% <span className="font-bold text-slate-800">Quality Inspection</span> થી લઈને <span className="font-bold text-slate-800"> Instant Payment</span> સુધીની તમામ સુવિધાઓ.
               </p>
             </motion.div>
 
@@ -404,7 +405,7 @@ export default function AboutPage() {
                       <div className="flex-1 w-full order-2 lg:order-1">
                         <h3 className="font-heading font-bold text-2xl sm:text-3xl md:text-4xl text-slate-900 mb-4 md:mb-5 tracking-tight">100% ભરોસા સાથે <span className="text-brand-orange">Dream Car</span> ખરીદો</h3>
                         <p className="font-body text-slate-600 text-base md:text-lg leading-relaxed mb-8 md:mb-10">
-                          પ્રી-ઓન્ડ કાર ખરીદવી હવે ચિંતાનો વિષય નથી. અમે તમને સંપૂર્ણ પારદર્શક અને <span className="font-semibold text-slate-800">Premium Buying Experience</span> આપીએ છીએ.
+                          Pre-owned ખરીદવી હવે ચિંતાનો વિષય નથી. અમે તમને સંપૂર્ણ પારદર્શક અને <span className="font-semibold text-slate-800">Premium Buying Experience</span> આપીએ છીએ.
                         </p>
 
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-6 md:gap-y-8">
@@ -446,6 +447,26 @@ export default function AboutPage() {
                             <div>
                               <span className="block font-heading font-bold text-slate-900 text-base md:text-lg group-hover:text-orange-700 transition-colors">150+ Premium Cars</span>
                               <span className="font-body text-slate-600 text-xs md:text-sm mt-1 block leading-relaxed">સુરતમાં સૌથી મોટું અને શ્રેષ્ઠ Premium કાર્સનું કલેક્શન.</span>
+                            </div>
+                          </div>
+
+                          <div className="flex items-start gap-3 md:gap-4 group">
+                            <div className="w-12 h-12 md:w-14 md:h-14 rounded-xl md:rounded-2xl bg-teal-50 border border-teal-100 flex items-center justify-center shrink-0 mt-1 md:group-hover:bg-teal-100 md:group-hover:scale-110 transition-all duration-300 shadow-sm">
+                              <FileText className="w-5 h-5 md:w-6 md:h-6 text-teal-600" />
+                            </div>
+                            <div>
+                              <span className="block font-heading font-bold text-slate-900 text-base md:text-lg group-hover:text-teal-700 transition-colors">Hassle-Free RC Transfer</span>
+                              <span className="font-body text-slate-600 text-xs md:text-sm mt-1 block leading-relaxed">કાગળની કાર્યવાહીની સંપૂર્ણ જવાબદારી અમારી, જેથી તમને મળે Peace of Mind.</span>
+                            </div>
+                          </div>
+
+                          <div className="flex items-start gap-3 md:gap-4 group">
+                            <div className="w-12 h-12 md:w-14 md:h-14 rounded-xl md:rounded-2xl bg-rose-50 border border-rose-100 flex items-center justify-center shrink-0 mt-1 md:group-hover:bg-rose-100 md:group-hover:scale-110 transition-all duration-300 shadow-sm">
+                              <Handshake className="w-5 h-5 md:w-6 md:h-6 text-rose-600" />
+                            </div>
+                            <div>
+                              <span className="block font-heading font-bold text-slate-900 text-base md:text-lg group-hover:text-rose-700 transition-colors">After-Sales Support</span>
+                              <span className="font-body text-slate-600 text-xs md:text-sm mt-1 block leading-relaxed">કાર ખરીદ્યા પછી પણ સર્વિસ અને કોઈપણ સહાયતા માટે અમારી ટીમ હંમેશા તૈયાર.</span>
                             </div>
                           </div>
 
@@ -510,6 +531,26 @@ export default function AboutPage() {
                               <span className="font-body text-slate-600 text-xs md:text-sm mt-1 block leading-relaxed">ઝડપી અને ફ્રી કાર ચેકિંગ માટે અમે તમારા લોકેશન પર આવીશું.</span>
                             </div>
                           </div>
+
+                          <div className="flex items-start gap-3 md:gap-4 group">
+                            <div className="w-12 h-12 md:w-14 md:h-14 rounded-xl md:rounded-2xl bg-red-50 border border-red-100 flex items-center justify-center shrink-0 mt-1 md:group-hover:bg-red-100 md:group-hover:scale-110 transition-all duration-300 shadow-sm">
+                              <Tag className="w-5 h-5 md:w-6 md:h-6 text-red-600" />
+                            </div>
+                            <div>
+                              <span className="block font-heading font-bold text-slate-900 text-base md:text-lg group-hover:text-red-700 transition-colors">No Hidden Charges</span>
+                              <span className="font-body text-slate-600 text-xs md:text-sm mt-1 block leading-relaxed">કાર વેચવાની પ્રક્રિયા સંપૂર્ણપણે ફ્રી છે, કોઈ કમિશન કે હિડન ચાર્જ વસૂલવામાં આવતો નથી.</span>
+                            </div>
+                          </div>
+
+                          <div className="flex items-start gap-3 md:gap-4 group">
+                            <div className="w-12 h-12 md:w-14 md:h-14 rounded-xl md:rounded-2xl bg-indigo-50 border border-indigo-100 flex items-center justify-center shrink-0 mt-1 md:group-hover:bg-indigo-100 md:group-hover:scale-110 transition-all duration-300 shadow-sm">
+                              <Landmark className="w-5 h-5 md:w-6 md:h-6 text-indigo-600" />
+                            </div>
+                            <div>
+                              <span className="block font-heading font-bold text-slate-900 text-base md:text-lg group-hover:text-indigo-700 transition-colors">Loan Settlement</span>
+                              <span className="font-body text-slate-600 text-xs md:text-sm mt-1 block leading-relaxed">જો તમારી કાર પર લોન ચાલુ હોય, તો અમે તેનું સીધું બેંક સેટલમેન્ટ કરી આપીએ છીએ.</span>
+                            </div>
+                          </div>
                         </div>
                       </div>
 
@@ -571,6 +612,26 @@ export default function AboutPage() {
                               <span className="font-body text-slate-600 text-xs md:text-sm mt-1 block leading-relaxed">અમારા ફેલાયેલા નેટવર્ક દ્વારા તમને સૌથી ઊંચી કિંમત મળે તેની ખાતરી.</span>
                             </div>
                           </div>
+
+                          <div className="flex items-start gap-3 md:gap-4 group">
+                            <div className="w-12 h-12 md:w-14 md:h-14 rounded-xl md:rounded-2xl bg-cyan-50 border border-cyan-100 flex items-center justify-center shrink-0 mt-1 md:group-hover:bg-cyan-100 md:group-hover:scale-110 transition-all duration-300 shadow-sm">
+                              <CheckCircle className="w-5 h-5 md:w-6 md:h-6 text-cyan-600" />
+                            </div>
+                            <div>
+                              <span className="block font-heading font-bold text-slate-900 text-base md:text-lg group-hover:text-cyan-700 transition-colors">Any Car, Any Condition</span>
+                              <span className="font-body text-slate-600 text-xs md:text-sm mt-1 block leading-relaxed">તમારી જૂની કાર કોઈપણ કંપની કે મોડલની હોય, અમે તેને બેસ્ટ વેલ્યુ સાથે એક્સચેન્જ કરીશું.</span>
+                            </div>
+                          </div>
+
+                          <div className="flex items-start gap-3 md:gap-4 group">
+                            <div className="w-12 h-12 md:w-14 md:h-14 rounded-xl md:rounded-2xl bg-fuchsia-50 border border-fuchsia-100 flex items-center justify-center shrink-0 mt-1 md:group-hover:bg-fuchsia-100 md:group-hover:scale-110 transition-all duration-300 shadow-sm">
+                              <ShieldCheck className="w-5 h-5 md:w-6 md:h-6 text-fuchsia-600" />
+                            </div>
+                            <div>
+                              <span className="block font-heading font-bold text-slate-900 text-base md:text-lg group-hover:text-fuchsia-700 transition-colors">Transparent Upgrade</span>
+                              <span className="font-body text-slate-600 text-xs md:text-sm mt-1 block leading-relaxed">જૂની કારની સાચી કિંમત અને નવી કારનો બેસ્ટ ભાવ – 100% પારદર્શિતા સાથે.</span>
+                            </div>
+                          </div>
                         </div>
                       </div>
 
@@ -587,11 +648,17 @@ export default function AboutPage() {
             </div>
           </div>
         </section>
+
+        {/* 5. Google Reviews Section */}
+        <div className="bg-slate-50/50 border-t border-slate-100">
+          <GoogleReviews />
+        </div>
+
+        {/* 6. Happy Customers Section */}
+        <div className="bg-white border-t border-slate-100 pb-16">
+          <HappyCustomers />
+        </div>
       </div>
-
-      {/* 5. Google Reviews Section (Dynamic API + CSS Marquee) */}
-      <GoogleReviews />
-
     </div>
   );
 }

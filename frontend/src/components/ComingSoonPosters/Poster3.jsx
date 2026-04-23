@@ -51,7 +51,7 @@ export default function Poster3({ car }) {
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-3">
             <div className="flex items-center gap-2 bg-black/40 px-3 py-1 border border-fuchsia-500/30 rounded backdrop-blur text-fuchsia-400 font-mono text-[10px] tracking-widest uppercase">
               <Terminal className="w-3.5 h-3.5 animate-pulse" />
-              Sadguru car melo
+              Sadguru Car Surat
             </div>
 
             {/* Glitch Title */}

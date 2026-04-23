@@ -2,7 +2,7 @@ import { useEffect, useState, useRef } from 'react';
 import { motion, useInView, useSpring } from 'framer-motion';
 import {
     Shield,
-    CheckCircle, Landmark, Headphones
+    CheckCircle, Landmark, Headphones, Tag, FileText, RefreshCw
 } from 'lucide-react';
 
 // --- Animation Variants ---

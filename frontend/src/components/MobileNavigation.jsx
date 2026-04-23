@@ -14,7 +14,7 @@ export default function MobileNavigation() {
                 <Link to="/" className="flex items-center gap-2">
                     <img
                         src="/logo.png"
-                        alt="Sadguru Car Melo"
+                        alt="Sadguru Car Surat"
                         className="h-11 w-auto object-contain"
                     />
                     <div className="flex flex-col">

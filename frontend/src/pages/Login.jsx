@@ -16,15 +16,15 @@ export default function Login() {
       const { default: axiosInstance } = await import('../api/axiosConfig');
       // Backend auth endpoint expects 'email'
       const response = await axiosInstance.post('/auth/login', {
-        email: data.email, 
+        email: data.email,
         password: data.password
       });
-      
+
       const userData = response.data.data;
       // Properly hydrate the Context API (token is now automated securely via HttpOnly cookies)
       login(userData);
       toast.success('Welcome to the Dashboard!');
-      
+
       if (userData.role === 'admin') {
         navigate('/admin');
       } else {
@@ -42,10 +42,10 @@ export default function Login() {
         <div className="absolute -top-40 -right-40 w-96 h-96 bg-accent/5 rounded-full blur-3xl" />
         <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
       </div>
- 
+
       {/* Back to Home Button */}
-      <Link 
-        to="/" 
+      <Link
+        to="/"
         className="absolute top-6 left-6 md:top-8 md:left-8 flex items-center gap-2 text-text-muted hover:text-primary transition-colors font-body text-sm font-semibold z-20 bg-surface/50 backdrop-blur-sm px-4 py-2 rounded-xl border border-gray-100 shadow-sm"
       >
         <Home className="w-4 h-4" />
@@ -59,7 +59,7 @@ export default function Login() {
             <span className="font-heading font-black text-2xl text-white">S</span>
           </div>
           <h1 className="font-heading font-bold text-2xl text-text mb-1 tracking-tight">
-            Sadguru Car Melo
+            Sadguru Car Surat
           </h1>
           <p className="font-body text-sm font-semibold text-accent uppercase tracking-wider">
             Secure Portal
@@ -69,7 +69,7 @@ export default function Login() {
         {/* Form Card */}
         <div className="bg-surface rounded-2xl shadow-xl shadow-primary/5 border border-gray-100 p-8">
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-            
+
             {/* Email Input */}
             <div className="space-y-2">
               <label className="font-body text-sm font-semibold text-text">

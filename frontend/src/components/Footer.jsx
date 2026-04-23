@@ -66,7 +66,12 @@ export default function Footer() {
             </h3>
             <div className="space-y-6 font-body text-[13px]">
               {/* Address */}
-              <div className="flex items-start gap-4 group cursor-pointer">
+              <a
+                href="https://maps.google.com/?q=Trilok+Car+Bazar,+Simada+Canal+Rd,+Canal+Chokdi,+Varachha,+Surat"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-start gap-4 group cursor-pointer"
+              >
                 <div className="w-11 h-11 shrink-0 rounded-xl bg-white/[0.08] border border-white/10 flex items-center justify-center group-hover:bg-accent group-hover:border-accent transition-all duration-500 shadow-xl group-hover:shadow-accent/20">
                   <MapPin className="w-5 h-5 text-white group-hover:text-black transition-colors duration-300" />
                 </div>
@@ -74,7 +79,7 @@ export default function Footer() {
                   Trilok Car Bazar, Simada Canal Rd,<br />
                   Canal Chokdi, Varachha, Surat
                 </p>
-              </div>
+              </a>
 
               {/* Phone */}
               <a href="tel:+919913634447" className="flex items-center gap-4 group">
@@ -124,7 +129,7 @@ export default function Footer() {
                   </div>
                   <div>
                     <p className="text-[9px] text-gray-500 font-bold uppercase tracking-widest mb-0.5 opacity-60">Instagram</p>
-                    <p className="text-[12px] font-heading font-bold text-white group-hover:text-primary transition-colors leading-none">@sadgurucarmelo</p>
+                    <p className="text-[12px] font-heading font-bold text-white group-hover:text-primary transition-colors leading-none">sadguru_car_surat</p>
                   </div>
                 </div>
                 <ArrowUpRight className="w-3.5 h-3.5 text-gray-700 group-hover:text-pink-400 transition-all" />
@@ -132,7 +137,7 @@ export default function Footer() {
 
               {/* Facebook Card */}
               <a
-                href="https://facebook.com/sadgurucarmelo"
+                href="https://www.facebook.com/share/1GrpkBqZXt/"
                 target="_blank"
                 rel="https://www.facebook.com/share/1EMursSoTv/"
                 className="group flex items-center justify-between p-2.5 rounded-xl bg-white/[0.04] border border-white/[0.05] hover:bg-white/[0.08] hover:border-blue-500/40 transition-all duration-500"
@@ -145,7 +150,7 @@ export default function Footer() {
                   </div>
                   <div>
                     <p className="text-[9px] text-gray-500 font-bold uppercase tracking-widest mb-0.5 opacity-60">Facebook</p>
-                    <p className="text-[12px] font-heading font-bold text-white group-hover:text-primary transition-colors leading-none">sadgurucarmelo</p>
+                    <p className="text-[12px] font-heading font-bold text-white group-hover:text-primary transition-colors leading-none">Sadguru car surat</p>
                   </div>
                 </div>
                 <ArrowUpRight className="w-3.5 h-3.5 text-gray-700 group-hover:text-blue-400 transition-all" />

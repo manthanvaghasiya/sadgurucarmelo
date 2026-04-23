@@ -46,7 +46,7 @@ export default function Poster5({ car }) {
         <div className="flex flex-col sm:flex-row items-center justify-between gap-2 z-20">
           <div className="flex items-center gap-2 bg-white/50 backdrop-blur-xl px-4 py-1.5 rounded-full border border-white/60 shadow-[0_4px_20px_rgba(0,0,0,0.03)]">
             <Leaf className="text-emerald-500 w-4 h-4" />
-            <span className="text-emerald-900 font-bold text-[11px] uppercase tracking-[0.15em]">Sadguru car melo</span>
+            <span className="text-emerald-900 font-bold text-[11px] uppercase tracking-[0.15em]">Sadguru Car Surat</span>
           </div>
 
           <div className="flex flex-col items-center sm:items-end">

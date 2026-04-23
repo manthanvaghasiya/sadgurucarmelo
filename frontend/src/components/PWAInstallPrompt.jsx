@@ -1,13 +1,31 @@
 import { useState, useEffect, useRef } from 'react';
-import { X } from 'lucide-react';
+import { X, Share } from 'lucide-react';
 import ReactGA from 'react-ga4';
 
 export default function PWAInstallPrompt() {
   const [deferredPrompt, setDeferredPrompt] = useState(null);
   const [isVisible, setIsVisible] = useState(false);
+  const [isIOS, setIsIOS] = useState(false);
   const timeoutRef = useRef(null);
 
   useEffect(() => {
+    // Detect if already installed
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+
+    if (isStandalone) return;
+
+    // Detect iOS
+    const userAgent = window.navigator.userAgent.toLowerCase();
+    const isIosDevice = /iphone|ipad|ipod/.test(userAgent);
+
+    if (isIosDevice) {
+      setIsIOS(true);
+      // Show iOS prompt after 3 seconds
+      timeoutRef.current = setTimeout(() => {
+        setIsVisible(true);
+      }, 3000);
+    }
+
     const handleBeforeInstallPrompt = (e) => {
       e.preventDefault();
       setDeferredPrompt(e);
@@ -39,6 +57,11 @@ export default function PWAInstallPrompt() {
   }, []);
 
   const handleInstallClick = async () => {
+    if (isIOS) {
+      setIsVisible(false);
+      return;
+    }
+
     if (!deferredPrompt) return;
     deferredPrompt.prompt();
     const { outcome } = await deferredPrompt.userChoice;
@@ -52,10 +75,14 @@ export default function PWAInstallPrompt() {
     setIsVisible(false);
     // Re-show after exactly 2 minutes
     timeoutRef.current = setTimeout(() => {
-      setDeferredPrompt((prev) => {
-        if (prev) setIsVisible(true);
-        return prev;
-      });
+      if (isIOS) {
+        setIsVisible(true);
+      } else {
+        setDeferredPrompt((prev) => {
+          if (prev) setIsVisible(true);
+          return prev;
+        });
+      }
     }, 120000);
   };
 
@@ -89,31 +116,54 @@ export default function PWAInstallPrompt() {
           <div className="flex flex-col items-center text-center">
             {/* App Icon */}
             <div className="w-16 h-16 rounded-2xl overflow-hidden shadow-lg ring-1 ring-black/5 mb-4">
-              <img src="/logo1.png" alt="Sadguru Car Melo" className="w-full h-full object-contain bg-white" />
+              <img src="/logo1.png" alt="Sadguru Car Surat" className="w-full h-full object-contain bg-white" />
             </div>
 
-            <h3 className="font-heading font-bold text-xl text-slate-900 leading-tight">
-              Sadguru Car Surat App
-            </h3>
-            <p className="font-body text-sm text-slate-500 mt-1.5 max-w-xs leading-relaxed">
-              Install our app for faster access, offline browsing, and a native experience.
-            </p>
+            {isIOS ? (
+              <>
+                <h3 className="font-heading font-bold text-xl text-slate-900 leading-tight">
+                  Install on iPhone
+                </h3>
+                <p className="font-body text-sm text-slate-500 mt-2 max-w-xs leading-relaxed">
+                  To install the app, tap the <Share className="inline w-4 h-4 mx-1 mb-1 text-blue-500" /> <b>Share</b> icon below, then tap <b>Add to Home Screen</b>.
+                </p>
 
-            {/* Action Buttons */}
-            <div className="flex items-center gap-3 mt-6 w-full">
-              <button
-                onClick={handleDismiss}
-                className="flex-1 font-heading font-semibold text-sm text-slate-600 py-3 rounded-xl bg-slate-100 hover:bg-slate-200 active:scale-[0.97] transition-all"
-              >
-                Maybe Later
-              </button>
-              <button
-                onClick={handleInstallClick}
-                className="flex-1 font-heading font-bold text-sm text-white py-3 rounded-xl bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 shadow-lg shadow-blue-600/25 active:scale-[0.97] transition-all"
-              >
-                Install Now
-              </button>
-            </div>
+                {/* Action Buttons */}
+                <div className="flex items-center gap-3 mt-6 w-full">
+                  <button
+                    onClick={handleDismiss}
+                    className="flex-1 font-heading font-bold text-sm text-white py-3 rounded-xl bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 shadow-lg shadow-blue-600/25 active:scale-[0.97] transition-all"
+                  >
+                    Got it!
+                  </button>
+                </div>
+              </>
+            ) : (
+              <>
+                <h3 className="font-heading font-bold text-xl text-slate-900 leading-tight">
+                  Sadguru Car Surat App
+                </h3>
+                <p className="font-body text-sm text-slate-500 mt-1.5 max-w-xs leading-relaxed">
+                  Install our app for faster access, offline browsing, and a native experience.
+                </p>
+
+                {/* Action Buttons */}
+                <div className="flex items-center gap-3 mt-6 w-full">
+                  <button
+                    onClick={handleDismiss}
+                    className="flex-1 font-heading font-semibold text-sm text-slate-600 py-3 rounded-xl bg-slate-100 hover:bg-slate-200 active:scale-[0.97] transition-all"
+                  >
+                    Maybe Later
+                  </button>
+                  <button
+                    onClick={handleInstallClick}
+                    className="flex-1 font-heading font-bold text-sm text-white py-3 rounded-xl bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 shadow-lg shadow-blue-600/25 active:scale-[0.97] transition-all"
+                  >
+                    Install Now
+                  </button>
+                </div>
+              </>
+            )}
           </div>
         </div>
       </div>

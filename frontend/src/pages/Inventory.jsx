@@ -80,9 +80,9 @@ export default function Inventory() {
   return (
     <div className="bg-background min-h-screen py-8">
       <Helmet>
-        <title>Buy Certified Pre-Owned Cars in Surat — Sadguru Car Melo Inventory</title>
-        <meta name="description" content="Browse 150+ certified pre-owned cars at Sadguru Car Melo, Surat. Filter by brand, fuel type, budget, and more. Transparent pricing, non-accidental vehicles." />
-        <meta property="og:title" content="Explore Verified Cars — Sadguru Car Melo" />
+        <title>Buy Certified Pre-Owned Cars in Surat — Sadguru Car Surat Inventory</title>
+        <meta name="description" content="Browse 150+ certified pre-owned cars at Sadguru Car Surat, Surat. Filter by brand, fuel type, budget, and more. Transparent pricing, non-accidental vehicles." />
+        <meta property="og:title" content="Explore Verified Cars — Sadguru Car Surat" />
         <meta property="og:description" content="150+ certified pre-owned cars with transparent pricing in Surat." />
       </Helmet>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

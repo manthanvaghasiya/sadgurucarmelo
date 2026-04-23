@@ -133,7 +133,7 @@ export default function HeroSection() {
           {/* Brand pill */}
           <motion.div variants={itemVariants} className="flex items-center gap-3 mb-6">
             <div className="h-[2px] w-12 bg-gradient-to-r from-brand-orange to-transparent"></div>
-            <span className="text-brand-orange text-sm font-bold tracking-[0.2em] uppercase">સદગુરુ કાર મેળો– વિશ્વાસ અને ગુણવત્તા.</span>
+            <span className="text-brand-orange text-[15px] font-heading font-black tracking-wide uppercase drop-shadow-sm">સદગુરુ કાર મેળો – વિશ્વાસ અને ગુણવત્તા.</span>
           </motion.div>
 
           {/* Main headline with Staggered Word Reveal — 2 lines on all screens */}

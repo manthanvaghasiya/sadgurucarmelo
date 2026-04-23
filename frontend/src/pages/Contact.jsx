@@ -31,9 +31,9 @@ export default function Contact() {
   return (
     <div className="bg-background min-h-screen py-12 pb-24 md:py-20 md:pb-20 px-4 overflow-x-hidden">
       <Helmet>
-        <title>Contact Sadguru Car Melo — Visit Our Showroom in Surat</title>
-        <meta name="description" content="Contact Sadguru Car Melo for car inquiries, test drives, or selling your vehicle. Located at Trilok Car Bazar, Varachha, Surat. Call +91 99136 34447." />
-        <meta property="og:title" content="Contact Sadguru Car Melo — Visit Our Showroom" />
+        <title>Contact Sadguru Car Surat — Visit Our Showroom in Surat</title>
+        <meta name="description" content="Contact Sadguru Car Surat for car inquiries, test drives, or selling your vehicle. Located at Trilok Car Bazar, Varachha, Surat. Call +91 99136 34447." />
+        <meta property="og:title" content="Contact Sadguru Car Surat — Visit Our Showroom" />
         <meta property="og:description" content="Call +91 99136 34447 or visit us at Trilok Car Bazar, Varachha, Surat." />
       </Helmet>
 
@@ -214,7 +214,7 @@ export default function Contact() {
           >
             {/* Real Google Map Embed */}
             <iframe
-              title="Sadguru Car Melo Showroom Map"
+              title="Sadguru Car Surat Showroom Map"
               src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3719.5210617841512!2d72.89515417470535!3d21.211176681489203!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3be04fdde8bfb4e5%3A0x834add64072864dc!2sSadguru%20Car%20Melo!5e0!3m2!1sen!2sin!4v1775327556300!5m2!1sen!2sin"
               width="100%"
               height="100%"

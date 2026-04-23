@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Trash2, ImagePlus, Loader2, Sparkles } from 'lucide-react';
+import { Trash2, ImagePlus, Loader2, Sparkles, Edit2, X } from 'lucide-react';
 import toast from 'react-hot-toast';
 import axiosInstance from '../../api/axiosConfig';
 
@@ -8,11 +8,29 @@ export default function HappyCustomersAdmin() {
   const [loading, setLoading] = useState(true);
   
   // Form State
+  const [editingId, setEditingId] = useState(null);
   const [file, setFile] = useState(null);
   const [preview, setPreview] = useState(null);
   const [customerName, setCustomerName] = useState('');
   const [reviewText, setReviewText] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const resetForm = () => {
+    setEditingId(null);
+    setFile(null);
+    setPreview(null);
+    setCustomerName('');
+    setReviewText('');
+  };
+
+  const handleEditClick = (customer) => {
+    setEditingId(customer._id);
+    setCustomerName(customer.customerName);
+    setReviewText(customer.reviewText || '');
+    setPreview(customer.photo); // The current URL from DB
+    setFile(null); // No new file selected yet
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   const fetchCustomers = async () => {
     try {
@@ -45,29 +63,32 @@ export default function HappyCustomersAdmin() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!file) return toast.error('Please select a photo');
+    if (!editingId && !file) return toast.error('Please select a photo');
     if (!customerName.trim()) return toast.error('Customer name is required');
 
     setIsSubmitting(true);
     const formData = new FormData();
-    formData.append('photo', file);
+    if (file) formData.append('photo', file);
     formData.append('customerName', customerName);
-    if (reviewText.trim()) {
+    if (reviewText !== undefined) {
       formData.append('reviewText', reviewText);
     }
 
     try {
-      const res = await axiosInstance.post('/happy-customers/admin', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data'
-        }
-      });
+      let res;
+      if (editingId) {
+        res = await axiosInstance.put(`/happy-customers/admin/${editingId}`, formData, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        });
+      } else {
+        res = await axiosInstance.post('/happy-customers/admin', formData, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        });
+      }
+
       if (res.data.success) {
-        toast.success('Happy Customer added!');
-        setFile(null);
-        setPreview(null);
-        setCustomerName('');
-        setReviewText('');
+        toast.success(editingId ? 'Customer updated!' : 'Happy Customer added!');
+        resetForm();
         fetchCustomers();
       }
     } catch (error) {
@@ -105,14 +126,22 @@ export default function HappyCustomersAdmin() {
         {/* ADD NEW CUSTOMER FORM */}
         <div className="lg:col-span-1">
           <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 sticky top-6">
-            <h2 className="font-heading font-bold text-lg text-text mb-6 flex items-center gap-2">
-              <Sparkles className="w-5 h-5 text-primary" /> Add New Customer
-            </h2>
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="font-heading font-bold text-lg text-text flex items-center gap-2">
+                {editingId ? <Edit2 className="w-5 h-5 text-primary" /> : <Sparkles className="w-5 h-5 text-primary" />}
+                {editingId ? 'Edit Customer' : 'Add New Customer'}
+              </h2>
+              {editingId && (
+                <button onClick={resetForm} className="text-gray-400 hover:text-red-500 transition-colors" title="Cancel Edit">
+                  <X className="w-5 h-5" />
+                </button>
+              )}
+            </div>
 
             <form onSubmit={handleSubmit} className="space-y-5">
               {/* Photo Upload Area */}
               <div>
-                <label className="block font-heading font-semibold text-sm text-text mb-2">Delivery Photo *</label>
+                <label className="block font-heading font-semibold text-sm text-text mb-2">Delivery Photo {!editingId && '*'}</label>
                 <div className="relative group">
                   {preview ? (
                     <div className="relative w-full aspect-[4/3] rounded-xl overflow-hidden border-2 border-primary/20">
@@ -165,7 +194,7 @@ export default function HappyCustomersAdmin() {
                 disabled={isSubmitting}
                 className="w-full bg-primary hover:bg-primary-hover text-white font-body font-bold py-3.5 px-4 rounded-xl shadow-md disabled:opacity-70 flex justify-center items-center gap-2 transition-colors"
               >
-                {isSubmitting ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Publish Customer Photo'}
+                {isSubmitting ? <Loader2 className="w-5 h-5 animate-spin" /> : (editingId ? 'Save Changes' : 'Publish Customer Photo')}
               </button>
             </form>
           </div>
@@ -199,13 +228,22 @@ export default function HappyCustomersAdmin() {
                         )}
                       </div>
 
-                      <button
-                        onClick={() => handleDelete(customer._id)}
-                        className="absolute top-2 right-2 p-2 bg-red-500 hover:bg-red-600 text-white rounded-lg opacity-0 group-hover:opacity-100 transition-opacity shadow-sm"
-                        title="Delete record"
-                      >
-                         <Trash2 className="w-4 h-4" />
-                      </button>
+                      <div className="absolute top-2 right-2 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button
+                          onClick={() => handleEditClick(customer)}
+                          className="p-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg shadow-sm"
+                          title="Edit record"
+                        >
+                           <Edit2 className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={() => handleDelete(customer._id)}
+                          className="p-2 bg-red-500 hover:bg-red-600 text-white rounded-lg shadow-sm"
+                          title="Delete record"
+                        >
+                           <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
                     </div>
                   ))}
                 </div>

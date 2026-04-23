@@ -20,7 +20,11 @@ export default function CarDetails() {
     const whatsappUrl = car ? getCarWhatsAppLink(car) : '#';
 
     useEffect(() => {
+        window.scrollTo(0, 0);
         const fetchCar = async () => {
+            setLoading(true);
+            setError('');
+            setCar(null);
             try {
                 const res = await axiosInstance.get(`/cars/${id}`);
                 if (res.data.success) {
@@ -29,13 +33,13 @@ export default function CarDetails() {
                     setActiveImage(fetchedCar.image || (fetchedCar.images && fetchedCar.images[0]) || 'https://placehold.co/1200x800/e2e8f0/64748b?text=No+Image');
 
                     // NEW: Automatically set viewMode to '360' if the car has spin images
-                    if (fetchedCar.spinImages && fetchedCar.spinImages.length > 0) {
+                    if ((fetchedCar.spinImages || []).length > 0) {
                         setViewMode('360');
                     }
 
                     // Fetch "Similar Cars"
                     try {
-                        const relatedRes = await axiosInstance.get(`/cars?make=${fetchedCar.make}&limit=5`);
+                        const relatedRes = await axiosInstance.get(`/cars?make=${fetchedCar.make}&limit=5&status=Available`);
                         if (relatedRes.data.success || relatedRes.data.data) {
                             const relatedArray = relatedRes.data.data || [];
                             const filteredRelated = relatedArray
@@ -83,9 +87,9 @@ export default function CarDetails() {
 
     return (
         <div className="bg-background min-h-screen py-10 px-4">
-            <SEO 
-                title={`Used ${car.make} ${car.model} ${car.year} for Sale in Surat | Sadguru Car Melo`}
-                description={`Buy ${car.make} ${car.model} (${car.year}) at ₹${car.price?.toLocaleString('en-IN')}. ${car.fuelType || ''}, ${car.transmission || ''}, ${car.kms?.toLocaleString('en-IN') || ''} KM. Certified pre-owned at Sadguru Car Melo, Surat.`}
+            <SEO
+                title={`Used ${car.make} ${car.model} ${car.year} for Sale in Surat | Sadguru Car Surat`}
+                description={`Buy ${car.make} ${car.model} (${car.year}) at ₹${car.price?.toLocaleString('en-IN')}. ${car.fuelType || ''}, ${car.transmission || ''}, ${car.kms?.toLocaleString('en-IN') || ''} KM. Certified pre-owned at Sadguru Car Surat, Surat.`}
                 image={car.image}
                 url={`https://sadgurucarmelo.com/car/${car._id || car.id}`}
                 schema={{
@@ -93,7 +97,7 @@ export default function CarDetails() {
                     "@type": "Vehicle",
                     "name": `${car.make} ${car.model} ${car.year}`,
                     "image": car.image,
-                    "description": car.description || `Certified pre-owned ${car.make} ${car.model} (${car.year}) available at Sadguru Car Melo.`,
+                    "description": car.description || `Certified pre-owned ${car.make} ${car.model} (${car.year}) available at Sadguru Car Surat.`,
                     "brand": {
                         "@type": "Brand",
                         "name": car.make
@@ -116,7 +120,7 @@ export default function CarDetails() {
                         "itemCondition": "https://schema.org/UsedCondition",
                         "seller": {
                             "@type": "AutoDealer",
-                            "name": "Sadguru Car Melo",
+                            "name": "Sadguru Car Surat",
                             "image": "https://sadgurucarmelo.com/og-image.jpg",
                             "address": {
                                 "@type": "PostalAddress",
@@ -163,8 +167,8 @@ export default function CarDetails() {
 
                             {/* Main Big Screen Viewer */}
                             <div className="relative w-full aspect-[4/3] lg:aspect-video bg-gray-200 rounded-2xl overflow-hidden mb-4 shadow-lg group">
-                                {viewMode === '360' && car.spinImages?.length > 0 ? (
-                                    <Car360Viewer images={car.spinImages} title="360° EXTERIOR SPIN" />
+                                {viewMode === '360' && (car.spinImages || []).length > 0 ? (
+                                    <Car360Viewer images={car.spinImages || []} title="360° EXTERIOR SPIN" />
                                 ) : (
                                     <img src={getOptimizedUrl(activeImage)} alt="Car View" loading="lazy" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.02]" />
                                 )}
@@ -183,14 +187,14 @@ export default function CarDetails() {
                             <div className="flex overflow-x-auto gap-3 pb-2 scrollbar-thin scrollbar-thumb-gray-200 scrollbar-track-transparent">
 
                                 {/* 1. The 360° Spin Thumbnail (Always First if it exists) */}
-                                {car.spinImages?.length > 0 && (
+                                {(car.spinImages || []).length > 0 && (
                                     <button
                                         onClick={() => setViewMode('360')}
                                         className={`relative shrink-0 w-24 sm:w-32 aspect-video bg-gray-900 rounded-lg overflow-hidden cursor-pointer transition-all duration-300 focus:outline-none 
                                             ${viewMode === '360' ? 'ring-2 ring-accent ring-offset-2 opacity-100 z-10' : 'opacity-70 hover:opacity-100 hover:ring-2 hover:ring-accent/50 hover:ring-offset-1'}`
                                         }
                                     >
-                                        <img src={getOptimizedUrl(car.spinImages[0])} className="w-full h-full object-cover opacity-50 blur-[1px]" alt="360 Spin" loading="lazy" />
+                                        <img src={getOptimizedUrl((car.spinImages || [])[0])} className="w-full h-full object-cover opacity-50 blur-[1px]" alt="360 Spin" loading="lazy" />
                                         <div className="absolute inset-0 flex flex-col items-center justify-center text-white">
                                             <RotateCw className="w-6 h-6 mb-1" />
                                             <span className="font-heading font-bold text-[10px] tracking-wider uppercase">360° Spin</span>
@@ -199,7 +203,7 @@ export default function CarDetails() {
                                 )}
 
                                 {/* 2. Standard Photo Thumbnails */}
-                                {(car.images && car.images.length > 0) && car.images.map((img, i) => {
+                                {(car.images || []).length > 0 && (car.images || []).map((img, i) => {
                                     const isActive = activeImage === img && viewMode === 'standard';
                                     return (
                                         <button
@@ -228,7 +232,7 @@ export default function CarDetails() {
                             <div className="bg-surface rounded-2xl shadow-sm border border-gray-100 p-6">
                                 <div className="flex justify-between items-start mb-4">
                                     <span className="font-heading font-bold text-[11px] text-text-muted tracking-widest uppercase">{car.registration || 'UNREGISTERED'}</span>
-                                    {car.badges && car.badges.map((b) => (
+                                    {(car.badges || []).map((b) => (
                                         <span key={b} className="bg-[#10b981]/10 text-[#10b981] px-2.5 py-1 rounded text-[10px] font-heading font-bold uppercase tracking-widest flex items-center gap-1">
                                             {typeof b === 'string' ? b.toUpperCase() : b}
                                         </span>
@@ -236,7 +240,7 @@ export default function CarDetails() {
                                 </div>
 
                                 <h2 className="font-heading font-bold text-[36px] text-accent mb-1 leading-none">₹{car.price?.toLocaleString('en-IN')}</h2>
-                                <p className="font-body text-xs text-text-muted mb-4">Last updated: {new Date(car.updatedAt || Date.now()).toLocaleDateString()}</p>
+                                <p className="font-body text-xs text-text-muted mb-4">Last updated: {car.updatedAt && !isNaN(new Date(car.updatedAt).getTime()) ? new Date(car.updatedAt).toLocaleDateString() : new Date().toLocaleDateString()}</p>
 
                                 {car.loanAvailable && (
                                     <div className="flex items-center gap-2 mb-6 px-3 py-3 bg-blue-50/50 border border-blue-100 rounded-xl text-blue-700">
@@ -331,7 +335,7 @@ export default function CarDetails() {
                                     S
                                 </div>
                                 <div className="flex flex-col">
-                                    <h4 className="font-heading font-bold text-text text-sm mb-1">Sadguru Car Melo</h4>
+                                    <h4 className="font-heading font-bold text-text text-sm mb-1">Sadguru Car Surat</h4>
                                     <p className="font-body text-xs text-text-muted mb-2">Trimruti Compound, Opp. Yoginagar BRTS, Varachha Road, Surat</p>
                                     <div className="flex items-center gap-1 mb-3">
                                         <span className="font-heading font-bold text-xs text-text">4.9</span>
@@ -357,51 +361,73 @@ export default function CarDetails() {
                     <div className="lg:col-span-2 order-3">
                         <div className="flex flex-col gap-8 bg-surface p-6 sm:p-8 rounded-2xl shadow-sm border border-gray-100">
                             {/* Specific Feature Grids */}
-                            <div className="flex flex-col gap-6">
-                                <div>
-                                    <h3 className="font-heading font-bold text-xl text-text mb-6 border-l-4 border-primary pl-3">Comfort Features</h3>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-4 font-body text-sm">
-                                        <div className="flex justify-between items-center border-b border-gray-100 pb-3">
-                                            <span className="text-text-muted">Air Conditioner</span>
-                                            <span className="font-semibold text-text">{car.airConditioner || 'N/A'}</span>
+                            {(car.airConditioner || car.powerWindows || car.sunroof || car.parkingSensors || car.displacement || car.maxPower || car.driveType || car.cylinders) && (
+                                <div className="flex flex-col gap-6">
+                                    {(car.airConditioner || car.powerWindows || car.sunroof || car.parkingSensors) && (
+                                        <div>
+                                            <h3 className="font-heading font-bold text-xl text-text mb-6 border-l-4 border-primary pl-3">Comfort Features</h3>
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-4 font-body text-sm">
+                                                {car.airConditioner && (
+                                                    <div className="flex justify-between items-center border-b border-gray-100 pb-3">
+                                                        <span className="text-text-muted">Air Conditioner</span>
+                                                        <span className="font-semibold text-text">{car.airConditioner}</span>
+                                                    </div>
+                                                )}
+                                                {car.powerWindows && (
+                                                    <div className="flex justify-between items-center border-b border-gray-100 pb-3">
+                                                        <span className="text-text-muted">Power Windows</span>
+                                                        <span className="font-semibold text-text">{car.powerWindows}</span>
+                                                    </div>
+                                                )}
+                                                {car.sunroof && (
+                                                    <div className="flex justify-between items-center border-b border-gray-100 pb-3">
+                                                        <span className="text-text-muted">Sunroof</span>
+                                                        <span className="font-semibold text-text">{car.sunroof}</span>
+                                                    </div>
+                                                )}
+                                                {car.parkingSensors && (
+                                                    <div className="flex justify-between items-center border-b border-gray-100 pb-3">
+                                                        <span className="text-text-muted">Parking Sensors</span>
+                                                        <span className="font-semibold text-text">{car.parkingSensors}</span>
+                                                    </div>
+                                                )}
+                                            </div>
                                         </div>
-                                        <div className="flex justify-between items-center border-b border-gray-100 pb-3">
-                                            <span className="text-text-muted">Power Windows</span>
-                                            <span className="font-semibold text-text">{car.powerWindows || 'N/A'}</span>
-                                        </div>
-                                        <div className="flex justify-between items-center border-b border-gray-100 pb-3">
-                                            <span className="text-text-muted">Sunroof</span>
-                                            <span className="font-semibold text-text">{car.sunroof || 'N/A'}</span>
-                                        </div>
-                                        <div className="flex justify-between items-center border-b border-gray-100 pb-3">
-                                            <span className="text-text-muted">Parking Sensors</span>
-                                            <span className="font-semibold text-text">{car.parkingSensors || 'N/A'}</span>
-                                        </div>
-                                    </div>
-                                </div>
+                                    )}
 
-                                <div>
-                                    <h3 className="font-heading font-bold text-xl text-text mb-6 border-l-4 border-primary pl-3">Engine & Performance</h3>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-4 font-body text-sm">
-                                        <div className="flex justify-between items-center border-b border-gray-100 pb-3">
-                                            <span className="text-text-muted">Displacement</span>
-                                            <span className="font-semibold text-text">{car.displacement || 'N/A'}</span>
+                                    {(car.displacement || car.maxPower || car.driveType || car.cylinders) && (
+                                        <div>
+                                            <h3 className="font-heading font-bold text-xl text-text mb-6 border-l-4 border-primary pl-3">Engine & Performance</h3>
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-4 font-body text-sm">
+                                                {car.displacement && (
+                                                    <div className="flex justify-between items-center border-b border-gray-100 pb-3">
+                                                        <span className="text-text-muted">Displacement</span>
+                                                        <span className="font-semibold text-text">{car.displacement}</span>
+                                                    </div>
+                                                )}
+                                                {car.maxPower && (
+                                                    <div className="flex justify-between items-center border-b border-gray-100 pb-3">
+                                                        <span className="text-text-muted">Max Power</span>
+                                                        <span className="font-semibold text-text">{car.maxPower}</span>
+                                                    </div>
+                                                )}
+                                                {car.driveType && (
+                                                    <div className="flex justify-between items-center border-b border-gray-100 pb-3">
+                                                        <span className="text-text-muted">Drive Type</span>
+                                                        <span className="font-semibold text-text">{car.driveType}</span>
+                                                    </div>
+                                                )}
+                                                {car.cylinders && (
+                                                    <div className="flex justify-between items-center border-b border-gray-100 pb-3">
+                                                        <span className="text-text-muted">No. of Cylinders</span>
+                                                        <span className="font-semibold text-text">{car.cylinders}</span>
+                                                    </div>
+                                                )}
+                                            </div>
                                         </div>
-                                        <div className="flex justify-between items-center border-b border-gray-100 pb-3">
-                                            <span className="text-text-muted">Max Power</span>
-                                            <span className="font-semibold text-text">{car.maxPower || 'N/A'}</span>
-                                        </div>
-                                        <div className="flex justify-between items-center border-b border-gray-100 pb-3">
-                                            <span className="text-text-muted">Drive Type</span>
-                                            <span className="font-semibold text-text">{car.driveType || 'N/A'}</span>
-                                        </div>
-                                        <div className="flex justify-between items-center border-b border-gray-100 pb-3">
-                                            <span className="text-text-muted">No. of Cylinders</span>
-                                            <span className="font-semibold text-text">{car.cylinders || 'N/A'}</span>
-                                        </div>
-                                    </div>
+                                    )}
                                 </div>
-                            </div>
+                            )}
 
                             {car.description && (
                                 <div>
@@ -410,11 +436,11 @@ export default function CarDetails() {
                                 </div>
                             )}
 
-                            {car.features && car.features.length > 0 && (
+                            {(car.features || []).length > 0 && (
                                 <div className={car.description ? 'mt-8' : ''}>
                                     <h3 className="font-heading font-bold text-xl text-text mb-6 border-l-4 border-primary pl-3">Key Features</h3>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-4 font-body text-sm">
-                                        {car.features.map((f, i) => {
+                                        {(car.features || []).map((f, i) => {
                                             const featureStr = String(f || '');
                                             const hasColon = featureStr.includes(':');
 
@@ -443,7 +469,7 @@ export default function CarDetails() {
                                 </div>
                             )}
 
-                            {(!car.description && (!car.features || car.features.length === 0)) && (
+                            {(!car.description && (car.features || []).length === 0 && !car.airConditioner && !car.powerWindows && !car.sunroof && !car.parkingSensors && !car.displacement && !car.maxPower && !car.driveType && !car.cylinders) && (
                                 <div className="py-6 text-center text-text-muted font-body text-sm">
                                     No description or features provided for this vehicle.
                                 </div>
@@ -456,7 +482,7 @@ export default function CarDetails() {
                                 S
                             </div>
                             <div className="flex flex-col">
-                                <h4 className="font-heading font-bold text-text text-sm mb-1">Sadguru Car Melo</h4>
+                                <h4 className="font-heading font-bold text-text text-sm mb-1">Sadguru Car Surat</h4>
                                 <p className="font-body text-xs text-text-muted mb-2">Trimruti Compound, Opp. Yoginagar BRTS, Varachha Road, Surat</p>
                                 <div className="flex items-center gap-1 mb-3">
                                     <span className="font-heading font-bold text-xs text-text">4.9</span>

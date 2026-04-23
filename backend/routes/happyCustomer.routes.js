@@ -57,4 +57,36 @@ router.delete('/admin/:id', protect, admin, async (req, res) => {
   }
 });
 
+// PUT /api/happy-customers/admin/:id - Admin only
+// Updates customer details and optionally the photo
+router.put('/admin/:id', protect, admin, upload.single('photo'), async (req, res) => {
+  try {
+    const { customerName, reviewText } = req.body;
+    
+    let updateData = {
+      customerName,
+      reviewText: reviewText || '',
+    };
+
+    if (req.file) {
+      updateData.photo = req.file.path;
+    }
+
+    const updatedCustomer = await HappyCustomer.findByIdAndUpdate(
+      req.params.id,
+      updateData,
+      { new: true }
+    );
+
+    if (!updatedCustomer) {
+      return res.status(404).json({ success: false, message: 'Customer record not found' });
+    }
+
+    res.json({ success: true, data: updatedCustomer });
+  } catch (error) {
+    console.error('Update Happy Customer error:', error);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+});
+
 export default router;
