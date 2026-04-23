@@ -122,7 +122,7 @@ router.get('/stats', protect, admin, checkCache, async (req, res) => {
       Car.countDocuments({ status: 'Available' }),
       Car.countDocuments({ status: 'Sold', updatedAt: { $gte: startOfMonth } }),
       Car.aggregate([
-        { $match: { status: { $in: ['Available', 'Booked', 'Coming Soon'] } } },
+        { $match: { status: 'Available' } },
         { $group: { _id: null, total: { $sum: '$price' } } },
       ]),
     ]);
