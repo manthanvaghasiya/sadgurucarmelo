@@ -45,7 +45,7 @@ const statusConfig = {
 };
 
 export default function Inventory() {
-  const { cars, deleteCar, toggleFeatured } = useCars();
+  const { cars, isLoading: carsLoading, deleteCar, toggleFeatured } = useCars();
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('Available');
@@ -56,21 +56,21 @@ export default function Inventory() {
 
   // Map backend cars to the local unified format dynamically
   const allCars = useMemo(() => {
-    return cars
+    return (cars || [])
       .map((c) => ({
-        id: c._id || c.id,
-        registration: c.registration || 'N/A',
-        image: c.image || 'https://placehold.co/120x80/e2e8f0/64748b?text=Car',
-        title: `${c.make} ${c.model} (${c.year})`,
-        make: c.make || '',
-        model: c.model || '',
-        km: `${(c.kms || 0).toLocaleString('en-IN')} KM`,
-        price: c.price >= 100000 ? `₹${(c.price / 100000).toFixed(2)} Lakhs` : `₹${(c.price || 0).toLocaleString('en-IN')}`,
-        priceRaw: c.price || 0,
-        status: c.status || 'Available',
-        isFeaturedOnHome: c.isFeaturedOnHome || false,
-        dateAdded: new Date(c.createdAt || Date.now()).toLocaleDateString('en-IN', { month: 'short', day: '2-digit', year: 'numeric' }),
-        fuel: c.fuelType || 'Unknown',
+        id: c?._id || c?.id || '',
+        registration: c?.registration || 'N/A',
+        image: c?.image || 'https://placehold.co/120x80/e2e8f0/64748b?text=Car',
+        title: `${c?.make || ''} ${c?.model || ''} (${c?.year || ''})`.trim(),
+        make: c?.make || '',
+        model: c?.model || '',
+        km: `${(c?.kms || 0).toLocaleString('en-IN')} KM`,
+        price: (c?.price || 0) >= 100000 ? `₹${((c?.price || 0) / 100000).toFixed(2)} Lakhs` : `₹${(c?.price || 0).toLocaleString('en-IN')}`,
+        priceRaw: c?.price || 0,
+        status: c?.status || 'Available',
+        isFeaturedOnHome: c?.isFeaturedOnHome || false,
+        dateAdded: new Date(c?.createdAt || Date.now()).toLocaleDateString('en-IN', { month: 'short', day: '2-digit', year: 'numeric' }),
+        fuel: c?.fuelType || 'Unknown',
       }));
   }, [cars]);
 
@@ -132,6 +132,18 @@ export default function Inventory() {
     });
     return c;
   }, [allCars]);
+
+  // ── Loading State ──
+  if (carsLoading) {
+    return (
+      <div className="flex items-center justify-center py-32">
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-10 h-10 border-4 border-primary/20 border-t-primary rounded-full animate-spin" />
+          <p className="font-body text-sm text-text-muted">Loading inventory...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">

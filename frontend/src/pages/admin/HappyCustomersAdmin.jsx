@@ -121,11 +121,11 @@ export default function HappyCustomersAdmin() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 lg:gap-8">
         
         {/* ADD NEW CUSTOMER FORM */}
         <div className="lg:col-span-1">
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-6 sticky top-6">
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-6 lg:sticky lg:top-6">
             <div className="flex justify-between items-center mb-6">
               <h2 className="font-heading font-bold text-lg text-text flex items-center gap-2">
                 {editingId ? <Edit2 className="w-5 h-5 text-primary" /> : <Sparkles className="w-5 h-5 text-primary" />}
@@ -146,12 +146,18 @@ export default function HappyCustomersAdmin() {
                   {preview ? (
                     <div className="relative w-full aspect-[4/3] rounded-xl overflow-hidden border-2 border-primary/20">
                       <img src={preview} alt="Preview" className="w-full h-full object-cover" />
-                      <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                      {/* Desktop: hover overlay */}
+                      <div className="absolute inset-0 bg-black/40 items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hidden sm:flex">
                         <label className="cursor-pointer bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white px-4 py-2 rounded-lg font-body text-sm font-semibold transition-colors">
                           Change Photo
                           <input type="file" accept="image/*" onChange={handleFileChange} className="hidden" />
                         </label>
                       </div>
+                      {/* Mobile: always-visible button at bottom */}
+                      <label className="sm:hidden absolute bottom-0 inset-x-0 bg-black/60 backdrop-blur-sm text-white text-center py-2.5 font-body text-xs font-bold cursor-pointer active:bg-black/80 transition-colors">
+                        Tap to Change Photo
+                        <input type="file" accept="image/*" onChange={handleFileChange} className="hidden" />
+                      </label>
                     </div>
                   ) : (
                     <label className="flex flex-col items-center justify-center w-full aspect-[4/3] rounded-xl border-2 border-dashed border-gray-300 hover:border-primary hover:bg-primary/5 transition-colors cursor-pointer bg-gray-50">
@@ -218,31 +224,58 @@ export default function HappyCustomersAdmin() {
              ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-4">
                   {customers.map((customer) => (
-                    <div key={customer._id} className="group relative rounded-xl overflow-hidden border border-gray-200 aspect-[4/3]">
-                      <img src={customer.photo} alt={customer.customerName} className="w-full h-full object-cover" />
-                      
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent p-4 flex flex-col justify-end">
-                        <h4 className="font-heading font-bold text-white text-sm truncate">{customer.customerName}</h4>
-                        {customer.reviewText && (
-                           <p className="font-body text-gray-300 text-xs mt-1 line-clamp-2">"{customer.reviewText}"</p>
-                        )}
+                    <div key={customer._id} className="group rounded-xl overflow-hidden border border-gray-200 bg-white">
+                      {/* Image with overlay */}
+                      <div className="relative aspect-[4/3]">
+                        <img src={customer.photo} alt={customer.customerName} className="w-full h-full object-cover" />
+                        
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent p-4 flex flex-col justify-end">
+                          <h4 className="font-heading font-bold text-white text-sm truncate">{customer.customerName}</h4>
+                          {customer.reviewText && (
+                            <p className="font-body text-gray-300 text-xs mt-1 line-clamp-2">"{customer.reviewText}"</p>
+                          )}
+                        </div>
+
+                        {/* Desktop: hover overlay buttons */}
+                        <div className="absolute top-2 right-2 flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity hidden sm:flex">
+                          <button
+                            onClick={() => handleEditClick(customer)}
+                            className="min-w-[44px] min-h-[44px] flex items-center justify-center bg-blue-500 hover:bg-blue-600 text-white rounded-lg shadow-sm active:scale-90 transition-all"
+                            title="Edit record"
+                          >
+                            <Edit2 className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={() => handleDelete(customer._id)}
+                            className="min-w-[44px] min-h-[44px] flex items-center justify-center bg-red-500 hover:bg-red-600 text-white rounded-lg shadow-sm active:scale-90 transition-all"
+                            title="Delete record"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
                       </div>
 
-                      <div className="absolute top-2 right-2 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <button
-                          onClick={() => handleEditClick(customer)}
-                          className="min-w-[44px] min-h-[44px] flex items-center justify-center bg-blue-500 hover:bg-blue-600 text-white rounded-lg shadow-sm active:scale-90 transition-all"
-                          title="Edit record"
-                        >
-                           <Edit2 className="w-4 h-4" />
-                        </button>
-                        <button
-                          onClick={() => handleDelete(customer._id)}
-                          className="min-w-[44px] min-h-[44px] flex items-center justify-center bg-red-500 hover:bg-red-600 text-white rounded-lg shadow-sm active:scale-90 transition-all"
-                          title="Delete record"
-                        >
-                           <Trash2 className="w-4 h-4" />
-                        </button>
+                      {/* Mobile: always-visible action bar */}
+                      <div className="sm:hidden flex items-center justify-between px-3 py-2.5 border-t border-gray-100">
+                        <div className="min-w-0">
+                          <p className="font-body text-xs font-semibold text-text truncate">{customer.customerName}</p>
+                        </div>
+                        <div className="flex items-center gap-1.5 shrink-0">
+                          <button
+                            onClick={() => handleEditClick(customer)}
+                            className="min-w-[40px] min-h-[40px] flex items-center justify-center text-primary bg-primary/5 hover:bg-primary/10 rounded-lg transition-colors active:scale-90"
+                            title="Edit"
+                          >
+                            <Edit2 className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={() => handleDelete(customer._id)}
+                            className="min-w-[40px] min-h-[40px] flex items-center justify-center text-red-500 bg-red-50 hover:bg-red-100 rounded-lg transition-colors active:scale-90"
+                            title="Delete"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
                       </div>
                     </div>
                   ))}

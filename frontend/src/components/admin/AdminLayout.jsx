@@ -39,7 +39,7 @@ export default function AdminLayout() {
     return location.pathname.startsWith(path);
   };
 
-  const { logout } = useAuth();
+  const { user, logout } = useAuth();
  
   const handleLogout = () => {
     logout();
