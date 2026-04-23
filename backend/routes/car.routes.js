@@ -239,10 +239,51 @@ router.put('/:id', protect, admin, upload.array('images', 10), async (req, res) 
       updateData.spinImages = updateData.spinImages.split(',').map(u => u.trim()).filter(Boolean);
     }
 
+    let finalImages = [];
+    if (req.body.keptImages) {
+        if (Array.isArray(req.body.keptImages)) {
+            finalImages = req.body.keptImages;
+        } else {
+            finalImages = [req.body.keptImages];
+        }
+    }
+
     if (req.files && req.files.length > 0) {
       const imageUrls = req.files.map(file => file.path);
-      updateData.images = imageUrls;
-      updateData.image = imageUrls[0];
+      
+      const mainType = req.body.mainPhotoType || 'existing';
+      const mainIndex = parseInt(req.body.mainPhotoIndex, 10) || 0;
+
+      let mainUrl = null;
+      if (mainType === 'new' && imageUrls[mainIndex]) {
+          mainUrl = imageUrls[mainIndex];
+          imageUrls.splice(mainIndex, 1);
+      } else if (mainType === 'existing' && finalImages[mainIndex]) {
+          mainUrl = finalImages[mainIndex];
+          finalImages.splice(mainIndex, 1);
+      }
+
+      finalImages = [...finalImages, ...imageUrls];
+      if (mainUrl) {
+          finalImages.unshift(mainUrl);
+      }
+    } else {
+      const mainType = req.body.mainPhotoType || 'existing';
+      const mainIndex = parseInt(req.body.mainPhotoIndex, 10) || 0;
+      if (mainType === 'existing' && finalImages[mainIndex]) {
+          const mainUrl = finalImages[mainIndex];
+          finalImages.splice(mainIndex, 1);
+          finalImages.unshift(mainUrl);
+      }
+    }
+
+    // Only update images if we have any final images
+    // If empty, we don't wipe it out entirely unless specifically told to, but since they can delete all, we should apply it.
+    updateData.images = finalImages;
+    if (finalImages.length > 0) {
+      updateData.image = finalImages[0];
+    } else {
+      updateData.image = '';
     }
 
     const car = await Car.findByIdAndUpdate(req.params.id, updateData, {

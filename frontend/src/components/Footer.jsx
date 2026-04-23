@@ -67,7 +67,7 @@ export default function Footer() {
             <div className="space-y-6 font-body text-[13px]">
               {/* Address */}
               <a
-                href="https://maps.google.com/?q=Trilok+Car+Bazar,+Simada+Canal+Rd,+Canal+Chokdi,+Varachha,+Surat"
+                href="https://maps.app.goo.gl/zJjxnJM1BnLj3RpR7"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-start gap-4 group cursor-pointer"

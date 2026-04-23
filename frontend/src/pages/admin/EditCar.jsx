@@ -182,7 +182,7 @@ function ToggleSwitch({ label, description, checked, onChange }) {
   );
 }
 
-// Drop Zone component (moved from AddCar.jsx logic)
+// DropZone component for new files
 function DropZone({
   title,
   description,
@@ -193,6 +193,8 @@ function DropZone({
   accept,
   highlight = false,
   id,
+  mainPhoto,
+  onMakeMain
 }) {
   const [isDragging, useStateDragging] = useState(false);
   const inputRef = useRef(null);
@@ -231,17 +233,26 @@ function DropZone({
       </div>
       {files.length > 0 && (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 mt-3">
-          {files.map((file, index) => (
-            <div key={index} className="relative group bg-background rounded-xl overflow-hidden border border-gray-100 aspect-[4/3]">
-              <img src={URL.createObjectURL(file)} alt={file.name} className="w-full h-full object-cover" />
-              <div className="absolute inset-0 bg-primary/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                <button type="button" onClick={() => onRemoveFile(index)} className="p-2 bg-white/90 rounded-full text-red-500 hover:bg-white transition-colors"><X className="w-4 h-4" /></button>
+          {files.map((file, index) => {
+            const isMain = mainPhoto?.type === 'new' && mainPhoto?.index === index;
+            return (
+              <div key={index} className="relative group bg-background rounded-xl overflow-hidden border border-gray-100 aspect-[4/3]">
+                <img src={URL.createObjectURL(file)} alt={file.name} className="w-full h-full object-cover" />
+                {isMain && (
+                   <div className="absolute top-2 left-2 bg-accent text-white text-[10px] font-bold px-2 py-1 rounded shadow-sm z-10">MAIN</div>
+                )}
+                <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2">
+                  {!isMain && onMakeMain && (
+                     <button type="button" onClick={(e) => { e.stopPropagation(); onMakeMain(index); }} className="text-[10px] bg-white text-black px-3 py-1.5 rounded font-bold hover:bg-gray-200 shadow-sm uppercase tracking-wide">Make Main</button>
+                  )}
+                  <button type="button" onClick={(e) => { e.stopPropagation(); onRemoveFile(index); }} className="text-[10px] bg-red-500 text-white px-3 py-1.5 rounded font-bold hover:bg-red-600 shadow-sm uppercase tracking-wide">Remove</button>
+                </div>
+                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-2">
+                  <p className="font-body text-[10px] text-white truncate text-center">{file.name}</p>
+                </div>
               </div>
-              <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-2">
-                <p className="font-body text-[10px] text-white truncate">{file.name}</p>
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>
@@ -256,9 +267,33 @@ export default function EditCar() {
   const [existingImages, setExistingImages] = useState([]);
   const [photos, setPhotos] = useState([]);
   const [spinImages, setSpinImages] = useState([]);
+  const [mainPhoto, setMainPhoto] = useState({ type: 'existing', index: 0 });
 
-  const addPhotos = (newFiles) => setPhotos((prev) => [...prev, ...newFiles]);
-  const removePhoto = (index) => setPhotos((prev) => prev.filter((_, i) => i !== index));
+  const addPhotos = (newFiles) => {
+    setPhotos((prev) => [...prev, ...newFiles]);
+    // If there were no existing photos, and this is the first upload, set it as main
+    if (existingImages.length === 0 && photos.length === 0 && mainPhoto.type === 'existing') {
+        setMainPhoto({ type: 'new', index: 0 });
+    }
+  };
+  
+  const removePhoto = (index) => {
+    setPhotos((prev) => prev.filter((_, i) => i !== index));
+    if (mainPhoto.type === 'new' && mainPhoto.index === index) {
+      setMainPhoto({ type: 'existing', index: 0 }); // Fallback
+    } else if (mainPhoto.type === 'new' && mainPhoto.index > index) {
+      setMainPhoto({ type: 'new', index: mainPhoto.index - 1 });
+    }
+  };
+
+  const removeExistingPhoto = (index) => {
+    setExistingImages((prev) => prev.filter((_, i) => i !== index));
+    if (mainPhoto.type === 'existing' && mainPhoto.index === index) {
+      setMainPhoto({ type: 'existing', index: 0 }); // Fallback
+    } else if (mainPhoto.type === 'existing' && mainPhoto.index > index) {
+      setMainPhoto({ type: 'existing', index: mainPhoto.index - 1 });
+    }
+  };
 
   const {
     register,
@@ -400,6 +435,14 @@ export default function EditCar() {
       formData.append('loanAvailable', String(data.loanAvailable));
       formData.append('isKmGenuine', String(data.isKmGenuine));
 
+      if (existingImages.length > 0) {
+        existingImages.forEach(url => formData.append('keptImages', url));
+      }
+
+      // Add main photo config
+      formData.append('mainPhotoType', mainPhoto.type);
+      formData.append('mainPhotoIndex', mainPhoto.index);
+
       // Append any new images
       if (photos.length > 0) {
         photos.forEach(photo => formData.append('images', photo));
@@ -437,14 +480,27 @@ export default function EditCar() {
 
       {/* Existing Image Preview */}
       {existingImages.length > 0 && (
-        <div className="mb-6 bg-surface rounded-2xl border border-gray-100 p-4">
-          <p className="font-body text-sm font-semibold text-text mb-3">Live Photos</p>
+        <div className="mb-6 bg-surface rounded-2xl border border-gray-100 p-4 sm:p-6 shadow-sm">
+          <p className="font-heading text-lg font-bold text-text mb-1">Live Photos</p>
+          <p className="font-body text-xs text-text-muted mb-4">You can remove old photos or set which one is the Main photo on the car card.</p>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
-            {existingImages.map((img, idx) => (
-              <div key={idx} className="w-full aspect-[4/3] rounded-xl overflow-hidden bg-background ring-1 ring-gray-100">
-                <img src={img} alt={`Car ${idx + 1}`} className="w-full h-full object-cover" />
-              </div>
-            ))}
+            {existingImages.map((img, idx) => {
+              const isMain = mainPhoto.type === 'existing' && mainPhoto.index === idx;
+              return (
+                <div key={idx} className="relative group w-full aspect-[4/3] rounded-xl overflow-hidden bg-background ring-1 ring-gray-100">
+                  <img src={img} alt={`Car ${idx + 1}`} className="w-full h-full object-cover" />
+                  {isMain && (
+                     <div className="absolute top-2 left-2 bg-accent text-white text-[10px] font-bold px-2 py-1 rounded shadow-sm z-10">MAIN</div>
+                  )}
+                  <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2 z-20">
+                     {!isMain && (
+                       <button type="button" onClick={() => setMainPhoto({ type: 'existing', index: idx })} className="text-[10px] bg-white text-black px-3 py-1.5 rounded font-bold hover:bg-gray-200 shadow-sm uppercase tracking-wide">Make Main</button>
+                     )}
+                     <button type="button" onClick={() => removeExistingPhoto(idx)} className="text-[10px] bg-red-500 text-white px-3 py-1.5 rounded font-bold hover:bg-red-600 shadow-sm uppercase tracking-wide">Remove</button>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
       )}
@@ -695,20 +751,22 @@ export default function EditCar() {
             <h2 className="font-heading font-bold text-lg text-text">Replace Media (Upload New)</h2>
           </div>
           <div className="mb-4">
-            <p className="text-sm font-body text-red-500 bg-red-50 p-3 rounded-lg border border-red-100 font-semibold">
-              <AlertCircle className="w-4 h-4 inline mr-2 align-text-bottom" />
-              Note: Uploading new photos here will entirely overwrite the existing live photos.
+            <p className="text-sm font-body text-blue-600 bg-blue-50 p-3 rounded-lg border border-blue-100 font-semibold">
+              <ImageIcon className="w-4 h-4 inline mr-2 align-text-bottom" />
+              Note: Upload new photos here. They will be added alongside your existing photos unless you remove the old ones above.
             </p>
           </div>
           <div className="space-y-8">
             <DropZone
               id="standard-photos"
-              title="Exterior & Interior Photos"
+              title="Add New Photos"
               description="Upload high-quality JPG or PNG images. Pick up to 10 photos."
               icon={ImageIcon}
               files={photos}
               onFilesAdded={addPhotos}
               onRemoveFile={removePhoto}
+              mainPhoto={mainPhoto}
+              onMakeMain={(idx) => setMainPhoto({ type: 'new', index: idx })}
             />
           </div>
 
