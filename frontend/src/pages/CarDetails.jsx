@@ -1,6 +1,6 @@
 import { useParams } from 'react-router-dom';
 import { useState, useEffect } from 'react';
-import { Helmet } from 'react-helmet-async';
+import SEO from '../components/SEO';
 import { Fuel, Settings2, User, Gauge, MessageCircle, MapPin, Star, Tag, Check, ShieldCheck, Palette, RotateCw, CheckCircle2 } from 'lucide-react';
 import axiosInstance from '../api/axiosConfig';
 import CarCard from '../components/CarCard';
@@ -83,14 +83,54 @@ export default function CarDetails() {
 
     return (
         <div className="bg-background min-h-screen py-10 px-4">
-            <Helmet>
-                <title>{`${car.make} ${car.model} (${car.year}) — Sadguru Car Melo`}</title>
-                <meta name="description" content={`Buy ${car.make} ${car.model} (${car.year}) at ₹${car.price?.toLocaleString('en-IN')}. ${car.fuelType || ''}, ${car.transmission || ''}, ${car.kms?.toLocaleString('en-IN') || ''} KM. Certified pre-owned at Sadguru Car Melo, Surat.`} />
-                <meta property="og:title" content={`${car.make} ${car.model} (${car.year}) — Sadguru Car Melo`} />
-                <meta property="og:description" content={`₹${car.price?.toLocaleString('en-IN')} • ${car.fuelType} • ${car.transmission} • ${car.owner}`} />
-                <meta property="og:image" content={car.image} />
-                <meta property="og:type" content="product" />
-            </Helmet>
+            <SEO 
+                title={`Used ${car.make} ${car.model} ${car.year} for Sale in Surat | Sadguru Car Melo`}
+                description={`Buy ${car.make} ${car.model} (${car.year}) at ₹${car.price?.toLocaleString('en-IN')}. ${car.fuelType || ''}, ${car.transmission || ''}, ${car.kms?.toLocaleString('en-IN') || ''} KM. Certified pre-owned at Sadguru Car Melo, Surat.`}
+                image={car.image}
+                url={`https://sadgurucarmelo.com/car/${car._id || car.id}`}
+                schema={{
+                    "@context": "https://schema.org",
+                    "@type": "Vehicle",
+                    "name": `${car.make} ${car.model} ${car.year}`,
+                    "image": car.image,
+                    "description": car.description || `Certified pre-owned ${car.make} ${car.model} (${car.year}) available at Sadguru Car Melo.`,
+                    "brand": {
+                        "@type": "Brand",
+                        "name": car.make
+                    },
+                    "model": car.model,
+                    "vehicleModelDate": car.year,
+                    "mileageFromOdometer": {
+                        "@type": "QuantitativeValue",
+                        "value": car.kms,
+                        "unitCode": "KMT"
+                    },
+                    "fuelType": car.fuelType,
+                    "vehicleTransmission": car.transmission,
+                    "bodyType": car.bodyType || 'Car',
+                    "offers": {
+                        "@type": "Offer",
+                        "priceCurrency": "INR",
+                        "price": car.price,
+                        "availability": car.status === 'Available' ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+                        "itemCondition": "https://schema.org/UsedCondition",
+                        "seller": {
+                            "@type": "AutoDealer",
+                            "name": "Sadguru Car Melo",
+                            "image": "https://sadgurucarmelo.com/og-image.jpg",
+                            "address": {
+                                "@type": "PostalAddress",
+                                "streetAddress": "Trilok Car Bazar, Simada Canal BRTS Rd, Canal Chokdi, Varachha",
+                                "addressLocality": "Surat",
+                                "postalCode": "395013",
+                                "addressRegion": "GJ",
+                                "addressCountry": "IN"
+                            },
+                            "telephone": "+919913634447"
+                        }
+                    }
+                }}
+            />
             <div className="max-w-7xl mx-auto">
 
                 {/* Page Header */}

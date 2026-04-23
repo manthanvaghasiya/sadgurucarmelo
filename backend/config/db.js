@@ -6,7 +6,9 @@ dns.setServers(['8.8.8.8', '8.8.4.4', '1.1.1.1']);
 
 const connectDB = async () => {
   try {
-    const conn = await mongoose.connect(process.env.MONGO_URI);
+    const conn = await mongoose.connect(process.env.MONGO_URI, {
+      maxPoolSize: 100, // Handle up to 100 concurrent DB connections
+    });
 
     console.log(`✅ MongoDB Connected: ${conn.connection.host}`);
     console.log(`   Database: ${conn.connection.name}`);

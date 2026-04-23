@@ -7,8 +7,8 @@ import { protect, admin } from '../middleware/authMiddleware.js';
 const router = express.Router();
 
 // ── Shared In-Memory Cache ──
-// 3600 seconds = 1 hour maximum memory lifetime
-const carCache = new NodeCache({ stdTTL: 3600 });
+// 60 seconds TTL for traffic spikes: 1 DB hit per minute, serving 999 hits from RAM
+const carCache = new NodeCache({ stdTTL: 60 });
 
 // ── Cache Interceptor Middleware ──
 // Synthesizes a unique memory key based on exact query params and paths
@@ -91,7 +91,7 @@ router.get('/', checkCache, async (req, res) => {
     const skip = (pageNum - 1) * perPage;
 
     const [cars, total] = await Promise.all([
-      Car.find(filter).sort(sortBy).skip(skip).limit(perPage),
+      Car.find(filter).sort(sortBy).skip(skip).limit(perPage).lean(),
       Car.countDocuments(filter),
     ]);
 
@@ -178,7 +178,7 @@ router.get('/filters', checkCache, async (req, res) => {
 // ═══════════════════════════════════════════════
 router.get('/:id', checkCache, async (req, res) => {
   try {
-    const car = await Car.findById(req.params.id);
+    const car = await Car.findById(req.params.id).lean();
     if (!car) {
       return res.status(404).json({ success: false, message: 'Car not found' });
     }

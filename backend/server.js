@@ -14,6 +14,7 @@ import cors from 'cors';
 import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
 import rateLimit from 'express-rate-limit';
+import compression from 'compression';
 import connectDB from './config/db.js';
 import fs from 'fs';
 import path from 'path';
@@ -48,6 +49,7 @@ import leadRoutes from './routes/lead.routes.js';
 import messageRoutes from './routes/message.routes.js';
 import promoPosterRoutes from './routes/promoPoster.routes.js';
 import happyCustomerRoutes from './routes/happyCustomer.routes.js';
+import sitemapRoutes from './routes/sitemap.routes.js';
 
 // ── Load env variables ──
 // (done automatically via 'dotenv/config' at top)
@@ -81,6 +83,9 @@ const loginLimiter = rateLimit({
 });
 app.use('/api', apiLimiter);
 app.use('/api/auth/login', loginLimiter);
+
+// ── Payload Compression ──
+app.use(compression());
 
 // ── Core Middleware ──
 app.use(cors({
@@ -145,6 +150,7 @@ app.use('/api/leads', leadRoutes);
 app.use('/api/messages', messageRoutes);
 app.use('/api/promo-posters', promoPosterRoutes);
 app.use('/api/happy-customers', happyCustomerRoutes);
+app.use('/api/sitemap.xml', sitemapRoutes);
 
 // ── 404 Handler ──
 app.use((_req, res) => {
