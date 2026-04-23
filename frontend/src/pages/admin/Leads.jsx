@@ -414,7 +414,7 @@ export default function Leads() {
                   <p className="font-body text-xs text-text-muted/60 mt-1">Check back later or view general leads.</p>
                 </div>
               ) : (
-                <div className="inline-block min-w-full align-middle">
+                <div className="w-full overflow-x-auto">
                   <table className="min-w-full divide-y divide-slate-100">
                     <thead>
                       <tr className="bg-background/50">
@@ -558,7 +558,7 @@ export default function Leads() {
                   <p className="font-body text-xs text-text-muted/60 mt-1">Check back later or view general leads.</p>
                 </div>
               ) : (
-                <div className="inline-block min-w-full align-middle">
+                <div className="w-full overflow-x-auto">
                   <table className="min-w-full divide-y divide-slate-100">
                     <thead>
                       <tr className="bg-background/50">
@@ -1162,11 +1162,11 @@ export default function Leads() {
                           {lead.source}
                         </span>
                         <div className="flex items-center gap-1">
-                          <button onClick={() => navigate(`/sales/edit-lead/${lead._id}`)} className="p-1.5 text-text-muted hover:text-primary hover:bg-primary/5 rounded-md transition-colors" title="Edit Lead">
-                            <Edit2 className="w-3.5 h-3.5" />
+                          <button onClick={() => navigate(`/sales/edit-lead/${lead._id}`)} className="min-w-[44px] min-h-[44px] flex items-center justify-center text-text-muted hover:text-primary hover:bg-primary/5 rounded-lg transition-colors active:scale-90" title="Edit Lead">
+                            <Edit2 className="w-4 h-4" />
                           </button>
-                          <button onClick={() => setDeleteTarget(lead._id)} className="p-1.5 text-text-muted hover:text-red-500 rounded-md transition-colors" title="Delete">
-                            <Trash2 className="w-3.5 h-3.5" />
+                          <button onClick={() => setDeleteTarget(lead._id)} className="min-w-[44px] min-h-[44px] flex items-center justify-center text-text-muted hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors active:scale-90" title="Delete">
+                            <Trash2 className="w-4 h-4" />
                           </button>
                         </div>
                       </div>

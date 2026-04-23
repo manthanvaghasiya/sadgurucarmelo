@@ -113,8 +113,8 @@ export default function HappyCustomersAdmin() {
   };
 
   return (
-    <div className="p-6 max-w-7xl mx-auto space-y-8">
-      <div className="flex justify-between items-center bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+    <div className="max-w-7xl mx-auto space-y-6">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-gray-100">
         <div>
           <h1 className="font-heading font-bold text-2xl text-text">Happy Customers Gallery</h1>
           <p className="font-body text-text-muted mt-1">Showcase your successful deliveries on the home page.</p>
@@ -125,7 +125,7 @@ export default function HappyCustomersAdmin() {
         
         {/* ADD NEW CUSTOMER FORM */}
         <div className="lg:col-span-1">
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 sticky top-6">
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-6 sticky top-6">
             <div className="flex justify-between items-center mb-6">
               <h2 className="font-heading font-bold text-lg text-text flex items-center gap-2">
                 {editingId ? <Edit2 className="w-5 h-5 text-primary" /> : <Sparkles className="w-5 h-5 text-primary" />}
@@ -202,7 +202,7 @@ export default function HappyCustomersAdmin() {
 
         {/* GALLERY MANAGER */}
         <div className="lg:col-span-2">
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 min-h-[500px]">
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-6 min-h-[300px] sm:min-h-[500px]">
              <h2 className="font-heading font-bold text-lg text-text mb-6">Gallery Overview</h2>
              
              {loading ? (
@@ -231,14 +231,14 @@ export default function HappyCustomersAdmin() {
                       <div className="absolute top-2 right-2 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                         <button
                           onClick={() => handleEditClick(customer)}
-                          className="p-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg shadow-sm"
+                          className="min-w-[44px] min-h-[44px] flex items-center justify-center bg-blue-500 hover:bg-blue-600 text-white rounded-lg shadow-sm active:scale-90 transition-all"
                           title="Edit record"
                         >
                            <Edit2 className="w-4 h-4" />
                         </button>
                         <button
                           onClick={() => handleDelete(customer._id)}
-                          className="p-2 bg-red-500 hover:bg-red-600 text-white rounded-lg shadow-sm"
+                          className="min-w-[44px] min-h-[44px] flex items-center justify-center bg-red-500 hover:bg-red-600 text-white rounded-lg shadow-sm active:scale-90 transition-all"
                           title="Delete record"
                         >
                            <Trash2 className="w-4 h-4" />

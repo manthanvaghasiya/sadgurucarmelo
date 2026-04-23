@@ -139,14 +139,14 @@ export default function Posters() {
                 <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center gap-3 backdrop-blur-[2px]">
                   <button
                     onClick={() => navigate(`/admin/edit-car/${car.id}`)}
-                    className="p-3 bg-white text-primary hover:bg-primary hover:text-white rounded-full transition-all transform translate-y-4 group-hover:translate-y-0 duration-300"
+                    className="min-w-[44px] min-h-[44px] flex items-center justify-center bg-white text-primary hover:bg-primary hover:text-white rounded-full transition-all transform translate-y-4 group-hover:translate-y-0 duration-300"
                     title="Edit Vehicle"
                   >
                     <Edit3 className="w-5 h-5" />
                   </button>
                   <button
                     onClick={() => setDeleteTarget(car.id)}
-                    className="p-3 bg-white text-red-500 hover:bg-red-500 hover:text-white rounded-full transition-all transform translate-y-4 group-hover:translate-y-0 duration-300 delay-75"
+                    className="min-w-[44px] min-h-[44px] flex items-center justify-center bg-white text-red-500 hover:bg-red-500 hover:text-white rounded-full transition-all transform translate-y-4 group-hover:translate-y-0 duration-300 delay-75"
                     title="Delete Vehicle"
                   >
                     <Trash2 className="w-5 h-5" />

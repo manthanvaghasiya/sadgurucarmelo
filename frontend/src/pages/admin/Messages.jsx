@@ -53,7 +53,7 @@ export default function Messages() {
   }
 
   return (
-    <div className="p-6 md:p-10 max-w-7xl mx-auto space-y-8 animate-fade-in">
+    <div className="max-w-7xl mx-auto space-y-6 animate-fade-in">
       <div className="flex flex-col gap-2">
         <h1 className="font-heading text-3xl md:text-4xl font-bold text-text tracking-tight">
           Inbox
@@ -63,7 +63,7 @@ export default function Messages() {
         </p>
       </div>
 
-      <div className="flex gap-4 border-b border-gray-200">
+      <div className="flex gap-4 border-b border-gray-200 overflow-x-auto -mx-1 px-1">
         {['All', 'Contact Us', 'Notify'].map((type) => (
           <button
             key={type}
@@ -90,7 +90,7 @@ export default function Messages() {
             {messages.filter(m => filterType === 'All' || m.type === filterType || (!m.type && filterType === 'Contact Us')).map((msg) => (
               <div
                 key={msg._id}
-                className={`p-6 transition-colors hover:bg-gray-50/50 flex flex-col md:flex-row gap-6 ${msg.status === 'Unread' ? 'bg-primary/5' : ''}`}
+                className={`p-4 sm:p-6 transition-colors hover:bg-gray-50/50 flex flex-col md:flex-row gap-4 sm:gap-6 ${msg.status === 'Unread' ? 'bg-primary/5' : ''}`}
               >
                 {/* Left: Message details */}
                 <div className="flex-1 space-y-4">
@@ -143,7 +143,7 @@ export default function Messages() {
                   {msg.status === 'Unread' && (
                     <button
                       onClick={() => markAsRead(msg._id)}
-                      className="flex items-center justify-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-xl hover:border-primary hover:text-primary transition-colors text-sm font-semibold text-text shadow-sm"
+                      className="flex items-center justify-center gap-2 min-h-[44px] px-4 py-2 bg-white border border-gray-200 rounded-xl hover:border-primary hover:text-primary transition-colors text-sm font-semibold text-text shadow-sm"
                     >
                       <CheckCircle2 className="w-4 h-4" />
                       Mark Read
@@ -151,7 +151,7 @@ export default function Messages() {
                   )}
                   <button
                     onClick={() => deleteMessage(msg._id)}
-                    className="flex items-center justify-center gap-2 px-4 py-2 bg-white border border-red-200 rounded-xl hover:border-red-600 hover:text-red-600 hover:bg-red-50 transition-colors text-sm font-semibold text-red-500 shadow-sm"
+                    className="flex items-center justify-center gap-2 min-h-[44px] px-4 py-2 bg-white border border-red-200 rounded-xl hover:border-red-600 hover:text-red-600 hover:bg-red-50 transition-colors text-sm font-semibold text-red-500 shadow-sm"
                   >
                     <Trash2 className="w-4 h-4" />
                     Delete

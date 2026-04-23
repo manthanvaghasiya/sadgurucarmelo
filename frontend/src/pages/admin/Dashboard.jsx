@@ -181,8 +181,8 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Table */}
-        <div className="overflow-x-auto">
+        {/* Desktop Table */}
+        <div className="hidden md:block overflow-x-auto">
           <table className="w-full min-w-[700px]">
             <thead>
               <tr className="border-t border-gray-100">
@@ -267,6 +267,56 @@ export default function Dashboard() {
               ))}
             </tbody>
           </table>
+        </div>
+
+        {/* Mobile Card List */}
+        <div className="md:hidden divide-y divide-gray-50">
+          {inventoryData.length === 0 ? (
+            <div className="flex flex-col items-center gap-3 py-16">
+              <div className="w-14 h-14 bg-background rounded-2xl flex items-center justify-center">
+                <Car className="w-7 h-7 text-text-muted/40" />
+              </div>
+              <p className="font-body text-sm font-semibold text-text-muted">
+                No featured vehicles
+              </p>
+            </div>
+          ) : (
+            inventoryData.map((car) => (
+              <div key={car.id} className="p-4 hover:bg-background/40 transition-colors">
+                <div className="flex gap-3">
+                  <div className="w-20 h-14 rounded-lg overflow-hidden bg-background shrink-0 ring-1 ring-gray-100">
+                    <img
+                      src={car.image}
+                      alt={car.name}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-body text-sm font-semibold text-text truncate">
+                      {car.name} ({car.year})
+                    </p>
+                    <div className="flex items-center gap-2 mt-0.5">
+                      <span className="font-body text-xs text-text-muted">{car.km}</span>
+                      <span className="w-1 h-1 rounded-full bg-gray-300" />
+                      <span className="font-body text-xs text-text-muted">{car.fuel}</span>
+                    </div>
+                    <div className="flex items-center justify-between mt-2">
+                      <span className="font-heading font-bold text-sm text-text">
+                        {car.price}
+                      </span>
+                      <button
+                        onClick={() => navigate(`/admin/edit-car/${car.id}`)}
+                        className="min-w-[44px] min-h-[44px] flex items-center justify-center text-text-muted hover:text-primary hover:bg-primary/5 rounded-lg transition-colors active:scale-90"
+                        title="Edit"
+                      >
+                        <Edit3 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))
+          )}
         </div>
 
         {/* Table Footer */}

@@ -471,15 +471,15 @@ export default function Inventory() {
                         <div className="flex items-center gap-1">
                           <button
                             onClick={() => navigate(`/admin/edit-car/${car.id}`)}
-                            className="p-1.5 text-text-muted hover:text-primary rounded-md transition-colors"
+                            className="min-w-[44px] min-h-[44px] flex items-center justify-center text-text-muted hover:text-primary hover:bg-primary/5 rounded-lg transition-colors active:scale-90"
                           >
-                            <Edit3 className="w-3.5 h-3.5" />
+                            <Edit3 className="w-4 h-4" />
                           </button>
                           <button
                             onClick={() => setDeleteTarget(car.id)}
-                            className="p-1.5 text-text-muted hover:text-red-500 rounded-md transition-colors"
+                            className="min-w-[44px] min-h-[44px] flex items-center justify-center text-text-muted hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors active:scale-90"
                           >
-                            <Trash2 className="w-3.5 h-3.5" />
+                            <Trash2 className="w-4 h-4" />
                           </button>
                         </div>
                       </div>

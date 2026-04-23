@@ -218,7 +218,7 @@ export default function AdminSettings() {
       </div>
 
       {/* Tab Navigation */}
-      <div className="bg-surface rounded-2xl border border-gray-100 p-1.5 inline-flex gap-1">
+      <div className="bg-surface rounded-2xl border border-gray-100 p-1.5 flex flex-wrap gap-1">
         {tabs.map((tab) => {
           const Icon = tab.icon;
           return (
@@ -355,7 +355,7 @@ export default function AdminSettings() {
             ) : (
               <div className="divide-y divide-gray-50">
                 {staff.map((member) => (
-                  <div key={member._id} className="flex items-center justify-between p-5 hover:bg-background/40 transition-colors group">
+                  <div key={member._id} className="flex flex-col sm:flex-row sm:items-center justify-between p-4 sm:p-5 gap-3 sm:gap-4 hover:bg-background/40 transition-colors group">
                     <div className="flex items-center gap-4 min-w-0">
                       <div className="w-11 h-11 bg-primary/5 rounded-xl flex items-center justify-center shrink-0">
                         <UserCircle className="w-6 h-6 text-primary/40" />
@@ -381,13 +381,13 @@ export default function AdminSettings() {
                         )}
                       </div>
                     </div>
-                    <div className="flex items-center gap-3 shrink-0">
+                    <div className="flex items-center gap-2 sm:gap-3 shrink-0 self-end sm:self-center">
                       <span className={`px-2.5 py-1 rounded-full font-body text-[11px] font-bold ring-1 capitalize ${roleStyles[member.role] || roleStyles['sales']}`}>
                         {member.role}
                       </span>
                       <button
                         onClick={() => handleEditStaff(member)}
-                        className="p-1.5 text-text-muted hover:text-primary hover:bg-primary/5 rounded-lg transition-colors opacity-60 group-hover:opacity-100"
+                        className="min-w-[44px] min-h-[44px] flex items-center justify-center text-text-muted hover:text-primary hover:bg-primary/5 rounded-lg transition-colors opacity-60 group-hover:opacity-100"
                         title="Edit Staff"
                       >
                         <Edit2 className="w-4 h-4" />
@@ -401,7 +401,7 @@ export default function AdminSettings() {
                       </button>
                       <button
                         onClick={() => setDeleteTarget(member._id)}
-                        className="p-1.5 text-text-muted hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors opacity-60 group-hover:opacity-100"
+                        className="min-w-[44px] min-h-[44px] flex items-center justify-center text-text-muted hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors opacity-60 group-hover:opacity-100"
                         title="Delete Staff"
                       >
                         <Trash2 className="w-4 h-4" />
