@@ -16,8 +16,8 @@ export default function TopNavigation() {
 
   return (
     <header className="sticky top-0 z-50 bg-surface shadow-sm border-b border-gray-100">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-20">
+      <div className="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8">
+        <div className="flex justify-between items-center h-14 md:h-20">
 
           {/* Logo / Branding */}
           <Link to="/" className="flex items-center gap-3 group">
