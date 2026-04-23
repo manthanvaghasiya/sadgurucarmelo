@@ -140,7 +140,7 @@ export default function Leads() {
 
   // ── Filtering ──
   const filtered = useMemo(() => {
-    let result = leads;
+    let result = leads || [];
 
     // Global search
     if (searchQuery.trim()) {
@@ -195,7 +195,7 @@ export default function Leads() {
     const tomorrow = new Date(today);
     tomorrow.setDate(tomorrow.getDate() + 1);
 
-    return leads.filter(l => {
+    return (leads || []).filter(l => {
       const isUpdatedToday = new Date(l.updatedAt) >= today && new Date(l.updatedAt) < tomorrow;
 
       // Rule 1: It is PENDING if the follow-up date is today or in the past, AND it is not closed.
@@ -254,13 +254,13 @@ export default function Leads() {
     }
   };
 
-  const newLeads = useMemo(() => leads.filter(l => l.status === 'New'), [leads]);
+  const newLeads = useMemo(() => (leads || []).filter(l => l.status === 'New'), [leads]);
 
   // ── KPI Cards ──
   const kpiCards = [
     {
       title: 'Total Leads', subtitle: 'All time',
-      value: leadStats.total, icon: Users,
+      value: leadStats?.total || 0, icon: Users,
       iconBg: 'bg-primary/10', iconColor: 'text-primary',
     },
     {
@@ -290,8 +290,8 @@ export default function Leads() {
 
   // ── Status counts ──
   const statusCounts = useMemo(() => {
-    const c = { All: leads.length, New: 0, Contacted: 0, 'Follow-up': 0, Closed: 0 };
-    leads.forEach(l => { if (c[l.status] !== undefined) c[l.status]++; });
+    const c = { All: (leads || []).length, New: 0, Contacted: 0, 'Follow-up': 0, Closed: 0 };
+    (leads || []).forEach(l => { if (c[l?.status] !== undefined) c[l.status]++; });
     return c;
   }, [leads]);
 

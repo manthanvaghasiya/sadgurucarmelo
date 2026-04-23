@@ -11,7 +11,7 @@ export default function Posters() {
 
   // Filter only 'Coming Soon' cars
   const comingSoonCars = useMemo(() => {
-    return cars
+    return (cars || [])
       .filter((c) => c.status === 'Coming Soon')
       .map((c) => ({
         id: c._id || c.id,

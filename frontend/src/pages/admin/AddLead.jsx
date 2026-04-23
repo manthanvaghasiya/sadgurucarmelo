@@ -83,7 +83,7 @@ export default function AdminAddLead() {
   };
 
   // Available cars for dropdown
-  const availableCars = cars.filter(c => c.status !== 'Sold');
+  const availableCars = (cars || []).filter(c => c?.status !== 'Sold');
 
   return (
     <div className="bg-background">

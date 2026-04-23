@@ -5,7 +5,7 @@ const CarContext = createContext();
 
 export function CarProvider({ children }) {
   const [cars, setCars] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
   // ── Fetch all cars from the backend ──
