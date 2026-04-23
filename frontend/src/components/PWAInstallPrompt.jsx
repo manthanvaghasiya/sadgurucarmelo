@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { X } from 'lucide-react';
+import ReactGA from 'react-ga4';
 
 export default function PWAInstallPrompt() {
   const [deferredPrompt, setDeferredPrompt] = useState(null);
@@ -14,6 +15,13 @@ export default function PWAInstallPrompt() {
     };
 
     const handleAppInstalled = () => {
+      // Track PWA install in Google Analytics
+      ReactGA.event({
+        category: "App Installation",
+        action: "PWA_Installed",
+        label: "User successfully installed the Web App"
+      });
+
       // Permanently hide — app is installed
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
       setDeferredPrompt(null);
