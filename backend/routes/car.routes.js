@@ -205,6 +205,14 @@ router.post('/', protect, admin, upload.array('images', 10), async (req, res) =>
     
     if (req.files && req.files.length > 0) {
       const imageUrls = req.files.map(file => file.path);
+      
+      const mainIndex = parseInt(req.body.mainPhotoIndex, 10) || 0;
+      if (imageUrls[mainIndex]) {
+          const mainUrl = imageUrls[mainIndex];
+          imageUrls.splice(mainIndex, 1);
+          imageUrls.unshift(mainUrl);
+      }
+
       carData.images = imageUrls;
       carData.image = imageUrls[0];
     } else {

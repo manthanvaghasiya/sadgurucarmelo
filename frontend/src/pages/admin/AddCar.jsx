@@ -191,6 +191,8 @@ function DropZone({
   accept,
   highlight = false,
   id,
+  mainPhoto,
+  onMakeMain
 }) {
   const [isDragging, setIsDragging] = useState(false);
   const inputRef = useRef(null);
@@ -303,30 +305,39 @@ function DropZone({
       {/* File Preview Grid */}
       {files.length > 0 && (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 mt-3">
-          {files.map((file, index) => (
-            <div
-              key={index}
-              className="relative group bg-background rounded-xl overflow-hidden border border-gray-100 aspect-[4/3]"
-            >
-              <img
-                src={URL.createObjectURL(file)}
-                alt={file.name}
-                className="w-full h-full object-cover"
-              />
-              <div className="absolute inset-0 bg-primary/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                <button
-                  type="button"
-                  onClick={() => onRemoveFile(index)}
-                  className="p-2 bg-white/90 rounded-full text-red-500 hover:bg-white transition-colors"
-                >
-                  <X className="w-4 h-4" />
-                </button>
+          {files.map((file, index) => {
+            const isMain = mainPhoto === index;
+            return (
+              <div
+                key={index}
+                className="relative group bg-background rounded-xl overflow-hidden border border-gray-100 aspect-[4/3]"
+              >
+                <img
+                  src={URL.createObjectURL(file)}
+                  alt={file.name}
+                  className="w-full h-full object-cover"
+                />
+                {isMain && (
+                   <div className="absolute top-2 left-2 bg-accent text-white text-[10px] font-bold px-2 py-1 rounded shadow-sm z-10">MAIN</div>
+                )}
+                <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2">
+                  {!isMain && onMakeMain && (
+                     <button type="button" onClick={(e) => { e.stopPropagation(); onMakeMain(index); }} className="text-[10px] bg-white text-black px-3 py-1.5 rounded font-bold hover:bg-gray-200 shadow-sm uppercase tracking-wide">Make Main</button>
+                  )}
+                  <button
+                    type="button"
+                    onClick={(e) => { e.stopPropagation(); onRemoveFile(index); }}
+                    className="text-[10px] bg-red-500 text-white px-3 py-1.5 rounded font-bold hover:bg-red-600 shadow-sm uppercase tracking-wide"
+                  >
+                    Remove
+                  </button>
+                </div>
+                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-2">
+                  <p className="font-body text-[10px] text-white truncate text-center">{file.name}</p>
+                </div>
               </div>
-              <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-2">
-                <p className="font-body text-[10px] text-white truncate">{file.name}</p>
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>
@@ -367,6 +378,7 @@ export default function AddCar() {
   // Files
   const [photos, setPhotos] = useState([]);
   const [spinImages, setSpinImages] = useState([]);
+  const [mainPhoto, setMainPhoto] = useState(0);
 
   const onSubmit = async (data) => {
     try {
@@ -422,6 +434,9 @@ export default function AddCar() {
       formData.append('loanAvailable', String(data.loanAvailable));
       formData.append('isKmGenuine', String(data.isKmGenuine));
 
+      // Append main photo index
+      formData.append('mainPhotoIndex', mainPhoto);
+
       // Inject the image files
       if (photos.length > 0) {
         photos.forEach(photo => {
@@ -451,7 +466,14 @@ export default function AddCar() {
   };
 
   const addPhotos = (newFiles) => setPhotos((prev) => [...prev, ...newFiles]);
-  const removePhoto = (index) => setPhotos((prev) => prev.filter((_, i) => i !== index));
+  const removePhoto = (index) => {
+    setPhotos((prev) => prev.filter((_, i) => i !== index));
+    if (mainPhoto === index) {
+      setMainPhoto(0); // Fallback
+    } else if (mainPhoto > index) {
+      setMainPhoto(mainPhoto - 1);
+    }
+  };
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="pb-24">
@@ -720,6 +742,8 @@ export default function AddCar() {
               onFilesAdded={addPhotos}
               onRemoveFile={removePhoto}
               accept="image/*"
+              mainPhoto={mainPhoto}
+              onMakeMain={setMainPhoto}
             />
 
 
