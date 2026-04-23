@@ -212,7 +212,7 @@ export default function AboutPage() {
               <motion.div variants={fadeInUp} className="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-4 md:gap-10">
                 <button className="group relative inline-flex items-center justify-center gap-3 bg-slate-900 text-white font-heading font-bold text-sm md:text-base px-6 py-4 md:px-8 md:py-4 rounded-xl md:rounded-2xl shadow-[0_10px_20px_rgba(15,23,42,0.15)] hover:shadow-[0_15px_30px_rgba(15,23,42,0.25)] transition-all hover:-translate-y-1 overflow-hidden min-h-[50px] w-full sm:w-auto">
                   <span className="relative z-10 flex items-center gap-2">
-                    અમારો વારસો જાણો
+                    Discover Our Legacy
                     <Award className="w-4 h-4 md:w-5 md:h-5 text-brand-orange group-hover:rotate-12 transition-transform duration-300" />
                   </span>
                   <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full duration-1000 transition-transform"></div>
@@ -353,7 +353,7 @@ export default function AboutPage() {
 
             {/* Premium Tab Navigation (Light Mode) */}
             <motion.div
-              className="flex flex-row flex-wrap items-center justify-center gap-3 md:gap-4 mb-10 md:mb-12"
+              className="grid grid-cols-3 sm:flex sm:flex-row sm:flex-wrap items-stretch justify-center gap-2 sm:gap-3 md:gap-4 mb-10 md:mb-12"
               initial="hidden"
               whileInView="visible"
               viewport={{ once: true }}
@@ -363,8 +363,8 @@ export default function AboutPage() {
                 <button
                   key={tab.id}
                   onClick={() => handleTabClick(tab.id)}
-                  className={`group relative px-4 py-3 md:px-10 md:py-4 rounded-xl md:rounded-2xl font-heading font-bold text-xs sm:text-sm md:text-lg transition-all duration-500 overflow-hidden shadow-sm flex-1 sm:flex-none min-h-[48px] md:min-h-[56px] flex items-center justify-center ${activeTab === tab.id
-                    ? 'text-white scale-105 ring-1 ring-primary/20 shadow-[0_10px_20px_rgba(37,99,235,0.2)]'
+                  className={`group relative px-1 py-3 sm:px-4 sm:py-3 md:px-10 md:py-4 rounded-xl md:rounded-2xl font-heading font-bold transition-all duration-500 overflow-hidden shadow-sm flex items-center justify-center w-full min-h-[60px] sm:min-h-[48px] md:min-h-[56px] ${activeTab === tab.id
+                    ? 'text-white scale-[1.02] sm:scale-105 ring-1 ring-primary/20 shadow-[0_10px_20px_rgba(37,99,235,0.2)] z-10'
                     : 'text-slate-600 hover:text-slate-900 bg-white border border-slate-200 hover:border-slate-300 hover:shadow-md'
                     }`}
                 >
@@ -375,11 +375,11 @@ export default function AboutPage() {
                   {activeTab !== tab.id && (
                     <div className="absolute inset-0 bg-slate-50 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
                   )}
-                  <span className="relative z-10 flex items-center gap-2 md:gap-3 whitespace-nowrap">
+                  <span className="relative z-10 flex flex-col sm:flex-row items-center gap-1.5 sm:gap-2 md:gap-3 text-center whitespace-nowrap">
                     {tab.id === 'buy' && <CarFront className={`w-4 h-4 md:w-6 md:h-6 ${activeTab === tab.id ? 'text-white' : 'text-primary transition-colors group-hover:text-blue-700'}`} />}
                     {tab.id === 'sell' && <Banknote className={`w-4 h-4 md:w-6 md:h-6 ${activeTab === tab.id ? 'text-white' : 'text-emerald-600 transition-colors group-hover:text-emerald-700'}`} />}
                     {tab.id === 'exchange' && <RefreshCw className={`w-4 h-4 md:w-6 md:h-6 ${activeTab === tab.id ? 'text-white' : 'text-brand-orange transition-colors group-hover:text-orange-700'}`} />}
-                    {tab.label}
+                    <span className="text-[10px] sm:text-sm md:text-lg tracking-tight sm:tracking-normal">{tab.label}</span>
                   </span>
                 </button>
               ))}

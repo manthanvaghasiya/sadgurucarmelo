@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Quote, Sparkles, X, ChevronRight } from 'lucide-react';
 import axiosInstance from '../api/axiosConfig';
@@ -181,41 +182,44 @@ export default function HappyCustomers() {
       </div>
 
       {/* Full-Screen Modal for All Customers */}
-      <AnimatePresence>
-        {isModalOpen && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[9999] flex flex-col bg-slate-50/95 backdrop-blur-xl overflow-hidden"
-          >
-            {/* Modal Header */}
-            <div className="bg-white/80 backdrop-blur-md px-4 sm:px-8 py-4 sm:py-5 border-b border-gray-200/50 flex items-center justify-center shadow-sm relative z-20 min-h-[80px]">
-              <h2 className="font-heading font-bold text-xl sm:text-3xl text-slate-800 flex items-center gap-2 sm:gap-3 text-center">
-                <Sparkles className="w-5 h-5 sm:w-8 sm:h-8 text-brand-orange" /> The Sadguru Family
-              </h2>
-              <button
-                onClick={handleCloseModal}
-                className="absolute right-4 sm:right-8 group flex items-center gap-2 px-3 py-2 sm:px-5 sm:py-2.5 bg-slate-100 hover:bg-red-50 text-slate-700 hover:text-red-600 rounded-full transition-all duration-300 shadow-sm border border-transparent hover:border-red-200"
-              >
-                <span className="font-heading font-bold text-sm sm:text-base hidden sm:inline">Close</span>
-                <X className="w-5 h-5 sm:w-6 sm:h-6 group-hover:rotate-90 transition-transform duration-300" />
-              </button>
-            </div>
-
-            {/* Modal Content - Reliable Grid Layout to prevent right-side gap */}
-            <div className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-10 scrollbar-thin scrollbar-thumb-gray-300 pb-32">
-              <div className="max-w-[1600px] mx-auto grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-6 items-start">
-                {customers.map((customer, index) => (
-                  <CustomerCard key={customer._id} customer={customer} index={index} isModal={true} />
-                ))}
+      {typeof document !== 'undefined' && createPortal(
+        <AnimatePresence>
+          {isModalOpen && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-[9999] flex flex-col bg-slate-50/95 backdrop-blur-xl overflow-hidden"
+            >
+              {/* Modal Header */}
+              <div className="bg-white/80 backdrop-blur-md px-4 sm:px-8 py-4 sm:py-5 border-b border-gray-200/50 flex items-center justify-center shadow-sm relative z-20 min-h-[80px]">
+                <h2 className="font-heading font-bold text-xl sm:text-3xl text-slate-800 flex items-center gap-2 sm:gap-3 text-center">
+                  <Sparkles className="w-5 h-5 sm:w-8 sm:h-8 text-brand-orange" /> The Sadguru Family
+                </h2>
+                <button
+                  onClick={handleCloseModal}
+                  className="absolute right-4 sm:right-8 group flex items-center gap-2 px-3 py-2 sm:px-5 sm:py-2.5 bg-slate-100 hover:bg-red-50 text-slate-700 hover:text-red-600 rounded-full transition-all duration-300 shadow-sm border border-transparent hover:border-red-200"
+                >
+                  <span className="font-heading font-bold text-sm sm:text-base hidden sm:inline">Close</span>
+                  <X className="w-5 h-5 sm:w-6 sm:h-6 group-hover:rotate-90 transition-transform duration-300" />
+                </button>
               </div>
-            </div>
+
+              {/* Modal Content - Reliable Grid Layout to prevent right-side gap */}
+              <div className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-10 scrollbar-thin scrollbar-thumb-gray-300 pb-32">
+                <div className="max-w-[1600px] mx-auto grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-6 items-start">
+                  {customers.map((customer, index) => (
+                    <CustomerCard key={customer._id} customer={customer} index={index} isModal={true} />
+                  ))}
+                </div>
+              </div>
 
 
-          </motion.div>
-        )}
-      </AnimatePresence>
+            </motion.div>
+          )}
+        </AnimatePresence>,
+        document.body
+      )}
     </section>
   );
 }

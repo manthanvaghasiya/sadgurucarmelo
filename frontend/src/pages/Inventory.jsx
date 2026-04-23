@@ -88,7 +88,7 @@ export default function Inventory() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
         {/* Mobile Filter Button - Fixed at top */}
-        <div className={`lg:hidden fixed top-[84px] left-0 right-0 z-[1000] px-4 pointer-events-none transition-all duration-300 ${isNearFooter ? 'opacity-0 -translate-y-4' : 'opacity-100 translate-y-0'}`}>
+        <div className={`lg:hidden fixed top-[64px] left-0 right-0 z-[1000] px-4 pointer-events-none transition-all duration-300 ${isNearFooter ? 'opacity-0 -translate-y-4' : 'opacity-100 translate-y-0'}`}>
           <button
             onClick={() => setIsFilterOpen(true)}
             className={`w-full flex items-center justify-center gap-2 bg-white/95 backdrop-blur-md text-primary border border-gray-100 py-3.5 rounded-2xl font-heading font-bold shadow-xl shadow-black/5 active:scale-[0.98] transition-all ${isNearFooter ? 'pointer-events-none' : 'pointer-events-auto'}`}
