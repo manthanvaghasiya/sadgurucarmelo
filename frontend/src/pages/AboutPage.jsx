@@ -353,7 +353,7 @@ export default function AboutPage() {
 
             {/* Premium Tab Navigation (Light Mode) */}
             <motion.div
-              className="grid grid-cols-3 sm:flex sm:flex-row sm:flex-wrap items-stretch justify-center gap-2 sm:gap-3 md:gap-4 mb-10 md:mb-12"
+              className="grid grid-cols-3 sm:flex sm:flex-row sm:justify-center gap-2 sm:gap-3 md:gap-4 mb-10 md:mb-12"
               initial="hidden"
               whileInView="visible"
               viewport={{ once: true }}
@@ -363,7 +363,7 @@ export default function AboutPage() {
                 <button
                   key={tab.id}
                   onClick={() => handleTabClick(tab.id)}
-                  className={`group relative px-1 py-3 sm:px-4 sm:py-3 md:px-10 md:py-4 rounded-xl md:rounded-2xl font-heading font-bold transition-all duration-500 overflow-hidden shadow-sm flex items-center justify-center w-full min-h-[60px] sm:min-h-[48px] md:min-h-[56px] ${activeTab === tab.id
+                  className={`group relative px-1 py-3 sm:px-6 sm:py-3 md:px-12 md:py-4 rounded-xl md:rounded-2xl font-heading font-bold transition-all duration-500 overflow-hidden shadow-sm flex items-center justify-center w-full sm:w-auto sm:min-w-[200px] md:min-w-[250px] min-h-[60px] sm:min-h-[48px] md:min-h-[56px] ${activeTab === tab.id
                     ? 'text-white scale-[1.02] sm:scale-105 ring-1 ring-primary/20 shadow-[0_10px_20px_rgba(37,99,235,0.2)] z-10'
                     : 'text-slate-600 hover:text-slate-900 bg-white border border-slate-200 hover:border-slate-300 hover:shadow-md'
                     }`}
