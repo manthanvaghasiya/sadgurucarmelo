@@ -11,7 +11,7 @@ export default defineConfig({
     VitePWA({
       registerType: 'autoUpdate',
       devOptions: {
-        enabled: true, // Enables SW + manifest in dev mode so beforeinstallprompt fires on localhost
+        enabled: false, // Disabled to prevent Failed to load module script error
       },
       manifest: {
         name: 'Sadguru Car Melo',
