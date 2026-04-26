@@ -116,7 +116,7 @@ export default function PWAInstallPrompt() {
           <div className="flex flex-col items-center text-center">
             {/* App Icon */}
             <div className="w-16 h-16 rounded-2xl overflow-hidden shadow-lg ring-1 ring-black/5 mb-4">
-              <img src="/logo1.png" alt="Sadguru Car Surat" className="w-full h-full object-contain bg-white" />
+              <img src="/sadgurulogo.png" alt="Sadguru Car Surat" className="w-full h-full object-contain bg-white" />
             </div>
 
             {isIOS ? (

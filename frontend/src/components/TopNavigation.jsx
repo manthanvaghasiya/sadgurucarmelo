@@ -24,7 +24,7 @@ export default function TopNavigation() {
             <img
               src="/logo.png"
               alt="Sadguru Car Surat"
-              className="h-5 w-auto object-contain group-hover:scale-105 transition-transform duration-300"
+              className="h-7 w-auto object-contain group-hover:scale-105 transition-transform duration-300"
             />
             <div className="flex flex-col">
               <span className="font-heading font-bold text-xl text-primary leading-tight tracking-tight">Sadguru Car Surat</span>
