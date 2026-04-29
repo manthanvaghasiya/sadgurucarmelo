@@ -135,7 +135,7 @@ export default function Home() {
                 પ્રીમિયમ ડીલરશીપ સેવાઓ
               </span>
               <h2 className="font-heading text-4xl md:text-5xl font-bold text-[#1a2b3c] mb-6 leading-tight">
-                સુરતમાં <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-orange via-amber-400 to-yellow-500">ખરીદ-વેચાણ અને એક્સચેન્જ</span> માટેનું સંપૂર્ણ સોલ્યુશન
+                સુરતમાં <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-orange via-amber-400 to-yellow-500">ખરીદ-વેચાણ અને Exchange</span> માટેનું સંપૂર્ણ Solution
               </h2>
               <p className="font-body text-text-muted text-lg leading-relaxed">
                 "પારદર્શક અને ભરોસાપાત્ર સેવાઓ દ્વારા અમે તમારા કારના અનુભવને નવી ઊંચાઈએ લઈ જવા માંગીએ છીએ. તમારી દરેક જરૂરિયાત માટે સુરતનું શ્રેષ્ઠ ઓટોમોટિવ ડેસ્ટિનેશન.અમારું લક્ષ્ય પારદર્શિતા અને અતૂટ વિશ્વાસ સાથે તમને કારની શ્રેષ્ઠ સુવિધાઓ આપવાનું છે. અમે દરેક ગ્રાહકની સુવિધા અને સંતોષ માટે સતત પ્રયત્નશીલ છીએ."
