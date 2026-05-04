@@ -1,11 +1,11 @@
 import { Helmet } from 'react-helmet-async';
 
-export default function SEO({ 
-  title, 
-  description, 
-  image = 'https://sadgurucarmelo.com/og-image.jpg', 
-  url = 'https://sadgurucarmelo.com', 
-  schema 
+export default function SEO({
+  title,
+  description,
+  image = 'https://sadgurucarsurat.com/og-image.jpg',
+  url = 'https://sadgurucarsurat.com',
+  schema
 }) {
   return (
     <Helmet>

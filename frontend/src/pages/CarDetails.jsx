@@ -91,7 +91,7 @@ export default function CarDetails() {
                 title={`Used ${car.make} ${car.model} ${car.year} for Sale in Surat | Sadguru Car Surat`}
                 description={`Buy ${car.make} ${car.model} (${car.year}) at ₹${car.price?.toLocaleString('en-IN')}. ${car.fuelType || ''}, ${car.transmission || ''}, ${car.kms?.toLocaleString('en-IN') || ''} KM. Certified pre-owned at Sadguru Car Surat, Surat.`}
                 image={car.image}
-                url={`https://sadgurucarmelo.com/car/${car._id || car.id}`}
+                url={`https://sadgurucarsurat.com/car/${car._id || car.id}`}
                 schema={{
                     "@context": "https://schema.org",
                     "@type": "Vehicle",
@@ -121,7 +121,7 @@ export default function CarDetails() {
                         "seller": {
                             "@type": "AutoDealer",
                             "name": "Sadguru Car Surat",
-                            "image": "https://sadgurucarmelo.com/og-image.jpg",
+                            "image": "https://sadgurucarsurat.com/og-image.jpg",
                             "address": {
                                 "@type": "PostalAddress",
                                 "streetAddress": "Trilok Car Bazar, Simada Canal BRTS Rd, Canal Chokdi, Varachha",

@@ -7,14 +7,14 @@ router.get('/', async (req, res) => {
     try {
         // Fetch all available cars, explicitly leaning the query for performance
         const cars = await Car.find({ status: 'Available' }).select('_id updatedAt').lean();
-        
+
         // Ensure NO trailing slash in baseUrl
-        const rawBaseUrl = process.env.FRONTEND_URL || 'https://sadgurucarmelo.com';
+        const rawBaseUrl = process.env.FRONTEND_URL || 'https://sadgurucarsurat.com';
         const baseUrl = rawBaseUrl.split(',')[0].replace(/\/$/, '');
-        
+
         let xml = `<?xml version="1.0" encoding="UTF-8"?>\n`;
         xml += `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n`;
-        
+
         // Static URLs
         const staticPages = [
             { url: '/', priority: '1.0' },

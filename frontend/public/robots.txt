@@ -4,4 +4,4 @@ Disallow: /admin/
 Disallow: /sales/
 Disallow: /login
 
-Sitemap: https://sadgurucarmelo.com/sitemap.xml
+Sitemap: https://sadgurucarsurat.com/sitemap.xml
