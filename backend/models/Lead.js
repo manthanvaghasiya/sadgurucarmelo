@@ -35,7 +35,7 @@ const leadSchema = new mongoose.Schema(
     source: {
       type: String,
       enum: {
-        values: ['WhatsApp', 'Walk-in', 'Phone', 'Website'],
+        values: ['WhatsApp', 'Walk-in', 'Phone', 'Website', 'Instagram', 'Facebook', 'Market Place'],
         message: '{VALUE} is not a valid lead source',
       },
       default: 'Website',

@@ -24,14 +24,25 @@ export default function PWAInstallPrompt() {
 
     if (isIosDevice) {
       setIsIOS(true);
-      // Show iOS prompt after 3 seconds
-      timeoutRef.current = setTimeout(() => {
+      if (isAdminRoute) {
         setIsVisible(true);
-      }, 3000);
+      } else {
+        // Show iOS prompt after 3 seconds for regular users
+        timeoutRef.current = setTimeout(() => {
+          setIsVisible(true);
+        }, 3000);
+      }
+    }
+
+    // Check if the event was already captured by index.html script
+    if (window.deferredPWAInstallPrompt) {
+      setDeferredPrompt(window.deferredPWAInstallPrompt);
+      setIsVisible(true);
     }
 
     const handleBeforeInstallPrompt = (e) => {
       e.preventDefault();
+      window.deferredPWAInstallPrompt = e;
       setDeferredPrompt(e);
       setIsVisible(true);
     };
@@ -47,6 +58,7 @@ export default function PWAInstallPrompt() {
       // Permanently hide — app is installed
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
       setDeferredPrompt(null);
+      window.deferredPWAInstallPrompt = null;
       setIsVisible(false);
     };
 
@@ -58,7 +70,7 @@ export default function PWAInstallPrompt() {
       window.removeEventListener('appinstalled', handleAppInstalled);
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
     };
-  }, []);
+  }, [isAdminRoute]);
 
   const handleInstallClick = async () => {
     if (isIOS) {

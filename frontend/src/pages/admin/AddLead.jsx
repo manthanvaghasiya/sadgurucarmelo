@@ -210,6 +210,9 @@ export default function AdminAddLead() {
                   <option value="WhatsApp">💬 WhatsApp</option>
                   <option value="Phone">📞 Phone Call</option>
                   <option value="Website">🌐 Website</option>
+                  <option value="Instagram">📸 Instagram</option>
+                  <option value="Facebook">📘 Facebook</option>
+                  <option value="Market Place">🏪 Market Place</option>
                 </select>
               </div>
             </div>
