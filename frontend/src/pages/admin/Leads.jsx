@@ -1286,7 +1286,7 @@ export default function Leads() {
                           <td className="px-6 py-4">
                             <div className="flex items-center justify-end gap-1 opacity-60 group-hover:opacity-100 transition-opacity">
                               <button
-                                onClick={() => navigate(`/sales/edit-lead/${lead._id}`)}
+                                onClick={() => navigate(`/admin/edit-lead/${lead._id}`)}
                                 className="p-2 text-text-muted hover:text-primary hover:bg-primary/5 rounded-lg transition-colors"
                                 title="Edit Lead"
                               >
@@ -1373,7 +1373,7 @@ export default function Leads() {
                           {lead.source}
                         </span>
                         <div className="flex items-center gap-1">
-                          <button onClick={() => navigate(`/sales/edit-lead/${lead._id}`)} className="min-w-[44px] min-h-[44px] flex items-center justify-center text-text-muted hover:text-primary hover:bg-primary/5 rounded-lg transition-colors active:scale-90" title="Edit Lead">
+                          <button onClick={() => navigate(`/admin/edit-lead/${lead._id}`)} className="min-w-[44px] min-h-[44px] flex items-center justify-center text-text-muted hover:text-primary hover:bg-primary/5 rounded-lg transition-colors active:scale-90" title="Edit Lead">
                             <Edit2 className="w-4 h-4" />
                           </button>
                           <button onClick={() => setDeleteTarget(lead._id)} className="min-w-[44px] min-h-[44px] flex items-center justify-center text-text-muted hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors active:scale-90" title="Delete">
