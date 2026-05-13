@@ -390,8 +390,8 @@ export default function EditCar() {
         formData.append('year', data.manufacturingYear); // Legacy fallback
       }
       if (data.registerYear) formData.append('registerYear', data.registerYear);
-      if (data.price) formData.append('price', data.price);
-      if (data.kmDriven) formData.append('kms', data.kmDriven);
+      if (data.price) formData.append('price', String(data.price).replace(/,/g, ''));
+      if (data.kmDriven) formData.append('kms', String(data.kmDriven).replace(/,/g, ''));
       if (data.fuelType) formData.append('fuelType', data.fuelType);
       if (data.transmission) formData.append('transmission', data.transmission);
       if (data.ownership) formData.append('owner', data.ownership);
@@ -551,10 +551,10 @@ export default function EditCar() {
             />
             <FormInput
               label="Price"
-              type="number"
-              register={register('price', { min: { value: 1000, message: 'Invalid price' } })}
+              type="text"
+              register={register('price', { validate: v => !v || !isNaN(Number(String(v).replace(/,/g, ''))) || 'Invalid price' })}
               error={errors.price}
-              placeholder="e.g. 585000"
+              placeholder="e.g. 585000 or 5,85,000"
               prefix="₹"
             />
             <div className="space-y-2">
@@ -572,9 +572,9 @@ export default function EditCar() {
               </div>
               <div className="relative">
                 <input
-                  type="number"
-                  {...register('kmDriven')}
-                  placeholder="e.g. 23000"
+                  type="text"
+                  {...register('kmDriven', { validate: v => !v || !isNaN(Number(String(v).replace(/,/g, ''))) || 'Invalid KMs' })}
+                  placeholder="e.g. 23000 or 23,000"
                   className={`w-full px-4 py-3 bg-background border ${errors.kmDriven ? 'border-red-500' : 'border-transparent'} focus:border-primary/30 rounded-xl font-body text-sm text-text placeholder:text-text-muted/50 outline-none transition-all focus:ring-2 focus:ring-primary/10`}
                 />
               </div>

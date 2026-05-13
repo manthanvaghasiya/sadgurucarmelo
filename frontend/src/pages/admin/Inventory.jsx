@@ -42,6 +42,12 @@ const statusConfig = {
     ring: 'ring-amber-500/20',
     dot: 'bg-amber-500',
   },
+  Draft: {
+    bg: 'bg-blue-50',
+    text: 'text-blue-600',
+    ring: 'ring-blue-500/20',
+    dot: 'bg-blue-500',
+  },
 };
 
 export default function Inventory() {
@@ -126,7 +132,7 @@ export default function Inventory() {
 
   // Status counts for filter pills
   const counts = useMemo(() => {
-    const c = { All: allCars.length, Available: 0, Sold: 0, 'Coming Soon': 0 };
+    const c = { All: allCars.length, Available: 0, Sold: 0, 'Coming Soon': 0, Draft: 0 };
     allCars.forEach((car) => {
       if (c[car.status] !== undefined) c[car.status]++;
     });
@@ -265,6 +271,7 @@ export default function Inventory() {
             <option value="Available">Available</option>
             <option value="Sold">Sold</option>
             <option value="Coming Soon">Coming Soon</option>
+            <option value="Draft">Draft</option>
           </select>
         </div>
       </div>

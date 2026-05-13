@@ -315,14 +315,14 @@ router.put('/:id', protect, admin, upload.array('images', 10), async (req, res) 
 // ═══════════════════════════════════════════════
 router.delete('/:id', protect, admin, async (req, res) => {
   try {
-    const car = await Car.findByIdAndUpdate(req.params.id, { status: 'Sold' });
+    const car = await Car.findByIdAndDelete(req.params.id);
     if (!car) {
       return res.status(404).json({ success: false, message: 'Car not found' });
     }
     
     carCache.flushAll();
     
-    res.json({ success: true, message: 'Vehicle successfully marked as Sold.' });
+    res.json({ success: true, message: 'Vehicle successfully deleted.' });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Server error' });
   }

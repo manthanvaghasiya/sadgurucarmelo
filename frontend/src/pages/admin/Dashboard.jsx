@@ -338,7 +338,7 @@ export default function Dashboard() {
         {/* Table Footer */}
         <div className="flex flex-col sm:flex-row items-center justify-between p-6 pt-4 border-t border-gray-100 gap-4">
           <p className="font-body text-sm text-text-muted">
-            Showing <span className="font-semibold text-text">1-{inventoryData.length}</span> of{' '}
+            Showing <span className="font-semibold text-text">{inventoryData.length > 0 ? `1-${inventoryData.length}` : '0'}</span> of{' '}
             <span className="font-semibold text-text">{(cars || []).length}</span> vehicles
           </p>
           <button
