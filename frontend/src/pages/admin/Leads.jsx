@@ -32,6 +32,7 @@ import {
 } from 'lucide-react';
 import axiosInstance from '../../api/axiosConfig';
 import toast from 'react-hot-toast';
+import { utils, writeFile } from 'xlsx';
 
 const ITEMS_PER_PAGE = 10;
 
@@ -93,6 +94,16 @@ export default function Leads() {
     salesman: ''
   });
   const [activeFilterBox, setActiveFilterBox] = useState(null); // 'date', 'customer', 'car' or null
+
+  // ── Advanced Export State ──
+  const [showExportModal, setShowExportModal] = useState(false);
+  const [exportFilters, setExportFilters] = useState({
+    dateRange: 'all', // 'all', 'thisMonth', 'lastMonth', 'custom'
+    startDate: '',
+    endDate: '',
+    status: 'All', // 'All', 'New', 'Contacted', 'Follow-up', 'Closed'
+    format: 'excel', // 'excel', 'csv'
+  });
 
   // ── Fetch leads from API ──
   const fetchLeads = useCallback(async () => {
@@ -296,49 +307,199 @@ export default function Leads() {
     return c;
   }, [leads]);
 
-  // ── Export CSV ──
-  const handleExportCSV = () => {
-    if (!leads || leads.length === 0) {
-      toast.error('No leads available to export.');
+  // ── Execute Advanced Export ──
+  const executeExport = () => {
+    let filteredForExport = [...(leads || [])];
+
+    // Filter by Status
+    if (exportFilters.status !== 'All') {
+      filteredForExport = filteredForExport.filter(l => l.status === exportFilters.status);
+    }
+
+    // Filter by Date
+    if (exportFilters.dateRange !== 'all') {
+      const now = new Date();
+      let start, end;
+      if (exportFilters.dateRange === 'thisMonth') {
+        start = new Date(now.getFullYear(), now.getMonth(), 1);
+        end = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
+      } else if (exportFilters.dateRange === 'lastMonth') {
+        start = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+        end = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59, 999);
+      } else if (exportFilters.dateRange === 'custom') {
+        start = exportFilters.startDate ? new Date(exportFilters.startDate) : null;
+        if (start) start.setHours(0, 0, 0, 0);
+        end = exportFilters.endDate ? new Date(exportFilters.endDate) : null;
+        if (end) end.setHours(23, 59, 59, 999);
+      }
+
+      if (start) {
+        filteredForExport = filteredForExport.filter(l => new Date(l.createdAt) >= start);
+      }
+      if (end) {
+        filteredForExport = filteredForExport.filter(l => new Date(l.createdAt) <= end);
+      }
+    }
+
+    if (filteredForExport.length === 0) {
+      toast.error('No leads found for these filters.');
       return;
     }
 
-    const headers = ['Date', 'Customer Name', 'Phone', 'Email', 'Source', 'Status', 'Urgency', 'Car Make', 'Car Model', 'Car Year', 'Assigned Salesman', 'Notes'];
-
-    const csvData = leads.map(lead => {
+    // Format Data
+    const exportData = filteredForExport.map(lead => {
       const customCarMatch = lead.notes?.match(/Looking for:\s*(.*?)(?:\n|$)/);
       const customCarString = customCarMatch ? customCarMatch[1].trim() : '';
 
-      return [
-        new Date(lead.createdAt).toLocaleDateString(),
-        `"${(lead.customerName || '').replace(/"/g, '""')}"`,
-        `"${(lead.phone || '').replace(/"/g, '""')}"`,
-        `"${(lead.email || '').replace(/"/g, '""')}"`,
-        `"${(lead.source || '').replace(/"/g, '""')}"`,
-        `"${(lead.status || '').replace(/"/g, '""')}"`,
-        `"${(lead.urgency || '').replace(/"/g, '""')}"`,
-        `"${(lead.carOfInterest?.make || customCarString || '').replace(/"/g, '""')}"`,
-        `"${(lead.carOfInterest?.model || '').replace(/"/g, '""')}"`,
-        `"${(lead.carOfInterest?.year || '').toString().replace(/"/g, '""')}"`,
-        `"${(lead.assignedTo?.name || 'Unassigned').replace(/"/g, '""')}"`,
-        `"${(lead.notes || '').replace(/"/g, '""').replace(/\n/g, ' ')}"`
-      ].join(',');
+      return {
+        'Date': new Date(lead.createdAt).toLocaleDateString(),
+        'Customer Name': lead.customerName || '',
+        'Phone': lead.phone || '',
+        'Email': lead.email || '',
+        'Source': lead.source || '',
+        'Status': lead.status || '',
+        'Urgency': lead.urgency || '',
+        'Car Make': lead.carOfInterest?.make || customCarString || '',
+        'Car Model': lead.carOfInterest?.model || '',
+        'Car Year': lead.carOfInterest?.year || '',
+        'Assigned Salesman': lead.assignedTo?.name || 'Unassigned',
+        'Notes': (lead.notes || '').replace(/\n/g, ' - ')
+      };
     });
 
-    const csv = [headers.join(','), ...csvData].join('\n');
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.setAttribute('download', `Sadguru_Leads_Export_${new Date().toISOString().split('T')[0]}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    toast.success('Leads exported successfully!');
+    const filename = `Sadguru_Leads_Export_${new Date().toISOString().split('T')[0]}`;
+
+    if (exportFilters.format === 'excel') {
+      const worksheet = utils.json_to_sheet(exportData);
+      const workbook = utils.book_new();
+      utils.book_append_sheet(workbook, worksheet, 'Leads');
+      writeFile(workbook, `${filename}.xlsx`);
+    } else {
+      const worksheet = utils.json_to_sheet(exportData);
+      const csv = utils.sheet_to_csv(worksheet);
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `${filename}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    toast.success(`${filteredForExport.length} Leads exported successfully!`);
+    setShowExportModal(false);
   };
 
   return (
     <div className="space-y-6">
+      {/* Advanced Export Modal */}
+      {showExportModal && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-primary/40 backdrop-blur-sm" onClick={() => setShowExportModal(false)} />
+          <div className="relative bg-surface rounded-2xl shadow-2xl shadow-primary/10 border border-gray-100 w-full max-w-md p-6 animate-in zoom-in-95 duration-200">
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-[#107c41]/10 rounded-xl flex items-center justify-center text-[#107c41]">
+                  <Download className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="font-heading font-bold text-lg text-text leading-tight">Export Leads Data</h3>
+                  <p className="font-body text-xs text-text-muted mt-0.5">Download as Excel or CSV</p>
+                </div>
+              </div>
+              <button onClick={() => setShowExportModal(false)} className="p-2 text-text-muted hover:bg-gray-100 rounded-lg transition-colors">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="space-y-5">
+              {/* Date Range */}
+              <div className="space-y-2">
+                <label className="font-body text-sm font-semibold text-text">Date Range</label>
+                <select
+                  value={exportFilters.dateRange}
+                  onChange={(e) => setExportFilters({ ...exportFilters, dateRange: e.target.value })}
+                  className="w-full px-4 py-2.5 bg-background border border-gray-200 focus:border-primary/30 rounded-xl font-body text-sm text-text outline-none transition-all focus:ring-2 focus:ring-primary/10 cursor-pointer"
+                >
+                  <option value="all">All Time</option>
+                  <option value="thisMonth">This Month</option>
+                  <option value="lastMonth">Last Month</option>
+                  <option value="custom">Custom Range</option>
+                </select>
+                {exportFilters.dateRange === 'custom' && (
+                  <div className="flex items-center gap-2 mt-2 animate-in slide-in-from-top-1">
+                    <input
+                      type="date"
+                      value={exportFilters.startDate}
+                      onChange={(e) => setExportFilters({ ...exportFilters, startDate: e.target.value })}
+                      className="w-full px-3 py-2 bg-background border border-gray-200 rounded-lg text-xs"
+                    />
+                    <span className="text-text-muted font-bold text-xs">TO</span>
+                    <input
+                      type="date"
+                      value={exportFilters.endDate}
+                      onChange={(e) => setExportFilters({ ...exportFilters, endDate: e.target.value })}
+                      className="w-full px-3 py-2 bg-background border border-gray-200 rounded-lg text-xs"
+                    />
+                  </div>
+                )}
+              </div>
+
+              {/* Status */}
+              <div className="space-y-2">
+                <label className="font-body text-sm font-semibold text-text">Lead Status</label>
+                <select
+                  value={exportFilters.status}
+                  onChange={(e) => setExportFilters({ ...exportFilters, status: e.target.value })}
+                  className="w-full px-4 py-2.5 bg-background border border-gray-200 focus:border-primary/30 rounded-xl font-body text-sm text-text outline-none transition-all focus:ring-2 focus:ring-primary/10 cursor-pointer"
+                >
+                  <option value="All">All Statuses</option>
+                  <option value="New">New</option>
+                  <option value="Contacted">Contacted</option>
+                  <option value="Follow-up">Follow-up</option>
+                  <option value="Closed">Closed</option>
+                </select>
+              </div>
+
+              {/* Format */}
+              <div className="space-y-2">
+                <label className="font-body text-sm font-semibold text-text">Format</label>
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => setExportFilters({ ...exportFilters, format: 'excel' })}
+                    className={`flex-1 py-2.5 px-4 rounded-xl border ${exportFilters.format === 'excel' ? 'border-[#107c41] bg-[#107c41]/5 text-[#107c41] font-bold' : 'border-gray-200 bg-background text-text-muted hover:bg-gray-50'} text-sm transition-colors`}
+                  >
+                    Excel (.xlsx)
+                  </button>
+                  <button
+                    onClick={() => setExportFilters({ ...exportFilters, format: 'csv' })}
+                    className={`flex-1 py-2.5 px-4 rounded-xl border ${exportFilters.format === 'csv' ? 'border-primary bg-primary/5 text-primary font-bold' : 'border-gray-200 bg-background text-text-muted hover:bg-gray-50'} text-sm transition-colors`}
+                  >
+                    Standard CSV
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-8 flex justify-end gap-3 pt-5 border-t border-gray-100">
+              <button
+                onClick={() => setShowExportModal(false)}
+                className="px-5 py-2.5 bg-background font-body text-sm font-bold text-text-muted hover:text-text rounded-xl transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={executeExport}
+                className="px-5 py-2.5 bg-primary hover:bg-primary-hover text-white font-body text-sm font-bold rounded-xl transition-all shadow-lg shadow-primary/20 active:scale-95 flex items-center gap-2"
+              >
+                <Download className="w-4 h-4" /> Download
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Delete Confirmation Modal */}
       {deleteTarget && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -695,10 +856,10 @@ export default function Leads() {
         </div>
         <div className="flex items-center gap-3">
           <button
-            onClick={handleExportCSV}
-            className="flex items-center gap-2 px-5 py-2.5 bg-background border border-gray-200 hover:border-primary/30 hover:bg-primary/5 text-text rounded-xl font-body text-sm font-bold transition-all shadow-sm active:scale-95 whitespace-nowrap"
+            onClick={() => setShowExportModal(true)}
+            className="flex items-center gap-2 px-5 py-2.5 bg-[#107c41] hover:bg-[#107c41]/90 text-white rounded-xl font-body text-sm font-bold transition-all shadow-sm active:scale-95 whitespace-nowrap"
           >
-            <Download className="w-4 h-4" /> Export CSV
+            <Download className="w-4 h-4" /> Export Data
           </button>
           <button
             onClick={() => navigate('/admin/add-lead')}
