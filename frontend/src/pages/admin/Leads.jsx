@@ -819,10 +819,10 @@ export default function Leads() {
                               </span>
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-center">
-                               <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full font-body text-[10px] font-bold ring-1 ${stCfg.bg} ${stCfg.text} ${stCfg.ring}`}>
-                                 <span className={`w-1.5 h-1.5 rounded-full ${stCfg.dot} animate-pulse`} />
-                                 New Lead
-                               </span>
+                              <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full font-body text-[10px] font-bold ring-1 ${stCfg.bg} ${stCfg.text} ${stCfg.ring}`}>
+                                <span className={`w-1.5 h-1.5 rounded-full ${stCfg.dot} animate-pulse`} />
+                                New Lead
+                              </span>
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-right">
                               <button
@@ -855,12 +855,12 @@ export default function Leads() {
           <p className="font-body text-sm text-text-muted mt-1 max-w-xl">Track and respond to inquiries, walk-ins, and contact requests.</p>
         </div>
         <div className="flex items-center gap-3">
-          <button
+          {/* <button
             onClick={() => setShowExportModal(true)}
             className="flex items-center gap-2 px-5 py-2.5 bg-[#107c41] hover:bg-[#107c41]/90 text-white rounded-xl font-body text-sm font-bold transition-all shadow-sm active:scale-95 whitespace-nowrap"
           >
             <Download className="w-4 h-4" /> Export Data
-          </button>
+          </button> */}
           <button
             onClick={() => navigate('/admin/add-lead')}
             className="flex items-center gap-2 px-5 py-2.5 bg-primary hover:bg-primary-hover text-white rounded-xl font-body text-sm font-bold transition-all shadow-lg shadow-primary/20 active:scale-95 whitespace-nowrap"
@@ -1067,7 +1067,7 @@ export default function Leads() {
                               </button>
                             )}
                           </div>
-                          <button 
+                          <button
                             className="mt-2 w-full text-left px-2 py-1.5 text-xs text-[#8b5cf6] font-bold hover:bg-[#8b5cf6]/10 rounded-md transition-colors flex items-center justify-between group"
                             onClick={(e) => {
                               e.stopPropagation();

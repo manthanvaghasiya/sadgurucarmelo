@@ -65,7 +65,7 @@ export default function AdminEditLead() {
         // Parse custom car if it exists in notes
         let carValue = lead.carOfInterest?._id || lead.carOfInterest?.id || lead.carOfInterest || '';
         let customCarNameStr = '';
-        
+
         // If there's no official car ID, it might be a custom car mentioned in the notes
         if (!carValue && lead.notes && lead.notes.includes('Looking for:')) {
           carValue = 'custom';
@@ -168,7 +168,7 @@ export default function AdminEditLead() {
           {/* ── Assignment Details (ADMIN ONLY) ── */}
           <div className="bg-surface rounded-2xl border border-gray-100 p-5 sm:p-6 space-y-4">
             <h2 className="font-heading font-bold text-sm text-text-muted uppercase tracking-widest mb-2">Assignment Details</h2>
-            
+
             <div>
               <label className="block font-body text-xs font-semibold text-text-muted mb-1.5 uppercase tracking-wide">
                 Assign to Salesman *
