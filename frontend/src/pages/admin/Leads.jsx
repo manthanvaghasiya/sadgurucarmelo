@@ -28,6 +28,7 @@ import {
   ClipboardList,
   Briefcase,
   Plus,
+  Download,
 } from 'lucide-react';
 import axiosInstance from '../../api/axiosConfig';
 import toast from 'react-hot-toast';
@@ -294,6 +295,47 @@ export default function Leads() {
     (leads || []).forEach(l => { if (c[l?.status] !== undefined) c[l.status]++; });
     return c;
   }, [leads]);
+
+  // ── Export CSV ──
+  const handleExportCSV = () => {
+    if (!leads || leads.length === 0) {
+      toast.error('No leads available to export.');
+      return;
+    }
+
+    const headers = ['Date', 'Customer Name', 'Phone', 'Email', 'Source', 'Status', 'Urgency', 'Car Make', 'Car Model', 'Car Year', 'Assigned Salesman', 'Notes'];
+
+    const csvData = leads.map(lead => {
+      const customCarMatch = lead.notes?.match(/Looking for:\s*(.*?)(?:\n|$)/);
+      const customCarString = customCarMatch ? customCarMatch[1].trim() : '';
+
+      return [
+        new Date(lead.createdAt).toLocaleDateString(),
+        `"${(lead.customerName || '').replace(/"/g, '""')}"`,
+        `"${(lead.phone || '').replace(/"/g, '""')}"`,
+        `"${(lead.email || '').replace(/"/g, '""')}"`,
+        `"${(lead.source || '').replace(/"/g, '""')}"`,
+        `"${(lead.status || '').replace(/"/g, '""')}"`,
+        `"${(lead.urgency || '').replace(/"/g, '""')}"`,
+        `"${(lead.carOfInterest?.make || customCarString || '').replace(/"/g, '""')}"`,
+        `"${(lead.carOfInterest?.model || '').replace(/"/g, '""')}"`,
+        `"${(lead.carOfInterest?.year || '').toString().replace(/"/g, '""')}"`,
+        `"${(lead.assignedTo?.name || 'Unassigned').replace(/"/g, '""')}"`,
+        `"${(lead.notes || '').replace(/"/g, '""').replace(/\n/g, ' ')}"`
+      ].join(',');
+    });
+
+    const csv = [headers.join(','), ...csvData].join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', `Sadguru_Leads_Export_${new Date().toISOString().split('T')[0]}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    toast.success('Leads exported successfully!');
+  };
 
   return (
     <div className="space-y-6">
@@ -651,12 +693,20 @@ export default function Leads() {
           <h1 className="font-heading font-bold text-2xl text-text">Lead Management</h1>
           <p className="font-body text-sm text-text-muted mt-1 max-w-xl">Track and respond to inquiries, walk-ins, and contact requests.</p>
         </div>
-        <button
-          onClick={() => navigate('/admin/add-lead')}
-          className="flex items-center gap-2 px-5 py-2.5 bg-primary hover:bg-primary-hover text-white rounded-xl font-body text-sm font-bold transition-all shadow-lg shadow-primary/20 active:scale-95 whitespace-nowrap"
-        >
-          <Plus className="w-4 h-4" /> Add Lead
-        </button>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={handleExportCSV}
+            className="flex items-center gap-2 px-5 py-2.5 bg-background border border-gray-200 hover:border-primary/30 hover:bg-primary/5 text-text rounded-xl font-body text-sm font-bold transition-all shadow-sm active:scale-95 whitespace-nowrap"
+          >
+            <Download className="w-4 h-4" /> Export CSV
+          </button>
+          <button
+            onClick={() => navigate('/admin/add-lead')}
+            className="flex items-center gap-2 px-5 py-2.5 bg-primary hover:bg-primary-hover text-white rounded-xl font-body text-sm font-bold transition-all shadow-lg shadow-primary/20 active:scale-95 whitespace-nowrap"
+          >
+            <Plus className="w-4 h-4" /> Add Lead
+          </button>
+        </div>
       </div>
 
       {/* KPI Stats Row */}
