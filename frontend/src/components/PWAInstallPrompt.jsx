@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { useLocation } from 'react-router-dom';
 import { X, Share } from 'lucide-react';
 import ReactGA from 'react-ga4';
 
@@ -7,6 +8,9 @@ export default function PWAInstallPrompt() {
   const [isVisible, setIsVisible] = useState(false);
   const [isIOS, setIsIOS] = useState(false);
   const timeoutRef = useRef(null);
+  
+  const location = useLocation();
+  const isAdminRoute = location.pathname.startsWith('/login') || location.pathname.startsWith('/admin') || location.pathname.startsWith('/sales');
 
   useEffect(() => {
     // Detect if already installed
@@ -122,10 +126,10 @@ export default function PWAInstallPrompt() {
             {isIOS ? (
               <>
                 <h3 className="font-heading font-bold text-xl text-slate-900 leading-tight">
-                  Install on iPhone
+                  {isAdminRoute ? 'Install Staff Portal' : 'Install on iPhone'}
                 </h3>
                 <p className="font-body text-sm text-slate-500 mt-2 max-w-xs leading-relaxed">
-                  To install the app, tap the <Share className="inline w-4 h-4 mx-1 mb-1 text-blue-500" /> <b>Share</b> icon below, then tap <b>Add to Home Screen</b>.
+                  To install the {isAdminRoute ? 'staff portal' : 'app'}, tap the <Share className="inline w-4 h-4 mx-1 mb-1 text-blue-500" /> <b>Share</b> icon below, then tap <b>Add to Home Screen</b>.
                 </p>
 
                 {/* Action Buttons */}
@@ -141,10 +145,12 @@ export default function PWAInstallPrompt() {
             ) : (
               <>
                 <h3 className="font-heading font-bold text-xl text-slate-900 leading-tight">
-                  Sadguru Car Surat App
+                  {isAdminRoute ? 'Sadguru Staff Portal' : 'Sadguru Car Surat App'}
                 </h3>
                 <p className="font-body text-sm text-slate-500 mt-1.5 max-w-xs leading-relaxed">
-                  Install our app for faster access, offline browsing, and a native experience.
+                  {isAdminRoute 
+                    ? 'Install the staff portal for quick access to the admin and sales dashboard.'
+                    : 'Install our app for faster access, offline browsing, and a native experience.'}
                 </p>
 
                 {/* Action Buttons */}

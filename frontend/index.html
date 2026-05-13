@@ -54,9 +54,57 @@
   <meta name="twitter:description" content="Buy, sell, or exchange certified pre-owned cars. 150+ verified vehicles." />
   <meta name="twitter:image" content="https://sadgurucarsurat.com/og-image.jpg" />
 
+  <!-- Catch PWA Install Prompt Early -->
+  <script>
+    window.deferredPWAInstallPrompt = null;
+    window.addEventListener('beforeinstallprompt', function(e) {
+      e.preventDefault();
+      window.deferredPWAInstallPrompt = e;
+    });
+  </script>
+
   <!-- Mobile UI Settings -->
   <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
   <meta name="theme-color" content="#0f172a" media="(prefers-color-scheme: dark)" />
+
+  <!-- Dynamic Staff Portal PWA Manifest Injection -->
+  <script>
+    (function() {
+      var path = window.location.pathname;
+      var isAdmin = path.startsWith('/login') || path.startsWith('/admin') || path.startsWith('/sales');
+      if (isAdmin) {
+        var appleTitle = document.querySelector('meta[name="apple-mobile-web-app-title"]');
+        if (appleTitle) appleTitle.content = "Staff Portal";
+        
+        function setAdminManifest() {
+          var manifest = document.querySelector('link[rel="manifest"]');
+          if (manifest && manifest.href.indexOf('admin-manifest.json') === -1) {
+            manifest.href = '/admin-manifest.json';
+          } else if (!manifest) {
+            var m = document.createElement('link');
+            m.rel = 'manifest';
+            m.href = '/admin-manifest.json';
+            document.head.appendChild(m);
+          }
+        }
+        
+        // Run immediately
+        setAdminManifest();
+        
+        // Also watch for any later injections by Vite or React
+        var observer = new MutationObserver(function(mutations) {
+          mutations.forEach(function(mutation) {
+            mutation.addedNodes.forEach(function(node) {
+              if (node.tagName === 'LINK' && node.rel === 'manifest' && node.href.indexOf('admin-manifest.json') === -1) {
+                node.href = '/admin-manifest.json';
+              }
+            });
+          });
+        });
+        observer.observe(document.head, { childList: true });
+      }
+    })();
+  </script>
 </head>
 
 <body>
