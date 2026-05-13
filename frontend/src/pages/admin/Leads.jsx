@@ -1143,6 +1143,9 @@ export default function Leads() {
                           <option value="WhatsApp" className="text-slate-800 bg-white font-semibold">WhatsApp</option>
                           <option value="Phone" className="text-slate-800 bg-white font-semibold">Phone</option>
                           <option value="Website" className="text-slate-800 bg-white font-semibold">Website</option>
+                          <option value="Instagram" className="text-slate-800 bg-white font-semibold">📸 Instagram</option>
+                          <option value="Facebook" className="text-slate-800 bg-white font-semibold">📘 Facebook</option>
+                          <option value="Market Place" className="text-slate-800 bg-white font-semibold">🏪 Market Place</option>
                         </select>
                       </div>
                     </th>
