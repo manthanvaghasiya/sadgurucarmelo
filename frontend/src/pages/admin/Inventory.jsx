@@ -30,12 +30,6 @@ const statusConfig = {
     ring: 'ring-[#10b981]/20',
     dot: 'bg-[#10b981]',
   },
-  Sold: {
-    bg: 'bg-gray-100',
-    text: 'text-gray-500',
-    ring: 'ring-gray-200',
-    dot: 'bg-gray-400',
-  },
   'Coming Soon': {
     bg: 'bg-amber-50',
     text: 'text-amber-600',
@@ -85,8 +79,10 @@ export default function Inventory() {
     let list = allCars;
 
     // Status filter
-    if (statusFilter !== 'All') {
-      list = list.filter((c) => c.status === statusFilter);
+    if (statusFilter === 'Draft') {
+      list = list.filter((c) => c.status === 'Draft');
+    } else {
+      list = list.filter((c) => c.status !== 'Draft');
     }
 
     // Search filter
@@ -132,7 +128,7 @@ export default function Inventory() {
 
   // Status counts for filter pills
   const counts = useMemo(() => {
-    const c = { All: allCars.length, Available: 0, Sold: 0, 'Coming Soon': 0, Draft: 0 };
+    const c = { All: allCars.length, Available: 0, 'Coming Soon': 0, Draft: 0 };
     allCars.forEach((car) => {
       if (c[car.status] !== undefined) c[car.status]++;
     });
@@ -212,13 +208,25 @@ export default function Inventory() {
             Manage your showroom listings, update prices, and mark cars as sold.
           </p>
         </div>
-        <Link
-          to="/admin/add-car"
-          className="inline-flex items-center gap-2 px-5 py-3 bg-accent hover:bg-accent-hover text-white rounded-xl font-body text-sm font-bold transition-colors shadow-lg shadow-accent/20 shrink-0 self-start sm:self-auto"
-        >
-          <Plus className="w-4 h-4" strokeWidth={2.5} />
-          Add New Car
-        </Link>
+        <div className="flex items-center gap-3 self-start sm:self-auto">
+          <button
+            onClick={() => handleStatusFilter(statusFilter === 'Draft' ? 'All' : 'Draft')}
+            className={`inline-flex items-center gap-2 px-5 py-3 rounded-xl font-body text-sm font-bold transition-colors shrink-0 ${
+              statusFilter === 'Draft' 
+                ? 'bg-blue-50 text-blue-600 border border-blue-200' 
+                : 'bg-background text-text-muted border border-gray-200 hover:text-text hover:border-primary/20'
+            }`}
+          >
+            Drafts ({counts['Draft'] || 0})
+          </button>
+          <Link
+            to="/admin/add-car"
+            className="inline-flex items-center gap-2 px-5 py-3 bg-accent hover:bg-accent-hover text-white rounded-xl font-body text-sm font-bold transition-colors shadow-lg shadow-accent/20 shrink-0"
+          >
+            <Plus className="w-4 h-4" strokeWidth={2.5} />
+            Add New Car
+          </Link>
+        </div>
       </div>
 
 
@@ -247,7 +255,6 @@ export default function Inventory() {
           )}
         </div>
 
-        {/* Sort by Price Toggle */}
         <button
           onClick={() => toggleSort('price')}
           className={`flex items-center gap-2 px-4 py-2.5 rounded-xl font-body text-sm font-semibold transition-colors whitespace-nowrap ${sortField === 'price'
@@ -258,22 +265,6 @@ export default function Inventory() {
           <ArrowUpDown className="w-4 h-4" />
           Price {sortField === 'price' ? (sortDir === 'asc' ? '↑' : '↓') : ''}
         </button>
-
-        {/* Status Dropdown (mobile-friendly alternative) */}
-        <div className="relative sm:hidden">
-          <SlidersHorizontal className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted pointer-events-none" />
-          <select
-            value={statusFilter}
-            onChange={(e) => handleStatusFilter(e.target.value)}
-            className="w-full pl-10 pr-8 py-2.5 bg-background rounded-xl font-body text-sm text-text appearance-none cursor-pointer outline-none border border-transparent focus:border-primary/20 transition-colors"
-          >
-            <option value="All">All Status</option>
-            <option value="Available">Available</option>
-            <option value="Sold">Sold</option>
-            <option value="Coming Soon">Coming Soon</option>
-            <option value="Draft">Draft</option>
-          </select>
-        </div>
       </div>
 
       {/* ═══════════════════════════════════════════════

@@ -188,10 +188,25 @@ router.get('/:id', checkCache, async (req, res) => {
   }
 });
 
+// ── Helper to handle Multer/Cloudinary upload errors safely ──
+const uploadImages = upload.array('images', 20);
+const handleUpload = (req, res, next) => {
+  uploadImages(req, res, function (err) {
+    if (err) {
+      console.error('📸 Image Upload Error:', err);
+      return res.status(400).json({ 
+        success: false, 
+        message: err.message || 'Image upload failed. Ensure files are JPG/PNG/WEBP and under limits.' 
+      });
+    }
+    next();
+  });
+};
+
 // ═══════════════════════════════════════════════
 //  POST /api/cars — Add new car (Admin)
 // ═══════════════════════════════════════════════
-router.post('/', protect, admin, upload.array('images', 10), async (req, res) => {
+router.post('/', protect, admin, handleUpload, async (req, res) => {
   try {
     const carData = { ...req.body };
     
@@ -235,7 +250,7 @@ router.post('/', protect, admin, upload.array('images', 10), async (req, res) =>
 // ═══════════════════════════════════════════════
 //  PUT /api/cars/:id — Update car (Admin)
 // ═══════════════════════════════════════════════
-router.put('/:id', protect, admin, upload.array('images', 10), async (req, res) => {
+router.put('/:id', protect, admin, handleUpload, async (req, res) => {
   try {
     const updateData = { ...req.body };
     

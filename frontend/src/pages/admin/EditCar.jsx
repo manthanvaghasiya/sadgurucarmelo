@@ -194,7 +194,9 @@ function DropZone({
   highlight = false,
   id,
   mainPhoto,
-  onMakeMain
+  onMakeMain,
+  onMoveLeft,
+  onMoveRight
 }) {
   const [isDragging, useStateDragging] = useState(false);
   const inputRef = useRef(null);
@@ -241,10 +243,21 @@ function DropZone({
                 {isMain && (
                    <div className="absolute top-2 left-2 bg-accent text-white text-[10px] font-bold px-2 py-1 rounded shadow-sm z-10">MAIN</div>
                 )}
+                <div className="absolute top-2 right-2 bg-black/60 text-white text-[10px] font-bold px-2 py-1 rounded shadow-sm z-10">
+                  {index + 1}
+                </div>
                 <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2">
-                  {!isMain && onMakeMain && (
-                     <button type="button" onClick={(e) => { e.stopPropagation(); onMakeMain(index); }} className="text-[10px] bg-white text-black px-3 py-1.5 rounded font-bold hover:bg-gray-200 shadow-sm uppercase tracking-wide">Make Main</button>
-                  )}
+                  <div className="flex items-center gap-1">
+                    {onMoveLeft && index > 0 && (
+                      <button type="button" onClick={(e) => { e.stopPropagation(); onMoveLeft(index); }} className="text-[10px] bg-gray-800/80 text-white px-2 py-1.5 rounded font-bold hover:bg-gray-700 shadow-sm">&larr;</button>
+                    )}
+                    {!isMain && onMakeMain && (
+                       <button type="button" onClick={(e) => { e.stopPropagation(); onMakeMain(index); }} className="text-[10px] bg-white text-black px-3 py-1.5 rounded font-bold hover:bg-gray-200 shadow-sm uppercase tracking-wide">Make Main</button>
+                    )}
+                    {onMoveRight && index < files.length - 1 && (
+                      <button type="button" onClick={(e) => { e.stopPropagation(); onMoveRight(index); }} className="text-[10px] bg-gray-800/80 text-white px-2 py-1.5 rounded font-bold hover:bg-gray-700 shadow-sm">&rarr;</button>
+                    )}
+                  </div>
                   <button type="button" onClick={(e) => { e.stopPropagation(); onRemoveFile(index); }} className="text-[10px] bg-red-500 text-white px-3 py-1.5 rounded font-bold hover:bg-red-600 shadow-sm uppercase tracking-wide">Remove</button>
                 </div>
                 <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-2">
@@ -293,6 +306,78 @@ export default function EditCar() {
     } else if (mainPhoto.type === 'existing' && mainPhoto.index > index) {
       setMainPhoto({ type: 'existing', index: mainPhoto.index - 1 });
     }
+  };
+
+  const movePhotoLeft = (index) => {
+    if (index === 0) return;
+    setPhotos((prev) => {
+      const newPhotos = [...prev];
+      const temp = newPhotos[index - 1];
+      newPhotos[index - 1] = newPhotos[index];
+      newPhotos[index] = temp;
+      return newPhotos;
+    });
+  };
+
+  const movePhotoRight = (index) => {
+    if (index === photos.length - 1) return;
+    setPhotos((prev) => {
+      const newPhotos = [...prev];
+      const temp = newPhotos[index + 1];
+      newPhotos[index + 1] = newPhotos[index];
+      newPhotos[index] = temp;
+      return newPhotos;
+    });
+  };
+
+  const moveExistingPhotoLeft = (index) => {
+    if (index === 0) return;
+    setExistingImages((prev) => {
+      const newPhotos = [...prev];
+      const temp = newPhotos[index - 1];
+      newPhotos[index - 1] = newPhotos[index];
+      newPhotos[index] = temp;
+      return newPhotos;
+    });
+  };
+
+  const moveExistingPhotoRight = (index) => {
+    if (index === existingImages.length - 1) return;
+    setExistingImages((prev) => {
+      const newPhotos = [...prev];
+      const temp = newPhotos[index + 1];
+      newPhotos[index + 1] = newPhotos[index];
+      newPhotos[index] = temp;
+      return newPhotos;
+    });
+  };
+
+  const handleMakeMainExisting = (index) => {
+    if (index === 0) {
+      setMainPhoto({ type: 'existing', index: 0 });
+      return;
+    }
+    setExistingImages((prev) => {
+      const arr = [...prev];
+      const [moved] = arr.splice(index, 1);
+      arr.unshift(moved);
+      return arr;
+    });
+    setMainPhoto({ type: 'existing', index: 0 });
+  };
+
+  const handleMakeMainNew = (index) => {
+    if (index === 0) {
+      setMainPhoto({ type: 'new', index: 0 });
+      return;
+    }
+    setPhotos((prev) => {
+      const arr = [...prev];
+      const [moved] = arr.splice(index, 1);
+      arr.unshift(moved);
+      return arr;
+    });
+    setMainPhoto({ type: 'new', index: 0 });
   };
 
   const {
@@ -492,10 +577,21 @@ export default function EditCar() {
                   {isMain && (
                      <div className="absolute top-2 left-2 bg-accent text-white text-[10px] font-bold px-2 py-1 rounded shadow-sm z-10">MAIN</div>
                   )}
+                  <div className="absolute top-2 right-2 bg-black/60 text-white text-[10px] font-bold px-2 py-1 rounded shadow-sm z-10">
+                    {idx + 1}
+                  </div>
                   <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2 z-20">
-                     {!isMain && (
-                       <button type="button" onClick={() => setMainPhoto({ type: 'existing', index: idx })} className="text-[10px] bg-white text-black px-3 py-1.5 rounded font-bold hover:bg-gray-200 shadow-sm uppercase tracking-wide">Make Main</button>
-                     )}
+                     <div className="flex items-center gap-1">
+                       {idx > 0 && (
+                         <button type="button" onClick={() => moveExistingPhotoLeft(idx)} className="text-[10px] bg-gray-800/80 text-white px-2 py-1.5 rounded font-bold hover:bg-gray-700 shadow-sm">&larr;</button>
+                       )}
+                       {!isMain && (
+                         <button type="button" onClick={() => handleMakeMainExisting(idx)} className="text-[10px] bg-white text-black px-3 py-1.5 rounded font-bold hover:bg-gray-200 shadow-sm uppercase tracking-wide">Make Main</button>
+                       )}
+                       {idx < existingImages.length - 1 && (
+                         <button type="button" onClick={() => moveExistingPhotoRight(idx)} className="text-[10px] bg-gray-800/80 text-white px-2 py-1.5 rounded font-bold hover:bg-gray-700 shadow-sm">&rarr;</button>
+                       )}
+                     </div>
                      <button type="button" onClick={() => removeExistingPhoto(idx)} className="text-[10px] bg-red-500 text-white px-3 py-1.5 rounded font-bold hover:bg-red-600 shadow-sm uppercase tracking-wide">Remove</button>
                   </div>
                 </div>
@@ -521,7 +617,7 @@ export default function EditCar() {
               register={register('status', { required: 'Status is required' })}
               error={errors.status}
               placeholder="Select listing status"
-              options={['Available', 'Sold', 'Booked', 'Coming Soon']}
+              options={['Available', 'Coming Soon', 'Draft']}
             />
             <FormInput
               label="Make"
@@ -766,7 +862,9 @@ export default function EditCar() {
               onFilesAdded={addPhotos}
               onRemoveFile={removePhoto}
               mainPhoto={mainPhoto}
-              onMakeMain={(idx) => setMainPhoto({ type: 'new', index: idx })}
+              onMakeMain={handleMakeMainNew}
+              onMoveLeft={movePhotoLeft}
+              onMoveRight={movePhotoRight}
             />
           </div>
 
