@@ -4,7 +4,7 @@ import {
   Users, Phone, Clock, Plus, CheckCircle2,
   ChevronRight, MessageCircle, Flame, Thermometer,
   Snowflake, CalendarClock, TrendingUp, UserCircle, AlertCircle,
-  Car, MapPin, X, LogOut
+  Car, MapPin, X, LogOut, Edit2
 } from 'lucide-react';
 import axiosInstance from '../../api/axiosConfig';
 import toast from 'react-hot-toast';
@@ -75,7 +75,7 @@ export default function SalesDashboard() {
       const isPending = l.followUpDate && new Date(l.followUpDate) < tomorrow && l.status !== 'Closed';
 
       // Rule 2: It is DONE if it was updated today AND (the salesman pushed the follow-up date to the future OR closed it).
-      const isDoneToday = isUpdatedToday && (l.status === 'Closed' || (l.followUpDate && new Date(l.followUpDate) >= tomorrow));
+      const isDoneToday = isUpdatedToday && l.status !== 'New' && (l.status === 'Closed' || (l.followUpDate && new Date(l.followUpDate) >= tomorrow));
 
       return isPending || isDoneToday;
     }).sort((a, b) => {
@@ -184,7 +184,7 @@ export default function SalesDashboard() {
         const tomorrow = new Date(today);
         tomorrow.setDate(tomorrow.getDate() + 1);
         const isUpdatedToday = new Date(lead.updatedAt) >= today && new Date(lead.updatedAt) < tomorrow;
-        const isActuallyDone = isUpdatedToday && (lead.status === 'Closed' || (lead.followUpDate && new Date(lead.followUpDate) >= tomorrow));
+        const isActuallyDone = isUpdatedToday && lead.status !== 'New' && (lead.status === 'Closed' || (lead.followUpDate && new Date(lead.followUpDate) >= tomorrow));
         return !isActuallyDone;
       }).length,
       icon: CalendarClock,
@@ -359,7 +359,7 @@ export default function SalesDashboard() {
                 tomorrow.setDate(tomorrow.getDate() + 1);
 
                 const isUpdatedToday = new Date(lead.updatedAt) >= today && new Date(lead.updatedAt) < tomorrow;
-                const isActuallyDone = isUpdatedToday && (lead.status === 'Closed' || (lead.followUpDate && new Date(lead.followUpDate) >= tomorrow));
+                const isActuallyDone = isUpdatedToday && lead.status !== 'New' && (lead.status === 'Closed' || (lead.followUpDate && new Date(lead.followUpDate) >= tomorrow));
 
                 const uCfg = urgencyConfig[lead.urgency] || urgencyConfig['Warm'];
                 const UrgencyIcon = uCfg.icon;
@@ -414,6 +414,13 @@ export default function SalesDashboard() {
                         title="Call Customer"
                       >
                         <Phone className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => navigate(`/sales/edit-lead/${lead._id}`)}
+                        className="p-2 text-text-muted hover:text-primary hover:bg-primary/5 rounded-lg transition-colors shadow-sm"
+                        title="Edit Lead"
+                      >
+                        <Edit2 className="w-4 h-4" />
                       </button>
                     </div>
                   </div>
@@ -501,6 +508,13 @@ export default function SalesDashboard() {
                         >
                           <MessageCircle className="w-3.5 h-3.5" />
                         </a>
+                        <button
+                          onClick={() => navigate(`/sales/edit-lead/${lead._id}`)}
+                          className="p-1.5 text-text-muted hover:text-primary hover:bg-primary/5 rounded-md transition-colors"
+                          title="Edit Lead"
+                        >
+                          <Edit2 className="w-3.5 h-3.5" />
+                        </button>
                       </div>
                     </div>
                   </div>

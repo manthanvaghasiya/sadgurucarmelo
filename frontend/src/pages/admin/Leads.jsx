@@ -214,7 +214,7 @@ export default function Leads() {
       const isPending = l.followUpDate && new Date(l.followUpDate) < tomorrow && l.status !== 'Closed';
 
       // Rule 2: It is DONE if it was updated today AND (the salesman pushed the follow-up date to the future OR closed it).
-      const isDoneToday = isUpdatedToday && (l.status === 'Closed' || (l.followUpDate && new Date(l.followUpDate) >= tomorrow));
+      const isDoneToday = isUpdatedToday && l.status !== 'New' && (l.status === 'Closed' || (l.followUpDate && new Date(l.followUpDate) >= tomorrow));
 
       return isPending || isDoneToday;
     }).sort((a, b) => {
@@ -291,7 +291,7 @@ export default function Leads() {
         const tomorrow = new Date(today);
         tomorrow.setDate(tomorrow.getDate() + 1);
         const isUpdatedToday = new Date(lead.updatedAt) >= today && new Date(lead.updatedAt) < tomorrow;
-        const isActuallyDone = isUpdatedToday && (lead.status === 'Closed' || (lead.followUpDate && new Date(lead.followUpDate) >= tomorrow));
+        const isActuallyDone = isUpdatedToday && lead.status !== 'New' && (lead.status === 'Closed' || (lead.followUpDate && new Date(lead.followUpDate) >= tomorrow));
         return !isActuallyDone;
       }).length, icon: CalendarClock,
       iconBg: 'bg-red-50', iconColor: 'text-red-500',
@@ -637,7 +637,7 @@ export default function Leads() {
                         tomorrow.setDate(tomorrow.getDate() + 1);
 
                         const isUpdatedToday = new Date(lead.updatedAt) >= today && new Date(lead.updatedAt) < tomorrow;
-                        const isActuallyDone = isUpdatedToday && (lead.status === 'Closed' || (lead.followUpDate && new Date(lead.followUpDate) >= tomorrow));
+                        const isActuallyDone = isUpdatedToday && lead.status !== 'New' && (lead.status === 'Closed' || (lead.followUpDate && new Date(lead.followUpDate) >= tomorrow));
                         const sCfg = sourceConfig[lead.source] || sourceConfig['Website'];
                         const stCfg = statusConfig[lead.status] || statusConfig['New'];
                         const lastNote = lead.notes?.split('\n\n').filter(n => n.trim()).pop()?.replace(/^\[.*?\]/, '').trim();
