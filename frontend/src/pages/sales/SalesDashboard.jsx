@@ -375,14 +375,30 @@ export default function SalesDashboard() {
                           <span className="flex items-center gap-1"><Phone className="w-3 h-3" />{lead.phone}</span>
                           <span className="flex items-center gap-1"><MapPin className="w-3 h-3 text-primary/60" />{lead.source}</span>
                         </div>
-                        {(lead.carsOfInterest?.length > 0 || lead.carOfInterest) && (
-                          <p className="font-body text-xs text-primary flex items-center gap-1 mt-1 truncate">
-                            <Car className="w-3.5 h-3.5 shrink-0" />
-                            <span className="truncate">
-                              {(lead.carsOfInterest?.length > 0 ? lead.carsOfInterest : [lead.carOfInterest]).map(c => `${c.make} ${c.model} (${c.year})`).join(', ')}
-                            </span>
-                          </p>
-                        )}
+                        {(() => {
+                          const customCarMatch = lead.notes?.match(/Looking for:\s*(.*?)(?:\n|$)/);
+                          const customCarStr = customCarMatch ? customCarMatch[1].trim() : '';
+                          const cars = lead.carsOfInterest?.length > 0 ? lead.carsOfInterest : (lead.carOfInterest ? [lead.carOfInterest] : []);
+                          if (cars.length > 0 || customCarStr) {
+                            return (
+                              <div className="flex flex-wrap gap-1.5 mt-2">
+                                {cars.map(c => (
+                                  <span key={c._id} className="inline-flex items-center gap-1 px-2 py-0.5 bg-primary/5 border border-primary/10 rounded-md text-[10px] font-bold text-primary whitespace-nowrap">
+                                    <Car className="w-3 h-3" />
+                                    {c.make} {c.model} ({c.year})
+                                  </span>
+                                ))}
+                                {customCarStr && (
+                                  <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-[#8b5cf6]/5 border border-[#8b5cf6]/20 text-[#8b5cf6] rounded-md text-[10px] font-bold whitespace-nowrap">
+                                    <Car className="w-3 h-3" />
+                                    {customCarStr.length > 20 ? customCarStr.substring(0, 20) + '...' : customCarStr} (Custom)
+                                  </span>
+                                )}
+                              </div>
+                            );
+                          }
+                          return null;
+                        })()}
                         {lead.notes && (
                           <p className="font-body text-[11px] text-text-muted/80 pt-1 line-clamp-2" title={lead.notes.split('\n').filter(e => e.trim()).join(' , ')}>
                             <span className="font-semibold text-text-muted">Notes:</span> {lead.notes.split('\n').filter(e => e.trim()).join(' , ')}
@@ -469,14 +485,30 @@ export default function SalesDashboard() {
                           </div>
                           <div className="font-body text-xs text-text-muted flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3 pt-0.5">
                             <span className="flex items-center gap-1"><Phone className="w-3 h-3 shrink-0" />{lead.phone}</span>
-                            {(lead.carsOfInterest?.length > 0 || lead.carOfInterest) && (
-                              <span className="flex items-center gap-1 text-primary">
-                                <Car className="w-3 h-3 shrink-0" />
-                                <span className="truncate">
-                                  {(lead.carsOfInterest?.length > 0 ? lead.carsOfInterest : [lead.carOfInterest]).map(c => `${c.make} ${c.model} (${c.year})`).join(', ')}
-                                </span>
-                              </span>
-                            )}
+                            {(() => {
+                              const customCarMatch = lead.notes?.match(/Looking for:\s*(.*?)(?:\n|$)/);
+                              const customCarStr = customCarMatch ? customCarMatch[1].trim() : '';
+                              const cars = lead.carsOfInterest?.length > 0 ? lead.carsOfInterest : (lead.carOfInterest ? [lead.carOfInterest] : []);
+                              if (cars.length > 0 || customCarStr) {
+                                return (
+                                  <div className="flex flex-wrap gap-1.5 mt-1 sm:mt-0 sm:ml-2">
+                                    {cars.map(c => (
+                                      <span key={c._id} className="inline-flex items-center gap-1 px-1.5 py-0.5 bg-primary/5 border border-primary/10 rounded text-[9px] font-bold text-primary whitespace-nowrap">
+                                        <Car className="w-2.5 h-2.5" />
+                                        {c.make} {c.model} ({c.year})
+                                      </span>
+                                    ))}
+                                    {customCarStr && (
+                                      <span className="inline-flex items-center gap-1 px-1.5 py-0.5 bg-[#8b5cf6]/5 border border-[#8b5cf6]/20 text-[#8b5cf6] rounded text-[9px] font-bold whitespace-nowrap">
+                                        <Car className="w-2.5 h-2.5" />
+                                        {customCarStr.length > 20 ? customCarStr.substring(0, 20) + '...' : customCarStr} (Custom)
+                                      </span>
+                                    )}
+                                  </div>
+                                );
+                              }
+                              return null;
+                            })()}
                           </div>
                         </div>
                       </div>

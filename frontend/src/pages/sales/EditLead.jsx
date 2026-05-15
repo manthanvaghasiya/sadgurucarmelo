@@ -45,6 +45,7 @@ export default function EditLead() {
           customerName: lead.customerName,
           phone: lead.phone,
           email: lead.email || '',
+          address: lead.address || lead.email || '',
           source: lead.source,
           followUpDate: lead.followUpDate ? new Date(lead.followUpDate).toISOString().split('T')[0] : '',
           notes: lead.notes || '',
@@ -86,7 +87,7 @@ export default function EditLead() {
       const payload = {
         customerName: data.customerName,
         phone: data.phone,
-        email: data.email || '',
+        address: data.address || '',
         source: data.source,
         urgency,
         notes: combinedNotes,
@@ -198,15 +199,15 @@ export default function EditLead() {
               {errors.phone && <p className="text-red-500 text-xs font-body mt-1">{errors.phone.message}</p>}
             </div>
 
-            {/* Email */}
+            {/* Address */}
             <div>
               <label className="block font-body text-xs font-semibold text-text-muted mb-1.5 uppercase tracking-wide">
-                Email (Optional)
+                Address (Optional)
               </label>
               <input
-                type="email"
-                {...register('email')}
-                placeholder="e.g. rajesh@email.com"
+                type="text"
+                {...register('address')}
+                placeholder="e.g. 123 Main St, City"
                 className="w-full px-4 py-3 bg-background rounded-xl border border-gray-200 font-body text-sm text-text placeholder:text-text-muted/60 outline-none focus:border-primary/30 focus:ring-2 focus:ring-primary/10"
               />
             </div>

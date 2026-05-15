@@ -38,7 +38,7 @@ export const AuthProvider = ({ children }) => {
       setUser(null);
       localStorage.removeItem('user');
       localStorage.removeItem('token'); // Just in case a legacy token exists
-      window.location.href = '/';
+      window.location.href = '/login';
     }
   };
 

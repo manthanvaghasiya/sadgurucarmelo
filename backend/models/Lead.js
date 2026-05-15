@@ -17,7 +17,10 @@ const leadSchema = new mongoose.Schema(
     email: {
       type: String,
       trim: true,
-      lowercase: true,
+    },
+    address: {
+      type: String,
+      trim: true,
     },
 
     // ── Vehicle Interest ──

@@ -161,7 +161,8 @@ export default function Leads() {
         (l) =>
           l.customerName?.toLowerCase().includes(q) ||
           l.phone?.includes(q) ||
-          l.email?.toLowerCase().includes(q)
+          l.email?.toLowerCase().includes(q) ||
+          l.address?.toLowerCase().includes(q)
       );
     }
 
@@ -357,6 +358,7 @@ export default function Leads() {
         'Customer Name': lead.customerName || '',
         'Phone': lead.phone || '',
         'Email': lead.email || '',
+        'Address': lead.address || '',
         'Source': lead.source || '',
         'Status': lead.status || '',
         'Urgency': lead.urgency || '',
@@ -662,23 +664,30 @@ export default function Leads() {
                               </div>
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap">
-                              {(lead.carsOfInterest?.length > 0 || lead.carOfInterest) ? (
-                                <div className="flex items-center gap-2">
-                                  <div className="w-8 h-8 bg-background rounded-lg flex items-center justify-center shrink-0">
-                                    <Car className="w-4 h-4 text-text-muted/60" />
-                                  </div>
-                                  <div className="flex flex-col min-w-0">
-                                    <span className="font-body text-xs font-semibold text-text truncate max-w-[200px]" title={(lead.carsOfInterest?.length > 0 ? lead.carsOfInterest : [lead.carOfInterest]).map(c => `${c.make} ${c.model}`).join(', ')}>
-                                      {(lead.carsOfInterest?.length > 0 ? lead.carsOfInterest : [lead.carOfInterest]).map(c => `${c.make} ${c.model}`).join(', ')}
-                                    </span>
-                                    <span className="font-body text-[10px] text-text-muted">
-                                      {(lead.carsOfInterest?.length > 0 ? lead.carsOfInterest : [lead.carOfInterest]).map(c => c.year).join(', ')}
-                                    </span>
-                                  </div>
-                                </div>
-                              ) : (
-                                <span className="font-body text-xs text-text-muted/40 italic">Not specified</span>
-                              )}
+                              {(() => {
+                                const customCarMatch = lead.notes?.match(/Looking for:\s*(.*?)(?:\n|$)/);
+                                const customCarStr = customCarMatch ? customCarMatch[1].trim() : '';
+                                const cars = lead.carsOfInterest?.length > 0 ? lead.carsOfInterest : (lead.carOfInterest ? [lead.carOfInterest] : []);
+                                const hasCars = cars.length > 0;
+                                
+                                if (hasCars || customCarStr) {
+                                  return (
+                                    <div className="flex flex-wrap gap-1.5 max-w-[240px]">
+                                      {cars.map(c => (
+                                        <span key={c._id} className="inline-flex items-center px-2 py-0.5 bg-background border border-gray-200 rounded-md text-[10px] font-semibold text-text whitespace-nowrap shadow-sm">
+                                          {c.make} {c.model} ({c.year})
+                                        </span>
+                                      ))}
+                                      {customCarStr && (
+                                        <span className="inline-flex items-center px-2 py-0.5 bg-[#8b5cf6]/5 border border-[#8b5cf6]/20 text-[#8b5cf6] rounded-md text-[10px] font-semibold whitespace-nowrap shadow-sm" title={customCarStr}>
+                                          {customCarStr.length > 20 ? customCarStr.substring(0, 20) + '...' : customCarStr} (Custom)
+                                        </span>
+                                      )}
+                                    </div>
+                                  );
+                                }
+                                return <span className="font-body text-xs text-text-muted/40 italic">Not specified</span>;
+                              })()}
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap">
                               <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full font-body text-[10px] font-bold ring-1 ${sCfg.bg} ${sCfg.text} ${sCfg.ring}`}>
@@ -800,21 +809,30 @@ export default function Leads() {
                               </div>
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap">
-                              {lead.carOfInterest ? (
-                                <div className="flex items-center gap-2">
-                                  <div className="w-8 h-8 bg-background rounded-lg flex items-center justify-center shrink-0">
-                                    <Car className="w-4 h-4 text-text-muted/60" />
-                                  </div>
-                                  <div className="flex flex-col min-w-0">
-                                    <span className="font-body text-xs font-semibold text-text truncate max-w-[120px]">
-                                      {lead.carOfInterest.make} {lead.carOfInterest.model}
-                                    </span>
-                                    <span className="font-body text-[10px] text-text-muted">{lead.carOfInterest.year}</span>
-                                  </div>
-                                </div>
-                              ) : (
-                                <span className="font-body text-xs text-text-muted/40 italic">Not specified</span>
-                              )}
+                              {(() => {
+                                const customCarMatch = lead.notes?.match(/Looking for:\s*(.*?)(?:\n|$)/);
+                                const customCarStr = customCarMatch ? customCarMatch[1].trim() : '';
+                                const cars = lead.carsOfInterest?.length > 0 ? lead.carsOfInterest : (lead.carOfInterest ? [lead.carOfInterest] : []);
+                                const hasCars = cars.length > 0;
+                                
+                                if (hasCars || customCarStr) {
+                                  return (
+                                    <div className="flex flex-wrap gap-1.5 max-w-[240px]">
+                                      {cars.map(c => (
+                                        <span key={c._id} className="inline-flex items-center px-2 py-0.5 bg-background border border-gray-200 rounded-md text-[10px] font-semibold text-text whitespace-nowrap shadow-sm">
+                                          {c.make} {c.model} ({c.year})
+                                        </span>
+                                      ))}
+                                      {customCarStr && (
+                                        <span className="inline-flex items-center px-2 py-0.5 bg-[#8b5cf6]/5 border border-[#8b5cf6]/20 text-[#8b5cf6] rounded-md text-[10px] font-semibold whitespace-nowrap shadow-sm" title={customCarStr}>
+                                          {customCarStr.length > 20 ? customCarStr.substring(0, 20) + '...' : customCarStr} (Custom)
+                                        </span>
+                                      )}
+                                    </div>
+                                  );
+                                }
+                                return <span className="font-body text-xs text-text-muted/40 italic">Not specified</span>;
+                              })()}
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap">
                               <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full font-body text-[10px] font-bold ring-1 ${sCfg.bg} ${sCfg.text} ${sCfg.ring}`}>
@@ -912,7 +930,7 @@ export default function Leads() {
             type="text"
             value={searchQuery}
             onChange={(e) => handleSearch(e.target.value)}
-            placeholder="Search by Name, Phone, or Email..."
+            placeholder="Search by Name, Phone, Address..."
             className="w-full pl-10 pr-10 py-2.5 bg-background border border-transparent focus:border-primary/20 rounded-xl font-body text-sm text-text placeholder:text-text-muted/60 outline-none transition-colors"
           />
           {searchQuery && (
@@ -1229,29 +1247,30 @@ export default function Leads() {
                             </div>
                           </td>
                           <td className={`px-4 py-4 transition-colors duration-300 ${columnFilters.car ? 'bg-emerald-50/50' : ''}`}>
-                            {lead.carOfInterest ? (
-                              <div className="flex flex-col">
-                                <span className="font-body text-xs font-semibold text-text truncate max-w-[150px]">
-                                  {lead.carOfInterest.make} {lead.carOfInterest.model}
-                                </span>
-                                <span className="font-body text-[11px] text-text-muted truncate max-w-[150px]">
-                                  ({lead.carOfInterest.year})
-                                </span>
-                              </div>
-                            ) : (
-                              (lead.notes && lead.notes.match(/Looking for:\s*(.*?)(?:\n|$)/)) ? (
-                                <div className="flex flex-col items-start gap-1">
-                                  <span className="font-body text-xs font-semibold text-text truncate max-w-[150px]" title={lead.notes.match(/Looking for:\s*(.*?)(?:\n|$)/)[1].trim()}>
-                                    {lead.notes.match(/Looking for:\s*(.*?)(?:\n|$)/)[1].trim()}
-                                  </span>
-                                  <span className="px-1.5 py-0.5 bg-[#8b5cf6]/10 text-[#8b5cf6] ring-1 ring-[#8b5cf6]/20 rounded-md font-body text-[9px] font-bold uppercase tracking-wider">
-                                    Custom
-                                  </span>
-                                </div>
-                              ) : (
-                                <span className="font-body text-xs text-text-muted/60 italic">-</span>
-                              )
-                            )}
+                            {(() => {
+                              const customCarMatch = lead.notes?.match(/Looking for:\s*(.*?)(?:\n|$)/);
+                              const customCarStr = customCarMatch ? customCarMatch[1].trim() : '';
+                              const cars = lead.carsOfInterest?.length > 0 ? lead.carsOfInterest : (lead.carOfInterest ? [lead.carOfInterest] : []);
+                              const hasCars = cars.length > 0;
+                              
+                              if (hasCars || customCarStr) {
+                                return (
+                                  <div className="flex flex-wrap gap-1.5 max-w-[240px]">
+                                    {cars.map(c => (
+                                      <span key={c._id} className="inline-flex items-center px-2 py-0.5 bg-background border border-gray-200 rounded-md text-[10px] font-semibold text-text whitespace-nowrap shadow-sm">
+                                        {c.make} {c.model} ({c.year})
+                                      </span>
+                                    ))}
+                                    {customCarStr && (
+                                      <span className="inline-flex items-center px-2 py-0.5 bg-[#8b5cf6]/5 border border-[#8b5cf6]/20 text-[#8b5cf6] rounded-md text-[10px] font-semibold whitespace-nowrap shadow-sm" title={customCarStr}>
+                                        {customCarStr.length > 20 ? customCarStr.substring(0, 20) + '...' : customCarStr} (Custom)
+                                      </span>
+                                    )}
+                                  </div>
+                                );
+                              }
+                              return <span className="font-body text-xs text-text-muted/60 italic">-</span>;
+                            })()}
                           </td>
 
                           <td className={`px-4 py-4 transition-colors duration-300 ${columnFilters.salesman ? 'bg-emerald-50/50' : ''}`}>
@@ -1339,14 +1358,33 @@ export default function Leads() {
                           <p className="font-body text-xs text-text-muted flex items-center gap-1 mt-0.5">
                             <Phone className="w-3 h-3" />{lead.phone}
                           </p>
-                          {lead.carOfInterest && (
-                            <p className="font-body text-xs text-primary flex items-center gap-1 mt-1">
-                              <Car className="w-3 h-3" />
-                              <span className="font-heading font-bold text-sm text-text truncate">
-                                {lead.carOfInterest.make} {lead.carOfInterest.model} ({lead.carOfInterest.year})
-                              </span>
-                            </p>
-                          )}
+                          {(() => {
+                            const customCarMatch = lead.notes?.match(/Looking for:\s*(.*?)(?:\n|$)/);
+                            const customCarStr = customCarMatch ? customCarMatch[1].trim() : '';
+                            const cars = lead.carsOfInterest?.length > 0 ? lead.carsOfInterest : (lead.carOfInterest ? [lead.carOfInterest] : []);
+                            const carStrings = cars.map(c => `${c.make} ${c.model} (${c.year})`);
+                            if (customCarStr) carStrings.push(customCarStr);
+                            
+                            if (cars.length > 0 || customCarStr) {
+                              return (
+                                <div className="flex flex-wrap gap-1.5 mt-2">
+                                  {cars.map(c => (
+                                    <span key={c._id} className="inline-flex items-center gap-1 px-2 py-0.5 bg-primary/5 border border-primary/10 rounded-md text-[10px] font-bold text-primary whitespace-nowrap">
+                                      <Car className="w-3 h-3" />
+                                      {c.make} {c.model} ({c.year})
+                                    </span>
+                                  ))}
+                                  {customCarStr && (
+                                    <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-[#8b5cf6]/5 border border-[#8b5cf6]/20 text-[#8b5cf6] rounded-md text-[10px] font-bold whitespace-nowrap">
+                                      <Car className="w-3 h-3" />
+                                      {customCarStr.length > 20 ? customCarStr.substring(0, 20) + '...' : customCarStr} (Custom)
+                                    </span>
+                                  )}
+                                </div>
+                              );
+                            }
+                            return null;
+                          })()}
 
                         </div>
                         <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full font-body text-[10px] font-bold ring-1 shrink-0 ${stCfg.bg} ${stCfg.text} ${stCfg.ring}`}>
