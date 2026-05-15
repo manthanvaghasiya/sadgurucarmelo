@@ -5,7 +5,7 @@ import toast from 'react-hot-toast';
 import {
   User, Phone, MessageCircle, Car, MapPin, Flame,
   Thermometer, Snowflake, ArrowLeft, CheckCircle2, Loader2,
-  CalendarClock, UserCircle
+  CalendarClock, UserCircle, X
 } from 'lucide-react';
 import axiosInstance from '../../api/axiosConfig';
 import { useAuth } from '../../context/AuthContext';
@@ -19,10 +19,14 @@ export default function AdminAddLead() {
   const [salesmen, setSalesmen] = useState([]);
   const [isFetchingSalesmen, setIsFetchingSalesmen] = useState(true);
 
+  const [selectedBrand, setSelectedBrand] = useState('');
+  const [selectedCars, setSelectedCars] = useState([]);
+  const [showCustomCar, setShowCustomCar] = useState(false);
+  const [customCarName, setCustomCarName] = useState('');
+
   const {
     register,
     handleSubmit,
-    watch,
     formState: { errors, isSubmitting },
   } = useForm({
     defaultValues: {
@@ -30,8 +34,6 @@ export default function AdminAddLead() {
       assignedTo: '',
     },
   });
-
-  const selectedCarOfInterest = watch('carOfInterest');
 
   // Fetch active salesmen
   useEffect(() => {
@@ -55,8 +57,8 @@ export default function AdminAddLead() {
   const onSubmit = async (data) => {
     try {
       let combinedNotes = data.notes || '';
-      if (data.carOfInterest === 'custom' && data.customCarName) {
-        combinedNotes = `Looking for: ${data.customCarName}${combinedNotes ? `\n\n${combinedNotes}` : ''}`;
+      if (showCustomCar && customCarName) {
+        combinedNotes = `Looking for: ${customCarName}${combinedNotes ? `\n\n${combinedNotes}` : ''}`;
       }
 
       const payload = {
@@ -67,7 +69,8 @@ export default function AdminAddLead() {
         urgency,
         assignedTo: data.assignedTo, // Using Admin selected salesman
         notes: combinedNotes ? `[${new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}] ${combinedNotes}` : '',
-        carOfInterest: (data.carOfInterest && data.carOfInterest !== 'custom') ? data.carOfInterest : undefined,
+        carsOfInterest: selectedCars.map(c => c._id),
+        carOfInterest: selectedCars.length > 0 ? selectedCars[0]._id : undefined,
         followUpDate: data.followUpDate || undefined,
       };
 
@@ -84,6 +87,19 @@ export default function AdminAddLead() {
 
   // Available cars for dropdown
   const availableCars = (cars || []).filter(c => c?.status !== 'Sold');
+  const availableBrands = [...new Set(availableCars.map(c => c.make))].sort();
+  const availableModelsForBrand = availableCars.filter(c => c.make === selectedBrand);
+
+  const handleModelSelect = (e) => {
+    const val = e.target.value;
+    if (val === 'custom') {
+      setShowCustomCar(true);
+    } else if (val && !selectedCars.some(c => c._id === val)) {
+      const car = availableCars.find(c => c._id === val);
+      if (car) setSelectedCars([...selectedCars, car]);
+    }
+    e.target.value = "";
+  };
 
   return (
     <div className="bg-background">
@@ -191,6 +207,67 @@ export default function AdminAddLead() {
             </div>
           </div>
 
+          {/* ── Cars of Interest ── */}
+          <div className="bg-surface rounded-2xl border border-gray-100 p-5 sm:p-6 space-y-4">
+            <h2 className="font-heading font-bold text-sm text-text-muted uppercase tracking-widest mb-2">Cars of Interest</h2>
+            
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block font-body text-xs font-semibold text-text-muted mb-1.5 uppercase tracking-wide">Brand</label>
+                <select 
+                  value={selectedBrand} 
+                  onChange={(e) => setSelectedBrand(e.target.value)}
+                  className="w-full px-4 py-3 bg-background rounded-xl border border-gray-200 font-body text-sm text-text outline-none focus:border-primary/30 focus:ring-2 focus:ring-primary/10 cursor-pointer"
+                >
+                  <option value="">Select Brand</option>
+                  {availableBrands.map(brand => <option key={brand} value={brand}>{brand}</option>)}
+                </select>
+              </div>
+              
+              <div>
+                <label className="block font-body text-xs font-semibold text-text-muted mb-1.5 uppercase tracking-wide">Model</label>
+                <div className="relative">
+                  <Car className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
+                  <select 
+                     defaultValue=""
+                     onChange={handleModelSelect}
+                     disabled={!selectedBrand && !showCustomCar}
+                     className="w-full pl-11 pr-4 py-3 bg-background rounded-xl border border-gray-200 font-body text-sm text-text outline-none focus:border-primary/30 focus:ring-2 focus:ring-primary/10 appearance-none cursor-pointer disabled:opacity-50"
+                  >
+                    <option value="" disabled>Select Car Model</option>
+                    {availableModelsForBrand.map(car => <option key={car._id} value={car._id}>{car.model} ({car.year}) - ₹{car.price?.toLocaleString('en-IN')}</option>)}
+                    <option value="custom" className="font-bold text-primary">➕ Other / Custom Car...</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            {showCustomCar && (
+              <div className="relative animate-in fade-in slide-in-from-top-2 duration-300 mt-3">
+                <input
+                  value={customCarName}
+                  onChange={(e) => setCustomCarName(e.target.value)}
+                  placeholder="Enter customized car name (e.g., Hyundai Creta 2022)"
+                  className="w-full px-4 py-3 bg-primary/5 rounded-xl border border-primary/20 font-body text-sm text-text placeholder:text-text-muted/60 outline-none focus:border-primary/40 focus:ring-2 focus:ring-primary/10"
+                  autoFocus
+                />
+              </div>
+            )}
+            
+            {/* Selected Cars Chips */}
+            {selectedCars.length > 0 && (
+               <div className="flex flex-wrap gap-2 pt-2">
+                  {selectedCars.map(car => (
+                     <span key={car._id} className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-primary/10 text-primary rounded-lg text-sm font-bold animate-in zoom-in-95 duration-200">
+                        <Car className="w-4 h-4"/>
+                        {car.make} {car.model} ({car.year})
+                        <button type="button" onClick={() => setSelectedCars(selectedCars.filter(c => c._id !== car._id))} className="ml-1 p-0.5 hover:bg-primary/20 rounded-md transition-colors"><X className="w-3.5 h-3.5" /></button>
+                     </span>
+                  ))}
+               </div>
+            )}
+          </div>
+
           {/* ── Lead Details ── */}
           <div className="bg-surface rounded-2xl border border-gray-100 p-5 sm:p-6 space-y-4">
             <h2 className="font-heading font-bold text-sm text-text-muted uppercase tracking-widest mb-2">Lead Details</h2>
@@ -217,41 +294,7 @@ export default function AdminAddLead() {
               </div>
             </div>
 
-            {/* Car of Interest */}
-            <div className="space-y-3">
-              <div>
-                <label className="block font-body text-xs font-semibold text-text-muted mb-1.5 uppercase tracking-wide">
-                  Car of Interest
-                </label>
-                <div className="relative">
-                  <Car className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
-                  <select
-                    {...register('carOfInterest')}
-                    className="w-full pl-11 pr-4 py-3 bg-background rounded-xl border border-gray-200 font-body text-sm text-text outline-none focus:border-primary/30 focus:ring-2 focus:ring-primary/10 appearance-none cursor-pointer"
-                  >
-                    <option value="">Not specific / General inquiry</option>
-                    {availableCars.map((car) => (
-                      <option key={car._id || car.id} value={car._id || car.id}>
-                        {car.make} {car.model} ({car.year}) — ₹{car.price?.toLocaleString('en-IN')}
-                      </option>
-                    ))}
-                    <option value="custom" className="font-bold text-primary">➕ Other / Custom Car...</option>
-                  </select>
-                </div>
-              </div>
 
-              {selectedCarOfInterest === 'custom' && (
-                <div className="relative animate-in fade-in slide-in-from-top-2 duration-300">
-                  <input
-                    {...register('customCarName', { required: 'Please enter the car details' })}
-                    placeholder="Enter customized car name (e.g., Hyundai Creta 2022)"
-                    className="w-full px-4 py-3 bg-primary/5 rounded-xl border border-primary/20 font-body text-sm text-text placeholder:text-text-muted/60 outline-none focus:border-primary/40 focus:ring-2 focus:ring-primary/10"
-                    autoFocus
-                  />
-                  {errors.customCarName && <p className="text-red-500 text-xs font-body mt-1">{errors.customCarName.message}</p>}
-                </div>
-              )}
-            </div>
 
             {/* Urgency */}
             <div>

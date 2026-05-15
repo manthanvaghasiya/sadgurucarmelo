@@ -375,10 +375,12 @@ export default function SalesDashboard() {
                           <span className="flex items-center gap-1"><Phone className="w-3 h-3" />{lead.phone}</span>
                           <span className="flex items-center gap-1"><MapPin className="w-3 h-3 text-primary/60" />{lead.source}</span>
                         </div>
-                        {lead.carOfInterest && (
+                        {(lead.carsOfInterest?.length > 0 || lead.carOfInterest) && (
                           <p className="font-body text-xs text-primary flex items-center gap-1 mt-1 truncate">
                             <Car className="w-3.5 h-3.5 shrink-0" />
-                            <span className="truncate">{lead.carOfInterest.make} {lead.carOfInterest.model} ({lead.carOfInterest.year})</span>
+                            <span className="truncate">
+                              {(lead.carsOfInterest?.length > 0 ? lead.carsOfInterest : [lead.carOfInterest]).map(c => `${c.make} ${c.model} (${c.year})`).join(', ')}
+                            </span>
                           </p>
                         )}
                         {lead.notes && (
@@ -467,10 +469,12 @@ export default function SalesDashboard() {
                           </div>
                           <div className="font-body text-xs text-text-muted flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3 pt-0.5">
                             <span className="flex items-center gap-1"><Phone className="w-3 h-3 shrink-0" />{lead.phone}</span>
-                            {lead.carOfInterest && (
+                            {(lead.carsOfInterest?.length > 0 || lead.carOfInterest) && (
                               <span className="flex items-center gap-1 text-primary">
                                 <Car className="w-3 h-3 shrink-0" />
-                                <span className="truncate">{lead.carOfInterest.make} {lead.carOfInterest.model} ({lead.carOfInterest.year})</span>
+                                <span className="truncate">
+                                  {(lead.carsOfInterest?.length > 0 ? lead.carsOfInterest : [lead.carOfInterest]).map(c => `${c.make} ${c.model} (${c.year})`).join(', ')}
+                                </span>
                               </span>
                             )}
                           </div>

@@ -181,6 +181,7 @@ export default function Leads() {
       const filterCarStr = columnFilters.car.toLowerCase().trim();
 
       const matchesCar = !filterCarStr || (
+        (lead.carsOfInterest?.length > 0 && lead.carsOfInterest.some(c => `${c.make} ${c.model} (${c.year})`.toLowerCase().includes(filterCarStr))) ||
         (lead.carOfInterest && (
           `${lead.carOfInterest.make} ${lead.carOfInterest.model} (${lead.carOfInterest.year})`
             .toLowerCase()
@@ -359,9 +360,9 @@ export default function Leads() {
         'Source': lead.source || '',
         'Status': lead.status || '',
         'Urgency': lead.urgency || '',
-        'Car Make': lead.carOfInterest?.make || customCarString || '',
-        'Car Model': lead.carOfInterest?.model || '',
-        'Car Year': lead.carOfInterest?.year || '',
+        'Car Make': (lead.carsOfInterest?.length > 0 ? lead.carsOfInterest.map(c => c.make).join(', ') : lead.carOfInterest?.make) || customCarString || '',
+        'Car Model': lead.carsOfInterest?.length > 0 ? lead.carsOfInterest.map(c => c.model).join(', ') : lead.carOfInterest?.model || '',
+        'Car Year': lead.carsOfInterest?.length > 0 ? lead.carsOfInterest.map(c => c.year).join(', ') : lead.carOfInterest?.year || '',
         'Assigned Salesman': lead.assignedTo?.name || 'Unassigned',
         'Notes': (lead.notes || '').replace(/\n/g, ' - ')
       };
@@ -661,16 +662,18 @@ export default function Leads() {
                               </div>
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap">
-                              {lead.carOfInterest ? (
+                              {(lead.carsOfInterest?.length > 0 || lead.carOfInterest) ? (
                                 <div className="flex items-center gap-2">
                                   <div className="w-8 h-8 bg-background rounded-lg flex items-center justify-center shrink-0">
                                     <Car className="w-4 h-4 text-text-muted/60" />
                                   </div>
                                   <div className="flex flex-col min-w-0">
-                                    <span className="font-body text-xs font-semibold text-text truncate max-w-[120px]">
-                                      {lead.carOfInterest.make} {lead.carOfInterest.model}
+                                    <span className="font-body text-xs font-semibold text-text truncate max-w-[200px]" title={(lead.carsOfInterest?.length > 0 ? lead.carsOfInterest : [lead.carOfInterest]).map(c => `${c.make} ${c.model}`).join(', ')}>
+                                      {(lead.carsOfInterest?.length > 0 ? lead.carsOfInterest : [lead.carOfInterest]).map(c => `${c.make} ${c.model}`).join(', ')}
                                     </span>
-                                    <span className="font-body text-[10px] text-text-muted">{lead.carOfInterest.year}</span>
+                                    <span className="font-body text-[10px] text-text-muted">
+                                      {(lead.carsOfInterest?.length > 0 ? lead.carsOfInterest : [lead.carOfInterest]).map(c => c.year).join(', ')}
+                                    </span>
                                   </div>
                                 </div>
                               ) : (
@@ -855,12 +858,12 @@ export default function Leads() {
           <p className="font-body text-sm text-text-muted mt-1 max-w-xl">Track and respond to inquiries, walk-ins, and contact requests.</p>
         </div>
         <div className="flex items-center gap-3">
-          {/* <button
+          <button
             onClick={() => setShowExportModal(true)}
             className="flex items-center gap-2 px-5 py-2.5 bg-[#107c41] hover:bg-[#107c41]/90 text-white rounded-xl font-body text-sm font-bold transition-all shadow-sm active:scale-95 whitespace-nowrap"
           >
             <Download className="w-4 h-4" /> Export Data
-          </button> */}
+          </button>
           <button
             onClick={() => navigate('/admin/add-lead')}
             className="flex items-center gap-2 px-5 py-2.5 bg-primary hover:bg-primary-hover text-white rounded-xl font-body text-sm font-bold transition-all shadow-lg shadow-primary/20 active:scale-95 whitespace-nowrap"

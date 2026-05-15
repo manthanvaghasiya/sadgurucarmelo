@@ -59,6 +59,7 @@ router.get('/', protect, async (req, res) => {
     const leads = await Lead.find(filter)
       .sort(sortBy)
       .populate('carOfInterest', 'title make model year price')
+      .populate('carsOfInterest', 'title make model year price')
       .populate('assignedTo', 'name');
 
     res.json({ success: true, count: leads.length, data: leads });
@@ -74,7 +75,8 @@ router.get('/', protect, async (req, res) => {
 router.get('/:id', protect, async (req, res) => {
   try {
     const lead = await Lead.findById(req.params.id)
-      .populate('carOfInterest', 'title make model year price');
+      .populate('carOfInterest', 'title make model year price')
+      .populate('carsOfInterest', 'title make model year price');
 
     if (!lead) return res.status(404).json({ success: false, message: 'Lead not found' });
 

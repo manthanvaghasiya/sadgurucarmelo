@@ -21,6 +21,10 @@ const leadSchema = new mongoose.Schema(
     },
 
     // ── Vehicle Interest ──
+    carsOfInterest: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Car',
+    }],
     carOfInterest: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Car',
