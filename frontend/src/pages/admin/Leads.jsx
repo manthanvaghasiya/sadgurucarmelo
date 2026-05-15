@@ -983,8 +983,8 @@ export default function Leads() {
 
 
       {/* Search & Filter Bar */}
-      <div className="bg-surface rounded-2xl border border-gray-100 p-4 space-y-3">
-        <div ref={searchRef} className="relative">
+      <div className="bg-surface rounded-2xl border border-gray-100 p-4 flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+        <div ref={searchRef} className="relative flex-1">
           <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted z-10" />
           <input
             type="text"
@@ -1069,55 +1069,6 @@ export default function Leads() {
               )}
             </div>
           )}
-        </div>
-
-        {/* Quick Filter Chips */}
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="font-body text-[10px] font-bold text-text-muted uppercase tracking-wider mr-1">Filters:</span>
-          {/* Source Filter */}
-          {['All', 'Walk-in', 'WhatsApp', 'Phone', 'Website', 'Instagram', 'Facebook', 'Market Place'].map((src) => (
-            <button
-              key={src}
-              onClick={() => handleSourceFilter(src)}
-              className={`px-2.5 py-1 rounded-lg font-body text-[11px] font-semibold transition-all ${
-                sourceFilter === src
-                  ? 'bg-primary text-white shadow-sm shadow-primary/20'
-                  : 'bg-background text-text-muted hover:bg-gray-100'
-              }`}
-            >
-              {src === 'All' ? '🔹 All Sources' : src}
-            </button>
-          ))}
-          <div className="w-px h-5 bg-gray-200 mx-1" />
-          {/* Status Filter */}
-          {['All', 'New', 'Contacted', 'Follow-up', 'Closed'].map((st) => (
-            <button
-              key={st}
-              onClick={() => handleStatusFilter(st)}
-              className={`px-2.5 py-1 rounded-lg font-body text-[11px] font-semibold transition-all ${
-                statusFilter === st
-                  ? 'bg-primary text-white shadow-sm shadow-primary/20'
-                  : 'bg-background text-text-muted hover:bg-gray-100'
-              }`}
-            >
-              {st === 'All' ? '📋 All Status' : st}
-            </button>
-          ))}
-          <div className="w-px h-5 bg-gray-200 mx-1" />
-          {/* Urgency Filter */}
-          {['All', 'Hot', 'Warm', 'Cold'].map((urg) => (
-            <button
-              key={urg}
-              onClick={() => handleUrgencyFilter(urg)}
-              className={`px-2.5 py-1 rounded-lg font-body text-[11px] font-semibold transition-all ${
-                urgencyFilter === urg
-                  ? (urg === 'Hot' ? 'bg-red-500 text-white' : urg === 'Warm' ? 'bg-amber-500 text-white' : urg === 'Cold' ? 'bg-[#3b82f6] text-white' : 'bg-primary text-white shadow-sm shadow-primary/20')
-                  : 'bg-background text-text-muted hover:bg-gray-100'
-              }`}
-            >
-              {urg === 'All' ? '🔥 All Urgency' : urg === 'Hot' ? '🔥 Hot' : urg === 'Warm' ? '🌡 Warm' : '❄️ Cold'}
-            </button>
-          ))}
         </div>
       </div>
 
