@@ -77,9 +77,9 @@ export default function EditLead() {
       let combinedNotes = data.notes || '';
       if (showCustomCar && customCarName) {
         if (!combinedNotes.includes('Looking for:')) {
-            combinedNotes = `Looking for: ${customCarName}${combinedNotes ? \`\\n\\n${combinedNotes}\` : ''}`;
+            combinedNotes = 'Looking for: ' + customCarName + (combinedNotes ? '\n\n' + combinedNotes : '');
         } else {
-            combinedNotes = combinedNotes.replace(/Looking for:\s*(.*?)(?:\n|$)/, `Looking for: ${customCarName}\n`);
+            combinedNotes = combinedNotes.replace(/Looking for:\s*(.*?)(?:\n|$)/, 'Looking for: ' + customCarName + '\n');
         }
       }
 

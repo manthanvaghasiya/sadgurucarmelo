@@ -58,7 +58,7 @@ export default function AdminAddLead() {
     try {
       let combinedNotes = data.notes || '';
       if (showCustomCar && customCarName) {
-        combinedNotes = `Looking for: ${customCarName}${combinedNotes ? `\n\n${combinedNotes}` : ''}`;
+        combinedNotes = 'Looking for: ' + customCarName + (combinedNotes ? '\n\n' + combinedNotes : '');
       }
 
       const payload = {
