@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Search,
@@ -29,6 +29,8 @@ import {
   Briefcase,
   Plus,
   Download,
+  MapPin,
+  FileText,
 } from 'lucide-react';
 import axiosInstance from '../../api/axiosConfig';
 import toast from 'react-hot-toast';
@@ -85,6 +87,8 @@ export default function Leads() {
   const [leadStats, setLeadStats] = useState({ total: 0, newCount: 0, followUp: 0, todayFollowUps: 0 });
   const [showTodayTracker, setShowTodayTracker] = useState(false);
   const [showNewTracker, setShowNewTracker] = useState(false);
+  const [showSearchDropdown, setShowSearchDropdown] = useState(false);
+  const searchRef = useRef(null);
 
   // New Filters Refactor
   const [columnFilters, setColumnFilters] = useState({
@@ -135,11 +139,14 @@ export default function Leads() {
 
 
 
-  // Click outside to close filters
+  // Click outside to close filters and search dropdown
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (activeFilterBox && !event.target.closest('.filter-container')) {
         setActiveFilterBox(null);
+      }
+      if (searchRef.current && !searchRef.current.contains(event.target)) {
+        setShowSearchDropdown(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
@@ -150,20 +157,73 @@ export default function Leads() {
     setActiveFilterBox(activeFilterBox === box ? null : box);
   };
 
+  // ── Helper: determine which fields a search query matches on a lead ──
+  const getMatchTypes = useCallback((lead, query) => {
+    if (!query) return [];
+    const q = query.toLowerCase();
+    const matches = [];
+
+    if (lead.customerName?.toLowerCase().includes(q)) matches.push('Name');
+    if (lead.phone?.includes(q)) matches.push('Phone');
+    if (lead.email?.toLowerCase().includes(q)) matches.push('Email');
+    if (lead.address?.toLowerCase().includes(q)) matches.push('Address');
+    if (lead.assignedTo?.name?.toLowerCase().includes(q)) matches.push('Salesman');
+    if (lead.source?.toLowerCase().includes(q)) matches.push('Source');
+    if (lead.status?.toLowerCase().includes(q)) matches.push('Status');
+    if (lead.urgency?.toLowerCase().includes(q)) matches.push('Urgency');
+
+    // Car match
+    const customCarMatch = lead.notes?.match(/Looking for:\s*(.*?)(?:\n|$)/);
+    const customCarStr = customCarMatch ? customCarMatch[1].trim() : '';
+    const carsArr = lead.carsOfInterest?.length > 0 ? lead.carsOfInterest : (lead.carOfInterest ? [lead.carOfInterest] : []);
+    if (carsArr.some(c => `${c.make} ${c.model} ${c.year}`.toLowerCase().includes(q)) || customCarStr.toLowerCase().includes(q)) {
+      matches.push('Car');
+    }
+
+    // Notes match (excluding the car-lookup portion we already checked)
+    const notesClean = (lead.notes || '').replace(/Looking for:\s*(.*?)(?:\n|$)/, '').toLowerCase();
+    if (notesClean.includes(q)) matches.push('Notes');
+
+    return matches;
+  }, []);
+
+  // ── Match type icon/color config for search dropdown ──
+  const matchTypeConfig = {
+    Name: { icon: UserIcon, color: 'text-primary', bg: 'bg-primary/10' },
+    Phone: { icon: Phone, color: 'text-[#8b5cf6]', bg: 'bg-[#8b5cf6]/10' },
+    Email: { icon: FileText, color: 'text-[#3b82f6]', bg: 'bg-[#3b82f6]/10' },
+    Address: { icon: MapPin, color: 'text-[#10b981]', bg: 'bg-[#10b981]/10' },
+    Salesman: { icon: Briefcase, color: 'text-[#f59e0b]', bg: 'bg-[#f59e0b]/10' },
+    Source: { icon: SlidersHorizontal, color: 'text-[#6366f1]', bg: 'bg-[#6366f1]/10' },
+    Status: { icon: CheckCircle2, color: 'text-[#10b981]', bg: 'bg-[#10b981]/10' },
+    Urgency: { icon: Flame, color: 'text-red-500', bg: 'bg-red-50' },
+    Car: { icon: Car, color: 'text-primary', bg: 'bg-primary/10' },
+    Notes: { icon: FileText, color: 'text-gray-500', bg: 'bg-gray-100' },
+  };
+
+  // ── Search suggestions (top 6 results with match info) ──
+  const searchSuggestions = useMemo(() => {
+    if (!searchQuery.trim() || searchQuery.trim().length < 1) return [];
+    const q = searchQuery.toLowerCase();
+    const results = [];
+    for (const lead of (leads || [])) {
+      const matchTypes = getMatchTypes(lead, q);
+      if (matchTypes.length > 0) {
+        results.push({ lead, matchTypes });
+      }
+      if (results.length >= 6) break;
+    }
+    return results;
+  }, [leads, searchQuery, getMatchTypes]);
+
   // ── Filtering ──
   const filtered = useMemo(() => {
     let result = leads || [];
 
-    // Global search
+    // Global search — expanded to all fields
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
-      result = result.filter(
-        (l) =>
-          l.customerName?.toLowerCase().includes(q) ||
-          l.phone?.includes(q) ||
-          l.email?.toLowerCase().includes(q) ||
-          l.address?.toLowerCase().includes(q)
-      );
+      result = result.filter((l) => getMatchTypes(l, q).length > 0);
     }
 
     // Column-specific local filters
@@ -200,7 +260,7 @@ export default function Leads() {
     });
 
     return result;
-  }, [leads, searchQuery, columnFilters]);
+  }, [leads, searchQuery, columnFilters, getMatchTypes]);
 
   // ── Strict Today's Follow-ups & Activity Logic ──
   const todayLeads = useMemo(() => {
@@ -923,21 +983,141 @@ export default function Leads() {
 
 
       {/* Search & Filter Bar */}
-      <div className="bg-surface rounded-2xl border border-gray-100 p-4 flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-        <div className="relative flex-1">
-          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
+      <div className="bg-surface rounded-2xl border border-gray-100 p-4 space-y-3">
+        <div ref={searchRef} className="relative">
+          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted z-10" />
           <input
             type="text"
             value={searchQuery}
-            onChange={(e) => handleSearch(e.target.value)}
-            placeholder="Search by Name, Phone, Address..."
-            className="w-full pl-10 pr-10 py-2.5 bg-background border border-transparent focus:border-primary/20 rounded-xl font-body text-sm text-text placeholder:text-text-muted/60 outline-none transition-colors"
+            onChange={(e) => { handleSearch(e.target.value); setShowSearchDropdown(true); }}
+            onFocus={() => { if (searchQuery.trim()) setShowSearchDropdown(true); }}
+            placeholder="Search anything — name, phone, address, car, salesman, status..."
+            className="w-full pl-10 pr-24 py-2.5 bg-background border border-transparent focus:border-primary/20 rounded-xl font-body text-sm text-text placeholder:text-text-muted/60 outline-none transition-colors"
           />
-          {searchQuery && (
-            <button onClick={() => handleSearch('')} className="absolute right-3 top-1/2 -translate-y-1/2 p-0.5 text-text-muted hover:text-text transition-colors">
-              <X className="w-3.5 h-3.5" />
-            </button>
+          <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-2">
+            {searchQuery && (
+              <>
+                <span className="px-2 py-0.5 bg-primary/10 text-primary rounded-md font-body text-[10px] font-bold whitespace-nowrap">
+                  {filtered.length} result{filtered.length !== 1 ? 's' : ''}
+                </span>
+                <button onClick={() => { handleSearch(''); setShowSearchDropdown(false); }} className="p-0.5 text-text-muted hover:text-text transition-colors">
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              </>
+            )}
+          </div>
+
+          {/* Live Search Results Dropdown */}
+          {showSearchDropdown && searchQuery.trim() && (
+            <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-xl shadow-2xl ring-1 ring-black/[0.06] z-50 overflow-hidden animate-in fade-in slide-in-from-top-1 duration-200">
+              {searchSuggestions.length === 0 ? (
+                <div className="px-5 py-8 flex flex-col items-center gap-2">
+                  <Search className="w-6 h-6 text-text-muted/30" />
+                  <p className="font-body text-sm text-text-muted">No leads match "<span className="font-bold text-text">{searchQuery}</span>"</p>
+                  <p className="font-body text-[11px] text-text-muted/60">Try searching by name, phone, car model, salesman...</p>
+                </div>
+              ) : (
+                <>
+                  <div className="px-4 py-2.5 bg-background/60 border-b border-gray-50 flex items-center justify-between">
+                    <span className="font-body text-[10px] font-bold text-text-muted uppercase tracking-wider">
+                      Top Results
+                    </span>
+                    <span className="font-body text-[10px] text-text-muted/60">
+                      {filtered.length} total match{filtered.length !== 1 ? 'es' : ''}
+                    </span>
+                  </div>
+                  <div className="max-h-[320px] overflow-y-auto">
+                    {searchSuggestions.map(({ lead, matchTypes }) => (
+                      <button
+                        key={lead._id}
+                        onClick={() => { setViewTarget(lead); setShowSearchDropdown(false); }}
+                        className="w-full px-4 py-3 flex items-center gap-3 hover:bg-background/60 transition-colors text-left group border-b border-gray-50 last:border-none"
+                      >
+                        <div className="w-9 h-9 bg-primary/5 rounded-lg flex items-center justify-center shrink-0 group-hover:bg-primary/10 transition-colors">
+                          <UserIcon className="w-4 h-4 text-primary" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2">
+                            <p className="font-body text-sm font-semibold text-text truncate">{lead.customerName}</p>
+                            <span className="font-body text-[10px] text-text-muted/50 shrink-0">{lead.phone}</span>
+                          </div>
+                          <div className="flex flex-wrap gap-1 mt-1">
+                            {matchTypes.map((type) => {
+                              const cfg = matchTypeConfig[type];
+                              const MIcon = cfg.icon;
+                              return (
+                                <span key={type} className={`inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded ${cfg.bg} ${cfg.color} font-body text-[9px] font-bold`}>
+                                  <MIcon className="w-2.5 h-2.5" />
+                                  {type}
+                                </span>
+                              );
+                            })}
+                          </div>
+                        </div>
+                        <Eye className="w-4 h-4 text-text-muted/30 group-hover:text-primary transition-colors shrink-0" />
+                      </button>
+                    ))}
+                  </div>
+                  {filtered.length > 6 && (
+                    <div className="px-4 py-2.5 bg-background/60 border-t border-gray-50 text-center">
+                      <span className="font-body text-[11px] text-text-muted">
+                        + {filtered.length - 6} more result{filtered.length - 6 !== 1 ? 's' : ''} in table below
+                      </span>
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
           )}
+        </div>
+
+        {/* Quick Filter Chips */}
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="font-body text-[10px] font-bold text-text-muted uppercase tracking-wider mr-1">Filters:</span>
+          {/* Source Filter */}
+          {['All', 'Walk-in', 'WhatsApp', 'Phone', 'Website', 'Instagram', 'Facebook', 'Market Place'].map((src) => (
+            <button
+              key={src}
+              onClick={() => handleSourceFilter(src)}
+              className={`px-2.5 py-1 rounded-lg font-body text-[11px] font-semibold transition-all ${
+                sourceFilter === src
+                  ? 'bg-primary text-white shadow-sm shadow-primary/20'
+                  : 'bg-background text-text-muted hover:bg-gray-100'
+              }`}
+            >
+              {src === 'All' ? '🔹 All Sources' : src}
+            </button>
+          ))}
+          <div className="w-px h-5 bg-gray-200 mx-1" />
+          {/* Status Filter */}
+          {['All', 'New', 'Contacted', 'Follow-up', 'Closed'].map((st) => (
+            <button
+              key={st}
+              onClick={() => handleStatusFilter(st)}
+              className={`px-2.5 py-1 rounded-lg font-body text-[11px] font-semibold transition-all ${
+                statusFilter === st
+                  ? 'bg-primary text-white shadow-sm shadow-primary/20'
+                  : 'bg-background text-text-muted hover:bg-gray-100'
+              }`}
+            >
+              {st === 'All' ? '📋 All Status' : st}
+            </button>
+          ))}
+          <div className="w-px h-5 bg-gray-200 mx-1" />
+          {/* Urgency Filter */}
+          {['All', 'Hot', 'Warm', 'Cold'].map((urg) => (
+            <button
+              key={urg}
+              onClick={() => handleUrgencyFilter(urg)}
+              className={`px-2.5 py-1 rounded-lg font-body text-[11px] font-semibold transition-all ${
+                urgencyFilter === urg
+                  ? (urg === 'Hot' ? 'bg-red-500 text-white' : urg === 'Warm' ? 'bg-amber-500 text-white' : urg === 'Cold' ? 'bg-[#3b82f6] text-white' : 'bg-primary text-white shadow-sm shadow-primary/20')
+                  : 'bg-background text-text-muted hover:bg-gray-100'
+              }`}
+            >
+              {urg === 'All' ? '🔥 All Urgency' : urg === 'Hot' ? '🔥 Hot' : urg === 'Warm' ? '🌡 Warm' : '❄️ Cold'}
+            </button>
+          ))}
         </div>
       </div>
 
