@@ -144,13 +144,17 @@ app.get('/', (_req, res) => {
 });
 
 // ── API Routes ──
-app.use('/api/auth', authRoutes);
-app.use('/api/cars', carRoutes);
-app.use('/api/leads', leadRoutes);
-app.use('/api/messages', messageRoutes);
-app.use('/api/promo-posters', promoPosterRoutes);
-app.use('/api/happy-customers', happyCustomerRoutes);
-app.use('/api/sitemap.xml', sitemapRoutes);
+const apiRouter = express.Router();
+apiRouter.use('/auth', authRoutes);
+apiRouter.use('/cars', carRoutes);
+apiRouter.use('/leads', leadRoutes);
+apiRouter.use('/messages', messageRoutes);
+apiRouter.use('/promo-posters', promoPosterRoutes);
+apiRouter.use('/happy-customers', happyCustomerRoutes);
+apiRouter.use('/sitemap.xml', sitemapRoutes);
+
+app.use('/api', apiRouter);
+app.use('/', apiRouter);
 
 // ── 404 Handler ──
 app.use((_req, res) => {
