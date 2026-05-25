@@ -2,9 +2,10 @@ import axios from 'axios';
 import toast from 'react-hot-toast';
 
 const cleanEnvUrl = import.meta.env.VITE_API_URL ? import.meta.env.VITE_API_URL.replace(/\/+$/, '') : '';
+const fallbackURL = import.meta.env.PROD ? '/api/' : 'http://localhost:5000/api/';
 const finalBaseURL = cleanEnvUrl 
   ? (cleanEnvUrl.endsWith('/api') ? `${cleanEnvUrl}/` : `${cleanEnvUrl}/api/`)
-  : 'http://localhost:5000/api/';
+  : fallbackURL;
 
 const axiosInstance = axios.create({
   baseURL: finalBaseURL,
