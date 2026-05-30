@@ -90,7 +90,7 @@ export default function AdminSettings() {
       const payload = {
         name: data.name.trim(),
         email: data.email.trim().toLowerCase(),
-        role: editTarget ? (member?.role || 'sales') : (data.role || 'sales'), // Fix: use selected role for new accounts
+        role: data.role || 'sales', // Fix: use selected role from dropdown for both create and edit
       };
       if (data.password) payload.password = data.password;
       if (data.phone?.trim()) payload.phone = data.phone.trim();
@@ -303,8 +303,7 @@ export default function AdminSettings() {
                   <label className="block font-body text-xs font-semibold text-text-muted mb-1.5 uppercase tracking-wide">Role *</label>
                   <select
                     {...registerStaff('role', { required: 'Role is required' })}
-                    disabled={editTarget} // Only allow role assignment on creation
-                    className={`w-full px-4 py-3 rounded-xl border border-gray-200 font-body text-sm text-text outline-none focus:border-primary/30 focus:ring-2 focus:ring-primary/10 ${editTarget ? 'bg-gray-50 cursor-not-allowed text-text-muted' : 'bg-background'}`}
+                    className="w-full px-4 py-3 rounded-xl border border-gray-200 font-body text-sm text-text bg-background outline-none focus:border-primary/30 focus:ring-2 focus:ring-primary/10"
                   >
                     <option value="sales">Salesman</option>
                     <option value="manager">Manager (Limited Admin)</option>
