@@ -90,7 +90,7 @@ export default function AdminSettings() {
       const payload = {
         name: data.name.trim(),
         email: data.email.trim().toLowerCase(),
-        role: editTarget ? (member?.role || 'sales') : 'sales', // Use existing role for edits, 'sales' for new
+        role: editTarget ? (member?.role || 'sales') : (data.role || 'sales'), // Fix: use selected role for new accounts
       };
       if (data.password) payload.password = data.password;
       if (data.phone?.trim()) payload.phone = data.phone.trim();
