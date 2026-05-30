@@ -25,7 +25,7 @@ export default function Login() {
       login(userData);
       toast.success('Welcome to the Dashboard!');
 
-      if (userData.role === 'admin') {
+      if (userData.role === 'admin' || userData.role === 'manager') {
         navigate('/admin');
       } else {
         navigate('/sales');
