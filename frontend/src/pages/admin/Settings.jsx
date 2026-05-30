@@ -23,9 +23,9 @@ import {
 } from 'lucide-react';
 import axiosInstance from '../../api/axiosConfig';
 
-// ── Role badge config ──
 const roleStyles = {
   admin: 'bg-primary/10 text-primary ring-primary/20',
+  manager: 'bg-purple-500/10 text-purple-600 ring-purple-500/20',
   sales: 'bg-accent/10 text-accent ring-accent/20',
 };
 
@@ -300,12 +300,15 @@ export default function AdminSettings() {
                   {staffErrors.password && <p className="text-red-500 text-xs font-body mt-1">{staffErrors.password.message}</p>}
                 </div>
                 <div>
-                  <label className="block font-body text-xs font-semibold text-text-muted mb-1.5 uppercase tracking-wide">Role</label>
-                  <input
-                    value="Salesman"
-                    readOnly
-                    className="w-full px-4 py-3 bg-gray-50 rounded-xl border border-gray-200 font-body text-sm text-text-muted cursor-not-allowed outline-none"
-                  />
+                  <label className="block font-body text-xs font-semibold text-text-muted mb-1.5 uppercase tracking-wide">Role *</label>
+                  <select
+                    {...registerStaff('role', { required: 'Role is required' })}
+                    disabled={editTarget} // Only allow role assignment on creation
+                    className={`w-full px-4 py-3 rounded-xl border border-gray-200 font-body text-sm text-text outline-none focus:border-primary/30 focus:ring-2 focus:ring-primary/10 ${editTarget ? 'bg-gray-50 cursor-not-allowed text-text-muted' : 'bg-background'}`}
+                  >
+                    <option value="sales">Salesman</option>
+                    <option value="manager">Manager (Limited Admin)</option>
+                  </select>
                 </div>
                 <div>
                   <label className="block font-body text-xs font-semibold text-text-muted mb-1.5 uppercase tracking-wide">Phone</label>

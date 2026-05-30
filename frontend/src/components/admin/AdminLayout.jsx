@@ -86,6 +86,10 @@ export default function AdminLayout() {
         {/* Navigation Links */}
         <nav className="flex-1 py-4 px-3 space-y-1 overflow-y-auto">
           {navItems.map((item) => {
+            // Hide Leads and Settings for manager role
+            if (user?.role === 'manager' && (item.name === 'Leads' || item.name === 'Settings')) {
+              return null;
+            }
             const Icon = item.icon;
             const active = isActive(item.path);
             return (

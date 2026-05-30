@@ -92,7 +92,7 @@ function App() {
               {/* ── Admin Routes ── */}
               <Route path="/admin/login" element={<Navigate to="/login" replace />} />
               <Route path="/admin" element={
-                <ProtectedRoute allowedRoles={['admin']}>
+                <ProtectedRoute allowedRoles={['admin', 'manager']}>
                   <AdminLayout />
                 </ProtectedRoute>
               }>
@@ -100,11 +100,27 @@ function App() {
                 <Route path="inventory" element={<AdminInventory />} />
                 <Route path="add-car" element={<AddCar />} />
                 <Route path="edit-car/:id" element={<EditCar />} />
-                <Route path="leads" element={<AdminLeads />} />
-                <Route path="add-lead" element={<AdminAddLead />} />
-                <Route path="edit-lead/:id" element={<AdminEditLead />} />
+                <Route path="leads" element={
+                  <ProtectedRoute allowedRoles={['admin']}>
+                    <AdminLeads />
+                  </ProtectedRoute>
+                } />
+                <Route path="add-lead" element={
+                  <ProtectedRoute allowedRoles={['admin']}>
+                    <AdminAddLead />
+                  </ProtectedRoute>
+                } />
+                <Route path="edit-lead/:id" element={
+                  <ProtectedRoute allowedRoles={['admin']}>
+                    <AdminEditLead />
+                  </ProtectedRoute>
+                } />
                 <Route path="messages" element={<AdminMessages />} />
-                <Route path="settings" element={<AdminSettings />} />
+                <Route path="settings" element={
+                  <ProtectedRoute allowedRoles={['admin']}>
+                    <AdminSettings />
+                  </ProtectedRoute>
+                } />
                 <Route path="posters" element={<AdminPosters />} />
                 <Route path="happy-customers" element={<AdminHappyCustomers />} />
               </Route>

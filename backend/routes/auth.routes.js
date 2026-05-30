@@ -104,11 +104,14 @@ router.post('/register', protect, admin, async (req, res) => {
       });
     }
 
+    const validRoles = ['sales', 'manager'];
+    const assignedRole = validRoles.includes(req.body.role) ? req.body.role : 'sales';
+
     const userData = {
       name,
       email,
       password,
-      role: 'sales', // FORCE: Only Sales accounts can be registered
+      role: assignedRole,
     };
     if (phone) userData.phone = phone;
     if (address) userData.address = address;

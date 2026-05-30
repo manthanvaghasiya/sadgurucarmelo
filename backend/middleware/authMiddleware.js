@@ -31,7 +31,7 @@ export const protect = async (req, res, next) => {
 
 export const admin = (req, res, next) => {
   console.log('🔍 Admin check — req.user:', JSON.stringify(req.user));
-  if (req.user && req.user.role === 'admin') {
+  if (req.user && (req.user.role === 'admin' || req.user.role === 'manager')) {
     return next();
   }
   return res.status(403).json({ message: 'Not authorized as an admin' });
