@@ -1,7 +1,7 @@
 import express from 'express';
 import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
-import { protect, admin } from '../middleware/authMiddleware.js';
+import { protect, strictAdmin } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
@@ -91,7 +91,7 @@ router.post('/logout', (req, res) => {
 // ═══════════════════════════════════════════════
 //  POST /api/auth/register — Create Staff Account (Admin only)
 // ═══════════════════════════════════════════════
-router.post('/register', protect, admin, async (req, res) => {
+router.post('/register', protect, strictAdmin, async (req, res) => {
   try {
     const { name, email, password, phone, address } = req.body;
 
@@ -221,7 +221,7 @@ router.put('/change-password', protect, async (req, res) => {
 // ═══════════════════════════════════════════════
 //  GET /api/auth/users — Get all staff (Admin only)
 // ═══════════════════════════════════════════════
-router.get('/users', protect, admin, async (req, res) => {
+router.get('/users', protect, strictAdmin, async (req, res) => {
   try {
     const users = await User.find().sort({ createdAt: -1 });
     res.json({
@@ -238,7 +238,7 @@ router.get('/users', protect, admin, async (req, res) => {
 // ═══════════════════════════════════════════════
 //  PUT /api/auth/users/:id — Update staff (Admin only)
 // ═══════════════════════════════════════════════
-router.put('/users/:id', protect, admin, async (req, res) => {
+router.put('/users/:id', protect, strictAdmin, async (req, res) => {
   try {
     const { isActive, role, password, name, email, phone, address } = req.body;
     const user = await User.findById(req.params.id).select('+password');
@@ -277,7 +277,7 @@ router.put('/users/:id', protect, admin, async (req, res) => {
 // ═══════════════════════════════════════════════
 //  DELETE /api/auth/users/:id — Delete staff (Admin only)
 // ═══════════════════════════════════════════════
-router.delete('/users/:id', protect, admin, async (req, res) => {
+router.delete('/users/:id', protect, strictAdmin, async (req, res) => {
   try {
     const user = await User.findByIdAndDelete(req.params.id);
     if (!user) {

@@ -34,5 +34,13 @@ export const admin = (req, res, next) => {
   if (req.user && (req.user.role === 'admin' || req.user.role === 'manager')) {
     return next();
   }
-  return res.status(403).json({ message: 'Not authorized as an admin' });
+  return res.status(403).json({ message: 'Not authorized as an admin or manager' });
+};
+
+export const strictAdmin = (req, res, next) => {
+  console.log('🔍 Strict Admin check — req.user:', JSON.stringify(req.user));
+  if (req.user && req.user.role === 'admin') {
+    return next();
+  }
+  return res.status(403).json({ message: 'Not authorized as a strict admin' });
 };
