@@ -13,12 +13,19 @@ export const createCarMaster = async (req, res) => {
   try {
     const { brand, models } = req.body;
 
-    const existing = await CarMaster.findOne({ brand: new RegExp(`^${brand}$`, 'i') });
-    if (existing) {
-      return res.status(400).json({ success: false, message: 'Brand already exists' });
+    let carMaster = await CarMaster.findOne({ brand: new RegExp(`^${brand}$`, 'i') });
+    
+    if (carMaster) {
+      // Merge models if it already exists
+      const existingModels = carMaster.models || [];
+      const newModels = models || [];
+      const combined = [...new Set([...existingModels, ...newModels])];
+      carMaster.models = combined;
+      await carMaster.save();
+      return res.status(200).json({ success: true, data: carMaster, message: 'Brand already exists, models merged successfully.' });
     }
 
-    const carMaster = await CarMaster.create({ brand, models: models || [] });
+    carMaster = await CarMaster.create({ brand, models: models || [] });
     res.status(201).json({ success: true, data: carMaster });
   } catch (error) {
     res.status(400).json({ success: false, message: error.message });
@@ -28,6 +35,13 @@ export const createCarMaster = async (req, res) => {
 export const updateCarMaster = async (req, res) => {
   try {
     const { brand, models } = req.body;
+    
+    // Check if we're trying to rename to an existing brand
+    const existing = await CarMaster.findOne({ brand: new RegExp(`^${brand}$`, 'i'), _id: { $ne: req.params.id } });
+    if (existing) {
+      return res.status(400).json({ success: false, message: 'Another brand with this name already exists' });
+    }
+
     const carMaster = await CarMaster.findByIdAndUpdate(
       req.params.id,
       { brand, models },
