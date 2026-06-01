@@ -22,6 +22,8 @@ export default function AdminAddLead() {
   const [selectedTransmission, setSelectedTransmission] = useState('');
   const [selectedCars, setSelectedCars] = useState([]);
   const [urgency, setUrgency] = useState('Warm');
+  const [salesmen, setSalesmen] = useState([]);
+  const [isFetchingSalesmen, setIsFetchingSalesmen] = useState(true);
 
   const {
     register,
