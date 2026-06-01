@@ -24,6 +24,7 @@ const navItems = [
   { name: 'Leads', path: '/admin/leads', icon: Users },
   { name: 'Messages', path: '/admin/messages', icon: Mail },
   { name: 'Happy Customers', path: '/admin/happy-customers', icon: ImageIcon },
+  { name: 'Car Brands', path: '/admin/car-brands', icon: Car },
   { name: 'Coming Soon', path: '/admin/posters', icon: Clock },
   { name: 'Settings', path: '/admin/settings', icon: Settings },
 ];

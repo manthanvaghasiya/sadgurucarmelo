@@ -379,9 +379,15 @@ export default function SalesDashboard() {
                           const customCarMatch = lead.notes?.match(/Looking for:\s*(.*?)(?:\n|$)/);
                           const customCarStr = customCarMatch ? customCarMatch[1].trim() : '';
                           const cars = lead.carsOfInterest?.length > 0 ? lead.carsOfInterest : (lead.carOfInterest ? [lead.carOfInterest] : []);
-                          if (cars.length > 0 || customCarStr) {
+                          if (lead.interestedBrand || cars.length > 0 || customCarStr) {
                             return (
                               <div className="flex flex-wrap gap-1.5 mt-2">
+                                {lead.interestedBrand && (
+                                  <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-primary/5 border border-primary/10 rounded-md text-[10px] font-bold text-primary whitespace-nowrap">
+                                    <Car className="w-3 h-3" />
+                                    {lead.interestedBrand} {lead.interestedModel || ''}
+                                  </span>
+                                )}
                                 {cars.map(c => (
                                   <span key={c._id} className="inline-flex items-center gap-1 px-2 py-0.5 bg-primary/5 border border-primary/10 rounded-md text-[10px] font-bold text-primary whitespace-nowrap">
                                     <Car className="w-3 h-3" />
@@ -489,9 +495,15 @@ export default function SalesDashboard() {
                               const customCarMatch = lead.notes?.match(/Looking for:\s*(.*?)(?:\n|$)/);
                               const customCarStr = customCarMatch ? customCarMatch[1].trim() : '';
                               const cars = lead.carsOfInterest?.length > 0 ? lead.carsOfInterest : (lead.carOfInterest ? [lead.carOfInterest] : []);
-                              if (cars.length > 0 || customCarStr) {
+                              if (lead.interestedBrand || cars.length > 0 || customCarStr) {
                                 return (
                                   <div className="flex flex-wrap gap-1.5 mt-1 sm:mt-0 sm:ml-2">
+                                    {lead.interestedBrand && (
+                                      <span className="inline-flex items-center gap-1 px-1.5 py-0.5 bg-primary/5 border border-primary/10 rounded text-[9px] font-bold text-primary whitespace-nowrap">
+                                        <Car className="w-2.5 h-2.5" />
+                                        {lead.interestedBrand} {lead.interestedModel || ''}
+                                      </span>
+                                    )}
                                     {cars.map(c => (
                                       <span key={c._id} className="inline-flex items-center gap-1 px-1.5 py-0.5 bg-primary/5 border border-primary/10 rounded text-[9px] font-bold text-primary whitespace-nowrap">
                                         <Car className="w-2.5 h-2.5" />

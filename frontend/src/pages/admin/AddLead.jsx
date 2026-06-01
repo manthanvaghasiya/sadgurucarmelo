@@ -9,18 +9,13 @@ import {
 } from 'lucide-react';
 import axiosInstance from '../../api/axiosConfig';
 import { useAuth } from '../../context/AuthContext';
-import { useCars } from '../../context/CarContext';
 
 export default function AdminAddLead() {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { cars } = useCars();
-  const [urgency, setUrgency] = useState('Warm');
-  const [salesmen, setSalesmen] = useState([]);
-  const [isFetchingSalesmen, setIsFetchingSalesmen] = useState(true);
-
+  const [carMasters, setCarMasters] = useState([]);
   const [selectedBrand, setSelectedBrand] = useState('');
-  const [selectedCars, setSelectedCars] = useState([]);
+  const [selectedModel, setSelectedModel] = useState('');
   const [showCustomCar, setShowCustomCar] = useState(false);
   const [customCarName, setCustomCarName] = useState('');
 
@@ -35,23 +30,31 @@ export default function AdminAddLead() {
     },
   });
 
-  // Fetch active salesmen
+  // Fetch active salesmen and car masters
   useEffect(() => {
-    const fetchSalesmen = async () => {
+    const fetchData = async () => {
       try {
-        const res = await axiosInstance.get('/auth/users');
-        if (res.data.success) {
-          const activeSalesmen = res.data.data.filter(u => u.role === 'sales' && u.isActive === true);
+        const [salesRes, mastersRes] = await Promise.all([
+          axiosInstance.get('/auth/users'),
+          axiosInstance.get('/car-masters')
+        ]);
+        
+        if (salesRes.data.success) {
+          const activeSalesmen = salesRes.data.data.filter(u => u.role === 'sales' && u.isActive === true);
           setSalesmen(activeSalesmen);
         }
+        
+        if (mastersRes.data.success) {
+          setCarMasters(mastersRes.data.data);
+        }
       } catch (err) {
-        console.error('Failed to fetch salesmen:', err);
-        toast.error('Failed to load salesmen list');
+        console.error('Failed to fetch data:', err);
+        toast.error('Failed to load form data');
       } finally {
         setIsFetchingSalesmen(false);
       }
     };
-    fetchSalesmen();
+    fetchData();
   }, []);
 
   const onSubmit = async (data) => {
@@ -69,8 +72,8 @@ export default function AdminAddLead() {
         urgency,
         assignedTo: data.assignedTo, // Using Admin selected salesman
         notes: combinedNotes ? `[${new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}] ${combinedNotes}` : '',
-        carsOfInterest: selectedCars.map(c => c._id),
-        carOfInterest: selectedCars.length > 0 ? selectedCars[0]._id : undefined,
+        interestedBrand: selectedBrand || undefined,
+        interestedModel: selectedModel && selectedModel !== 'custom' ? selectedModel : undefined,
         followUpDate: data.followUpDate || undefined,
       };
 
@@ -86,19 +89,24 @@ export default function AdminAddLead() {
   };
 
   // Available cars for dropdown
-  const availableCars = (cars || []).filter(c => c?.status !== 'Sold');
-  const availableBrands = [...new Set(availableCars.map(c => c.make))].sort();
-  const availableModelsForBrand = availableCars.filter(c => c.make === selectedBrand);
+  const availableBrands = carMasters.map(c => c.brand).sort();
+  const selectedCarMaster = carMasters.find(c => c.brand === selectedBrand);
+  const availableModelsForBrand = selectedCarMaster ? [...selectedCarMaster.models].sort() : [];
 
   const handleModelSelect = (e) => {
     const val = e.target.value;
+    setSelectedModel(val);
     if (val === 'custom') {
       setShowCustomCar(true);
-    } else if (val && !selectedCars.some(c => c._id === val)) {
-      const car = availableCars.find(c => c._id === val);
-      if (car) setSelectedCars([...selectedCars, car]);
+    } else {
+      setShowCustomCar(false);
     }
-    e.target.value = "";
+  };
+
+  const handleBrandSelect = (e) => {
+    setSelectedBrand(e.target.value);
+    setSelectedModel('');
+    setShowCustomCar(false);
   };
 
   return (
@@ -216,7 +224,7 @@ export default function AdminAddLead() {
                 <label className="block font-body text-xs font-semibold text-text-muted mb-1.5 uppercase tracking-wide">Brand</label>
                 <select 
                   value={selectedBrand} 
-                  onChange={(e) => setSelectedBrand(e.target.value)}
+                  onChange={handleBrandSelect}
                   className="w-full px-4 py-3 bg-background rounded-xl border border-gray-200 font-body text-sm text-text outline-none focus:border-primary/30 focus:ring-2 focus:ring-primary/10 cursor-pointer"
                 >
                   <option value="">Select Brand</option>
@@ -229,13 +237,13 @@ export default function AdminAddLead() {
                 <div className="relative">
                   <Car className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
                   <select 
-                     defaultValue=""
+                     value={selectedModel}
                      onChange={handleModelSelect}
                      disabled={!selectedBrand && !showCustomCar}
                      className="w-full pl-11 pr-4 py-3 bg-background rounded-xl border border-gray-200 font-body text-sm text-text outline-none focus:border-primary/30 focus:ring-2 focus:ring-primary/10 appearance-none cursor-pointer disabled:opacity-50"
                   >
                     <option value="" disabled>Select Car Model</option>
-                    {availableModelsForBrand.map(car => <option key={car._id} value={car._id}>{car.model} ({car.year}) - ₹{car.price?.toLocaleString('en-IN')}</option>)}
+                    {availableModelsForBrand.map(model => <option key={model} value={model}>{model}</option>)}
                     <option value="custom" className="font-bold text-primary">➕ Other / Custom Car...</option>
                   </select>
                 </div>
@@ -252,19 +260,6 @@ export default function AdminAddLead() {
                   autoFocus
                 />
               </div>
-            )}
-            
-            {/* Selected Cars Chips */}
-            {selectedCars.length > 0 && (
-               <div className="flex flex-wrap gap-2 pt-2">
-                  {selectedCars.map(car => (
-                     <span key={car._id} className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-primary/10 text-primary rounded-lg text-sm font-bold animate-in zoom-in-95 duration-200">
-                        <Car className="w-4 h-4"/>
-                        {car.make} {car.model} ({car.year})
-                        <button type="button" onClick={() => setSelectedCars(selectedCars.filter(c => c._id !== car._id))} className="ml-1 p-0.5 hover:bg-primary/20 rounded-md transition-colors"><X className="w-3.5 h-3.5" /></button>
-                     </span>
-                  ))}
-               </div>
             )}
           </div>
 

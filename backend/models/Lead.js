@@ -33,6 +33,14 @@ const leadSchema = new mongoose.Schema(
       ref: 'Car',
       default: null,
     },
+    interestedBrand: {
+      type: String,
+      trim: true,
+    },
+    interestedModel: {
+      type: String,
+      trim: true,
+    },
     budgetRange: {
       type: String,
       trim: true,

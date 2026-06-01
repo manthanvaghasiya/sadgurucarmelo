@@ -176,7 +176,7 @@ export default function Leads() {
     const customCarMatch = lead.notes?.match(/Looking for:\s*(.*?)(?:\n|$)/);
     const customCarStr = customCarMatch ? customCarMatch[1].trim() : '';
     const carsArr = lead.carsOfInterest?.length > 0 ? lead.carsOfInterest : (lead.carOfInterest ? [lead.carOfInterest] : []);
-    if (carsArr.some(c => `${c.make} ${c.model} ${c.year}`.toLowerCase().includes(q)) || customCarStr.toLowerCase().includes(q)) {
+    if (carsArr.some(c => `${c.make} ${c.model} ${c.year}`.toLowerCase().includes(q)) || customCarStr.toLowerCase().includes(q) || (lead.interestedBrand && lead.interestedBrand.toLowerCase().includes(q)) || (lead.interestedModel && lead.interestedModel.toLowerCase().includes(q))) {
       matches.push('Car');
     }
 
@@ -248,6 +248,8 @@ export default function Leads() {
             .toLowerCase()
             .includes(filterCarStr)
         )) ||
+        (lead.interestedBrand && lead.interestedBrand.toLowerCase().includes(filterCarStr)) ||
+        (lead.interestedModel && lead.interestedModel.toLowerCase().includes(filterCarStr)) ||
         (customCarString && customCarString.toLowerCase().includes(filterCarStr)) ||
         (customCarString && filterCarStr === 'custom car')
       );
@@ -422,8 +424,8 @@ export default function Leads() {
         'Source': lead.source || '',
         'Status': lead.status || '',
         'Urgency': lead.urgency || '',
-        'Car Make': (lead.carsOfInterest?.length > 0 ? lead.carsOfInterest.map(c => c.make).join(', ') : lead.carOfInterest?.make) || customCarString || '',
-        'Car Model': lead.carsOfInterest?.length > 0 ? lead.carsOfInterest.map(c => c.model).join(', ') : lead.carOfInterest?.model || '',
+        'Car Make': lead.interestedBrand || (lead.carsOfInterest?.length > 0 ? lead.carsOfInterest.map(c => c.make).join(', ') : lead.carOfInterest?.make) || customCarString || '',
+        'Car Model': lead.interestedModel || (lead.carsOfInterest?.length > 0 ? lead.carsOfInterest.map(c => c.model).join(', ') : lead.carOfInterest?.model) || '',
         'Car Year': lead.carsOfInterest?.length > 0 ? lead.carsOfInterest.map(c => c.year).join(', ') : lead.carOfInterest?.year || '',
         'Assigned Salesman': lead.assignedTo?.name || 'Unassigned',
         'Notes': (lead.notes || '').replace(/\n/g, ' - ')
@@ -730,9 +732,14 @@ export default function Leads() {
                                 const cars = lead.carsOfInterest?.length > 0 ? lead.carsOfInterest : (lead.carOfInterest ? [lead.carOfInterest] : []);
                                 const hasCars = cars.length > 0;
                                 
-                                if (hasCars || customCarStr) {
+                                if (lead.interestedBrand || hasCars || customCarStr) {
                                   return (
                                     <div className="flex flex-wrap gap-1.5 max-w-[240px]">
+                                      {lead.interestedBrand && (
+                                        <span className="inline-flex items-center px-2 py-0.5 bg-background border border-gray-200 rounded-md text-[10px] font-semibold text-text whitespace-nowrap shadow-sm">
+                                          {lead.interestedBrand} {lead.interestedModel || ''}
+                                        </span>
+                                      )}
                                       {cars.map(c => (
                                         <span key={c._id} className="inline-flex items-center px-2 py-0.5 bg-background border border-gray-200 rounded-md text-[10px] font-semibold text-text whitespace-nowrap shadow-sm">
                                           {c.make} {c.model} ({c.year})
@@ -875,9 +882,14 @@ export default function Leads() {
                                 const cars = lead.carsOfInterest?.length > 0 ? lead.carsOfInterest : (lead.carOfInterest ? [lead.carOfInterest] : []);
                                 const hasCars = cars.length > 0;
                                 
-                                if (hasCars || customCarStr) {
+                                if (lead.interestedBrand || hasCars || customCarStr) {
                                   return (
                                     <div className="flex flex-wrap gap-1.5 max-w-[240px]">
+                                      {lead.interestedBrand && (
+                                        <span className="inline-flex items-center px-2 py-0.5 bg-background border border-gray-200 rounded-md text-[10px] font-semibold text-text whitespace-nowrap shadow-sm">
+                                          {lead.interestedBrand} {lead.interestedModel || ''}
+                                        </span>
+                                      )}
                                       {cars.map(c => (
                                         <span key={c._id} className="inline-flex items-center px-2 py-0.5 bg-background border border-gray-200 rounded-md text-[10px] font-semibold text-text whitespace-nowrap shadow-sm">
                                           {c.make} {c.model} ({c.year})
@@ -1384,9 +1396,14 @@ export default function Leads() {
                               const cars = lead.carsOfInterest?.length > 0 ? lead.carsOfInterest : (lead.carOfInterest ? [lead.carOfInterest] : []);
                               const hasCars = cars.length > 0;
                               
-                              if (hasCars || customCarStr) {
+                              if (lead.interestedBrand || hasCars || customCarStr) {
                                 return (
                                   <div className="flex flex-wrap gap-1.5 max-w-[240px]">
+                                    {lead.interestedBrand && (
+                                      <span className="inline-flex items-center px-2 py-0.5 bg-background border border-gray-200 rounded-md text-[10px] font-semibold text-text whitespace-nowrap shadow-sm">
+                                        {lead.interestedBrand} {lead.interestedModel || ''}
+                                      </span>
+                                    )}
                                     {cars.map(c => (
                                       <span key={c._id} className="inline-flex items-center px-2 py-0.5 bg-background border border-gray-200 rounded-md text-[10px] font-semibold text-text whitespace-nowrap shadow-sm">
                                         {c.make} {c.model} ({c.year})
@@ -1495,10 +1512,17 @@ export default function Leads() {
                             const cars = lead.carsOfInterest?.length > 0 ? lead.carsOfInterest : (lead.carOfInterest ? [lead.carOfInterest] : []);
                             const carStrings = cars.map(c => `${c.make} ${c.model} (${c.year})`);
                             if (customCarStr) carStrings.push(customCarStr);
+                            if (lead.interestedBrand) carStrings.push(`${lead.interestedBrand} ${lead.interestedModel || ''}`);
                             
-                            if (cars.length > 0 || customCarStr) {
+                            if (cars.length > 0 || customCarStr || lead.interestedBrand) {
                               return (
                                 <div className="flex flex-wrap gap-1.5 mt-2">
+                                  {lead.interestedBrand && (
+                                    <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-primary/5 border border-primary/10 rounded-md text-[10px] font-bold text-primary whitespace-nowrap">
+                                      <Car className="w-3 h-3" />
+                                      {lead.interestedBrand} {lead.interestedModel || ''}
+                                    </span>
+                                  )}
                                   {cars.map(c => (
                                     <span key={c._id} className="inline-flex items-center gap-1 px-2 py-0.5 bg-primary/5 border border-primary/10 rounded-md text-[10px] font-bold text-primary whitespace-nowrap">
                                       <Car className="w-3 h-3" />

@@ -50,6 +50,7 @@ import messageRoutes from './routes/message.routes.js';
 import promoPosterRoutes from './routes/promoPoster.routes.js';
 import happyCustomerRoutes from './routes/happyCustomer.routes.js';
 import sitemapRoutes from './routes/sitemap.routes.js';
+import carMasterRoutes from './routes/carMaster.routes.js';
 
 // ── Load env variables ──
 // (done automatically via 'dotenv/config' at top)
@@ -152,6 +153,7 @@ apiRouter.use('/messages', messageRoutes);
 apiRouter.use('/promo-posters', promoPosterRoutes);
 apiRouter.use('/happy-customers', happyCustomerRoutes);
 apiRouter.use('/sitemap.xml', sitemapRoutes);
+apiRouter.use('/car-masters', carMasterRoutes);
 
 app.use('/api', apiRouter);
 app.use('/', apiRouter);

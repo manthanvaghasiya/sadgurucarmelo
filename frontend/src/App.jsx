@@ -28,6 +28,7 @@ const AdminAddLead = lazy(() => import('./pages/admin/AddLead'));
 const AdminEditLead = lazy(() => import('./pages/admin/EditLead'));
 const AdminMessages = lazy(() => import('./pages/admin/Messages'));
 const AdminSettings = lazy(() => import('./pages/admin/Settings'));
+const AdminCarBrands = lazy(() => import('./pages/admin/CarMasterSettings'));
 const AdminPosters = lazy(() => import('./pages/admin/Posters'));
 const AdminHappyCustomers = lazy(() => import('./pages/admin/HappyCustomersAdmin'));
 
@@ -119,6 +120,11 @@ function App() {
                 <Route path="settings" element={
                   <ProtectedRoute allowedRoles={['admin']}>
                     <AdminSettings />
+                  </ProtectedRoute>
+                } />
+                <Route path="car-brands" element={
+                  <ProtectedRoute allowedRoles={['admin']}>
+                    <AdminCarBrands />
                   </ProtectedRoute>
                 } />
                 <Route path="posters" element={<AdminPosters />} />
