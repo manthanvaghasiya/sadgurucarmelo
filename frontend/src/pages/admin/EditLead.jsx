@@ -22,6 +22,9 @@ export default function AdminEditLead() {
   const [selectedFuelType, setSelectedFuelType] = useState('');
   const [selectedTransmission, setSelectedTransmission] = useState('');
   const [urgency, setUrgency] = useState('Warm');
+  const [isLoading, setIsLoading] = useState(true);
+  const [salesmen, setSalesmen] = useState([]);
+  const [isFetchingSalesmen, setIsFetchingSalesmen] = useState(true);
 
   const {
     register,

@@ -22,6 +22,7 @@ export default function EditLead() {
   const [selectedFuelType, setSelectedFuelType] = useState('');
   const [selectedTransmission, setSelectedTransmission] = useState('');
   const [urgency, setUrgency] = useState('Warm');
+  const [isLoading, setIsLoading] = useState(true);
 
   const {
     register,
