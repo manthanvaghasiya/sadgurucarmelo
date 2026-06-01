@@ -5,7 +5,7 @@ import toast from 'react-hot-toast';
 import {
   User, Phone, MessageCircle, Car, MapPin, Flame,
   Thermometer, Snowflake, ArrowLeft, CheckCircle2, Loader2,
-  CalendarClock, UserCircle, X
+  CalendarClock, UserCircle, X, Trash2, Plus
 } from 'lucide-react';
 import axiosInstance from '../../api/axiosConfig';
 import { useAuth } from '../../context/AuthContext';
@@ -21,6 +21,7 @@ export default function AdminEditLead() {
   const [customCarName, setCustomCarName] = useState('');
   const [selectedFuelType, setSelectedFuelType] = useState('');
   const [selectedTransmission, setSelectedTransmission] = useState('');
+  const [selectedCars, setSelectedCars] = useState([]);
   const [urgency, setUrgency] = useState('Warm');
   const [isLoading, setIsLoading] = useState(true);
   const [salesmen, setSalesmen] = useState([]);
@@ -81,24 +82,46 @@ export default function AdminEditLead() {
           notes: lead.notes || '',
         });
         setUrgency(lead.urgency || 'Warm');
-        setSelectedFuelType(lead.interestedFuelType || '');
-        setSelectedTransmission(lead.interestedTransmission || '');
         
-        if (lead.interestedBrand) {
-           setSelectedBrand(lead.interestedBrand);
-           setSelectedModel(lead.interestedModel || '');
-        } else if (lead.carsOfInterest && lead.carsOfInterest.length > 0) {
-           setSelectedBrand(lead.carsOfInterest[0].make || '');
-           setSelectedModel(lead.carsOfInterest[0].model || '');
-        } else if (lead.carOfInterest) {
-           setSelectedBrand(lead.carOfInterest.make || '');
-           setSelectedModel(lead.carOfInterest.model || '');
-        }
-        
-        const customCarMatch = lead.notes?.match(/Looking for:\s*(.*?)(?:\n|$)/);
-        if (customCarMatch) {
-            setShowCustomCar(true);
-            setCustomCarName(customCarMatch[1]);
+        if (lead.interestedCarMasters && lead.interestedCarMasters.length > 0) {
+           setSelectedCars(lead.interestedCarMasters.map(c => ({
+             brand: c.brand || '',
+             model: c.model || '',
+             fuelType: c.fuelType || '',
+             transmission: c.transmission || '',
+             customName: !c.brand ? c.model : undefined
+           })));
+        } else {
+           let legacyCars = [];
+           const customCarMatch = lead.notes?.match(/Looking for:\s*(.*?)(?:\n|$)/);
+           let customCarName = customCarMatch ? customCarMatch[1].trim() : '';
+
+           if (lead.interestedBrand || customCarName) {
+              legacyCars.push({
+                 brand: lead.interestedBrand || '',
+                 model: customCarName ? 'custom' : (lead.interestedModel || ''),
+                 fuelType: lead.interestedFuelType || '',
+                 transmission: lead.interestedTransmission || '',
+                 customName: customCarName
+              });
+           } else if (lead.carsOfInterest && lead.carsOfInterest.length > 0) {
+              lead.carsOfInterest.forEach(c => {
+                 legacyCars.push({
+                    brand: c.make || '',
+                    model: c.model || '',
+                    fuelType: '',
+                    transmission: ''
+                 });
+              });
+           } else if (lead.carOfInterest) {
+              legacyCars.push({
+                 brand: lead.carOfInterest.make || '',
+                 model: lead.carOfInterest.model || '',
+                 fuelType: '',
+                 transmission: ''
+              });
+           }
+           setSelectedCars(legacyCars);
         }
         setIsLoading(false);
       } catch (err) {
@@ -112,13 +135,25 @@ export default function AdminEditLead() {
 
   const onSubmit = async (data) => {
     try {
+      let finalCars = [...selectedCars];
+      if (selectedBrand || (showCustomCar && customCarName)) {
+        finalCars.push({
+          brand: selectedBrand,
+          model: showCustomCar ? 'custom' : selectedModel,
+          fuelType: selectedFuelType,
+          transmission: selectedTransmission,
+          customName: showCustomCar ? customCarName : undefined
+        });
+      }
+
+      let customCarNotes = finalCars.filter(c => c.customName).map(c => c.customName).join(', ');
       let combinedNotes = data.notes || '';
-      if (showCustomCar && customCarName) {
-        if (!combinedNotes.includes('Looking for:')) {
-            combinedNotes = 'Looking for: ' + customCarName + (combinedNotes ? '\n\n' + combinedNotes : '');
-        } else {
-            combinedNotes = combinedNotes.replace(/Looking for:\s*(.*?)(?:\n|$)/, 'Looking for: ' + customCarName + '\n');
-        }
+      
+      combinedNotes = combinedNotes.replace(/\[.*?\]\s*Looking for:.*?(?:\n\n|\n|$)/g, '').trim();
+      combinedNotes = combinedNotes.replace(/Looking for:.*?(?:\n\n|\n|$)/g, '').trim();
+
+      if (customCarNotes) {
+        combinedNotes = 'Looking for: ' + customCarNotes + (combinedNotes ? '\n\n' + combinedNotes : '');
       }
 
       const payload = {
@@ -129,10 +164,16 @@ export default function AdminEditLead() {
         urgency,
         assignedTo: data.assignedTo,
         notes: combinedNotes ? `[${new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}] ${combinedNotes}` : '',
-        interestedBrand: selectedBrand || undefined,
-        interestedModel: selectedModel && selectedModel !== 'custom' ? selectedModel : undefined,
-        interestedFuelType: selectedFuelType || undefined,
-        interestedTransmission: selectedTransmission || undefined,
+        interestedBrand: finalCars.length > 0 ? (finalCars[0].brand || undefined) : undefined,
+        interestedModel: finalCars.length > 0 ? (finalCars[0].model === 'custom' ? undefined : finalCars[0].model) : undefined,
+        interestedFuelType: finalCars.length > 0 ? (finalCars[0].fuelType || undefined) : undefined,
+        interestedTransmission: finalCars.length > 0 ? (finalCars[0].transmission || undefined) : undefined,
+        interestedCarMasters: finalCars.length > 0 ? finalCars.map(c => ({
+          brand: c.brand || undefined,
+          model: c.model === 'custom' ? c.customName : c.model,
+          fuelType: c.fuelType || undefined,
+          transmission: c.transmission || undefined
+        })) : undefined,
         followUpDate: data.followUpDate || undefined,
       };
 
@@ -166,6 +207,35 @@ export default function AdminEditLead() {
     setSelectedBrand(e.target.value);
     setSelectedModel('');
     setShowCustomCar(false);
+  };
+
+  const handleAddCar = () => {
+    if (!selectedBrand && !showCustomCar) return;
+    if (showCustomCar && !customCarName) {
+      toast.error('Please enter the custom car name');
+      return;
+    }
+    
+    const newCar = {
+      brand: selectedBrand,
+      model: showCustomCar ? 'custom' : selectedModel,
+      fuelType: selectedFuelType,
+      transmission: selectedTransmission,
+      customName: showCustomCar ? customCarName : undefined
+    };
+    
+    setSelectedCars([...selectedCars, newCar]);
+    
+    setSelectedBrand('');
+    setSelectedModel('');
+    setShowCustomCar(false);
+    setCustomCarName('');
+    setSelectedFuelType('');
+    setSelectedTransmission('');
+  };
+
+  const handleRemoveCar = (index) => {
+    setSelectedCars(selectedCars.filter((_, i) => i !== index));
   };
 
   if (isLoading) {
@@ -358,6 +428,47 @@ export default function AdminEditLead() {
                   className="w-full px-4 py-3 bg-primary/5 rounded-xl border border-primary/20 font-body text-sm text-text placeholder:text-text-muted/60 outline-none focus:border-primary/40 focus:ring-2 focus:ring-primary/10"
                   autoFocus
                 />
+              </div>
+            )}
+
+            <div className="flex justify-end mt-4">
+              <button
+                type="button"
+                onClick={handleAddCar}
+                className="px-4 py-2 bg-primary/10 text-primary font-bold rounded-xl hover:bg-primary/20 transition-colors flex items-center gap-2 text-sm"
+              >
+                <Plus className="w-4 h-4" /> Add Car
+              </button>
+            </div>
+
+            {/* List of selected cars */}
+            {selectedCars.length > 0 && (
+              <div className="mt-4 space-y-2 border-t border-gray-100 pt-4">
+                <h3 className="font-body text-xs font-semibold text-text-muted uppercase tracking-wide">Selected Cars</h3>
+                {selectedCars.map((car, idx) => (
+                  <div key={idx} className="flex items-center justify-between p-3 bg-background border border-gray-200 rounded-xl">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+                        <Car className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <p className="font-bold text-sm text-text">
+                          {car.customName ? car.customName : `${car.brand} ${car.model}`}
+                        </p>
+                        <p className="text-xs text-text-muted">
+                          {[car.fuelType, car.transmission].filter(Boolean).join(' • ') || 'Any Fuel/Transmission'}
+                        </p>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveCar(idx)}
+                      className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                ))}
               </div>
             )}
           </div>

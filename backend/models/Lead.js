@@ -49,6 +49,12 @@ const leadSchema = new mongoose.Schema(
       type: String,
       trim: true,
     },
+    interestedCarMasters: [{
+      brand: { type: String, trim: true },
+      model: { type: String, trim: true },
+      fuelType: { type: String, trim: true },
+      transmission: { type: String, trim: true },
+    }],
     budgetRange: {
       type: String,
       trim: true,

@@ -176,7 +176,14 @@ export default function Leads() {
     const customCarMatch = lead.notes?.match(/Looking for:\s*(.*?)(?:\n|$)/);
     const customCarStr = customCarMatch ? customCarMatch[1].trim() : '';
     const carsArr = lead.carsOfInterest?.length > 0 ? lead.carsOfInterest : (lead.carOfInterest ? [lead.carOfInterest] : []);
-    if (carsArr.some(c => `${c.make} ${c.model} ${c.year}`.toLowerCase().includes(q)) || customCarStr.toLowerCase().includes(q) || (lead.interestedBrand && lead.interestedBrand.toLowerCase().includes(q)) || (lead.interestedModel && lead.interestedModel.toLowerCase().includes(q))) {
+    const carMastersArr = lead.interestedCarMasters || [];
+    if (
+      carsArr.some(c => `${c.make} ${c.model} ${c.year}`.toLowerCase().includes(q)) || 
+      carMastersArr.some(c => `${c.brand} ${c.model}`.toLowerCase().includes(q)) ||
+      customCarStr.toLowerCase().includes(q) || 
+      (lead.interestedBrand && lead.interestedBrand.toLowerCase().includes(q)) || 
+      (lead.interestedModel && lead.interestedModel.toLowerCase().includes(q))
+    ) {
       matches.push('Car');
     }
 
@@ -241,8 +248,10 @@ export default function Leads() {
       const customCarString = customCarMatch ? customCarMatch[1].trim() : '';
       const filterCarStr = columnFilters.car.toLowerCase().trim();
 
+      const carMastersArr = lead.interestedCarMasters || [];
       const matchesCar = !filterCarStr || (
         (lead.carsOfInterest?.length > 0 && lead.carsOfInterest.some(c => `${c.make} ${c.model} (${c.year})`.toLowerCase().includes(filterCarStr))) ||
+        (carMastersArr.some(c => `${c.brand} ${c.model}`.toLowerCase().includes(filterCarStr))) ||
         (lead.carOfInterest && (
           `${lead.carOfInterest.make} ${lead.carOfInterest.model} (${lead.carOfInterest.year})`
             .toLowerCase()
@@ -424,10 +433,10 @@ export default function Leads() {
         'Source': lead.source || '',
         'Status': lead.status || '',
         'Urgency': lead.urgency || '',
-        'Car Make': lead.interestedBrand || (lead.carsOfInterest?.length > 0 ? lead.carsOfInterest.map(c => c.make).join(', ') : lead.carOfInterest?.make) || customCarString || '',
-        'Car Model': lead.interestedModel || (lead.carsOfInterest?.length > 0 ? lead.carsOfInterest.map(c => c.model).join(', ') : lead.carOfInterest?.model) || '',
-        'Fuel Type': lead.interestedFuelType || '',
-        'Transmission': lead.interestedTransmission || '',
+        'Car Make': lead.interestedCarMasters?.length > 0 ? lead.interestedCarMasters.map(c => c.brand).filter(Boolean).join(', ') : (lead.interestedBrand || (lead.carsOfInterest?.length > 0 ? lead.carsOfInterest.map(c => c.make).join(', ') : lead.carOfInterest?.make) || customCarString || ''),
+        'Car Model': lead.interestedCarMasters?.length > 0 ? lead.interestedCarMasters.map(c => c.model).filter(Boolean).join(', ') : (lead.interestedModel || (lead.carsOfInterest?.length > 0 ? lead.carsOfInterest.map(c => c.model).join(', ') : lead.carOfInterest?.model) || ''),
+        'Fuel Type': lead.interestedCarMasters?.length > 0 ? lead.interestedCarMasters.map(c => c.fuelType).filter(Boolean).join(', ') : (lead.interestedFuelType || ''),
+        'Transmission': lead.interestedCarMasters?.length > 0 ? lead.interestedCarMasters.map(c => c.transmission).filter(Boolean).join(', ') : (lead.interestedTransmission || ''),
         'Car Year': lead.carsOfInterest?.length > 0 ? lead.carsOfInterest.map(c => c.year).join(', ') : lead.carOfInterest?.year || '',
         'Assigned Salesman': lead.assignedTo?.name || 'Unassigned',
         'Notes': (lead.notes || '').replace(/\n/g, ' - ')
@@ -734,10 +743,15 @@ export default function Leads() {
                                 const cars = lead.carsOfInterest?.length > 0 ? lead.carsOfInterest : (lead.carOfInterest ? [lead.carOfInterest] : []);
                                 const hasCars = cars.length > 0;
                                 
-                                if (lead.interestedBrand || hasCars || customCarStr) {
+                                if (lead.interestedCarMasters?.length > 0 || lead.interestedBrand || hasCars || customCarStr) {
                                   return (
                                     <div className="flex flex-wrap gap-1.5 max-w-[240px]">
-                                      {lead.interestedBrand && (
+                                      {lead.interestedCarMasters?.map((c, i) => (
+                                        <span key={'cm'+i} className="inline-flex items-center px-2 py-0.5 bg-background border border-gray-200 rounded-md text-[10px] font-semibold text-text whitespace-nowrap shadow-sm">
+                                          {c.brand} {c.model} {(c.fuelType || c.transmission) ? `(${[c.fuelType, c.transmission].filter(Boolean).join(', ')})` : ''}
+                                        </span>
+                                      ))}
+                                      {(!lead.interestedCarMasters || lead.interestedCarMasters.length === 0) && lead.interestedBrand && (
                                         <span className="inline-flex items-center px-2 py-0.5 bg-background border border-gray-200 rounded-md text-[10px] font-semibold text-text whitespace-nowrap shadow-sm">
                                           {lead.interestedBrand} {lead.interestedModel || ''} {(lead.interestedFuelType || lead.interestedTransmission) ? `(${[lead.interestedFuelType, lead.interestedTransmission].filter(Boolean).join(', ')})` : ''}
                                         </span>
@@ -884,10 +898,15 @@ export default function Leads() {
                                 const cars = lead.carsOfInterest?.length > 0 ? lead.carsOfInterest : (lead.carOfInterest ? [lead.carOfInterest] : []);
                                 const hasCars = cars.length > 0;
                                 
-                                if (lead.interestedBrand || hasCars || customCarStr) {
+                                if (lead.interestedCarMasters?.length > 0 || lead.interestedBrand || hasCars || customCarStr) {
                                   return (
                                     <div className="flex flex-wrap gap-1.5 max-w-[240px]">
-                                      {lead.interestedBrand && (
+                                      {lead.interestedCarMasters?.map((c, i) => (
+                                        <span key={'cm'+i} className="inline-flex items-center px-2 py-0.5 bg-background border border-gray-200 rounded-md text-[10px] font-semibold text-text whitespace-nowrap shadow-sm">
+                                          {c.brand} {c.model} {(c.fuelType || c.transmission) ? `(${[c.fuelType, c.transmission].filter(Boolean).join(', ')})` : ''}
+                                        </span>
+                                      ))}
+                                      {(!lead.interestedCarMasters || lead.interestedCarMasters.length === 0) && lead.interestedBrand && (
                                         <span className="inline-flex items-center px-2 py-0.5 bg-background border border-gray-200 rounded-md text-[10px] font-semibold text-text whitespace-nowrap shadow-sm">
                                           {lead.interestedBrand} {lead.interestedModel || ''} {(lead.interestedFuelType || lead.interestedTransmission) ? `(${[lead.interestedFuelType, lead.interestedTransmission].filter(Boolean).join(', ')})` : ''}
                                         </span>
@@ -1398,14 +1417,19 @@ export default function Leads() {
                               const cars = lead.carsOfInterest?.length > 0 ? lead.carsOfInterest : (lead.carOfInterest ? [lead.carOfInterest] : []);
                               const hasCars = cars.length > 0;
                               
-                              if (lead.interestedBrand || hasCars || customCarStr) {
+                              if (lead.interestedCarMasters?.length > 0 || lead.interestedBrand || hasCars || customCarStr) {
                                 return (
                                   <div className="flex flex-wrap gap-1.5 max-w-[240px]">
-                                    {lead.interestedBrand && (
-                                      <span className="inline-flex items-center px-2 py-0.5 bg-background border border-gray-200 rounded-md text-[10px] font-semibold text-text whitespace-nowrap shadow-sm">
-                                        {lead.interestedBrand} {lead.interestedModel || ''} {(lead.interestedFuelType || lead.interestedTransmission) ? `(${[lead.interestedFuelType, lead.interestedTransmission].filter(Boolean).join(', ')})` : ''}
-                                      </span>
-                                    )}
+                                    {lead.interestedCarMasters?.map((c, i) => (
+                                        <span key={'cm'+i} className="inline-flex items-center px-2 py-0.5 bg-background border border-gray-200 rounded-md text-[10px] font-semibold text-text whitespace-nowrap shadow-sm">
+                                          {c.brand} {c.model} {(c.fuelType || c.transmission) ? `(${[c.fuelType, c.transmission].filter(Boolean).join(', ')})` : ''}
+                                        </span>
+                                      ))}
+                                      {(!lead.interestedCarMasters || lead.interestedCarMasters.length === 0) && lead.interestedBrand && (
+                                        <span className="inline-flex items-center px-2 py-0.5 bg-background border border-gray-200 rounded-md text-[10px] font-semibold text-text whitespace-nowrap shadow-sm">
+                                          {lead.interestedBrand} {lead.interestedModel || ''} {(lead.interestedFuelType || lead.interestedTransmission) ? `(${[lead.interestedFuelType, lead.interestedTransmission].filter(Boolean).join(', ')})` : ''}
+                                        </span>
+                                      )}
                                     {cars.map(c => (
                                       <span key={c._id} className="inline-flex items-center px-2 py-0.5 bg-background border border-gray-200 rounded-md text-[10px] font-semibold text-text whitespace-nowrap shadow-sm">
                                         {c.make} {c.model} ({c.year})
@@ -1514,9 +1538,15 @@ export default function Leads() {
                             const cars = lead.carsOfInterest?.length > 0 ? lead.carsOfInterest : (lead.carOfInterest ? [lead.carOfInterest] : []);
                             const carStrings = cars.map(c => `${c.make} ${c.model} (${c.year})`);
                             if (customCarStr) carStrings.push(customCarStr);
-                            if (lead.interestedBrand) carStrings.push(`${lead.interestedBrand} ${lead.interestedModel || ''} ${(lead.interestedFuelType || lead.interestedTransmission) ? `(${[lead.interestedFuelType, lead.interestedTransmission].filter(Boolean).join(', ')})` : ''}`);
+                            if (lead.interestedCarMasters && lead.interestedCarMasters.length > 0) {
+                              lead.interestedCarMasters.forEach(c => {
+                                carStrings.push(`${c.brand} ${c.model} ${(c.fuelType || c.transmission) ? `(${[c.fuelType, c.transmission].filter(Boolean).join(', ')})` : ''}`);
+                              });
+                            } else if (lead.interestedBrand) {
+                              carStrings.push(`${lead.interestedBrand} ${lead.interestedModel || ''} ${(lead.interestedFuelType || lead.interestedTransmission) ? `(${[lead.interestedFuelType, lead.interestedTransmission].filter(Boolean).join(', ')})` : ''}`);
+                            }
                             
-                            if (cars.length > 0 || customCarStr || lead.interestedBrand) {
+                            if (cars.length > 0 || customCarStr || lead.interestedBrand || lead.interestedCarMasters?.length > 0) {
                               return (
                                 <div className="flex flex-wrap gap-1.5 mt-2">
                                   {lead.interestedBrand && (
