@@ -41,6 +41,14 @@ const leadSchema = new mongoose.Schema(
       type: String,
       trim: true,
     },
+    interestedFuelType: {
+      type: String,
+      trim: true,
+    },
+    interestedTransmission: {
+      type: String,
+      trim: true,
+    },
     budgetRange: {
       type: String,
       trim: true,

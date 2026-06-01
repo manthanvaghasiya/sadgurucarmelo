@@ -385,7 +385,7 @@ export default function SalesDashboard() {
                                 {lead.interestedBrand && (
                                   <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-primary/5 border border-primary/10 rounded-md text-[10px] font-bold text-primary whitespace-nowrap">
                                     <Car className="w-3 h-3" />
-                                    {lead.interestedBrand} {lead.interestedModel || ''}
+                                    {lead.interestedBrand} {lead.interestedModel || ''} {(lead.interestedFuelType || lead.interestedTransmission) ? `(${[lead.interestedFuelType, lead.interestedTransmission].filter(Boolean).join(', ')})` : ''}
                                   </span>
                                 )}
                                 {cars.map(c => (
@@ -501,7 +501,7 @@ export default function SalesDashboard() {
                                     {lead.interestedBrand && (
                                       <span className="inline-flex items-center gap-1 px-1.5 py-0.5 bg-primary/5 border border-primary/10 rounded text-[9px] font-bold text-primary whitespace-nowrap">
                                         <Car className="w-2.5 h-2.5" />
-                                        {lead.interestedBrand} {lead.interestedModel || ''}
+                                        {lead.interestedBrand} {lead.interestedModel || ''} {(lead.interestedFuelType || lead.interestedTransmission) ? `(${[lead.interestedFuelType, lead.interestedTransmission].filter(Boolean).join(', ')})` : ''}
                                       </span>
                                     )}
                                     {cars.map(c => (

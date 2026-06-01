@@ -426,6 +426,8 @@ export default function Leads() {
         'Urgency': lead.urgency || '',
         'Car Make': lead.interestedBrand || (lead.carsOfInterest?.length > 0 ? lead.carsOfInterest.map(c => c.make).join(', ') : lead.carOfInterest?.make) || customCarString || '',
         'Car Model': lead.interestedModel || (lead.carsOfInterest?.length > 0 ? lead.carsOfInterest.map(c => c.model).join(', ') : lead.carOfInterest?.model) || '',
+        'Fuel Type': lead.interestedFuelType || '',
+        'Transmission': lead.interestedTransmission || '',
         'Car Year': lead.carsOfInterest?.length > 0 ? lead.carsOfInterest.map(c => c.year).join(', ') : lead.carOfInterest?.year || '',
         'Assigned Salesman': lead.assignedTo?.name || 'Unassigned',
         'Notes': (lead.notes || '').replace(/\n/g, ' - ')
@@ -737,7 +739,7 @@ export default function Leads() {
                                     <div className="flex flex-wrap gap-1.5 max-w-[240px]">
                                       {lead.interestedBrand && (
                                         <span className="inline-flex items-center px-2 py-0.5 bg-background border border-gray-200 rounded-md text-[10px] font-semibold text-text whitespace-nowrap shadow-sm">
-                                          {lead.interestedBrand} {lead.interestedModel || ''}
+                                          {lead.interestedBrand} {lead.interestedModel || ''} {(lead.interestedFuelType || lead.interestedTransmission) ? `(${[lead.interestedFuelType, lead.interestedTransmission].filter(Boolean).join(', ')})` : ''}
                                         </span>
                                       )}
                                       {cars.map(c => (
@@ -887,7 +889,7 @@ export default function Leads() {
                                     <div className="flex flex-wrap gap-1.5 max-w-[240px]">
                                       {lead.interestedBrand && (
                                         <span className="inline-flex items-center px-2 py-0.5 bg-background border border-gray-200 rounded-md text-[10px] font-semibold text-text whitespace-nowrap shadow-sm">
-                                          {lead.interestedBrand} {lead.interestedModel || ''}
+                                          {lead.interestedBrand} {lead.interestedModel || ''} {(lead.interestedFuelType || lead.interestedTransmission) ? `(${[lead.interestedFuelType, lead.interestedTransmission].filter(Boolean).join(', ')})` : ''}
                                         </span>
                                       )}
                                       {cars.map(c => (
@@ -1401,7 +1403,7 @@ export default function Leads() {
                                   <div className="flex flex-wrap gap-1.5 max-w-[240px]">
                                     {lead.interestedBrand && (
                                       <span className="inline-flex items-center px-2 py-0.5 bg-background border border-gray-200 rounded-md text-[10px] font-semibold text-text whitespace-nowrap shadow-sm">
-                                        {lead.interestedBrand} {lead.interestedModel || ''}
+                                        {lead.interestedBrand} {lead.interestedModel || ''} {(lead.interestedFuelType || lead.interestedTransmission) ? `(${[lead.interestedFuelType, lead.interestedTransmission].filter(Boolean).join(', ')})` : ''}
                                       </span>
                                     )}
                                     {cars.map(c => (
@@ -1512,7 +1514,7 @@ export default function Leads() {
                             const cars = lead.carsOfInterest?.length > 0 ? lead.carsOfInterest : (lead.carOfInterest ? [lead.carOfInterest] : []);
                             const carStrings = cars.map(c => `${c.make} ${c.model} (${c.year})`);
                             if (customCarStr) carStrings.push(customCarStr);
-                            if (lead.interestedBrand) carStrings.push(`${lead.interestedBrand} ${lead.interestedModel || ''}`);
+                            if (lead.interestedBrand) carStrings.push(`${lead.interestedBrand} ${lead.interestedModel || ''} ${(lead.interestedFuelType || lead.interestedTransmission) ? `(${[lead.interestedFuelType, lead.interestedTransmission].filter(Boolean).join(', ')})` : ''}`);
                             
                             if (cars.length > 0 || customCarStr || lead.interestedBrand) {
                               return (
@@ -1520,7 +1522,7 @@ export default function Leads() {
                                   {lead.interestedBrand && (
                                     <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-primary/5 border border-primary/10 rounded-md text-[10px] font-bold text-primary whitespace-nowrap">
                                       <Car className="w-3 h-3" />
-                                      {lead.interestedBrand} {lead.interestedModel || ''}
+                                      {lead.interestedBrand} {lead.interestedModel || ''} {(lead.interestedFuelType || lead.interestedTransmission) ? `(${[lead.interestedFuelType, lead.interestedTransmission].filter(Boolean).join(', ')})` : ''}
                                     </span>
                                   )}
                                   {cars.map(c => (

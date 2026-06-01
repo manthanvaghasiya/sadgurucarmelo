@@ -18,6 +18,8 @@ export default function AdminAddLead() {
   const [selectedModel, setSelectedModel] = useState('');
   const [showCustomCar, setShowCustomCar] = useState(false);
   const [customCarName, setCustomCarName] = useState('');
+  const [selectedFuelType, setSelectedFuelType] = useState('');
+  const [selectedTransmission, setSelectedTransmission] = useState('');
   const [urgency, setUrgency] = useState('Warm');
 
   const {
@@ -75,6 +77,8 @@ export default function AdminAddLead() {
         notes: combinedNotes ? `[${new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}] ${combinedNotes}` : '',
         interestedBrand: selectedBrand || undefined,
         interestedModel: selectedModel && selectedModel !== 'custom' ? selectedModel : undefined,
+        interestedFuelType: selectedFuelType || undefined,
+        interestedTransmission: selectedTransmission || undefined,
         followUpDate: data.followUpDate || undefined,
       };
 
@@ -248,6 +252,35 @@ export default function AdminAddLead() {
                     <option value="custom" className="font-bold text-primary">➕ Other / Custom Car...</option>
                   </select>
                 </div>
+              </div>
+              
+              <div>
+                <label className="block font-body text-xs font-semibold text-text-muted mb-1.5 uppercase tracking-wide">Fuel Type</label>
+                <select 
+                  value={selectedFuelType} 
+                  onChange={(e) => setSelectedFuelType(e.target.value)}
+                  className="w-full px-4 py-3 bg-background rounded-xl border border-gray-200 font-body text-sm text-text outline-none focus:border-primary/30 focus:ring-2 focus:ring-primary/10 cursor-pointer"
+                >
+                  <option value="">Any</option>
+                  <option value="Petrol">Petrol</option>
+                  <option value="Diesel">Diesel</option>
+                  <option value="CNG">CNG</option>
+                  <option value="Electric">Electric</option>
+                  <option value="Hybrid">Hybrid</option>
+                </select>
+              </div>
+              
+              <div>
+                <label className="block font-body text-xs font-semibold text-text-muted mb-1.5 uppercase tracking-wide">Transmission</label>
+                <select 
+                  value={selectedTransmission} 
+                  onChange={(e) => setSelectedTransmission(e.target.value)}
+                  className="w-full px-4 py-3 bg-background rounded-xl border border-gray-200 font-body text-sm text-text outline-none focus:border-primary/30 focus:ring-2 focus:ring-primary/10 cursor-pointer"
+                >
+                  <option value="">Any</option>
+                  <option value="Manual">Manual</option>
+                  <option value="Automatic">Automatic</option>
+                </select>
               </div>
             </div>
 
