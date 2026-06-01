@@ -19,6 +19,7 @@ export default function EditLead() {
   const [selectedModel, setSelectedModel] = useState('');
   const [showCustomCar, setShowCustomCar] = useState(false);
   const [customCarName, setCustomCarName] = useState('');
+  const [urgency, setUrgency] = useState('Warm');
 
   const {
     register,

@@ -18,6 +18,7 @@ export default function AddLead() {
   const [selectedModel, setSelectedModel] = useState('');
   const [showCustomCar, setShowCustomCar] = useState(false);
   const [customCarName, setCustomCarName] = useState('');
+  const [urgency, setUrgency] = useState('Warm');
 
   const {
     register,
