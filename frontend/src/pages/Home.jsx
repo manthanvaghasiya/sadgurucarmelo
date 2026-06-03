@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import { motion } from "framer-motion";
 import CarCard from '../components/CarCard';
+import SkeletonCarCard from '../components/SkeletonCarCard';
 import { useCars } from '../context/CarContext';
 import HeroSection from '../components/HeroSection';
 import ArrivingShortly from '../components/ArrivingShortly';
@@ -63,10 +64,13 @@ export default function Home() {
 
             <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
               {isLoading ? (
-                <div className="col-span-full flex flex-col items-center justify-center py-20">
-                  <Loader2 className="w-10 h-10 animate-spin text-primary mb-4" />
-                  <p className="font-body text-text-muted font-semibold">Loading inventory...</p>
-                </div>
+                <>
+                  {Array.from({ length: 4 }).map((_, index) => (
+                    <div key={index} className="car-card-premium">
+                      <SkeletonCarCard />
+                    </div>
+                  ))}
+                </>
               ) : (!cars || cars.length === 0) ? (
                 <div className="col-span-full flex flex-col items-center justify-center py-20 text-center bg-white rounded-2xl border border-dashed border-gray-300">
                   <p className="font-heading text-lg text-text font-bold mb-2">Our inventory is currently being updated.</p>

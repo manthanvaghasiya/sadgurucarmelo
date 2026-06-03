@@ -7,7 +7,7 @@ import { useCars } from '../context/CarContext';
 import ArrivingShortly from '../components/ArrivingShortly';
 
 export default function Inventory() {
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [isNearFooter, setIsNearFooter] = useState(false);
 
@@ -62,6 +62,39 @@ export default function Inventory() {
     }
     return initial;
   });
+
+  // Sync filters to URL
+  useEffect(() => {
+    const params = new URLSearchParams(searchParams);
+    
+    if (filters.makes && filters.makes.length > 0) {
+      params.set('make', filters.makes.join(','));
+    } else {
+      params.delete('make');
+    }
+    
+    if (filters.fuelType) {
+      params.set('fuelType', filters.fuelType);
+    } else {
+      params.delete('fuelType');
+    }
+    
+    if (filters.bodyType) {
+      params.set('bodyType', filters.bodyType);
+    } else {
+      params.delete('bodyType');
+    }
+    
+    if (filters.budget && filters.budget.length === 2 && (filters.budget[0] !== 0 || filters.budget[1] !== 5000000)) {
+      params.set('priceMin', filters.budget[0].toString());
+      params.set('priceMax', filters.budget[1].toString());
+    } else {
+      params.delete('priceMin');
+      params.delete('priceMax');
+    }
+    
+    setSearchParams(params, { replace: true });
+  }, [filters, setSearchParams]);
 
   useEffect(() => {
     const handleScroll = () => {

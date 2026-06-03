@@ -1,9 +1,10 @@
-import { useState, useEffect, useCallback, Fragment } from 'react';
+import { useState, useEffect, Fragment } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { ChevronLeft, ChevronRight, Search } from 'lucide-react';
-import axiosInstance from '../api/axiosConfig';
 import CarCard from './CarCard';
 import ComingSoonCarousel from './ComingSoonCarousel';
+import { useCars } from '../context/CarContext';
+import SkeletonCarCard from './SkeletonCarCard';
 
 // ── Format helpers ──
 function formatPrice(num) {
@@ -16,83 +17,62 @@ function formatKm(num) {
 }
 
 export default function InventoryGrid({ filters = {} }) {
-  const [cars, setCars] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const { cars: allCars, isLoading: isContextLoading, error: contextError } = useCars();
   const [sortBy, setSortBy] = useState('newest');
   const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const [totalCount, setTotalCount] = useState(0);
   const [searchParams] = useSearchParams();
   const currentModelParam = searchParams.get('model');
   const [searchTerm, setSearchTerm] = useState('');
 
-  const fetchCars = useCallback(async () => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const params = new URLSearchParams();
-      params.set('page', page);
-      params.set('limit', '12');
-      params.set('status', 'Available');
-
-      if (sortBy !== 'newest') params.set('sort', sortBy);
-      if (filters.fuelType) params.set('fuelType', filters.fuelType);
-      if (filters.bodyType) params.set('bodyType', filters.bodyType);
-
-      // Map new budget array back to min/max API requirements
-      if (filters.budget && filters.budget.length === 2) {
-        params.set('priceMin', filters.budget[0]);
-        params.set('priceMax', filters.budget[1]);
-      } else {
-        if (filters.priceMin) params.set('priceMin', filters.priceMin);
-        if (filters.priceMax) params.set('priceMax', filters.priceMax);
-      }
-
-      if (filters.makes && filters.makes.length === 1) {
-        params.set('make', filters.makes[0]);
-      }
-
-      if (currentModelParam) {
-        params.set('model', currentModelParam);
-      }
-
-      const res = await axiosInstance.get(`/cars?${params.toString()}`);
-      let data = res.data.data || [];
-
-      // Client-side multi-make filter (if more than 1 make selected)
-      if (filters.makes && filters.makes.length > 1) {
-        data = data.filter(c => filters.makes.includes(c.make));
-      }
-
-      setCars(data);
-      setTotalPages(res.data.pages || 1);
-      setTotalCount(res.data.total || data.length);
-    } catch (err) {
-      setError(err.response?.data?.message || err.message || 'Failed to fetch cars');
-    } finally {
-      setIsLoading(false);
-    }
-  }, [page, sortBy, filters, currentModelParam]);
-
-  useEffect(() => {
-    fetchCars();
-  }, [fetchCars]);
-
   // Reset to page 1 when filters or sort change
   useEffect(() => {
     setPage(1);
-  }, [sortBy, filters]);
+  }, [sortBy, filters, searchTerm]);
 
-  // Derived filtered cars based on universal local search
-  const displayedCars = cars.filter((car) => {
+  // Client-side filtering
+  const filteredCars = (allCars || []).filter(c => {
+    if (c.status !== 'Available') return false;
+    
+    if (filters.fuelType && c.fuelType !== filters.fuelType) return false;
+    if (filters.bodyType && c.bodyType !== filters.bodyType) return false;
+    
+    if (filters.budget && filters.budget.length === 2) {
+      if (c.price < filters.budget[0] || c.price > filters.budget[1]) return false;
+    } else {
+      if (filters.priceMin && c.price < filters.priceMin) return false;
+      if (filters.priceMax && c.price > filters.priceMax) return false;
+    }
+    
+    if (filters.makes && filters.makes.length > 0) {
+      if (!filters.makes.includes(c.make)) return false;
+    }
+    
+    if (currentModelParam && c.model !== currentModelParam) return false;
+    
+    return true;
+  });
+
+  // Client-side sorting
+  const sortedCars = [...filteredCars].sort((a, b) => {
+    if (sortBy === 'price-low') return (a.price || 0) - (b.price || 0);
+    if (sortBy === 'price-high') return (b.price || 0) - (a.price || 0);
+    if (sortBy === 'km-low') return (a.kms || 0) - (b.kms || 0);
+    // newest (default)
+    return new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
+  });
+
+  // Search filter
+  const displayedCars = sortedCars.filter((car) => {
     if (!searchTerm.trim()) return true;
     const q = searchTerm.toLowerCase().trim();
     const corpus = `${car.make || ''} ${car.model || ''} ${car.variant || ''} ${car.year || ''} ${car.color || ''} ${car.owner || ''} ${car.fuelType || ''} ${car.transmission || ''} ${car.title || ''} ${car.price || ''}`.toLowerCase();
     return corpus.includes(q);
   });
 
-  const displayCount = searchTerm.trim() ? displayedCars.length : totalCount;
+  const displayCount = displayedCars.length;
+  const itemsPerPage = 12;
+  const totalPages = Math.ceil(displayCount / itemsPerPage) || 1;
+  const paginatedCars = displayedCars.slice((page - 1) * itemsPerPage, page * itemsPerPage);
 
   return (
     <div className="flex flex-col gap-6">
@@ -140,17 +120,18 @@ export default function InventoryGrid({ filters = {} }) {
       </div>
 
       {/* Grid */}
-      {isLoading ? (
-        <div className="py-24 flex flex-col items-center justify-center">
-          <div className="w-10 h-10 border-4 border-primary/20 border-t-primary rounded-full animate-spin"></div>
-          <p className="mt-4 font-heading font-semibold text-text-muted">Loading stock...</p>
+      {isContextLoading ? (
+        <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+          {Array.from({ length: 6 }).map((_, index) => (
+            <SkeletonCarCard key={index} />
+          ))}
         </div>
-      ) : error ? (
+      ) : contextError ? (
         <div className="py-16 text-center">
           <p className="font-heading font-bold text-lg text-red-500">Error loading inventory</p>
-          <p className="font-body text-sm text-text-muted mt-1">{error}</p>
+          <p className="font-body text-sm text-text-muted mt-1">{contextError}</p>
         </div>
-      ) : cars.length === 0 ? (
+      ) : paginatedCars.length === 0 ? (
         <div className="py-16 text-center">
           <p className="font-heading font-bold text-lg text-text-muted">No vehicles found</p>
           <p className="font-body text-sm text-text-muted/60 mt-1">
@@ -159,7 +140,7 @@ export default function InventoryGrid({ filters = {} }) {
         </div>
       ) : (
         <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-          {displayedCars.map((car, index) => (
+          {paginatedCars.map((car, index) => (
             <Fragment key={car._id || car.id}>
               <CarCard
                 id={car._id || car.id}
@@ -184,13 +165,13 @@ export default function InventoryGrid({ filters = {} }) {
         </div>
       )}
 
-      {/* Pagination (Hide when searching) */}
-      {!searchTerm.trim() && totalPages > 1 && (
+      {/* Pagination */}
+      {totalPages > 1 && (
         <div className="flex flex-col sm:flex-row items-center justify-between pt-4 border-t border-gray-100 gap-4">
           <p className="font-body text-sm text-text-muted">
             Page <span className="font-semibold text-text">{page}</span> of{' '}
             <span className="font-semibold text-text">{totalPages}</span>
-            {' '}({totalCount} cars)
+            {' '}({displayCount} cars)
           </p>
           <div className="flex items-center gap-2">
             <button
