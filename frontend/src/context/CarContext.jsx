@@ -14,7 +14,21 @@ export function CarProvider({ children }) {
     setError(null);
     try {
       const response = await axiosInstance.get('/cars?limit=1000');
-      setCars(response.data.data || response.data);
+      
+      // Robust parsing to prevent silent crashes if API returns unexpected structure
+      let dataToSet = [];
+      if (Array.isArray(response.data)) {
+        dataToSet = response.data;
+      } else if (response.data && Array.isArray(response.data.data)) {
+        dataToSet = response.data.data;
+      } else if (response.data && Array.isArray(response.data.cars)) {
+        dataToSet = response.data.cars;
+      } else if (response.data && typeof response.data === 'object' && !Array.isArray(response.data)) {
+        // Fallback for single object or weirdly nested object
+        dataToSet = [];
+      }
+      
+      setCars(dataToSet);
     } catch (err) {
       setError(err.response?.data?.message || err.message || 'Failed to fetch cars');
     } finally {
