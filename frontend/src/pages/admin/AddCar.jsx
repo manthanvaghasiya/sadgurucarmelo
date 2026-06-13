@@ -94,20 +94,95 @@ function FeatureManager({ control, register, errors }) {
     control,
     name: "features"
   });
+  const [isBulkPasteOpen, setIsBulkPasteOpen] = useState(false);
+  const [bulkText, setBulkText] = useState('');
+
+  const handleBulkParse = () => {
+    if (!bulkText.trim()) return;
+    const lines = bulkText.split('\n').map(l => l.trim()).filter(l => l);
+    const newFeatures = [];
+    
+    let i = 0;
+    while (i < lines.length) {
+      const line = lines[i];
+      if (line.includes(':')) {
+        const idx = line.indexOf(':');
+        newFeatures.push({ key: line.substring(0, idx).trim(), value: line.substring(idx + 1).trim() });
+        i++;
+      } else {
+        if (i + 1 < lines.length && !lines[i+1].includes(':')) {
+          const next = lines[i+1];
+          if (next.toUpperCase() === 'YES' || next.toUpperCase() === 'NO' || next.toUpperCase() === 'STANDARD' || next.length < 80) {
+            newFeatures.push({ key: line, value: next });
+            i += 2;
+            continue;
+          }
+        }
+        newFeatures.push({ key: line, value: 'Yes' });
+        i++;
+      }
+    }
+    
+    append(newFeatures);
+    setBulkText('');
+    setIsBulkPasteOpen(false);
+  };
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <label className="font-body text-sm font-semibold text-text">
-          Key Features (Specifications)
-        </label>
-        <button
-          type="button"
-          onClick={() => append({ key: '', value: '' })}
-          className="flex items-center gap-1.5 px-3 py-1.5 bg-primary/5 text-primary hover:bg-primary/10 rounded-lg font-body text-xs font-bold transition-colors"
-        >
-          <Plus className="w-3.5 h-3.5" /> Add Feature
-        </button>
+      <div className="flex flex-col gap-3">
+        <div className="flex items-center justify-between">
+          <label className="font-body text-sm font-semibold text-text">
+            Key Features (Specifications)
+          </label>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setIsBulkPasteOpen(!isBulkPasteOpen)}
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-lg font-body text-xs font-bold transition-colors"
+            >
+              Bulk Paste
+            </button>
+            <button
+              type="button"
+              onClick={() => append({ key: '', value: '' })}
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-primary/5 text-primary hover:bg-primary/10 rounded-lg font-body text-xs font-bold transition-colors"
+            >
+              <Plus className="w-3.5 h-3.5" /> Add Feature
+            </button>
+          </div>
+        </div>
+
+        {isBulkPasteOpen && (
+          <div className="p-4 bg-blue-50/50 border border-blue-100 rounded-xl space-y-3 animate-in fade-in slide-in-from-top-2">
+            <p className="font-body text-xs text-text-muted">
+              Paste your features list here. It will automatically detect <strong>Key: Value</strong> pairs or alternating lines.
+            </p>
+            <textarea
+              value={bulkText}
+              onChange={(e) => setBulkText(e.target.value)}
+              rows={5}
+              placeholder="E.g.&#10;Sunroof: Panoramic&#10;OR&#10;Airbags&#10;6"
+              className="w-full px-4 py-3 bg-white border border-blue-200 focus:border-blue-400 rounded-xl font-body text-sm text-text outline-none resize-y"
+            />
+            <div className="flex justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => setIsBulkPasteOpen(false)}
+                className="px-4 py-2 font-body text-xs font-bold text-text-muted hover:text-text transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleBulkParse}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg font-body text-xs font-bold hover:bg-blue-700 transition-colors shadow-sm shadow-blue-500/20"
+              >
+                Extract Features
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
       <div className="grid grid-cols-1 gap-3">

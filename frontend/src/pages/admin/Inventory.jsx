@@ -331,7 +331,7 @@ export default function Inventory() {
                             <img
                               src={car.image}
                               alt={car.title}
-                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                              className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500"
                             />
                           </div>
                           <div className="min-w-0">
@@ -442,7 +442,7 @@ export default function Inventory() {
                       <img
                         src={car.image}
                         alt={car.title}
-                        className="w-full h-full object-cover"
+                        className="w-full h-full object-contain"
                       />
                     </div>
 

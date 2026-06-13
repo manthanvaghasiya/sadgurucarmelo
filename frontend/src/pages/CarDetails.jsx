@@ -1,7 +1,7 @@
 import { useParams } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import SEO from '../components/SEO';
-import { Fuel, Settings2, User, Gauge, MessageCircle, MapPin, Star, Tag, Check, ShieldCheck, Palette, RotateCw, CheckCircle2 } from 'lucide-react';
+import { Fuel, Settings2, User, Gauge, MessageCircle, MapPin, Star, Tag, Check, ShieldCheck, Palette, RotateCw, CheckCircle2, ChevronLeft, ChevronRight } from 'lucide-react';
 import axiosInstance from '../api/axiosConfig';
 import CarCard from '../components/CarCard';
 import Car360Viewer from '../components/Car360Viewer';
@@ -166,11 +166,11 @@ export default function CarDetails() {
                         <div className="bg-surface p-4 rounded-2xl shadow-sm border border-gray-100">
 
                             {/* Main Big Screen Viewer */}
-                            <div className="relative w-full aspect-[4/3] lg:aspect-video bg-gray-200 rounded-2xl overflow-hidden mb-4 shadow-lg group">
+                            <div className={`relative w-full bg-gray-200 rounded-2xl overflow-hidden mb-4 shadow-lg group ${viewMode === '360' && (car.spinImages || []).length > 0 ? 'aspect-[4/3] lg:aspect-video' : ''}`}>
                                 {viewMode === '360' && (car.spinImages || []).length > 0 ? (
                                     <Car360Viewer images={car.spinImages || []} title="360° EXTERIOR SPIN" />
                                 ) : (
-                                    <img src={getOptimizedUrl(activeImage)} alt="Car View" loading="lazy" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.02]" />
+                                    <img src={getOptimizedUrl(activeImage)} alt="Car View" loading="lazy" className="w-full h-auto object-contain transition-transform duration-700 group-hover:scale-[1.02]" />
                                 )}
 
                                 {/* Simple Status Badge (No longer a toggle button) */}
@@ -180,6 +180,42 @@ export default function CarDetails() {
                                             GALLERY VIEW
                                         </div>
                                     </div>
+                                )}
+
+                                {/* Image Navigation Arrows */}
+                                {viewMode !== '360' && (car.images || []).length > 1 && (
+                                    <>
+                                        <button 
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                const currentIndex = (car.images || []).indexOf(activeImage);
+                                                if (currentIndex > 0) {
+                                                    setActiveImage((car.images || [])[currentIndex - 1]);
+                                                }
+                                            }}
+                                            className={`absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/80 hover:bg-white text-text rounded-full flex items-center justify-center shadow-md backdrop-blur-sm transition-all z-20 ${
+                                                (car.images || []).indexOf(activeImage) === 0 ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:scale-110'
+                                            }`}
+                                            disabled={(car.images || []).indexOf(activeImage) === 0}
+                                        >
+                                            <ChevronLeft className="w-6 h-6" />
+                                        </button>
+                                        <button 
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                const currentIndex = (car.images || []).indexOf(activeImage);
+                                                if (currentIndex < (car.images || []).length - 1) {
+                                                    setActiveImage((car.images || [])[currentIndex + 1]);
+                                                }
+                                            }}
+                                            className={`absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/80 hover:bg-white text-text rounded-full flex items-center justify-center shadow-md backdrop-blur-sm transition-all z-20 ${
+                                                (car.images || []).indexOf(activeImage) === (car.images || []).length - 1 ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:scale-110'
+                                            }`}
+                                            disabled={(car.images || []).indexOf(activeImage) === (car.images || []).length - 1}
+                                        >
+                                            <ChevronRight className="w-6 h-6" />
+                                        </button>
+                                    </>
                                 )}
                             </div>
 
@@ -194,7 +230,7 @@ export default function CarDetails() {
                                             ${viewMode === '360' ? 'ring-2 ring-accent ring-offset-2 opacity-100 z-10' : 'opacity-70 hover:opacity-100 hover:ring-2 hover:ring-accent/50 hover:ring-offset-1'}`
                                         }
                                     >
-                                        <img src={getOptimizedUrl((car.spinImages || [])[0])} className="w-full h-full object-cover opacity-50 blur-[1px]" alt="360 Spin" loading="lazy" />
+                                        <img src={getOptimizedUrl((car.spinImages || [])[0])} className="w-full h-full object-contain opacity-50 blur-[1px]" alt="360 Spin" loading="lazy" />
                                         <div className="absolute inset-0 flex flex-col items-center justify-center text-white">
                                             <RotateCw className="w-6 h-6 mb-1" />
                                             <span className="font-heading font-bold text-[10px] tracking-wider uppercase">360° Spin</span>
@@ -216,7 +252,7 @@ export default function CarDetails() {
                                                 ${isActive ? 'ring-2 ring-primary ring-offset-2 opacity-100 z-10' : 'opacity-60 hover:opacity-100 hover:ring-2 hover:ring-primary/30 hover:ring-offset-1'}`
                                             }
                                         >
-                                            <img src={getOptimizedUrl(img)} className="w-full h-full object-cover" alt={`Thumb ${i + 1}`} loading="lazy" />
+                                            <img src={getOptimizedUrl(img)} className="w-full h-full object-contain" alt={`Thumb ${i + 1}`} loading="lazy" />
                                         </button>
                                     );
                                 })}
@@ -447,7 +483,7 @@ export default function CarDetails() {
                                             // Split at the FIRST colon
                                             let key = featureStr.trim();
                                             let value = (
-                                                <span className="flex items-center gap-1 text-[#10b981]">
+                                                <span className="inline-flex items-center gap-1 text-[#10b981]">
                                                     <Check className="w-4 h-4 stroke-[3]" /> Yes
                                                 </span>
                                             );
@@ -455,7 +491,11 @@ export default function CarDetails() {
                                             if (hasColon) {
                                                 const colonIndex = featureStr.indexOf(':');
                                                 key = featureStr.substring(0, colonIndex).trim();
-                                                value = featureStr.substring(colonIndex + 1).trim();
+                                                const valStr = featureStr.substring(colonIndex + 1).trim();
+                                                
+                                                if (valStr.toLowerCase() !== 'yes') {
+                                                    value = valStr;
+                                                }
                                             }
 
                                             return (
