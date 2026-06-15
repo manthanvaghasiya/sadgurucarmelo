@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Trash2, ImagePlus, Loader2, Sparkles, Edit2, X } from 'lucide-react';
 import toast from 'react-hot-toast';
 import axiosInstance from '../../api/axiosConfig';
+import imageCompression from 'browser-image-compression';
 
 export default function HappyCustomersAdmin() {
   const [customers, setCustomers] = useState([]);
@@ -68,7 +69,16 @@ export default function HappyCustomersAdmin() {
 
     setIsSubmitting(true);
     const formData = new FormData();
-    if (file) formData.append('photo', file);
+    if (file) {
+      try {
+        const compressOptions = { maxSizeMB: 0.2, maxWidthOrHeight: 1280, useWebWorker: true };
+        const compressedFile = await imageCompression(file, compressOptions);
+        formData.append('photo', compressedFile);
+      } catch (error) {
+        console.error('Image compression error:', error);
+        formData.append('photo', file);
+      }
+    }
     formData.append('customerName', customerName);
     if (reviewText !== undefined) {
       formData.append('reviewText', reviewText);

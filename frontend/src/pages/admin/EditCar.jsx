@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { useForm, useFieldArray } from 'react-hook-form';
 import VR360Uploader from '../../components/admin/VR360Uploader';
+import imageCompression from 'browser-image-compression';
 
 // Reusable Select component
 function FormSelect({ label, options, placeholder, register, error }) {
@@ -605,7 +606,22 @@ export default function EditCar() {
 
       // Append any new images
       if (photos.length > 0) {
-        photos.forEach(photo => formData.append('images', photo));
+        const compressOptions = {
+          maxSizeMB: 0.2,
+          maxWidthOrHeight: 1280,
+          useWebWorker: true,
+        };
+        const compressedPhotos = await Promise.all(
+          photos.map(async (photo) => {
+            try {
+              return await imageCompression(photo, compressOptions);
+            } catch (error) {
+              console.error('Image compression error:', error);
+              return photo;
+            }
+          })
+        );
+        compressedPhotos.forEach(photo => formData.append('images', photo));
       }
 
       await toast.promise(updateCar(id, formData), {
