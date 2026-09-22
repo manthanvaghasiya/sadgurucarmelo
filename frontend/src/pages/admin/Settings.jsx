@@ -357,7 +357,7 @@ export default function AdminSettings() {
           <div className="bg-surface rounded-2xl border border-gray-100 p-6 sm:p-8 space-y-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-gray-100">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-purple-500/10 text-purple-400 flex items-center justify-center">
+                <div className="w-10 h-10 rounded-xl bg-brand-orange/10 text-brand-orange flex items-center justify-center">
                   <Sparkles className="w-5 h-5" />
                 </div>
                 <div>
@@ -372,14 +372,14 @@ export default function AdminSettings() {
                 href="https://aistudio.google.com/app/apikey"
                 target="_blank"
                 rel="noreferrer"
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-purple-500/10 text-purple-400 hover:bg-purple-500/20 border border-purple-500/20 font-body text-xs font-semibold transition-colors shrink-0"
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-brand-orange/10 text-brand-orange hover:bg-brand-orange/20 border border-brand-orange/20 font-body text-xs font-semibold transition-colors shrink-0"
               >
                 Get Free Gemini API Key &rarr;
               </a>
             </div>
 
-            <div className="p-4 rounded-xl bg-purple-500/5 border border-purple-500/15 flex items-start gap-3">
-              <Sparkles className="w-5 h-5 text-purple-400 shrink-0 mt-0.5" />
+            <div className="p-4 rounded-xl bg-brand-orange/5 border border-brand-orange/15 flex items-start gap-3">
+              <Sparkles className="w-5 h-5 text-brand-orange shrink-0 mt-0.5" />
               <div className="font-body text-xs text-text-muted leading-relaxed">
                 <strong className="text-text">How Multi-Key Rotation Works: </strong>
                 You can configure multiple free Gemini API keys. When adding a car or pasting a dealer WhatsApp message, the system uses the first active key. If a key hits Google's free-tier rate limit (429) or quota exhaustion, it automatically penalties that key for 60 seconds and instantly rotates to your next key. If all keys are exhausted or offline, the smart regex pattern parser takes over with zero downtime.
@@ -388,7 +388,7 @@ export default function AdminSettings() {
 
             {aiLoading ? (
               <div className="py-12 flex items-center justify-center text-text-muted gap-2 font-body text-sm">
-                <Loader2 className="w-5 h-5 animate-spin text-purple-400" />
+                <Loader2 className="w-5 h-5 animate-spin text-brand-orange" />
                 Loading AI configuration...
               </div>
             ) : (
@@ -411,7 +411,7 @@ export default function AdminSettings() {
                             value={key}
                             onChange={(e) => updateGeminiKey(index, e.target.value)}
                             placeholder="AIzaSy..."
-                            className="w-full px-4 py-3 bg-background rounded-xl border border-gray-200 dark:border-white/10 font-mono text-xs text-text outline-none focus:border-purple-500/40 focus:ring-2 focus:ring-purple-500/10"
+                            className="w-full px-4 py-3 bg-background rounded-xl border border-gray-200 dark:border-white/10 font-mono text-xs text-text outline-none focus:border-brand-orange/40 focus:ring-2 focus:ring-brand-orange/10"
                           />
                           {state && (
                             <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1.5 pointer-events-none">
@@ -453,7 +453,7 @@ export default function AdminSettings() {
                     onClick={addGeminiKey}
                     className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-surface border border-gray-200 dark:border-white/10 font-body text-xs font-semibold text-text hover:bg-white/5 transition-colors"
                   >
-                    <Plus className="w-4 h-4 text-purple-400" />
+                    <Plus className="w-4 h-4 text-brand-orange" />
                     Add Another Gemini Key
                   </button>
 
@@ -461,7 +461,7 @@ export default function AdminSettings() {
                     type="button"
                     disabled={aiSaving}
                     onClick={onSaveAiSettings}
-                    className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-body text-xs font-bold shadow-md shadow-purple-600/25 hover:from-purple-500 hover:to-indigo-500 disabled:opacity-50 transition-all"
+                    className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-primary hover:bg-primary-hover text-white font-body text-xs font-bold shadow-md shadow-primary/20 disabled:opacity-50 transition-all"
                   >
                     {aiSaving ? (
                       <>
