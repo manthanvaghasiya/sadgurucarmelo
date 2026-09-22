@@ -25,7 +25,6 @@ const navItems = [
   { name: 'Add New Car', path: '/admin/add-car', icon: PlusCircle },
   { name: 'Messages', path: '/admin/messages', icon: Mail },
   { name: 'Happy Customers', path: '/admin/happy-customers', icon: ImageIcon },
-  { name: 'Car Brands', path: '/admin/car-brands', icon: Car },
   { name: 'Promo Banners', path: '/admin/banners', icon: ImageIcon },
   { name: 'Settings', path: '/admin/settings', icon: Settings },
 ];
