@@ -82,7 +82,7 @@ export default function Contact() {
                   <Phone className="w-5 h-5 md:w-6 md:h-6 text-primary fill-primary/10 stroke-[2]" />
                 </div>
                 <div className="flex flex-col justify-center min-h-[48px]">
-                  <span className="font-heading font-semibold text-[10px] md:text-[11px] uppercase tracking-widest text-text-muted block mb-1">Sales & General Inquiry</span>
+                  <span className="font-heading font-semibold text-[10px] md:text-[11px] uppercase tracking-widest text-text-muted block mb-1">Showroom & General Inquiry</span>
                   <a href="tel:+919913634447" className="font-heading font-bold text-lg md:text-xl text-primary hover:underline block min-h-[44px] flex items-center">
                     +91 99136 34447
                   </a>
@@ -238,7 +238,7 @@ export default function Contact() {
             >
               <div>
                 <h3 className="font-heading font-bold text-base sm:text-lg text-text mb-1">તાત્કાલિક Support જોઈએ છે?</h3>
-                <p className="font-body text-xs sm:text-sm text-text-muted">અમારી <span className="font-semibold text-slate-800">Sales Team</span> સાથે WhatsApp પર સીધી વાત કરો.</p>
+                <p className="font-body text-xs sm:text-sm text-text-muted">અમારી <span className="font-semibold text-slate-800">Sadguru Team</span> સાથે WhatsApp પર સીધી વાત કરો.</p>
               </div>
               <a
                 href="https://wa.me/919913634447"

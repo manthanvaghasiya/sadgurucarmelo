@@ -235,7 +235,7 @@ export default function AdminSettings() {
   };
 
   const tabs = [
-    { id: 'team', label: 'Sales Team', icon: Users },
+    { id: 'team', label: 'Team & Staff', icon: Users },
     { id: 'security', label: 'Security', icon: Shield },
     { id: 'ai', label: 'AI Configuration', icon: Sparkles },
   ];
@@ -442,7 +442,7 @@ export default function AdminSettings() {
                       </div>
                     </div>
                     <div className="flex items-center gap-2 sm:gap-3 shrink-0 self-end sm:self-center">
-                      <span className={`px-2.5 py-1 rounded-full font-body text-[11px] font-bold ring-1 capitalize ${roleStyles[member.role] || roleStyles['sales']}`}>
+                      <span className={`px-2.5 py-1 rounded-full font-body text-[11px] font-bold ring-1 capitalize ${roleStyles[member.role] || roleStyles['manager']}`}>
                         {member.role}
                       </span>
                       <button

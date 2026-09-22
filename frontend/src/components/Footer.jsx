@@ -87,7 +87,7 @@ export default function Footer() {
                   <Phone className="w-5 h-5 text-white group-hover:text-black transition-colors duration-300" />
                 </div>
                 <div className="flex flex-col">
-                  <span className="text-[10px] text-gray-500 font-bold uppercase tracking-wider mb-0.5 group-hover:text-accent transition-colors">Call Sales</span>
+                  <span className="text-[10px] text-gray-500 font-bold uppercase tracking-wider mb-0.5 group-hover:text-accent transition-colors">Call Showroom</span>
                   <span className="font-heading font-bold text-lg text-white group-hover:text-accent transition-colors">
                     +91 99136 34447
                   </span>

@@ -161,7 +161,7 @@ export default function PWAInstallPrompt() {
                 </h3>
                 <p className="font-body text-sm text-slate-500 mt-1.5 max-w-xs leading-relaxed">
                   {isAdminRoute
-                    ? 'Install the staff portal for quick access to the admin and sales dashboard.'
+                    ? 'Install the staff portal for quick access to the admin and management dashboard.'
                     : 'Install our app for faster access, offline browsing, and a native experience.'}
                 </p>
 

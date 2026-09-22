@@ -13,7 +13,7 @@ const generateToken = (userId, role) => {
 };
 
 // ═══════════════════════════════════════════════
-//  POST /api/auth/login — Login (Admin + Sales)
+//  POST /api/auth/login — Login (Admin & Staff)
 // ═══════════════════════════════════════════════
 router.post('/login', async (req, res) => {
   try {
