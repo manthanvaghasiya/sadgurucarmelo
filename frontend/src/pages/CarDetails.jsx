@@ -879,10 +879,10 @@ export default function CarDetails() {
                 )}
             </div>
 
-            {/* ════ Full-Screen High-Definition Lightbox Modal ════ */}
+            {/* ════ Full-Screen High-Definition Lightbox Modal (White Theme) ════ */}
             {isLightboxOpen && images.length > 0 && (
                 <div
-                    className="fixed inset-0 z-[9999] bg-slate-950/95 backdrop-blur-2xl flex flex-col justify-between p-3 sm:p-6 select-none animate-[fadeIn_200ms_ease-out]"
+                    className="fixed inset-0 z-[9999] bg-white/98 backdrop-blur-2xl flex flex-col justify-between p-3 sm:p-6 select-none animate-[fadeIn_200ms_ease-out]"
                     onTouchStart={onTouchStart}
                     onTouchMove={onTouchMove}
                     onTouchEnd={onTouchEnd}
@@ -896,13 +896,13 @@ export default function CarDetails() {
                         <button
                             type="button"
                             onClick={() => setIsLightboxOpen(false)}
-                            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white/10 hover:bg-white/20 text-white font-heading font-bold text-xs border border-white/15 backdrop-blur-md transition-all active:scale-95"
+                            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-800 font-heading font-bold text-xs border border-slate-200 shadow-xs transition-all active:scale-95"
                         >
-                            <ArrowLeft className="w-4 h-4" />
+                            <ArrowLeft className="w-4 h-4 text-slate-700" />
                             <span>પાછા જાઓ · Back</span>
                         </button>
 
-                        <div className="px-3.5 py-1 rounded-full bg-white/10 border border-white/15 backdrop-blur-md text-white font-heading font-bold text-xs tracking-wider">
+                        <div className="px-3.5 py-1 rounded-full bg-slate-100 border border-slate-200 text-slate-800 font-heading font-bold text-xs tracking-wider shadow-xs">
                             {activeImageIdx + 1} / {images.length}
                         </div>
 
@@ -910,7 +910,7 @@ export default function CarDetails() {
                             <button
                                 type="button"
                                 onClick={handleShare}
-                                className="w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center border border-white/15 backdrop-blur-md transition-transform active:scale-95"
+                                className="w-9 h-9 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 hover:text-brand-orange flex items-center justify-center border border-slate-200 shadow-xs transition-all active:scale-95"
                                 title="Share"
                             >
                                 <Share2 className="w-4 h-4" />
@@ -918,7 +918,7 @@ export default function CarDetails() {
                             <button
                                 type="button"
                                 onClick={handleDownloadAllImages}
-                                className="w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center border border-white/15 backdrop-blur-md transition-transform active:scale-95"
+                                className="w-9 h-9 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 hover:text-brand-orange flex items-center justify-center border border-slate-200 shadow-xs transition-all active:scale-95"
                                 title="Download All Photos"
                             >
                                 <Download className="w-4 h-4" />
@@ -926,7 +926,7 @@ export default function CarDetails() {
                             <button
                                 type="button"
                                 onClick={() => setIsLightboxOpen(false)}
-                                className="w-9 h-9 rounded-full bg-red-600/80 hover:bg-red-600 text-white flex items-center justify-center border border-red-400/40 backdrop-blur-md transition-transform active:scale-95 ml-1"
+                                className="w-9 h-9 rounded-full bg-red-600 hover:bg-red-700 text-white flex items-center justify-center shadow-md transition-all active:scale-95 ml-1"
                                 title="Close"
                             >
                                 <X className="w-4 h-4" />
@@ -942,7 +942,7 @@ export default function CarDetails() {
                         <img
                             src={getOptimizedUrl(images[activeImageIdx], 1600)}
                             alt={`${car.make} ${car.model} Fullscreen ${activeImageIdx + 1}`}
-                            className="max-h-[75vh] max-w-full object-contain rounded-xl sm:rounded-2xl shadow-2xl transition-all duration-300 bg-white"
+                            className="max-h-[75vh] max-w-full object-contain rounded-xl sm:rounded-2xl shadow-xl transition-all duration-300 bg-white border border-slate-200/80"
                         />
 
                         {/* Lightbox Prev / Next Controls */}
@@ -954,10 +954,10 @@ export default function CarDetails() {
                                         e.stopPropagation();
                                         setActiveImageIdx((prev) => (prev === 0 ? images.length - 1 : prev - 1));
                                     }}
-                                    className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-white/10 hover:bg-white/25 text-white border border-white/20 backdrop-blur-md flex items-center justify-center shadow-xl transition-all hover:scale-110 active:scale-90"
+                                    className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-white hover:bg-slate-50 text-slate-800 border border-slate-200 shadow-xl flex items-center justify-center transition-all hover:scale-110 active:scale-90"
                                     title="Previous"
                                 >
-                                    <ChevronLeft className="w-7 h-7" />
+                                    <ChevronLeft className="w-7 h-7 text-slate-700" />
                                 </button>
                                 <button
                                     type="button"
@@ -965,10 +965,10 @@ export default function CarDetails() {
                                         e.stopPropagation();
                                         setActiveImageIdx((prev) => (prev === images.length - 1 ? 0 : prev + 1));
                                     }}
-                                    className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-white/10 hover:bg-white/25 text-white border border-white/20 backdrop-blur-md flex items-center justify-center shadow-xl transition-all hover:scale-110 active:scale-90"
+                                    className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-white hover:bg-slate-50 text-slate-800 border border-slate-200 shadow-xl flex items-center justify-center transition-all hover:scale-110 active:scale-90"
                                     title="Next"
                                 >
-                                    <ChevronRight className="w-7 h-7" />
+                                    <ChevronRight className="w-7 h-7 text-slate-700" />
                                 </button>
                             </>
                         )}
@@ -986,12 +986,12 @@ export default function CarDetails() {
                                     key={`lb-thumb-${idx}`}
                                     type="button"
                                     onClick={() => setActiveImageIdx(idx)}
-                                    className={`relative shrink-0 w-12 sm:w-16 aspect-[16/10] rounded-lg overflow-hidden border-2 transition-all ${
+                                    className={`relative shrink-0 w-12 sm:w-16 aspect-[16/10] rounded-lg overflow-hidden border-2 transition-all bg-white ${
                                         activeImageIdx === idx
                                             ? 'border-brand-orange scale-110 shadow-lg'
                                             : isDetailCard
                                                 ? 'border-amber-400/60 opacity-80 hover:opacity-100'
-                                                : 'border-white/20 opacity-50 hover:opacity-100'
+                                                : 'border-slate-200 opacity-60 hover:opacity-100 hover:border-slate-400'
                                     }`}
                                     title={isDetailCard ? 'Car Details Card' : `Photo ${idx + 1}`}
                                 >
