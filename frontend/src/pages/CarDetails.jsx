@@ -14,6 +14,7 @@ import EmiCalculator from '../components/EmiCalculator';
 import { getCarWhatsAppLink } from '../utils/whatsapp';
 import { getOptimizedUrl } from '../utils/imageUtils';
 import { useCompare } from '../context/CompareContext';
+import { generateCarDetailCard } from '../utils/carDetailCardGenerator';
 
 export default function CarDetails() {
     const { id } = useParams();
@@ -23,6 +24,7 @@ export default function CarDetails() {
     const [error, setError] = useState('');
     const [activeImage, setActiveImage] = useState(null);
     const [activeImageIdx, setActiveImageIdx] = useState(0);
+    const [detailCardUrl, setDetailCardUrl] = useState(null);
     const [isLightboxOpen, setIsLightboxOpen] = useState(false);
     const [touchStart, setTouchStart] = useState(null);
     const [touchEnd, setTouchEnd] = useState(null);
@@ -31,15 +33,25 @@ export default function CarDetails() {
 
     const whatsappUrl = car ? getCarWhatsAppLink(car) : '#';
 
-    // Normalized list of gallery images
-    const images = car?.images && car.images.length > 0 ? car.images : (car?.image ? [car.image] : []);
+    // Normalized list of gallery images (includes generated Car Details Summary Card)
+    const rawImages = car?.images && car.images.length > 0 ? car.images : (car?.image ? [car.image] : []);
+    const images = detailCardUrl ? [...rawImages, detailCardUrl] : rawImages;
+
+    // Generate branded Car Details Card whenever car data loads
+    useEffect(() => {
+        if (car) {
+            generateCarDetailCard(car).then((cardUrl) => {
+                if (cardUrl) setDetailCardUrl(cardUrl);
+            }).catch((err) => console.error('Failed to generate detail card:', err));
+        }
+    }, [car]);
 
     // Sync activeImage whenever activeImageIdx changes or car loads
     useEffect(() => {
         if (images.length > 0) {
             setActiveImage(images[activeImageIdx] || images[0]);
         }
-    }, [activeImageIdx, car]);
+    }, [activeImageIdx, images.length, car]);
 
     // Keyboard navigation for Lightbox
     useEffect(() => {
@@ -104,15 +116,17 @@ export default function CarDetails() {
     };
 
     const handleDownloadAllImages = async () => {
-        const imagesToDownload = car?.images && car.images.length > 0 ? car.images : [car?.image].filter(Boolean);
-        if (!imagesToDownload || imagesToDownload.length === 0) {
+        const rawList = car?.images && car.images.length > 0 ? [...car.images] : [car?.image].filter(Boolean);
+        if (!rawList || rawList.length === 0) {
             toast.error('No images available to download');
             return;
         }
 
-        toast.success(`${imagesToDownload.length} ફોટા ડાઉનલોડ થઈ રહ્યા છે... / Downloading ${imagesToDownload.length} photos...`, { duration: 4000 });
+        const totalCount = rawList.length + (detailCardUrl ? 1 : 0);
+        toast.success(`${totalCount} ફાઈલો ડાઉનલોડ થઈ રહી છે (ફોટા + કાર ડિટેઇલ્સ કાર્ડ)... / Downloading ${totalCount} items (Photos + Details Card)...`, { duration: 5000 });
 
-        imagesToDownload.forEach((img, i) => {
+        // 1. Download all regular photos
+        rawList.forEach((img, i) => {
             setTimeout(async () => {
                 try {
                     const response = await fetch(getOptimizedUrl(img, 1200));
@@ -136,6 +150,32 @@ export default function CarDetails() {
                 }
             }, i * 600);
         });
+
+        // 2. Also download the branded Car Details Summary Card
+        if (detailCardUrl) {
+            setTimeout(() => {
+                const link = document.createElement('a');
+                link.href = detailCardUrl;
+                link.download = `${car.make || 'Sadguru'}-${car.model || 'Car'}-Vehicle-Details.jpg`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }, rawList.length * 600);
+        }
+    };
+
+    const handleDownloadDetailCardOnly = () => {
+        if (!detailCardUrl) {
+            toast.error('Details Card is generating...');
+            return;
+        }
+        const link = document.createElement('a');
+        link.href = detailCardUrl;
+        link.download = `${car.make || 'Sadguru'}-${car.model || 'Car'}-Vehicle-Details.jpg`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        toast.success('ડિટેઇલ્સ કાર્ડ ડાઉનલોડ થઈ ગયું · Details Card downloaded!');
     };
 
     useEffect(() => {
@@ -303,14 +343,27 @@ export default function CarDetails() {
                                     <span className="hidden sm:inline">શેર કરો · Share</span>
                                 </button>
 
+                                {detailCardUrl && (
+                                    <button
+                                        type="button"
+                                        onClick={handleDownloadDetailCardOnly}
+                                        className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-brand-orange hover:bg-amber-500/20 text-xs font-bold transition-all shadow-xs active:scale-95"
+                                        title="Download Vehicle Details Card"
+                                    >
+                                        <Download className="w-3.5 h-3.5" />
+                                        <span className="hidden md:inline">ડિટેઇલ્સ કાર્ડ · Details Card</span>
+                                    </button>
+                                )}
+
                                 <button
                                     type="button"
                                     onClick={handleDownloadAllImages}
                                     className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white border border-slate-200 text-slate-700 hover:text-brand-orange hover:bg-brand-orange/5 text-xs font-bold transition-all shadow-xs active:scale-95"
-                                    title="Download All Photos"
+                                    title="Download All Photos & Details Card"
                                 >
                                     <Download className="w-3.5 h-3.5" />
-                                    <span className="hidden sm:inline">સેવ કરો · Save</span>
+                                    <span className="hidden sm:inline">સેવ કરો · Save All & Card</span>
+                                    <span className="sm:hidden">સેવ કરો · Save</span>
                                 </button>
                             </div>
                         </div>
@@ -436,9 +489,10 @@ export default function CarDetails() {
                                     </button>
                                 )}
 
-                                {/* 2. Standard Photo Thumbnails */}
+                                {/* 2. Standard Photo & Details Card Thumbnails */}
                                 {images.map((img, i) => {
                                     const isActive = i === activeImageIdx && viewMode === 'standard';
+                                    const isDetailCard = img === detailCardUrl;
                                     return (
                                         <button
                                             key={i}
@@ -452,13 +506,21 @@ export default function CarDetails() {
                                                     ? 'border-brand-orange ring-2 ring-brand-orange/40 scale-[0.98] shadow-md'
                                                     : 'border-transparent opacity-70 hover:opacity-100 hover:border-slate-300'
                                             }`}
+                                            title={isDetailCard ? 'કાર ડિટેઇલ્સ કાર્ડ · Car Details Card' : `Photo ${i + 1}`}
                                         >
                                             <img
                                                 src={getOptimizedUrl(img, 240)}
                                                 className="w-full h-full object-cover"
-                                                alt={`Thumbnail ${i + 1}`}
+                                                alt={isDetailCard ? 'Car Details Card' : `Thumbnail ${i + 1}`}
                                                 loading="lazy"
                                             />
+                                            {isDetailCard && (
+                                                <div className="absolute bottom-0 inset-x-0 bg-slate-950/85 backdrop-blur-xs py-0.5 px-1 text-center">
+                                                    <span className="font-heading font-black text-[9px] text-amber-300 uppercase tracking-wider flex items-center justify-center gap-1">
+                                                        📋 Details Card
+                                                    </span>
+                                                </div>
+                                            )}
                                         </button>
                                     );
                                 })}
@@ -917,24 +979,35 @@ export default function CarDetails() {
                         className="w-full max-w-4xl mx-auto flex items-center justify-center gap-2 overflow-x-auto py-2 scrollbar-none z-30"
                         onClick={(e) => e.stopPropagation()}
                     >
-                        {images.map((img, idx) => (
-                            <button
-                                key={`lb-thumb-${idx}`}
-                                type="button"
-                                onClick={() => setActiveImageIdx(idx)}
-                                className={`relative shrink-0 w-12 sm:w-16 aspect-[16/10] rounded-lg overflow-hidden border-2 transition-all ${
-                                    activeImageIdx === idx
-                                        ? 'border-brand-orange scale-110 shadow-lg'
-                                        : 'border-white/20 opacity-50 hover:opacity-100'
-                                }`}
-                            >
-                                <img
-                                    src={getOptimizedUrl(img, 150)}
-                                    alt={`Frame ${idx + 1}`}
-                                    className="w-full h-full object-cover"
-                                />
-                            </button>
-                        ))}
+                        {images.map((img, idx) => {
+                            const isDetailCard = img === detailCardUrl;
+                            return (
+                                <button
+                                    key={`lb-thumb-${idx}`}
+                                    type="button"
+                                    onClick={() => setActiveImageIdx(idx)}
+                                    className={`relative shrink-0 w-12 sm:w-16 aspect-[16/10] rounded-lg overflow-hidden border-2 transition-all ${
+                                        activeImageIdx === idx
+                                            ? 'border-brand-orange scale-110 shadow-lg'
+                                            : isDetailCard
+                                                ? 'border-amber-400/60 opacity-80 hover:opacity-100'
+                                                : 'border-white/20 opacity-50 hover:opacity-100'
+                                    }`}
+                                    title={isDetailCard ? 'Car Details Card' : `Photo ${idx + 1}`}
+                                >
+                                    <img
+                                        src={getOptimizedUrl(img, 150)}
+                                        alt={isDetailCard ? 'Details Card' : `Frame ${idx + 1}`}
+                                        className="w-full h-full object-cover"
+                                    />
+                                    {isDetailCard && (
+                                        <div className="absolute inset-x-0 bottom-0 bg-slate-950/80 text-[8px] text-amber-300 font-bold text-center leading-tight">
+                                            Card
+                                        </div>
+                                    )}
+                                </button>
+                            );
+                        })}
                     </div>
                 </div>
             )}

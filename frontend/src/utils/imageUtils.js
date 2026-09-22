@@ -13,6 +13,7 @@
  */
 export const getOptimizedUrl = (url, width, quality = 'auto') => {
   if (!url || typeof url !== 'string') return url;
+  if (url.startsWith('data:') || url.startsWith('blob:')) return url;
 
   // 1. Cloudinary URL optimization
   if (url.includes('cloudinary.com') && url.includes('/upload/')) {
