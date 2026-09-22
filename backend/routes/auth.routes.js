@@ -104,7 +104,7 @@ router.post('/register', protect, strictAdmin, async (req, res) => {
       });
     }
 
-    const validRoles = ['manager'];
+    const validRoles = ['manager', 'admin'];
     const assignedRole = validRoles.includes(req.body.role) ? req.body.role : 'manager';
 
     const userData = {

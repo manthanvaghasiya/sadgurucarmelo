@@ -67,7 +67,7 @@ export default function AdminSettings() {
     try {
       const res = await axiosInstance.get('/auth/users');
       if (res.data.success) {
-        setStaff((res.data.data || []).filter(user => user.role !== 'admin'));
+        setStaff(res.data.data || []);
       }
     } catch (err) {
       console.error('Failed to fetch staff:', err);
@@ -363,7 +363,8 @@ export default function AdminSettings() {
                     {...registerStaff('role', { required: 'Role is required' })}
                     className="w-full px-4 py-3 rounded-xl border border-gray-200 font-body text-sm text-text bg-background outline-none focus:border-primary/30 focus:ring-2 focus:ring-primary/10"
                   >
-                    <option value="manager">Manager (Assistant Admin)</option>
+                    <option value="manager">Manager</option>
+                    <option value="admin">Administrator</option>
                   </select>
                 </div>
                 <div>
