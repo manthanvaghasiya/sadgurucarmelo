@@ -3,6 +3,7 @@ import NodeCache from 'node-cache';
 import Car from '../models/Car.js';
 import { upload } from '../config/cloudinary.js';
 import { protect, admin } from '../middleware/authMiddleware.js';
+import { broadcastNewCar } from './subscription.routes.js';
 
 const router = express.Router();
 
@@ -239,6 +240,9 @@ router.post('/', protect, admin, handleUpload, async (req, res) => {
     
     // Auto-Invalidate global Cache so public site updates instantly!
     carCache.flushAll();
+    
+    // Push notification to all subscribers
+    broadcastNewCar(car).catch(err => console.error('Push notification broadcast error:', err));
     
     res.status(201).json({ success: true, data: car });
   } catch (error) {

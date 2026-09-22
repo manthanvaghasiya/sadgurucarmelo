@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { CarProvider } from './context/CarContext';
 import { AuthProvider } from './context/AuthContext';
+import { CompareProvider } from './context/CompareContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import TopNavigation from './components/TopNavigation';
 import Footer from './components/Footer';
@@ -14,6 +15,8 @@ const Inventory = lazy(() => import('./pages/Inventory'));
 const AboutPage = lazy(() => import('./pages/AboutPage'));
 const Contact = lazy(() => import('./pages/Contact'));
 const CarDetails = lazy(() => import('./pages/CarDetails'));
+const SellYourCar = lazy(() => import('./pages/SellYourCar'));
+const CompareCars = lazy(() => import('./pages/CompareCars'));
 
 const UnifiedLogin = lazy(() => import('./pages/Login'));
 
@@ -23,22 +26,18 @@ const Dashboard = lazy(() => import('./pages/admin/Dashboard'));
 const AddCar = lazy(() => import('./pages/admin/AddCar'));
 const EditCar = lazy(() => import('./pages/admin/EditCar'));
 const AdminInventory = lazy(() => import('./pages/admin/Inventory'));
-const AdminLeads = lazy(() => import('./pages/admin/Leads'));
-const AdminAddLead = lazy(() => import('./pages/admin/AddLead'));
-const AdminEditLead = lazy(() => import('./pages/admin/EditLead'));
+const AdminSellRequests = lazy(() => import('./pages/admin/SellRequests'));
 const AdminMessages = lazy(() => import('./pages/admin/Messages'));
 const AdminSettings = lazy(() => import('./pages/admin/Settings'));
 const AdminCarBrands = lazy(() => import('./pages/admin/CarMasterSettings'));
-const AdminPosters = lazy(() => import('./pages/admin/Posters'));
+const AdminBanners = lazy(() => import('./pages/admin/Banners'));
 const AdminHappyCustomers = lazy(() => import('./pages/admin/HappyCustomersAdmin'));
-
-// Sales Portal Imports
-const SalesDashboard = lazy(() => import('./pages/sales/SalesDashboard'));
-const AddLead = lazy(() => import('./pages/sales/AddLead'));
-const EditLead = lazy(() => import('./pages/sales/EditLead'));
 
 import MobileBottomNav from './components/MobileBottomNav';
 import PWAInstallPrompt from './components/PWAInstallPrompt';
+import CompareFloatingBar from './components/CompareFloatingBar';
+import PushNotificationManager from './components/PushNotificationManager';
+import AnalyticsTracker from './components/AnalyticsTracker';
 
 // ── Loading Fallback Component ──
 const PageLoader = () => (
@@ -55,37 +54,43 @@ function App() {
     <AuthProvider>
       <BrowserRouter>
         <ScrollToTop />
+        <AnalyticsTracker />
         <CarProvider>
-          <PWAInstallPrompt />
-          <Toaster position="top-right" toastOptions={{ style: { fontFamily: 'var(--font-body)' } }} />
-          {/* This wrapper ensures the Footer is always pushed to the bottom 
-        even if the page content is short.
-      */}
-          <Suspense fallback={<PageLoader />}>
-            <Routes>
-              {/* ── Public Routes (Customer-Facing) ── */}
-              <Route
-                path="/*"
-                element={
-                  <div className="flex flex-col min-h-screen bg-background font-body text-text relative pb-24 md:pb-0">
-                    <TopNavigation />
+          <CompareProvider>
+            <PWAInstallPrompt />
+            <PushNotificationManager />
+            <CompareFloatingBar />
+            <Toaster position="top-right" toastOptions={{ style: { fontFamily: 'var(--font-body)' } }} />
+            {/* This wrapper ensures the Footer is always pushed to the bottom 
+          even if the page content is short.
+        */}
+            <Suspense fallback={<PageLoader />}>
+              <Routes>
+                {/* ── Public Routes (Customer-Facing) ── */}
+                <Route
+                  path="/*"
+                  element={
+                    <div className="flex flex-col min-h-screen bg-background font-body text-text relative pb-24 md:pb-0">
+                      <TopNavigation />
 
-                    <MobileBottomNav />
-                    <main className="flex-grow">
-                      <Suspense fallback={<PageLoader />}>
-                        <Routes>
-                          <Route path="/" element={<Home />} />
-                          <Route path="/inventory" element={<Inventory />} />
-                          <Route path="/about" element={<AboutPage />} />
-                          <Route path="/contact" element={<Contact />} />
-                          <Route path="/car-details/:id" element={<CarDetails />} />
-                        </Routes>
-                      </Suspense>
-                    </main>
-                    <Footer />
-                  </div>
-                }
-              />
+                      <MobileBottomNav />
+                      <main className="flex-grow">
+                        <Suspense fallback={<PageLoader />}>
+                          <Routes>
+                            <Route path="/" element={<Home />} />
+                            <Route path="/inventory" element={<Inventory />} />
+                            <Route path="/sell-your-car" element={<SellYourCar />} />
+                            <Route path="/compare" element={<CompareCars />} />
+                            <Route path="/about" element={<AboutPage />} />
+                            <Route path="/contact" element={<Contact />} />
+                            <Route path="/car-details/:id" element={<CarDetails />} />
+                          </Routes>
+                        </Suspense>
+                      </main>
+                      <Footer />
+                    </div>
+                  }
+                />
 
               {/* ── Unified Login ── */}
               <Route path="/login" element={<UnifiedLogin />} />
@@ -99,23 +104,9 @@ function App() {
               }>
                 <Route index element={<Dashboard />} />
                 <Route path="inventory" element={<AdminInventory />} />
+                <Route path="sell-requests" element={<AdminSellRequests />} />
                 <Route path="add-car" element={<AddCar />} />
                 <Route path="edit-car/:id" element={<EditCar />} />
-                <Route path="leads" element={
-                  <ProtectedRoute allowedRoles={['admin']}>
-                    <AdminLeads />
-                  </ProtectedRoute>
-                } />
-                <Route path="add-lead" element={
-                  <ProtectedRoute allowedRoles={['admin']}>
-                    <AdminAddLead />
-                  </ProtectedRoute>
-                } />
-                <Route path="edit-lead/:id" element={
-                  <ProtectedRoute allowedRoles={['admin']}>
-                    <AdminEditLead />
-                  </ProtectedRoute>
-                } />
                 <Route path="messages" element={<AdminMessages />} />
                 <Route path="settings" element={
                   <ProtectedRoute allowedRoles={['admin']}>
@@ -127,29 +118,13 @@ function App() {
                     <AdminCarBrands />
                   </ProtectedRoute>
                 } />
-                <Route path="posters" element={<AdminPosters />} />
+                <Route path="banners" element={<AdminBanners />} />
+                <Route path="posters" element={<Navigate to="/admin/banners" replace />} />
                 <Route path="happy-customers" element={<AdminHappyCustomers />} />
               </Route>
-
-              {/* ── Sales Portal Routes ── */}
-              <Route path="/sales/login" element={<Navigate to="/login" replace />} />
-              <Route path="/sales" element={
-                <ProtectedRoute allowedRoles={['sales']}>
-                  <SalesDashboard />
-                </ProtectedRoute>
-              } />
-              <Route path="/sales/add-lead" element={
-                <ProtectedRoute allowedRoles={['sales']}>
-                  <AddLead />
-                </ProtectedRoute>
-              } />
-              <Route path="/sales/edit-lead/:id" element={
-                <ProtectedRoute allowedRoles={['sales']}>
-                  <EditLead />
-                </ProtectedRoute>
-              } />
             </Routes>
           </Suspense>
+        </CompareProvider>
         </CarProvider>
       </BrowserRouter>
     </AuthProvider>

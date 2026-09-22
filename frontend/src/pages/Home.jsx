@@ -11,11 +11,12 @@ import CarCard from '../components/CarCard';
 import SkeletonCarCard from '../components/SkeletonCarCard';
 import { useCars } from '../context/CarContext';
 import HeroSection from '../components/HeroSection';
-import ArrivingShortly from '../components/ArrivingShortly';
 import GoogleReviews from '../components/GoogleReviews';
 import HappyCustomers from '../components/HappyCustomers';
 import QuickSearch from '../components/QuickSearch';
 import WhyChooseUs from '../components/WhyChooseUs';
+import LiveTicker from '../components/LiveTicker';
+import PromoBanners from '../components/PromoBanners';
 
 export default function Home() {
   const { cars, isLoading } = useCars();
@@ -42,6 +43,9 @@ export default function Home() {
 
         {/* 1. Hero Section */}
         <HeroSection />
+
+        {/* Live Ticker — Newly Arrived Vehicles */}
+        <LiveTicker />
 
         {/* 3. Inventory Grid Section — Premium Enhanced */}
         <section className="inventory-grid-section py-20 px-4 bg-transparent overflow-hidden">
@@ -161,7 +165,7 @@ export default function Home() {
                 </div>
                 <h3 className="font-heading text-xl font-bold text-primary mb-3">તમારી કાર તરત જ વેચો</h3>
                 <p className="font-body text-text-muted leading-relaxed mb-6">પારદર્શક પ્રક્રિયા અને સુરક્ષિત પેમેન્ટ સાથે તમારી કારનું મેળવો શ્રેષ્ઠ બજાર મૂલ્ય.</p>
-                <Link to="/about?service=sell" className="font-heading font-semibold text-primary hover:underline mt-auto flex items-center gap-2">વધુ માહિતી માટે →</Link>
+                <Link to="/sell-your-car" className="font-heading font-semibold text-primary hover:underline mt-auto flex items-center gap-2">ઓનલાઇન વેલ્યુએશન મેળવો →</Link>
               </div>
 
               <div className="bg-surface rounded-3xl p-8 shadow-sm hover:shadow-lg transition-shadow border border-gray-100 flex flex-col items-center text-center group bg-white/80 backdrop-blur-sm">
@@ -176,8 +180,8 @@ export default function Home() {
           </div>
         </section>
 
-        {/* 4. Highlight Banner (Dynamic) */}
-        <ArrivingShortly />
+        {/* 4. Promotional Offers Banner Slider */}
+        <PromoBanners />
 
         {/* 5. Why Choose Us */}
         {/* Note: You might want to remove the redundant background classes directly inside the WhyChooseUs component now that the Home page handles it */}

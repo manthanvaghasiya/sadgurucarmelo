@@ -20,13 +20,13 @@ import {
   Mail,
   Phone,
   MapPin,
+  Sparkles,
 } from 'lucide-react';
 import axiosInstance from '../../api/axiosConfig';
 
 const roleStyles = {
   admin: 'bg-primary/10 text-primary ring-primary/20',
   manager: 'bg-purple-500/10 text-purple-600 ring-purple-500/20',
-  sales: 'bg-accent/10 text-accent ring-accent/20',
 };
 
 export default function AdminSettings() {
@@ -90,7 +90,7 @@ export default function AdminSettings() {
       const payload = {
         name: data.name.trim(),
         email: data.email.trim().toLowerCase(),
-        role: data.role || 'sales', // Fix: use selected role from dropdown for both create and edit
+        role: data.role || 'manager', // Fix: use selected role from dropdown for both create and edit
       };
       if (data.password) payload.password = data.password;
       if (data.phone?.trim()) payload.phone = data.phone.trim();
@@ -177,9 +177,67 @@ export default function AdminSettings() {
     }
   };
 
+  // ── AI Configuration State ──
+  const [geminiKeys, setGeminiKeys] = useState(['']);
+  const [geminiStates, setGeminiStates] = useState([]);
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiSaving, setAiSaving] = useState(false);
+
+  const fetchAiSettings = useCallback(async () => {
+    setAiLoading(true);
+    try {
+      const res = await axiosInstance.get('/ai/settings');
+      if (res.data.success) {
+        setGeminiKeys(res.data.data.keys && res.data.data.keys.length > 0 ? res.data.data.keys : ['']);
+        setGeminiStates(res.data.data.keyStates || []);
+      }
+    } catch (err) {
+      console.error('Failed to load AI settings:', err);
+    } finally {
+      setAiLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (activeTab === 'ai') fetchAiSettings();
+  }, [activeTab, fetchAiSettings]);
+
+  const onSaveAiSettings = async () => {
+    setAiSaving(true);
+    try {
+      const validKeys = geminiKeys.filter((k) => k && k.trim().length > 0);
+      const res = await axiosInstance.put('/ai/settings', { geminiApiKeys: validKeys });
+      if (res.data.success) {
+        toast.success('Gemini API keys saved successfully!');
+        setGeminiKeys(validKeys.length > 0 ? validKeys : ['']);
+        fetchAiSettings();
+      }
+    } catch (err) {
+      toast.error('Failed to update Gemini API keys');
+    } finally {
+      setAiSaving(false);
+    }
+  };
+
+  const updateGeminiKey = (index, value) => {
+    const next = [...geminiKeys];
+    next[index] = value;
+    setGeminiKeys(next);
+  };
+
+  const addGeminiKey = () => {
+    setGeminiKeys([...geminiKeys, '']);
+  };
+
+  const removeGeminiKey = (index) => {
+    const next = geminiKeys.filter((_, i) => i !== index);
+    setGeminiKeys(next.length > 0 ? next : ['']);
+  };
+
   const tabs = [
     { id: 'team', label: 'Sales Team', icon: Users },
     { id: 'security', label: 'Security', icon: Shield },
+    { id: 'ai', label: 'AI Configuration', icon: Sparkles },
   ];
 
   return (
@@ -243,7 +301,7 @@ export default function AdminSettings() {
           {/* Create Button */}
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="font-heading font-bold text-lg text-text">Sales Team Roster</h2>
+              <h2 className="font-heading font-bold text-lg text-text">Team & Staff Roster</h2>
               <p className="font-body text-sm text-text-muted mt-0.5">{staff.length} team member{staff.length !== 1 ? 's' : ''}</p>
             </div>
             <button
@@ -305,8 +363,7 @@ export default function AdminSettings() {
                     {...registerStaff('role', { required: 'Role is required' })}
                     className="w-full px-4 py-3 rounded-xl border border-gray-200 font-body text-sm text-text bg-background outline-none focus:border-primary/30 focus:ring-2 focus:ring-primary/10"
                   >
-                    <option value="sales">Salesman</option>
-                    <option value="manager">Manager (Limited Admin)</option>
+                    <option value="manager">Manager (Assistant Admin)</option>
                   </select>
                 </div>
                 <div>
@@ -490,6 +547,134 @@ export default function AdminSettings() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* ═══════════════════════ AI Configuration Tab ═══════════════════════ */}
+      {activeTab === 'ai' && (
+        <div className="space-y-6">
+          <div className="bg-surface rounded-2xl border border-gray-100 p-6 sm:p-8 space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-gray-100">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-purple-500/10 text-purple-400 flex items-center justify-center">
+                  <Sparkles className="w-5 h-5" />
+                </div>
+                <div>
+                  <h2 className="font-heading font-bold text-lg text-text">Gemini AI Auto-Fill Engine</h2>
+                  <p className="font-body text-xs text-text-muted mt-0.5">
+                    Multi-key rotation system with automatic failover, rate-limit spacing (15 RPM), and smart fallback.
+                  </p>
+                </div>
+              </div>
+
+              <a
+                href="https://aistudio.google.com/app/apikey"
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-purple-500/10 text-purple-400 hover:bg-purple-500/20 border border-purple-500/20 font-body text-xs font-semibold transition-colors shrink-0"
+              >
+                Get Free Gemini API Key &rarr;
+              </a>
+            </div>
+
+            <div className="p-4 rounded-xl bg-purple-500/5 border border-purple-500/15 flex items-start gap-3">
+              <Sparkles className="w-5 h-5 text-purple-400 shrink-0 mt-0.5" />
+              <div className="font-body text-xs text-text-muted leading-relaxed">
+                <strong className="text-text">How Multi-Key Rotation Works: </strong>
+                You can configure multiple free Gemini API keys. When adding a car or pasting a dealer WhatsApp message, the system uses the first active key. If a key hits Google's free-tier rate limit (429) or quota exhaustion, it automatically penalties that key for 60 seconds and instantly rotates to your next key. If all keys are exhausted or offline, the smart regex pattern parser takes over with zero downtime.
+              </div>
+            </div>
+
+            {aiLoading ? (
+              <div className="py-12 flex items-center justify-center text-text-muted gap-2 font-body text-sm">
+                <Loader2 className="w-5 h-5 animate-spin text-purple-400" />
+                Loading AI configuration...
+              </div>
+            ) : (
+              <div className="space-y-4">
+                <label className="block font-body text-xs font-semibold text-text-muted uppercase tracking-wide">
+                  Gemini API Keys ({geminiKeys.filter(k => k.trim()).length} Active)
+                </label>
+
+                <div className="space-y-3">
+                  {geminiKeys.map((key, index) => {
+                    const state = geminiStates.find(s => s.key === key);
+                    const isExhausted = state?.exhaustedUntil && new Date(state.exhaustedUntil) > new Date();
+                    const isInvalid = state?.isInvalid;
+
+                    return (
+                      <div key={index} className="flex items-center gap-3">
+                        <div className="relative flex-1">
+                          <input
+                            type="text"
+                            value={key}
+                            onChange={(e) => updateGeminiKey(index, e.target.value)}
+                            placeholder="AIzaSy..."
+                            className="w-full px-4 py-3 bg-background rounded-xl border border-gray-200 dark:border-white/10 font-mono text-xs text-text outline-none focus:border-purple-500/40 focus:ring-2 focus:ring-purple-500/10"
+                          />
+                          {state && (
+                            <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1.5 pointer-events-none">
+                              {isInvalid ? (
+                                <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-red-500/10 text-red-400 border border-red-500/20">
+                                  Invalid Key
+                                </span>
+                              ) : isExhausted ? (
+                                <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20">
+                                  Quota Cooldown (60s)
+                                </span>
+                              ) : (
+                                <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                                  Ready
+                                </span>
+                              )}
+                            </div>
+                          )}
+                        </div>
+
+                        {geminiKeys.length > 1 && (
+                          <button
+                            type="button"
+                            onClick={() => removeGeminiKey(index)}
+                            className="p-3 text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-xl transition-colors shrink-0"
+                            title="Remove Key"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+
+                <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
+                  <button
+                    type="button"
+                    onClick={addGeminiKey}
+                    className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-surface border border-gray-200 dark:border-white/10 font-body text-xs font-semibold text-text hover:bg-white/5 transition-colors"
+                  >
+                    <Plus className="w-4 h-4 text-purple-400" />
+                    Add Another Gemini Key
+                  </button>
+
+                  <button
+                    type="button"
+                    disabled={aiSaving}
+                    onClick={onSaveAiSettings}
+                    className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-body text-xs font-bold shadow-md shadow-purple-600/25 hover:from-purple-500 hover:to-indigo-500 disabled:opacity-50 transition-all"
+                  >
+                    {aiSaving ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        Saving Keys...
+                      </>
+                    ) : (
+                      'Save Gemini Keys'
+                    )}
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}

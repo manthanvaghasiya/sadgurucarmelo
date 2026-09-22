@@ -45,12 +45,16 @@ function mongoSanitize() {
 // Route imports
 import authRoutes from './routes/auth.routes.js';
 import carRoutes from './routes/car.routes.js';
-import leadRoutes from './routes/lead.routes.js';
 import messageRoutes from './routes/message.routes.js';
 import promoPosterRoutes from './routes/promoPoster.routes.js';
 import happyCustomerRoutes from './routes/happyCustomer.routes.js';
 import sitemapRoutes from './routes/sitemap.routes.js';
 import carMasterRoutes from './routes/carMaster.routes.js';
+import sellRequestRoutes from './routes/sellRequest.routes.js';
+import subscriptionRoutes from './routes/subscription.routes.js';
+import aiRoutes from './routes/ai.routes.js';
+import analyticsRoutes from './routes/analytics.routes.js';
+import systemHealthRoutes from './routes/systemHealth.routes.js';
 
 // ── Load env variables ──
 // (done automatically via 'dotenv/config' at top)
@@ -72,15 +76,17 @@ app.use(mongoSanitize());
 // ── Rate Limiting ──
 const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100,
+  max: process.env.NODE_ENV === 'production' ? 1000 : 10000,
   standardHeaders: true,
   legacyHeaders: false,
   message: { success: false, message: 'Too many requests, please try again later.' },
+  skip: () => process.env.NODE_ENV !== 'production',
 });
 const loginLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 10,
+  max: process.env.NODE_ENV === 'production' ? 15 : 100,
   message: { success: false, message: 'Too many login attempts. Try again in 15 minutes.' },
+  skip: () => process.env.NODE_ENV !== 'production',
 });
 app.use('/api', apiLimiter);
 app.use('/api/auth/login', loginLimiter);
@@ -148,12 +154,16 @@ app.get('/', (_req, res) => {
 const apiRouter = express.Router();
 apiRouter.use('/auth', authRoutes);
 apiRouter.use('/cars', carRoutes);
-apiRouter.use('/leads', leadRoutes);
 apiRouter.use('/messages', messageRoutes);
 apiRouter.use('/promo-posters', promoPosterRoutes);
 apiRouter.use('/happy-customers', happyCustomerRoutes);
 apiRouter.use('/sitemap.xml', sitemapRoutes);
 apiRouter.use('/car-masters', carMasterRoutes);
+apiRouter.use('/sell-requests', sellRequestRoutes);
+apiRouter.use('/notifications', subscriptionRoutes);
+apiRouter.use('/ai', aiRoutes);
+apiRouter.use('/analytics', analyticsRoutes);
+apiRouter.use('/system', systemHealthRoutes);
 
 app.use('/api', apiRouter);
 app.use('/', apiRouter);

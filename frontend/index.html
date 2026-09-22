@@ -71,7 +71,7 @@
   <script>
     (function() {
       var path = window.location.pathname;
-      var isAdmin = path.startsWith('/login') || path.startsWith('/admin') || path.startsWith('/sales');
+      var isAdmin = path.startsWith('/login') || path.startsWith('/admin');
       if (isAdmin) {
         var appleTitle = document.querySelector('meta[name="apple-mobile-web-app-title"]');
         if (appleTitle) appleTitle.content = "Staff Portal";

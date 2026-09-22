@@ -10,7 +10,7 @@ export default function PWAInstallPrompt() {
   const timeoutRef = useRef(null);
   
   const location = useLocation();
-  const isAdminRoute = location.pathname.startsWith('/login') || location.pathname.startsWith('/admin') || location.pathname.startsWith('/sales');
+  const isAdminRoute = location.pathname.startsWith('/login') || location.pathname.startsWith('/admin');
 
   useEffect(() => {
     // Detect if already installed

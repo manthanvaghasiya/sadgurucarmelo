@@ -2,7 +2,6 @@ import { useState, useEffect, Fragment } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { ChevronLeft, ChevronRight, Search } from 'lucide-react';
 import CarCard from './CarCard';
-import ComingSoonCarousel from './ComingSoonCarousel';
 import { useCars } from '../context/CarContext';
 import SkeletonCarCard from './SkeletonCarCard';
 
@@ -154,12 +153,6 @@ export default function InventoryGrid({ filters = {} }) {
                 isKmGenuine={car.isKmGenuine}
                 badges={car.badges || []}
               />
-              {/* Insert PromoBanner after every 8 cars exclusively for mobile screens */}
-              {(index + 1) % 8 === 0 && (
-                <div className="col-span-full hidden max-md:block">
-                  <ComingSoonCarousel />
-                </div>
-              )}
             </Fragment>
           ))}
         </div>

@@ -4,7 +4,6 @@ import { Helmet } from 'react-helmet-async';
 import SidebarFilter from '../components/SidebarFilter';
 import InventoryGrid from '../components/InventoryGrid';
 import { useCars } from '../context/CarContext';
-import ArrivingShortly from '../components/ArrivingShortly';
 
 export default function Inventory() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -212,10 +211,6 @@ export default function Inventory() {
 
         </div>
 
-        {/* Promotional Banner (Hidden on mobile since it's injected inside grid) */}
-        <div className="max-md:hidden pt-05">
-          <ArrivingShortly />
-        </div>
 
       </div>
     </div>

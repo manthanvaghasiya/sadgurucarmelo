@@ -1,15 +1,19 @@
-import { useParams } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import SEO from '../components/SEO';
-import { Fuel, Settings2, User, Gauge, MessageCircle, MapPin, Star, Tag, Check, ShieldCheck, Palette, RotateCw, CheckCircle2, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Fuel, Settings2, User, Gauge, MessageCircle, MapPin, Star, Tag, Check, ShieldCheck, Palette, RotateCw, CheckCircle2, ChevronLeft, ChevronRight, ArrowLeftRight, Download } from 'lucide-react';
+import toast from 'react-hot-toast';
 import axiosInstance from '../api/axiosConfig';
 import CarCard from '../components/CarCard';
 import Car360Viewer from '../components/Car360Viewer';
+import EmiCalculator from '../components/EmiCalculator';
 import { getCarWhatsAppLink } from '../utils/whatsapp';
 import { getOptimizedUrl } from '../utils/imageUtils';
+import { useCompare } from '../context/CompareContext';
 
 export default function CarDetails() {
     const { id } = useParams();
+    const { addToCompare, removeFromCompare, toggleCompare, isInCompare, compareCount } = useCompare();
     const [car, setCar] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
@@ -18,6 +22,41 @@ export default function CarDetails() {
     const [viewMode, setViewMode] = useState('standard'); // 'standard' or '360'
 
     const whatsappUrl = car ? getCarWhatsAppLink(car) : '#';
+
+    const handleDownloadAllImages = async () => {
+        const imagesToDownload = car?.images && car.images.length > 0 ? car.images : [car?.image].filter(Boolean);
+        if (!imagesToDownload || imagesToDownload.length === 0) {
+            toast.error('No images available to download');
+            return;
+        }
+
+        toast.success(`${imagesToDownload.length} ફોટા ડાઉનલોડ થઈ રહ્યા છે... / Downloading ${imagesToDownload.length} photos...`, { duration: 4000 });
+
+        imagesToDownload.forEach((img, i) => {
+            setTimeout(async () => {
+                try {
+                    const response = await fetch(getOptimizedUrl(img, 1200));
+                    const blob = await response.blob();
+                    const blobUrl = URL.createObjectURL(blob);
+                    const link = document.createElement('a');
+                    link.href = blobUrl;
+                    link.download = `${car.make || 'Sadguru'}-${car.model || 'Car'}-${i + 1}.jpg`;
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    URL.revokeObjectURL(blobUrl);
+                } catch {
+                    const link = document.createElement('a');
+                    link.href = getOptimizedUrl(img, 1200);
+                    link.download = `${car.make || 'Sadguru'}-${car.model || 'Car'}-${i + 1}.jpg`;
+                    link.target = '_blank';
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                }
+            }, i * 600);
+        });
+    };
 
     useEffect(() => {
         window.scrollTo(0, 0);
@@ -362,6 +401,42 @@ export default function CarDetails() {
                                         <MessageCircle className="w-5 h-5 fill-current" />
                                         INQUIRE ON WHATSAPP
                                     </a>
+
+                                    <button
+                                        type="button"
+                                        id="btn-car-detail-compare"
+                                        onClick={() => toggleCompare(car)}
+                                        className={`w-full flex items-center justify-center gap-2 py-3.5 rounded-xl font-body font-bold text-xs border transition-all active:scale-[0.98] ${
+                                            isInCompare(car._id || car.id)
+                                                ? 'bg-brand-orange text-white border-brand-orange shadow-md shadow-brand-orange/20'
+                                                : 'bg-white border-slate-200 text-slate-700 hover:border-brand-orange hover:text-brand-orange hover:bg-brand-orange/5 shadow-sm'
+                                        }`}
+                                    >
+                                        <ArrowLeftRight className="w-4 h-4" />
+                                        {isInCompare(car._id || car.id)
+                                            ? `✓ સરખામણીમાં ઉમેરેલ છે · In Compare (Click to Remove)`
+                                            : `બીજી કાર સાથે સરખાવો · Add to Compare (${compareCount}/3)`}
+                                    </button>
+
+                                    {isInCompare(car._id || car.id) && (
+                                        <Link
+                                            to="/compare"
+                                            id="link-car-detail-view-compare"
+                                            className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl font-body font-bold text-xs bg-slate-900 text-white hover:bg-slate-800 transition-all shadow-sm"
+                                        >
+                                            <ArrowLeftRight className="w-3.5 h-3.5 text-amber-400" />
+                                            <span>સરખામણી જુઓ · View Comparison ({compareCount} cars) →</span>
+                                        </Link>
+                                    )}
+
+                                    <button
+                                        type="button"
+                                        onClick={handleDownloadAllImages}
+                                        className="w-full flex items-center justify-center gap-2 py-3 rounded-xl font-body font-bold text-xs bg-slate-900 hover:bg-slate-800 text-white shadow-md active:scale-98 transition-all"
+                                    >
+                                        <Download className="w-4 h-4 text-amber-400" />
+                                        <span>બધા ફોટા ડાઉનલોડ કરો · Download All Photos ({(car.images && car.images.length > 0) ? car.images.length : 1})</span>
+                                    </button>
                                 </div>
                             </div>
 
@@ -515,6 +590,9 @@ export default function CarDetails() {
                                 </div>
                             )}
                         </div>
+
+                        {/* Interactive EMI Loan Calculator */}
+                        <EmiCalculator carPrice={car.price} carTitle={`${car.make} ${car.model} (${car.year})`} />
 
                         {/* Dealer Info Box (Mobile Only) - Appears after specs */}
                         <div className="flex lg:hidden bg-gray-50 rounded-2xl p-6 border border-gray-100 items-start gap-4 mt-6">

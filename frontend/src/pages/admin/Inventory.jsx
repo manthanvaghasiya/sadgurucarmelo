@@ -48,7 +48,7 @@ export default function Inventory() {
   const { cars, isLoading: carsLoading, deleteCar, toggleFeatured } = useCars();
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState('Available');
+  const [statusFilter, setStatusFilter] = useState('All');
 
   const [sortField, setSortField] = useState(null);
   const [sortDir, setSortDir] = useState('asc');
@@ -79,10 +79,8 @@ export default function Inventory() {
     let list = allCars;
 
     // Status filter
-    if (statusFilter === 'Draft') {
-      list = list.filter((c) => c.status === 'Draft');
-    } else {
-      list = list.filter((c) => c.status !== 'Draft');
+    if (statusFilter !== 'All') {
+      list = list.filter((c) => c.status === statusFilter);
     }
 
     // Search filter
@@ -208,20 +206,10 @@ export default function Inventory() {
             Manage your showroom listings, update prices, and mark cars as sold.
           </p>
         </div>
-        <div className="flex items-center gap-3 self-start sm:self-auto">
-          <button
-            onClick={() => handleStatusFilter(statusFilter === 'Draft' ? 'All' : 'Draft')}
-            className={`inline-flex items-center gap-2 px-5 py-3 rounded-xl font-body text-sm font-bold transition-colors shrink-0 ${
-              statusFilter === 'Draft' 
-                ? 'bg-blue-50 text-blue-600 border border-blue-200' 
-                : 'bg-background text-text-muted border border-gray-200 hover:text-text hover:border-primary/20'
-            }`}
-          >
-            Drafts ({counts['Draft'] || 0})
-          </button>
+        <div className="flex items-center gap-3 w-full sm:w-auto">
           <Link
             to="/admin/add-car"
-            className="inline-flex items-center gap-2 px-5 py-3 bg-accent hover:bg-accent-hover text-white rounded-xl font-body text-sm font-bold transition-colors shadow-lg shadow-accent/20 shrink-0"
+            className="w-full sm:w-auto justify-center inline-flex items-center gap-2 px-5 py-3 bg-accent hover:bg-accent-hover text-white rounded-xl font-body text-sm font-bold transition-colors shadow-lg shadow-accent/20 shrink-0"
           >
             <Plus className="w-4 h-4" strokeWidth={2.5} />
             Add New Car
@@ -229,7 +217,41 @@ export default function Inventory() {
         </div>
       </div>
 
-
+      {/* ═══════════════════════════════════════════════
+          Status Filter Tabs (Edge-to-Edge Touch Scrolling on Mobile)
+         ═══════════════════════════════════════════════ */}
+      <div className="flex items-center gap-2 overflow-x-auto pb-2 pt-1 scrollbar-none touch-pan-x -mx-4 px-4 sm:mx-0 sm:px-0">
+        {[
+          { label: 'All Cars', value: 'All', count: counts.All },
+          { label: 'Available', value: 'Available', count: counts.Available },
+          { label: 'Coming Soon', value: 'Coming Soon', count: counts['Coming Soon'] },
+          { label: 'Drafts', value: 'Draft', count: counts.Draft },
+        ].map((tab) => {
+          const isActive = statusFilter === tab.value;
+          return (
+            <button
+              key={tab.value}
+              onClick={() => handleStatusFilter(tab.value)}
+              className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl font-body text-sm font-semibold transition-all shrink-0 min-h-[40px] active:scale-95 ${
+                isActive
+                  ? 'bg-primary text-white shadow-md shadow-primary/10 ring-1 ring-primary'
+                  : 'bg-surface hover:bg-background text-text-muted hover:text-text border border-gray-100'
+              }`}
+            >
+              <span>{tab.label}</span>
+              <span
+                className={`px-2 py-0.5 rounded-full text-xs font-bold ${
+                  isActive
+                    ? 'bg-white/20 text-white'
+                    : 'bg-background text-text-muted'
+                }`}
+              >
+                {tab.count || 0}
+              </span>
+            </button>
+          );
+        })}
+      </div>
 
       {/* ═══════════════════════════════════════════════
           Search & Sort Bar
@@ -280,6 +302,9 @@ export default function Inventory() {
                   Vehicle
                 </th>
                 <th className="text-left font-body text-[11px] font-bold text-text-muted uppercase tracking-wider px-4 py-4 bg-background/40">
+                  Status
+                </th>
+                <th className="text-left font-body text-[11px] font-bold text-text-muted uppercase tracking-wider px-4 py-4 bg-background/40">
                   <button
                     onClick={() => toggleSort('price')}
                     className="flex items-center gap-1 hover:text-text transition-colors"
@@ -302,7 +327,7 @@ export default function Inventory() {
             <tbody>
               {filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="text-center py-16">
+                  <td colSpan={6} className="text-center py-16">
                     <div className="flex flex-col items-center gap-3">
                       <div className="w-14 h-14 bg-background rounded-2xl flex items-center justify-center">
                         <Car className="w-7 h-7 text-text-muted/40" />
@@ -353,6 +378,14 @@ export default function Inventory() {
                             </div>
                           </div>
                         </div>
+                      </td>
+
+                      {/* Status */}
+                      <td className="px-4 py-4">
+                        <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold ring-1 ${cfg.bg} ${cfg.text} ${cfg.ring}`}>
+                          <span className={`w-1.5 h-1.5 rounded-full ${cfg.dot}`} />
+                          {car.status}
+                        </span>
                       </td>
 
                       {/* Price */}
@@ -474,10 +507,16 @@ export default function Inventory() {
                         <span className="w-1 h-1 rounded-full bg-gray-300" />
                         <span className="font-body text-xs text-text-muted">{car.fuel}</span>
                       </div>
-                      <div className="flex items-center justify-between mt-2.5">
-                        <span className="font-heading font-bold text-sm text-text">
-                          {car.price}
-                        </span>
+                      <div className="flex items-center justify-between mt-2.5 flex-wrap gap-2">
+                        <div className="flex items-center gap-2">
+                          <span className="font-heading font-bold text-sm text-text">
+                            {car.price}
+                          </span>
+                          <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold ring-1 ${cfg.bg} ${cfg.text} ${cfg.ring}`}>
+                            <span className={`w-1.5 h-1.5 rounded-full ${cfg.dot}`} />
+                            {car.status}
+                          </span>
+                        </div>
                         <div className="flex items-center gap-1">
                           <button
                             onClick={() => navigate(`/admin/edit-car/${car.id}`)}

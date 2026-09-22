@@ -43,7 +43,8 @@ router.post('/', async (req, res, next) => {
 router.get('/', protect, admin, async (req, res, next) => {
   try {
     const messages = await Message.find({}).sort({ createdAt: -1 });
-    res.status(200).json({ success: true, data: messages });
+    const unreadCount = messages.filter((m) => m.status === 'Unread').length;
+    res.status(200).json({ success: true, data: messages, total: messages.length, unreadCount });
   } catch (error) {
     next(error);
   }

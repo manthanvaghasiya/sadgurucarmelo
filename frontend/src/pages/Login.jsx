@@ -24,12 +24,7 @@ export default function Login() {
       // Properly hydrate the Context API (token is now automated securely via HttpOnly cookies)
       login(userData);
       toast.success('Welcome to the Dashboard!');
-
-      if (userData.role === 'admin' || userData.role === 'manager') {
-        navigate('/admin');
-      } else {
-        navigate('/sales');
-      }
+      navigate('/admin');
     } catch (error) {
       toast.error(error.response?.data?.message || 'Invalid Credentials. Please try again.');
     }

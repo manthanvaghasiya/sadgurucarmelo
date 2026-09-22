@@ -14,18 +14,19 @@ import {
   Mail,
   Image as ImageIcon,
   Clock,
+  BadgeDollarSign,
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 
 const navItems = [
   { name: 'Dashboard', path: '/admin', icon: LayoutDashboard },
   { name: 'Inventory', path: '/admin/inventory', icon: Car },
+  { name: 'Sell Requests', path: '/admin/sell-requests', icon: BadgeDollarSign },
   { name: 'Add New Car', path: '/admin/add-car', icon: PlusCircle },
-  { name: 'Leads', path: '/admin/leads', icon: Users },
   { name: 'Messages', path: '/admin/messages', icon: Mail },
   { name: 'Happy Customers', path: '/admin/happy-customers', icon: ImageIcon },
   { name: 'Car Brands', path: '/admin/car-brands', icon: Car },
-  { name: 'Coming Soon', path: '/admin/posters', icon: Clock },
+  { name: 'Promo Banners', path: '/admin/banners', icon: ImageIcon },
   { name: 'Settings', path: '/admin/settings', icon: Settings },
 ];
 
@@ -87,8 +88,8 @@ export default function AdminLayout() {
         {/* Navigation Links */}
         <nav className="flex-1 py-4 px-3 space-y-1 overflow-y-auto">
           {navItems.map((item) => {
-            // Hide Leads and Settings for manager role
-            if (user?.role === 'manager' && (item.name === 'Leads' || item.name === 'Settings')) {
+            // Hide Settings for manager role
+            if (user?.role === 'manager' && item.name === 'Settings') {
               return null;
             }
             const Icon = item.icon;

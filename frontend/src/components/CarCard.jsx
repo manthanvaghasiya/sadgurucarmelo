@@ -1,7 +1,10 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { Fuel, Settings2, User, Gauge, MessageCircle, Eye, CheckCircle2 } from 'lucide-react';
+import { Fuel, Settings2, User, Gauge, MessageCircle, Eye, CheckCircle2, ArrowLeftRight, Download } from 'lucide-react';
+import toast from 'react-hot-toast';
 import { getCarWhatsAppLink } from '../utils/whatsapp';
 import { getOptimizedUrl } from '../utils/imageUtils';
+import { useCompare } from '../context/CompareContext';
+
 export default function CarCard({
   id = '1',
   image = 'https://placehold.co/600x400/e2e8f0/64748b?text=Premium+Car',
@@ -15,16 +18,70 @@ export default function CarCard({
   isKmGenuine = false
 }) {
   const navigate = useNavigate();
+  const { toggleCompare, isInCompare } = useCompare();
   const whatsappUrl = getCarWhatsAppLink({ title, price });
+  const isCompared = isInCompare(id);
 
   const handleCardClick = () => {
     navigate(`/car-details/${id}`);
   };
 
+  const handleDownloadImages = async (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (!image) {
+      toast.error('No image available');
+      return;
+    }
+
+    toast.success('ફોટો ડાઉનલોડ થઈ રહ્યો છે... / Downloading photo...', { duration: 3000 });
+
+    try {
+      const response = await fetch(getOptimizedUrl(image, 1200));
+      const blob = await response.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = blobUrl;
+      link.download = `${title.replace(/[^a-zA-Z0-9]/g, '-')}.jpg`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(blobUrl);
+    } catch {
+      const link = document.createElement('a');
+      link.href = getOptimizedUrl(image, 1200);
+      link.download = `${title.replace(/[^a-zA-Z0-9]/g, '-')}.jpg`;
+      link.target = '_blank';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+  };
+
+  const handleCompareToggle = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    toggleCompare({
+      id,
+      _id: id,
+      image,
+      model: title,
+      price,
+      fuelType: fuel,
+      transmission,
+      owner,
+      kms,
+      isKmGenuine,
+    });
+  };
+
   return (
     <div
       onClick={handleCardClick}
-      className="car-card-glass rounded-2xl overflow-hidden group hover:shadow-lg transition-all duration-300 flex flex-col h-full cursor-pointer"
+      className={`car-card-glass rounded-2xl overflow-hidden group hover:shadow-lg transition-all duration-300 flex flex-col h-full cursor-pointer ${
+        isCompared ? 'ring-2 ring-brand-orange shadow-brand-orange/10' : ''
+      }`}
     >
 
       {/* Image Container with Badges */}
@@ -37,7 +94,13 @@ export default function CarCard({
         />
 
         {/* Top Badges */}
-        <div className="absolute top-3 left-3 flex flex-col gap-1.5">
+        <div className="absolute top-3 left-3 flex flex-col gap-1.5 z-10">
+          {isCompared && (
+            <span className="inline-flex items-center gap-1 text-[10px] font-heading font-black uppercase tracking-wider px-2.5 py-1 rounded bg-brand-orange text-white shadow-md ring-1 ring-white/50 animate-[fadeScale_150ms_ease-out]">
+              <ArrowLeftRight className="w-3 h-3 stroke-[3]" />
+              In Compare
+            </span>
+          )}
           {badges.map((badge, index) => (
             <span
               key={index}
@@ -47,6 +110,28 @@ export default function CarCard({
               {badge}
             </span>
           ))}
+        </div>
+
+        {/* Top-Right Action Buttons (Download + Compare) */}
+        <div className="absolute top-3 right-3 flex items-center gap-1.5 z-10">
+          <button
+            onClick={handleDownloadImages}
+            className="w-8 h-8 rounded-full bg-white/85 hover:bg-white text-slate-700 hover:text-primary flex items-center justify-center transition-all shadow-md active:scale-95"
+            title="ફોટો ડાઉનલોડ કરો · Download Photo"
+          >
+            <Download className="w-3.5 h-3.5 stroke-[2.5]" />
+          </button>
+          <button
+            onClick={handleCompareToggle}
+            className={`w-8 h-8 rounded-full flex items-center justify-center transition-all shadow-md active:scale-90 ${
+              isCompared
+                ? 'bg-brand-orange text-white scale-110 ring-2 ring-white shadow-brand-orange/40'
+                : 'bg-white/85 hover:bg-white text-slate-700 hover:text-brand-orange'
+            }`}
+            title={isCompared ? 'સરખામણીમાંથી દૂર કરો · Remove from Compare' : 'સરખામણીમાં ઉમેરો · Add to Compare'}
+          >
+            <ArrowLeftRight className="w-3.5 h-3.5 stroke-[2.5]" />
+          </button>
         </div>
       </div>
 

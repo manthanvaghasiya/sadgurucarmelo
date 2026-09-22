@@ -23,7 +23,7 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
 
   // 3. Role-based security check
   if (allowedRoles && !allowedRoles.includes(user.role)) {
-    return <Navigate to={(user.role === 'admin' || user.role === 'manager') ? '/admin' : '/sales'} replace />;
+    return <Navigate to="/admin" replace />;
   }
 
   // 4. Everything is secure, render the page!

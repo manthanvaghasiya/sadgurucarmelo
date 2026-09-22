@@ -12,9 +12,14 @@ import {
   Eye,
   Filter,
   ShoppingCart,
+  MessageSquare,
+  HandCoins,
+  Download,
 } from 'lucide-react';
 import axiosInstance from '../../api/axiosConfig';
 import { useCars } from '../../context/CarContext';
+import TrafficGrowthChart from '../../components/admin/TrafficGrowthChart';
+import SystemStorageHealth from '../../components/admin/SystemStorageHealth';
 
 const statusStyles = {
   Available: 'bg-[#10b981]/10 text-[#059669] ring-[#10b981]/20',
@@ -28,20 +33,56 @@ export default function Dashboard() {
   const navigate = useNavigate();
   const [activeMenu, setActiveMenu] = useState(null);
   const [statsLoading, setStatsLoading] = useState(true);
-  const [leadStats, setLeadStats] = useState({ total: 0, newCount: 0, followUp: 0 });
-  const [carStats, setCarStats] = useState({ totalCars: 0, soldThisMonth: 0, totalValue: 0 });
+  const [sellRequestCount, setSellRequestCount] = useState(0);
+  const [unreadMessages, setUnreadMessages] = useState(0);
+  const [totalMessages, setTotalMessages] = useState(0);
+  const [appInstalls, setAppInstalls] = useState(0);
+  const [carStats, setCarStats] = useState({ totalCars: 0, availableCars: 0, soldThisMonth: 0, totalValue: 0 });
 
   // Fetch live stats
   useEffect(() => {
     const fetchStats = async () => {
       setStatsLoading(true);
       try {
-        const [leadRes, carRes] = await Promise.all([
-          axiosInstance.get('/leads/stats'),
+        const [sellRes, carRes, msgRes, installsRes] = await Promise.allSettled([
+          axiosInstance.get('/sell-requests'),
           axiosInstance.get('/cars/stats'),
+          axiosInstance.get('/messages'),
+          axiosInstance.get('/analytics/app-installs/total'),
         ]);
-        if (leadRes.data?.success) setLeadStats(leadRes.data.data || {});
-        if (carRes.data?.success) setCarStats(carRes.data.data || {});
+
+        if (sellRes.status === 'fulfilled' && sellRes.value.data?.success) {
+          const resData = sellRes.value.data;
+          const pending = resData.pendingCount !== undefined
+            ? resData.pendingCount
+            : (resData.data || []).filter((r) => r.status === 'Pending').length;
+          setSellRequestCount(pending);
+        } else {
+          setSellRequestCount(0);
+        }
+
+        if (carRes.status === 'fulfilled' && carRes.value.data?.success) {
+          setCarStats(carRes.value.data.data || {});
+        }
+
+        if (msgRes.status === 'fulfilled' && msgRes.value.data?.success) {
+          const resData = msgRes.value.data;
+          const msgs = resData.data || [];
+          const unread = resData.unreadCount !== undefined
+            ? resData.unreadCount
+            : msgs.filter((m) => m.status === 'Unread').length;
+          setUnreadMessages(unread);
+          setTotalMessages(resData.total !== undefined ? resData.total : msgs.length);
+        } else {
+          setUnreadMessages(0);
+          setTotalMessages(0);
+        }
+
+        if (installsRes.status === 'fulfilled' && installsRes.value.data?.success) {
+          setAppInstalls(installsRes.value.data.total ?? 0);
+        } else {
+          setAppInstalls(0);
+        }
       } catch (err) {
         console.error('Failed to fetch stats:', err);
       } finally {
@@ -60,37 +101,44 @@ export default function Dashboard() {
 
   const statsData = [
     {
-      id: 'total-cars',
-      title: 'Total Available Cars',
-      value: (carStats?.availableCars || 0).toString(),
-      change: 'Active',
-      trend: 'up',
-      subtitle: 'Live Database',
+      id: 'total-inventory',
+      title: 'Total Inventory',
+      value: (carStats?.availableCars || (cars || []).length || 0).toString(),
+      subtext: 'Active Listings',
       icon: Car,
-      iconBg: 'bg-primary/10',
-      iconColor: 'text-primary',
+      iconBg: 'bg-purple-500/10',
+      iconColor: 'text-purple-400',
+      glow: 'shadow-[0_0_30px_rgba(168,85,247,0.12)]',
     },
     {
-      id: 'inventory-value',
-      title: 'Total Inventory Value',
-      value: totalValueFormatted,
-      change: 'Live',
-      trend: 'up',
-      subtitle: 'Database total',
-      icon: DollarSign,
-      iconBg: 'bg-accent/10',
-      iconColor: 'text-accent',
+      id: 'new-messages',
+      title: 'New Messages',
+      value: unreadMessages.toString(),
+      subtext: `${totalMessages} total received`,
+      icon: MessageSquare,
+      iconBg: 'bg-blue-500/10',
+      iconColor: 'text-blue-400',
+      glow: 'shadow-[0_0_30px_rgba(96,165,250,0.12)]',
     },
     {
-      id: 'recent-leads',
-      title: 'Total Leads',
-      value: (leadStats?.total || 0).toString(),
-      change: `${leadStats?.newCount || 0} new`,
-      trend: (leadStats?.newCount || 0) > 0 ? 'up' : 'up',
-      subtitle: `${leadStats?.followUp || 0} follow-ups pending`,
-      icon: Users,
-      iconBg: 'bg-[#8b5cf6]/10',
-      iconColor: 'text-[#8b5cf6]',
+      id: 'sell-requests',
+      title: 'Sell Requests',
+      value: sellRequestCount.toString(),
+      subtext: 'Pending evaluations',
+      icon: HandCoins,
+      iconBg: 'bg-emerald-500/10',
+      iconColor: 'text-emerald-400',
+      glow: 'shadow-[0_0_30px_rgba(52,211,153,0.12)]',
+    },
+    {
+      id: 'app-installs',
+      title: 'App Installs',
+      value: appInstalls.toString(),
+      subtext: 'Total PWA installations',
+      icon: Download,
+      iconBg: 'bg-orange-500/10',
+      iconColor: 'text-orange-400',
+      glow: 'shadow-[0_0_30px_rgba(249,115,22,0.12)]',
     },
   ];
 
@@ -129,44 +177,42 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* ── Stats Row ── */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+      {/* ── Stats Row (4 Columns matching Hari Ram Motors) ── */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5">
         {statsData.map((stat) => {
           const Icon = stat.icon;
           return (
             <div
               key={stat.id}
-              className="bg-surface rounded-2xl border border-gray-100 p-6 hover:shadow-lg hover:shadow-primary/5 transition-all duration-300 group"
+              className={`relative overflow-hidden bg-surface rounded-2xl border border-gray-100 p-4 sm:p-5 hover:-translate-y-1 transition-all duration-300 ${stat.glow || ''}`}
             >
-              <div className="flex items-start justify-between mb-4">
-                <div className={`w-12 h-12 ${stat.iconBg} rounded-xl flex items-center justify-center transition-transform group-hover:scale-110`}>
-                  <Icon className={`w-6 h-6 ${stat.iconColor}`} strokeWidth={2} />
-                </div>
-                <div className={`flex items-center gap-1 font-body text-xs font-bold px-2.5 py-1 rounded-full ${stat.trend === 'up'
-                  ? 'bg-[#10b981]/10 text-[#059669]'
-                  : 'bg-red-50 text-red-500'
-                  }`}>
-                  {stat.trend === 'up' ? (
-                    <TrendingUp className="w-3 h-3" />
-                  ) : (
-                    <TrendingDown className="w-3 h-3" />
-                  )}
-                  {stat.change}
+              <div className="flex items-start justify-between mb-3">
+                <div className={`w-10 h-10 sm:w-11 sm:h-11 ${stat.iconBg} rounded-xl flex items-center justify-center transition-transform hover:scale-105`}>
+                  <Icon className={`w-5 h-5 ${stat.iconColor}`} strokeWidth={2} />
                 </div>
               </div>
-              <h3 className="font-body text-sm font-semibold text-text-muted mb-1">
-                {stat.title}
-              </h3>
-              <p className="font-heading font-bold text-3xl text-text leading-none mb-1">
-                {stat.value}
-              </p>
-              <span className="font-body text-xs text-text-muted/60">
-                {stat.subtitle}
-              </span>
+
+              <div>
+                <p className="font-heading font-bold text-2xl sm:text-3xl text-text tracking-tight leading-none">
+                  {statsLoading ? '—' : stat.value}
+                </p>
+                <h3 className="font-body text-xs sm:text-sm font-semibold text-text mt-1.5 truncate">
+                  {stat.title}
+                </h3>
+                <p className="font-body text-[10px] sm:text-xs text-text-muted mt-0.5 truncate">
+                  {stat.subtext}
+                </p>
+              </div>
             </div>
           );
         })}
       </div>
+
+      {/* ── Website Traffic Growth Analytics ── */}
+      <TrafficGrowthChart />
+
+      {/* ── System Storage & Health Telemetry ── */}
+      <SystemStorageHealth />
 
       {/* ── Inventory Table ── */}
       <div className="bg-surface rounded-2xl border border-gray-100 overflow-hidden">
