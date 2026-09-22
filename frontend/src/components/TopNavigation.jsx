@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import { Phone, User, MessageCircle, ArrowLeftRight } from 'lucide-react';
+import { Phone, MessageCircle } from 'lucide-react';
 import { useCompare } from '../context/CompareContext';
 
 export default function TopNavigation() {
@@ -55,26 +55,8 @@ export default function TopNavigation() {
             ))}
           </nav>
 
-          {/* Desktop Call-to-Actions & Compare Access */}
+          {/* Desktop Call-to-Actions */}
           <div className="flex items-center gap-2 md:gap-4">
-            {/* Compare Quick Access Link with Live Count */}
-            <Link
-              to="/compare"
-              className={`relative p-2 md:px-3.5 md:py-2 rounded-lg font-body font-bold text-xs sm:text-sm flex items-center gap-1.5 transition-all ${
-                compareCars.length > 0
-                  ? 'bg-amber-500/10 text-brand-orange border border-amber-500/30 shadow-sm'
-                  : 'text-text-muted hover:text-text border border-gray-100 hover:border-gray-200'
-              }`}
-              title="Compare Vehicles"
-            >
-              <ArrowLeftRight className="w-4 h-4 md:w-3.5 md:h-3.5" />
-              <span className="hidden lg:inline">Compare</span>
-              {compareCars.length > 0 && (
-                <span className="w-4 h-4 rounded-full bg-brand-orange text-white text-[9px] font-black flex items-center justify-center shadow-xs">
-                  {compareCars.length}
-                </span>
-              )}
-            </Link>
 
             <a
               href="tel:+919913634447"
