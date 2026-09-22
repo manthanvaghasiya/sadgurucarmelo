@@ -4,7 +4,7 @@ import SEO from '../components/SEO';
 import {
     Fuel, Settings2, User, Gauge, MessageCircle, MapPin, Star, Tag, Check,
     ShieldCheck, Palette, RotateCw, CheckCircle2, ChevronLeft, ChevronRight,
-    ArrowLeftRight, Download, Maximize2, Share2, X, ArrowLeft
+    ArrowLeftRight, Download, Maximize2, Share2, X, ArrowLeft, Send, Loader2
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import axiosInstance from '../api/axiosConfig';
@@ -115,6 +115,8 @@ export default function CarDetails() {
         }
     };
 
+    const [isSendingImages, setIsSendingImages] = useState(false);
+
     const handleDownloadAllImages = async () => {
         const rawList = car?.images && car.images.length > 0 ? [...car.images] : [car?.image].filter(Boolean);
         if (!rawList || rawList.length === 0) {
@@ -122,10 +124,31 @@ export default function CarDetails() {
             return;
         }
 
-        const totalCount = rawList.length + (detailCardUrl ? 1 : 0);
-        toast.success(`${totalCount} ફાઈલો ડાઉનલોડ થઈ રહી છે (ફોટા + કાર ડિટેઇલ્સ કાર્ડ)... / Downloading ${totalCount} items (Photos + Details Card)...`, { duration: 5000 });
+        // 1. Ensure Details Card is available
+        let cardUrl = detailCardUrl;
+        if (!cardUrl && car) {
+            try {
+                cardUrl = await generateCarDetailCard(car);
+                if (cardUrl) setDetailCardUrl(cardUrl);
+            } catch (err) {
+                console.error('Failed to generate card for download:', err);
+            }
+        }
 
-        // 1. Download all regular photos
+        const totalCount = rawList.length + (cardUrl ? 1 : 0);
+        toast.success(`${totalCount} ફાઈલો ડાઉનલોડ થઈ રહી છે (ડિટેઇલ્સ કાર્ડ + ફોટા)... / Downloading ${totalCount} items (Details Card + Photos)...`, { duration: 5000 });
+
+        // Download Details Card first
+        if (cardUrl) {
+            const link = document.createElement('a');
+            link.href = cardUrl;
+            link.download = `${car.make || 'Sadguru'}-${car.model || 'Car'}-0-Vehicle-Details.jpg`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // Download all car photos with staggered interval
         rawList.forEach((img, i) => {
             setTimeout(async () => {
                 try {
@@ -148,34 +171,85 @@ export default function CarDetails() {
                     link.click();
                     document.body.removeChild(link);
                 }
-            }, i * 600);
+            }, (i + 1) * 500);
         });
-
-        // 2. Also download the branded Car Details Summary Card
-        if (detailCardUrl) {
-            setTimeout(() => {
-                const link = document.createElement('a');
-                link.href = detailCardUrl;
-                link.download = `${car.make || 'Sadguru'}-${car.model || 'Car'}-Vehicle-Details.jpg`;
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-            }, rawList.length * 600);
-        }
     };
 
-    const handleDownloadDetailCardOnly = () => {
-        if (!detailCardUrl) {
-            toast.error('Details Card is generating...');
-            return;
+    const handleSendImages = async () => {
+        if (!car) return;
+        setIsSendingImages(true);
+        toast.loading('ફોટા તૈયાર થઈ રહ્યા છે... / Preparing images to send...', { id: 'send-images' });
+
+        try {
+            // 1. Ensure Details Card is generated
+            let cardUrl = detailCardUrl;
+            if (!cardUrl) {
+                try {
+                    cardUrl = await generateCarDetailCard(car);
+                    if (cardUrl) setDetailCardUrl(cardUrl);
+                } catch (err) {
+                    console.error('Failed to generate detail card:', err);
+                }
+            }
+
+            const rawList = car?.images && car.images.length > 0 ? [...car.images] : [car?.image].filter(Boolean);
+            const allImageSources = [];
+            if (cardUrl) allImageSources.push({ url: cardUrl, name: `${car.make || 'Sadguru'}-${car.model || 'Car'}-0-Vehicle-Details.jpg`, isCard: true });
+            rawList.forEach((img, idx) => {
+                allImageSources.push({ url: getOptimizedUrl(img, 1200), name: `${car.make || 'Sadguru'}-${car.model || 'Car'}-${idx + 1}.jpg` });
+            });
+
+            const shareText = `🚗 *${car.make} ${car.model} ${car.variant || ''} (${car.year})*\n💰 કિંમત: ₹${car.price?.toLocaleString('en-IN')}\n🛣️ કિ.મી.: ${car.kmDriven?.toLocaleString('en-IN')} km\n⛽ ઇંધણ: ${car.fuel}\n📍 સદ્ગુરુ કાર મેળો, સુરત\n🔗 વધુ વિગતો: ${window.location.href}`;
+
+            // Check if Web Share API with files is supported
+            let canShareFiles = false;
+            let filesToShare = [];
+
+            if (navigator.canShare) {
+                try {
+                    for (const item of allImageSources.slice(0, 10)) {
+                        const res = await fetch(item.url);
+                        const blob = await res.blob();
+                        const file = new File([blob], item.name, { type: 'image/jpeg' });
+                        filesToShare.push(file);
+                    }
+                    if (filesToShare.length > 0 && navigator.canShare({ files: filesToShare })) {
+                        canShareFiles = true;
+                    }
+                } catch (e) {
+                    console.warn('File preparation for share failed, using fallback', e);
+                    canShareFiles = false;
+                }
+            }
+
+            if (canShareFiles && filesToShare.length > 0) {
+                toast.dismiss('send-images');
+                await navigator.share({
+                    title: `${car.make} ${car.model} (${car.year})`,
+                    text: shareText,
+                    files: filesToShare,
+                });
+                toast.success('ફોટો સફળતાપૂર્વક મોકલ્યા! · Images sent successfully!');
+            } else {
+                // Fallback for desktop / unsupported devices:
+                // 1. Trigger download of all images including the Details Card
+                handleDownloadAllImages();
+                // 2. Open WhatsApp with car details pre-filled
+                toast.dismiss('send-images');
+                toast.success('WhatsApp ખુલી રહ્યું છે અને ફોટા ડાઉનલોડ થઈ રહ્યા છે · Opening WhatsApp and downloading photos to send...', { duration: 5000 });
+                const waUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(shareText)}`;
+                window.open(waUrl, '_blank');
+            }
+        } catch (err) {
+            console.error('Send images error:', err);
+            toast.dismiss('send-images');
+            if (err.name !== 'AbortError') {
+                toast.error('Unable to send images directly. Downloading photos instead...');
+                handleDownloadAllImages();
+            }
+        } finally {
+            setIsSendingImages(false);
         }
-        const link = document.createElement('a');
-        link.href = detailCardUrl;
-        link.download = `${car.make || 'Sadguru'}-${car.model || 'Car'}-Vehicle-Details.jpg`;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        toast.success('ડિટેઇલ્સ કાર્ડ ડાઉનલોડ થઈ ગયું · Details Card downloaded!');
     };
 
     useEffect(() => {
@@ -343,17 +417,20 @@ export default function CarDetails() {
                                     <span className="hidden sm:inline">શેર કરો · Share</span>
                                 </button>
 
-                                {detailCardUrl && (
-                                    <button
-                                        type="button"
-                                        onClick={handleDownloadDetailCardOnly}
-                                        className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-brand-orange hover:bg-amber-500/20 text-xs font-bold transition-all shadow-xs active:scale-95"
-                                        title="Download Vehicle Details Card"
-                                    >
-                                        <Download className="w-3.5 h-3.5" />
-                                        <span className="hidden md:inline">ડિટેઇલ્સ કાર્ડ · Details Card</span>
-                                    </button>
-                                )}
+                                <button
+                                    type="button"
+                                    onClick={handleSendImages}
+                                    disabled={isSendingImages}
+                                    className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-600 hover:bg-emerald-500/20 text-xs font-bold transition-all shadow-xs active:scale-95 disabled:opacity-50"
+                                    title="Send Car Images & Details Card"
+                                >
+                                    {isSendingImages ? (
+                                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                                    ) : (
+                                        <Send className="w-3.5 h-3.5" />
+                                    )}
+                                    <span>ફોટો મોકલો · Send Images</span>
+                                </button>
 
                                 <button
                                     type="button"
