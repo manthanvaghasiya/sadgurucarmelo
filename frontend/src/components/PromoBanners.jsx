@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import axiosInstance from '../api/axiosConfig';
+import { getOptimizedUrl } from '../utils/imageUtils';
 
 export default function PromoBanners() {
   const [banners, setBanners] = useState([]);
@@ -63,12 +64,12 @@ export default function PromoBanners() {
           {banners[0].link ? (
             <a href={banners[0].link} className="block w-full h-full">
               <img
-                src={banners[0].desktopImageUrl}
+                src={getOptimizedUrl(banners[0].desktopImageUrl, 1200)}
                 alt={banners[0].title || 'Promo Banner'}
                 className="w-full h-auto hidden md:block transition-transform duration-700 group-hover:scale-[1.02]"
               />
               <img
-                src={banners[0].mobileImageUrl}
+                src={getOptimizedUrl(banners[0].mobileImageUrl, 600)}
                 alt={banners[0].title || 'Promo Banner'}
                 className="w-full h-auto md:hidden transition-transform duration-700 group-hover:scale-[1.02]"
               />
@@ -76,12 +77,12 @@ export default function PromoBanners() {
           ) : (
             <>
               <img
-                src={banners[0].desktopImageUrl}
+                src={getOptimizedUrl(banners[0].desktopImageUrl, 1200)}
                 alt={banners[0].title || 'Promo Banner'}
                 className="w-full h-auto hidden md:block"
               />
               <img
-                src={banners[0].mobileImageUrl}
+                src={getOptimizedUrl(banners[0].mobileImageUrl, 600)}
                 alt={banners[0].title || 'Promo Banner'}
                 className="w-full h-auto md:hidden"
               />
@@ -99,12 +100,12 @@ export default function PromoBanners() {
               {b.link ? (
                 <a href={b.link} className="block w-full h-full">
                   <img
-                    src={b.desktopImageUrl}
+                    src={getOptimizedUrl(b.desktopImageUrl, 1200)}
                     alt={b.title || 'Promo Banner'}
                     className="w-full h-auto hidden md:block transition-transform duration-700 group-hover:scale-[1.02]"
                   />
                   <img
-                    src={b.mobileImageUrl}
+                    src={getOptimizedUrl(b.mobileImageUrl, 600)}
                     alt={b.title || 'Promo Banner'}
                     className="w-full h-auto md:hidden transition-transform duration-700 group-hover:scale-[1.02]"
                   />
@@ -112,12 +113,12 @@ export default function PromoBanners() {
               ) : (
                 <>
                   <img
-                    src={b.desktopImageUrl}
+                    src={getOptimizedUrl(b.desktopImageUrl, 1200)}
                     alt={b.title || 'Promo Banner'}
                     className="w-full h-auto hidden md:block"
                   />
                   <img
-                    src={b.mobileImageUrl}
+                    src={getOptimizedUrl(b.mobileImageUrl, 600)}
                     alt={b.title || 'Promo Banner'}
                     className="w-full h-auto md:hidden"
                   />
@@ -138,12 +139,12 @@ export default function PromoBanners() {
                 {b.link ? (
                   <a href={b.link} className="block w-full h-full">
                     <img
-                      src={b.desktopImageUrl}
+                      src={getOptimizedUrl(b.desktopImageUrl, 1200)}
                       alt={b.title || 'Promo Banner'}
                       className="w-full h-auto hidden md:block"
                     />
                     <img
-                      src={b.mobileImageUrl}
+                      src={getOptimizedUrl(b.mobileImageUrl, 600)}
                       alt={b.title || 'Promo Banner'}
                       className="w-full h-auto md:hidden"
                     />
@@ -151,12 +152,12 @@ export default function PromoBanners() {
                 ) : (
                   <>
                     <img
-                      src={b.desktopImageUrl}
+                      src={getOptimizedUrl(b.desktopImageUrl, 1200)}
                       alt={b.title || 'Promo Banner'}
                       className="w-full h-auto hidden md:block"
                     />
                     <img
-                      src={b.mobileImageUrl}
+                      src={getOptimizedUrl(b.mobileImageUrl, 600)}
                       alt={b.title || 'Promo Banner'}
                       className="w-full h-auto md:hidden"
                     />

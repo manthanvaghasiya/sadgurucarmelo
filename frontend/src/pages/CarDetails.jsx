@@ -209,7 +209,7 @@ export default function CarDetails() {
                                 {viewMode === '360' && (car.spinImages || []).length > 0 ? (
                                     <Car360Viewer images={car.spinImages || []} title="360° EXTERIOR SPIN" />
                                 ) : (
-                                    <img src={getOptimizedUrl(activeImage)} alt="Car View" loading="lazy" className="w-full h-auto object-contain transition-transform duration-700 group-hover:scale-[1.02]" />
+                                    <img src={getOptimizedUrl(activeImage, 1200)} alt="Car View" loading="lazy" className="w-full h-auto object-contain transition-transform duration-700 group-hover:scale-[1.02]" />
                                 )}
 
                                 {/* Simple Status Badge (No longer a toggle button) */}
@@ -269,7 +269,7 @@ export default function CarDetails() {
                                             ${viewMode === '360' ? 'ring-2 ring-accent ring-offset-2 opacity-100 z-10' : 'opacity-70 hover:opacity-100 hover:ring-2 hover:ring-accent/50 hover:ring-offset-1'}`
                                         }
                                     >
-                                        <img src={getOptimizedUrl((car.spinImages || [])[0])} className="w-full h-full object-contain opacity-50 blur-[1px]" alt="360 Spin" loading="lazy" />
+                                        <img src={getOptimizedUrl((car.spinImages || [])[0], 240)} className="w-full h-full object-contain opacity-50 blur-[1px]" alt="360 Spin" loading="lazy" />
                                         <div className="absolute inset-0 flex flex-col items-center justify-center text-white">
                                             <RotateCw className="w-6 h-6 mb-1" />
                                             <span className="font-heading font-bold text-[10px] tracking-wider uppercase">360° Spin</span>
@@ -291,7 +291,7 @@ export default function CarDetails() {
                                                 ${isActive ? 'ring-2 ring-primary ring-offset-2 opacity-100 z-10' : 'opacity-60 hover:opacity-100 hover:ring-2 hover:ring-primary/30 hover:ring-offset-1'}`
                                             }
                                         >
-                                            <img src={getOptimizedUrl(img)} className="w-full h-full object-contain" alt={`Thumb ${i + 1}`} loading="lazy" />
+                                            <img src={getOptimizedUrl(img, 240)} className="w-full h-full object-contain" alt={`Thumb ${i + 1}`} loading="lazy" />
                                         </button>
                                     );
                                 })}

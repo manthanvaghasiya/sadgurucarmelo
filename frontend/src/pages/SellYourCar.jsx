@@ -140,9 +140,26 @@ export default function SellYourCar() {
       if (formData.expectedPrice) data.append('expectedPrice', formData.expectedPrice);
       if (formData.notes) data.append('notes', formData.notes.trim());
 
-      photos.forEach((photo) => {
-        data.append('photos', photo);
-      });
+      if (photos.length > 0) {
+        const compressOptions = {
+          maxSizeMB: 0.25,
+          maxWidthOrHeight: 1280,
+          useWebWorker: true,
+        };
+        const compressedPhotos = await Promise.all(
+          photos.map(async (photo) => {
+            try {
+              return await imageCompression(photo, compressOptions);
+            } catch (err) {
+              console.warn('Sell car photo compression failed, using original', err);
+              return photo;
+            }
+          })
+        );
+        compressedPhotos.forEach((photo) => {
+          data.append('photos', photo);
+        });
+      }
 
       const res = await axiosInstance.post('/sell-requests', data, {
         headers: { 'Content-Type': 'multipart/form-data' },

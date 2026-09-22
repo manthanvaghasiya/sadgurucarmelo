@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { RotateCw, MoveHorizontal, Loader2, MousePointer2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { getOptimizedUrl } from '../utils/imageUtils';
 
 const Car360Viewer = ({ images = [], title = "360° SPIN" }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -11,7 +12,7 @@ const Car360Viewer = ({ images = [], title = "360° SPIN" }) => {
   const [hasInteracted, setHasInteracted] = useState(false);
   const containerRef = useRef(null);
 
-  // Preload all images using new Image() for high performance
+  // Preload all images using new Image() for high performance with 750px optimization
   useEffect(() => {
     if (!images || images.length === 0) return;
 
@@ -23,7 +24,7 @@ const Car360Viewer = ({ images = [], title = "360° SPIN" }) => {
 
     const imageObjects = images.map((src) => {
       const img = new Image();
-      img.src = src;
+      img.src = getOptimizedUrl(src, 750);
       img.onload = () => {
         if (isMounted) {
           setLoadedCount((prev) => prev + 1);
@@ -164,7 +165,7 @@ const Car360Viewer = ({ images = [], title = "360° SPIN" }) => {
             >
               {/* Main Image Rendering - Optimized with eager loading hint */}
               <img
-                src={images[currentIndex]}
+                src={getOptimizedUrl(images[currentIndex], 750)}
                 alt={`Car Rotation Frame ${currentIndex + 1}`}
                 className="w-full h-full object-contain pointer-events-none"
                 style={{ contentVisibility: 'auto' }}

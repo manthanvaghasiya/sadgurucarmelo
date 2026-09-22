@@ -87,7 +87,7 @@ export default function CarCard({
       {/* Image Container with Badges */}
       <div className="car-card-image-wrap relative overflow-hidden bg-gray-100">
         <img
-          src={getOptimizedUrl(image)}
+          src={getOptimizedUrl(image, 500)}
           alt={title}
           loading="lazy"
           className="w-full h-auto object-contain group-hover:scale-105 transition-transform duration-500"

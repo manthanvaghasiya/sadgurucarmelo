@@ -1,6 +1,5 @@
 import { v2 as cloudinary } from 'cloudinary';
-import { CloudinaryStorage } from 'multer-storage-cloudinary';
-import multer from 'multer';
+import { upload, isR2Configured, uploadBufferToR2, deleteFromR2 } from './storage.js';
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -8,15 +7,5 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-const storage = new CloudinaryStorage({
-  cloudinary: cloudinary,
-  params: {
-    folder: 'sadguru_cars',
-    allowedFormats: ['jpeg', 'png', 'jpg', 'webp'],
-    transformation: [
-      { quality: 'auto', fetch_format: 'auto' },
-    ],
-  },
-});
-
-export const upload = multer({ storage });
+export { upload, isR2Configured, uploadBufferToR2, deleteFromR2 };
+export default cloudinary;

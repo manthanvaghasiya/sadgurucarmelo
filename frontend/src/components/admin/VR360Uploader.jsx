@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { UploadCloud, CheckCircle, AlertCircle, Loader2, X } from 'lucide-react';
 import toast from 'react-hot-toast';
+import imageCompression from 'browser-image-compression';
 
 const CLOUDINARY_UPLOAD_PRESET = 'car_360_uploads';
 const CLOUDINARY_CLOUD_NAME = 'dijf9umhc';
@@ -46,13 +47,24 @@ const VR360Uploader = ({ onUploadComplete, initialImages = [] }) => {
     const cloudinaryUrl = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`;
 
     try {
-      // Sequential upload to avoid browser/Cloudinary rate limits
+      // Sequential upload with client-side compression to drastically reduce bandwidth & storage
       for (const file of selectedFiles) {
+        let fileToUpload = file;
+        try {
+          fileToUpload = await imageCompression(file, {
+            maxSizeMB: 0.08,
+            maxWidthOrHeight: 800,
+            useWebWorker: true,
+          });
+        } catch (compErr) {
+          console.warn('360 frame compression skipped for', file.name, compErr);
+        }
+
         const formData = new FormData();
         formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
-        formData.append('file', file);
+        formData.append('file', fileToUpload);
 
-        console.log(`Uploading ${file.name} to Cloudinary...`);
+        console.log(`Uploading ${file.name} (${Math.round(fileToUpload.size / 1024)} KB) to Cloudinary...`);
 
         const response = await axios.post(cloudinaryUrl, formData, {
           onUploadProgress: (progressEvent) => {
