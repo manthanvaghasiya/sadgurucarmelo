@@ -172,6 +172,57 @@ router.get('/me', protect, async (req, res) => {
 });
 
 // ═══════════════════════════════════════════════
+//  PUT /api/auth/profile — Update own profile (name, email, phone, address)
+// ═══════════════════════════════════════════════
+router.put('/profile', protect, async (req, res) => {
+  try {
+    const { name, email, phone, address } = req.body;
+    const user = await User.findById(req.user.id);
+
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+
+    if (name && name.trim()) {
+      user.name = name.trim();
+    }
+
+    if (email && email.trim()) {
+      const cleanEmail = email.trim().toLowerCase();
+      if (cleanEmail !== user.email) {
+        const emailExists = await User.findOne({ email: cleanEmail, _id: { $ne: req.user.id } });
+        if (emailExists) {
+          return res.status(400).json({ success: false, message: 'Email is already in use by another account' });
+        }
+        user.email = cleanEmail;
+      }
+    }
+
+    if (phone !== undefined) user.phone = phone.trim();
+    if (address !== undefined) user.address = address.trim();
+
+    await user.save();
+
+    res.json({
+      success: true,
+      message: 'Profile updated successfully',
+      data: {
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        phone: user.phone,
+        address: user.address,
+        isActive: user.isActive,
+      },
+    });
+  } catch (error) {
+    console.error('Update profile error:', error);
+    res.status(500).json({ success: false, message: error.message || 'Server error' });
+  }
+});
+
+// ═══════════════════════════════════════════════
 //  PUT /api/auth/change-password — Change own password
 // ═══════════════════════════════════════════════
 router.put('/change-password', protect, async (req, res) => {
