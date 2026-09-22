@@ -13,9 +13,14 @@ export default function PWAInstallPrompt() {
   const isAdminRoute = location.pathname.startsWith('/login') || location.pathname.startsWith('/admin');
 
   useEffect(() => {
+    // Only show install prompt on Admin / Staff routes
+    if (!isAdminRoute) return;
+
+    // Check if dismissed before
+    if (localStorage.getItem('pwa_staff_prompt_dismissed')) return;
+
     // Detect if already installed
     const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
-
     if (isStandalone) return;
 
     // Detect iOS
@@ -24,14 +29,7 @@ export default function PWAInstallPrompt() {
 
     if (isIosDevice) {
       setIsIOS(true);
-      if (isAdminRoute) {
-        setIsVisible(true);
-      } else {
-        // Show iOS prompt after 3 seconds for regular users
-        timeoutRef.current = setTimeout(() => {
-          setIsVisible(true);
-        }, 3000);
-      }
+      setIsVisible(true);
     }
 
     // Check if the event was already captured by index.html script
@@ -89,26 +87,20 @@ export default function PWAInstallPrompt() {
 
   const handleDismiss = () => {
     setIsVisible(false);
-    // Re-show after exactly 2 minutes
-    timeoutRef.current = setTimeout(() => {
-      if (isIOS) {
-        setIsVisible(true);
-      } else {
-        setDeferredPrompt((prev) => {
-          if (prev) setIsVisible(true);
-          return prev;
-        });
-      }
-    }, 120000);
+    try {
+      localStorage.setItem('pwa_staff_prompt_dismissed', 'true');
+    } catch {
+      // Ignore storage error
+    }
   };
+
+  // Do not render anything on customer-facing pages
+  if (!isAdminRoute) {
+    return null;
+  }
 
   return (
     <>
-      {/* Backdrop overlay */}
-      <div
-        className={`fixed inset-0 bg-black/30 backdrop-blur-sm z-[9998] transition-opacity duration-500 ${isVisible ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
-        onClick={handleDismiss}
-      />
 
       {/* Prompt Card */}
       <div
