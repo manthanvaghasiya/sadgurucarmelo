@@ -319,7 +319,7 @@ export default function CarDetails() {
 
                             {/* Main Big Screen Viewer */}
                             <div
-                                className={`relative w-full bg-slate-950 rounded-2xl sm:rounded-3xl overflow-hidden mb-4 shadow-xl border border-slate-100 group flex items-center justify-center cursor-pointer select-none ${
+                                className={`relative w-full bg-white rounded-2xl sm:rounded-3xl overflow-hidden mb-4 shadow-sm border border-slate-200/80 group flex items-center justify-center cursor-pointer select-none ${
                                     viewMode === '360' && (car.spinImages || []).length > 0
                                         ? 'aspect-[4/3] lg:aspect-video'
                                         : 'aspect-[4/3] sm:aspect-[16/10]'
@@ -447,7 +447,7 @@ export default function CarDetails() {
                                                 setActiveImageIdx(i);
                                                 setViewMode('standard');
                                             }}
-                                            className={`relative shrink-0 w-24 sm:w-32 aspect-[16/10] bg-slate-100 rounded-xl overflow-hidden cursor-pointer transition-all duration-300 snap-start border-2 ${
+                                            className={`relative shrink-0 w-24 sm:w-32 aspect-[16/10] bg-white rounded-xl overflow-hidden cursor-pointer transition-all duration-300 snap-start border-2 ${
                                                 isActive
                                                     ? 'border-brand-orange ring-2 ring-brand-orange/40 scale-[0.98] shadow-md'
                                                     : 'border-transparent opacity-70 hover:opacity-100 hover:border-slate-300'
@@ -880,7 +880,7 @@ export default function CarDetails() {
                         <img
                             src={getOptimizedUrl(images[activeImageIdx], 1600)}
                             alt={`${car.make} ${car.model} Fullscreen ${activeImageIdx + 1}`}
-                            className="max-h-[75vh] max-w-full object-contain rounded-xl sm:rounded-2xl shadow-2xl transition-all duration-300"
+                            className="max-h-[75vh] max-w-full object-contain rounded-xl sm:rounded-2xl shadow-2xl transition-all duration-300 bg-white"
                         />
 
                         {/* Lightbox Prev / Next Controls */}
