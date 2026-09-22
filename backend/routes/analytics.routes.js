@@ -3,8 +3,15 @@ import Analytics from '../models/Analytics.js';
 
 const router = express.Router();
 
+// Helper to get today's date normalized to IST (Asia/Kolkata)
+const getTodayIST = () => {
+  const now = new Date();
+  const istString = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Kolkata' }).format(now);
+  return new Date(istString + 'T00:00:00.000Z');
+};
+
 // @route   GET /api/analytics/app-installs/total
-// @desc    Get total app installs across all time
+// @desc    Get real total app installs across all time
 // @access  Public
 router.get('/app-installs/total', async (req, res) => {
   try {
@@ -20,12 +27,11 @@ router.get('/app-installs/total', async (req, res) => {
 });
 
 // @route   POST /api/analytics/app-install
-// @desc    Track new PWA app installation
+// @desc    Track real PWA app installation
 // @access  Public
 router.post('/app-install', async (req, res) => {
   try {
-    const today = new Date();
-    today.setUTCHours(0, 0, 0, 0);
+    const today = getTodayIST();
 
     await Analytics.findOneAndUpdate(
       { date: today },
@@ -40,14 +46,15 @@ router.post('/app-install', async (req, res) => {
 });
 
 // @route   POST /api/analytics/track
-// @desc    Track page views and unique visitors
+// @desc    Track real page views and unique visitors
 // @access  Public
 router.post('/track', async (req, res) => {
   try {
-    const today = new Date();
-    today.setUTCHours(0, 0, 0, 0);
+    const today = getTodayIST();
 
-    const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress || req.ip || '127.0.0.1';
+    const rawIp = req.headers['x-forwarded-for'] || req.socket.remoteAddress || req.ip || '127.0.0.1';
+    const ip = typeof rawIp === 'string' ? rawIp.split(',')[0].trim() : '127.0.0.1';
+    const visitorId = req.body?.visitorId ? String(req.body.visitorId).trim() : null;
 
     // Atomically increment pageViews and ensure document exists
     const doc = await Analytics.findOneAndUpdate(
@@ -56,15 +63,27 @@ router.post('/track', async (req, res) => {
       { upsert: true, new: true, setDefaultsOnInsert: true }
     );
 
-    // If IP is not already recorded for today, atomically add it and increment visitors
-    if (doc && !doc.ips.includes(ip)) {
-      await Analytics.updateOne(
-        { date: today, ips: { $ne: ip } },
-        {
-          $addToSet: { ips: ip },
-          $inc: { visitors: 1 }
-        }
-      );
+    // Check if this visitor is unique for today
+    let isNewVisitor = false;
+    const updateOps = {};
+
+    if (visitorId && (!doc.visitorIds || !doc.visitorIds.includes(visitorId))) {
+      updateOps.$addToSet = { ...(updateOps.$addToSet || {}), visitorIds: visitorId };
+      isNewVisitor = true;
+    }
+
+    if (ip && (!doc.ips || !doc.ips.includes(ip))) {
+      updateOps.$addToSet = { ...(updateOps.$addToSet || {}), ips: ip };
+      if (!visitorId) {
+        isNewVisitor = true;
+      }
+    }
+
+    if (isNewVisitor) {
+      updateOps.$inc = { visitors: 1 };
+      await Analytics.updateOne({ date: today }, updateOps);
+    } else if (updateOps.$addToSet) {
+      await Analytics.updateOne({ date: today }, updateOps);
     }
 
     res.status(200).json({ success: true });
@@ -74,62 +93,17 @@ router.post('/track', async (req, res) => {
   }
 });
 
-// Helper to seed realistic baseline traffic if DB is empty
-const seedBaselineAnalytics = async () => {
-  try {
-    const count = await Analytics.countDocuments();
-    if (count > 0) return;
-
-    console.log('Seeding baseline analytics for last 60 days...');
-    const records = [];
-    const now = new Date();
-
-    for (let i = 59; i >= 0; i--) {
-      const d = new Date(now);
-      d.setDate(d.getDate() - i);
-      d.setUTCHours(0, 0, 0, 0);
-
-      const dayOfWeek = d.getDay(); // 0 = Sun, 6 = Sat
-      const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
-      const progress = (60 - i) / 60; // 0 to 1
-
-      const baseViews = 160 + Math.floor(progress * 140);
-      const weekendBonus = isWeekend ? 60 + Math.floor(Math.random() * 45) : 0;
-      const jitter = Math.floor(Math.random() * 35) - 15;
-      const pageViews = Math.max(80, baseViews + weekendBonus + jitter);
-
-      const visitorRatio = 0.28 + (Math.random() * 0.1);
-      const visitors = Math.max(25, Math.floor(pageViews * visitorRatio));
-
-      records.push({
-        date: d,
-        pageViews,
-        visitors,
-        appInstalls: isWeekend ? Math.floor(Math.random() * 3) : (Math.random() > 0.6 ? 1 : 0),
-        ips: [],
-      });
-    }
-
-    await Analytics.insertMany(records);
-    console.log('Successfully seeded 60 days of baseline analytics.');
-  } catch (err) {
-    console.error('Error seeding baseline analytics:', err);
-  }
-};
-
 // @route   GET /api/analytics/summary
-// @desc    Get traffic summary & growth comparison for the last N days
+// @desc    Get real traffic summary & growth comparison for the last N days
 // @access  Public
 router.get('/summary', async (req, res) => {
   try {
-    await seedBaselineAnalytics();
-
     const limitDays = parseInt(req.query.days) || 30;
-    
+    const today = getTodayIST();
+
     // Current period range
-    const currentStartDate = new Date();
+    const currentStartDate = new Date(today);
     currentStartDate.setDate(currentStartDate.getDate() - (limitDays - 1));
-    currentStartDate.setUTCHours(0, 0, 0, 0);
 
     // Previous period range for growth calculation
     const prevStartDate = new Date(currentStartDate);
@@ -140,7 +114,7 @@ router.get('/summary', async (req, res) => {
     prevEndDate.setUTCHours(23, 59, 59, 999);
 
     const [currentData, prevData] = await Promise.all([
-      Analytics.find({ date: { $gte: currentStartDate } }).sort({ date: 1 }),
+      Analytics.find({ date: { $gte: currentStartDate, $lte: today } }).sort({ date: 1 }),
       Analytics.find({ date: { $gte: prevStartDate, $lte: prevEndDate } }),
     ]);
 
@@ -153,9 +127,8 @@ router.get('/summary', async (req, res) => {
     let peakDate = '';
 
     for (let i = limitDays - 1; i >= 0; i--) {
-      const d = new Date();
+      const d = new Date(today);
       d.setDate(d.getDate() - i);
-      d.setUTCHours(0, 0, 0, 0);
 
       const record = currentData.find((r) => r.date.getTime() === d.getTime());
       const views = record ? record.pageViews : 0;

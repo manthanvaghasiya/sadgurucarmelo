@@ -53,10 +53,14 @@ export default function TrafficGrowthChart() {
 
   // Compute maximum values for scaling
   const maxVal = useMemo(() => {
-    if (!data.length) return 100;
+    if (!data.length) return 5;
     const max = Math.max(...data.map((d) => Math.max(d.pageViews || 0, d.visitors || 0)));
-    // Round up to nearest 50 for clean scale
-    return Math.max(50, Math.ceil(max / 50) * 50);
+    if (max === 0) return 5;
+    if (max <= 5) return 5;
+    if (max <= 10) return 10;
+    if (max <= 20) return 20;
+    if (max <= 50) return 50;
+    return Math.ceil(max / 20) * 20;
   }, [data]);
 
   // Coordinate mapping
@@ -171,6 +175,10 @@ export default function TrafficGrowthChart() {
             <h2 className="font-heading font-bold text-lg sm:text-xl text-text">
               Website Traffic Growth
             </h2>
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-500/10 text-emerald-600 border border-emerald-500/20">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+              Real Data
+            </span>
             <span
               className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] sm:text-xs font-bold ring-1 transition-colors ${
                 isPositiveGrowth

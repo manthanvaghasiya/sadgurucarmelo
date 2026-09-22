@@ -20,6 +20,9 @@ const analyticsSchema = new mongoose.Schema({
   },
   ips: [{ 
     type: String 
+  }],
+  visitorIds: [{
+    type: String
   }]
 }, { 
   timestamps: true 
