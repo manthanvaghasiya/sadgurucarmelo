@@ -9,14 +9,11 @@ import {
   Eye,
   EyeOff,
   Loader2,
-  UserCircle,
   Lock,
   Key,
   Mail,
-  Phone,
   Sparkles,
   Save,
-  CheckCircle2,
 } from 'lucide-react';
 import axiosInstance from '../../api/axiosConfig';
 import { useAuth } from '../../context/AuthContext';
@@ -28,97 +25,81 @@ export default function AdminSettings() {
   // ── Auth Context ──
   const { user: authUser, updateUser } = useAuth();
 
-  // ── Profile State & Form ──
-  const [profileLoading, setProfileLoading] = useState(false);
-  const {
-    register: registerProfile,
-    handleSubmit: handleProfileSubmit,
-    reset: resetProfile,
-    formState: { errors: profileErrors, isSubmitting: profileSubmitting },
-  } = useForm();
-
-  // ── Password State & Form ──
+  // ── Credentials Form State ──
+  const [credentialsLoading, setCredentialsLoading] = useState(false);
   const [showCurrent, setShowCurrent] = useState(false);
   const [showNew, setShowNew] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
 
   const {
-    register: registerPwd,
-    handleSubmit: handlePwdSubmit,
-    reset: resetPwd,
-    watch: watchPwd,
-    formState: { errors: pwdErrors, isSubmitting: pwdSubmitting },
+    register,
+    handleSubmit,
+    reset,
+    watch,
+    setValue,
+    formState: { errors, isSubmitting },
   } = useForm();
 
-  // ── Fetch Profile ──
-  const fetchProfile = useCallback(async () => {
-    setProfileLoading(true);
+  const newPasswordValue = watch('newPassword');
+
+  // ── Fetch Current Admin Credentials ──
+  const fetchCredentials = useCallback(async () => {
+    setCredentialsLoading(true);
     try {
       const res = await axiosInstance.get('/auth/me');
       if (res.data.success && res.data.data) {
         const userData = res.data.data;
-        resetProfile({
-          name: userData.name || '',
-          email: userData.email || '',
-          phone: userData.phone || '',
-        });
+        setValue('email', userData.email || '');
         if (updateUser) updateUser(userData);
       }
     } catch (err) {
-      console.error('Failed to fetch profile:', err);
-      if (authUser) {
-        resetProfile({
-          name: authUser.name || '',
-          email: authUser.email || '',
-          phone: authUser.phone || '',
-        });
+      console.error('Failed to fetch credentials:', err);
+      if (authUser?.email) {
+        setValue('email', authUser.email);
       }
     } finally {
-      setProfileLoading(false);
+      setCredentialsLoading(false);
     }
-  }, [resetProfile, updateUser, authUser]);
+  }, [setValue, updateUser, authUser]);
 
   useEffect(() => {
     if (activeTab === 'security') {
-      fetchProfile();
+      fetchCredentials();
     }
-  }, [activeTab, fetchProfile]);
+  }, [activeTab, fetchCredentials]);
 
-  // ── Update Profile ──
-  const onUpdateProfile = async (data) => {
+  // ── Save Credentials (Email and/or Password) ──
+  const onSaveCredentials = async (data) => {
     try {
-      const res = await axiosInstance.put('/auth/profile', {
-        name: data.name.trim(),
+      const payload = {
         email: data.email.trim().toLowerCase(),
-        phone: data.phone?.trim() || '',
-      });
+      };
+
+      if (data.newPassword && data.newPassword.trim()) {
+        if (!data.currentPassword || !data.currentPassword.trim()) {
+          toast.error('Current password is required to set a new password');
+          return;
+        }
+        payload.currentPassword = data.currentPassword;
+        payload.newPassword = data.newPassword.trim();
+      }
+
+      const res = await axiosInstance.put('/auth/profile', payload);
       if (res.data.success) {
-        toast.success('Profile updated successfully!');
+        toast.success(res.data.message || 'Credentials updated successfully!');
         if (res.data.data && updateUser) {
           updateUser(res.data.data);
         }
-      }
-    } catch (err) {
-      toast.error(err.response?.data?.message || 'Failed to update profile');
-    }
-  };
-
-  // ── Change Password ──
-  const onChangePassword = async (data) => {
-    try {
-      const res = await axiosInstance.put('/auth/change-password', {
-        currentPassword: data.currentPassword,
-        newPassword: data.newPassword,
-      });
-      if (res.data.success) {
-        toast.success('Password changed successfully!');
-        resetPwd();
+        // Clear password fields
+        setValue('currentPassword', '');
+        setValue('newPassword', '');
+        setValue('confirmPassword', '');
         setShowCurrent(false);
         setShowNew(false);
         setShowConfirm(false);
       }
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Failed to change password');
+      toast.error(err.response?.data?.message || 'Failed to update credentials');
     }
   };
 
@@ -180,7 +161,7 @@ export default function AdminSettings() {
   };
 
   const tabs = [
-    { id: 'security', label: 'Security & Account', icon: Shield },
+    { id: 'security', label: 'Security & Credentials', icon: Shield },
     { id: 'ai', label: 'AI Configuration', icon: Sparkles },
   ];
 
@@ -193,7 +174,7 @@ export default function AdminSettings() {
         </div>
         <div>
           <h1 className="font-heading font-bold text-2xl text-text">Settings</h1>
-          <p className="font-body text-sm text-text-muted">Manage your account profile, security credentials, and AI configuration.</p>
+          <p className="font-body text-sm text-text-muted">Manage your login credentials, account security, and AI configuration.</p>
         </div>
       </div>
 
@@ -217,190 +198,155 @@ export default function AdminSettings() {
         })}
       </div>
 
-      {/* ═══════════════════════ Security & Account Tab ═══════════════════════ */}
+      {/* ═══════════════════════ Security & Credentials Tab ═══════════════════════ */}
       {activeTab === 'security' && (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Card 1: Admin Profile & Username */}
-          <div className="bg-surface rounded-2xl border border-gray-100 p-6 sm:p-8 space-y-6 flex flex-col justify-between">
-            <div className="space-y-6">
-              <div className="flex items-center gap-3 pb-4 border-b border-gray-100">
-                <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center">
-                  <UserCircle className="w-5 h-5 text-primary" />
-                </div>
-                <div>
-                  <h2 className="font-heading font-bold text-lg text-text">Admin Profile & Username</h2>
-                  <p className="font-body text-sm text-text-muted">Update your display name, username, email, and contact info.</p>
-                </div>
+        <div className="max-w-2xl">
+          <div className="bg-surface rounded-2xl border border-gray-100 p-6 sm:p-8 space-y-6">
+            {/* Header */}
+            <div className="flex items-center gap-3 pb-5 border-b border-gray-100">
+              <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center">
+                <Shield className="w-5 h-5 text-primary" />
               </div>
-
-              {profileLoading ? (
-                <div className="py-12 flex flex-col items-center justify-center gap-2 font-body text-sm text-text-muted">
-                  <Loader2 className="w-6 h-6 animate-spin text-primary" />
-                  Loading profile...
-                </div>
-              ) : (
-                <form id="profile-form" onSubmit={handleProfileSubmit(onUpdateProfile)} className="space-y-4">
-                  <div>
-                    <label className="block font-body text-xs font-semibold text-text-muted mb-1.5 uppercase tracking-wide">
-                      Admin Name / Username *
-                    </label>
-                    <div className="relative">
-                      <UserCircle className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted/60" />
-                      <input
-                        {...registerProfile('name', { required: 'Name is required' })}
-                        className="w-full pl-11 pr-4 py-3 bg-background rounded-xl border border-gray-200 font-body text-sm text-text outline-none focus:border-primary/30 focus:ring-2 focus:ring-primary/10"
-                        placeholder="Admin Name"
-                      />
-                    </div>
-                    {profileErrors.name && <p className="text-red-500 text-xs font-body mt-1">{profileErrors.name.message}</p>}
-                  </div>
-
-                  <div>
-                    <label className="block font-body text-xs font-semibold text-text-muted mb-1.5 uppercase tracking-wide">
-                      Email Address *
-                    </label>
-                    <div className="relative">
-                      <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted/60" />
-                      <input
-                        type="email"
-                        {...registerProfile('email', { required: 'Email is required' })}
-                        className="w-full pl-11 pr-4 py-3 bg-background rounded-xl border border-gray-200 font-body text-sm text-text outline-none focus:border-primary/30 focus:ring-2 focus:ring-primary/10"
-                        placeholder="admin@example.com"
-                      />
-                    </div>
-                    {profileErrors.email && <p className="text-red-500 text-xs font-body mt-1">{profileErrors.email.message}</p>}
-                  </div>
-
-                  <div>
-                    <label className="block font-body text-xs font-semibold text-text-muted mb-1.5 uppercase tracking-wide">
-                      Phone Number
-                    </label>
-                    <div className="relative">
-                      <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted/60" />
-                      <input
-                        type="tel"
-                        {...registerProfile('phone')}
-                        className="w-full pl-11 pr-4 py-3 bg-background rounded-xl border border-gray-200 font-body text-sm text-text outline-none focus:border-primary/30 focus:ring-2 focus:ring-primary/10"
-                        placeholder="e.g. +91 99136 34447"
-                      />
-                    </div>
-                  </div>
-                </form>
-              )}
+              <div>
+                <h2 className="font-heading font-bold text-lg text-text">Security & Login Credentials</h2>
+                <p className="font-body text-sm text-text-muted">Update your admin login email address and password.</p>
+              </div>
             </div>
 
-            <div className="pt-4 border-t border-gray-100 flex justify-end">
-              <button
-                type="submit"
-                form="profile-form"
-                disabled={profileSubmitting || profileLoading}
-                className="px-6 py-3 bg-primary hover:bg-primary-hover text-white rounded-xl font-body text-sm font-bold transition-colors shadow-sm shadow-primary/20 disabled:opacity-50 flex items-center gap-2"
-              >
-                {profileSubmitting ? (
-                  <>
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                    Saving Profile...
-                  </>
-                ) : (
-                  <>
-                    <Save className="w-4 h-4" />
-                    Save Profile Changes
-                  </>
-                )}
-              </button>
-            </div>
-          </div>
-
-          {/* Card 2: Security & Change Password */}
-          <div className="bg-surface rounded-2xl border border-gray-100 p-6 sm:p-8 space-y-6 flex flex-col justify-between">
-            <div className="space-y-6">
-              <div className="flex items-center gap-3 pb-4 border-b border-gray-100">
-                <div className="w-10 h-10 bg-[#f59e0b]/10 rounded-xl flex items-center justify-center">
-                  <Key className="w-5 h-5 text-[#d97706]" />
-                </div>
-                <div>
-                  <h2 className="font-heading font-bold text-lg text-text">Change Password</h2>
-                  <p className="font-body text-sm text-text-muted">Update your admin account login password.</p>
-                </div>
+            {credentialsLoading ? (
+              <div className="py-12 flex flex-col items-center justify-center gap-2 font-body text-sm text-text-muted">
+                <Loader2 className="w-6 h-6 animate-spin text-primary" />
+                Loading credentials...
               </div>
-
-              <form id="password-form" onSubmit={handlePwdSubmit(onChangePassword)} className="space-y-4">
+            ) : (
+              <form onSubmit={handleSubmit(onSaveCredentials)} className="space-y-6">
+                {/* Email Address */}
                 <div>
-                  <label className="block font-body text-xs font-semibold text-text-muted mb-1.5 uppercase tracking-wide">Current Password</label>
+                  <label className="block font-body text-xs font-semibold text-text-muted mb-1.5 uppercase tracking-wide">
+                    Email Address *
+                  </label>
                   <div className="relative">
-                    <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted/60" />
+                    <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted/60" />
                     <input
-                      type={showCurrent ? 'text' : 'password'}
-                      {...registerPwd('currentPassword', { required: 'Current password is required' })}
-                      placeholder="••••••••"
-                      className="w-full pl-11 pr-11 py-3 bg-background rounded-xl border border-gray-200 font-body text-sm text-text outline-none focus:border-primary/30 focus:ring-2 focus:ring-primary/10"
+                      type="email"
+                      {...register('email', { required: 'Email is required' })}
+                      className="w-full pl-11 pr-4 py-3 bg-background rounded-xl border border-gray-200 font-body text-sm text-text outline-none focus:border-primary/30 focus:ring-2 focus:ring-primary/10"
+                      placeholder="admin@example.com"
                     />
-                    <button type="button" onClick={() => setShowCurrent(!showCurrent)} className="absolute right-4 top-1/2 -translate-y-1/2 text-text-muted">
-                      {showCurrent ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                    </button>
                   </div>
-                  {pwdErrors.currentPassword && <p className="text-red-500 text-xs font-body mt-1">{pwdErrors.currentPassword.message}</p>}
+                  {errors.email && <p className="text-red-500 text-xs font-body mt-1">{errors.email.message}</p>}
+                  <p className="font-body text-xs text-text-muted/60 mt-1">This is your username for logging into the admin portal.</p>
                 </div>
 
-                <div>
-                  <label className="block font-body text-xs font-semibold text-text-muted mb-1.5 uppercase tracking-wide">New Password</label>
-                  <div className="relative">
-                    <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted/60" />
-                    <input
-                      type={showNew ? 'text' : 'password'}
-                      {...registerPwd('newPassword', { required: 'New password is required', minLength: { value: 6, message: 'Min 6 characters' } })}
-                      placeholder="Min 6 characters"
-                      className="w-full pl-11 pr-11 py-3 bg-background rounded-xl border border-gray-200 font-body text-sm text-text outline-none focus:border-primary/30 focus:ring-2 focus:ring-primary/10"
-                    />
-                    <button type="button" onClick={() => setShowNew(!showNew)} className="absolute right-4 top-1/2 -translate-y-1/2 text-text-muted">
-                      {showNew ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                    </button>
+                {/* Password Section */}
+                <div className="pt-4 border-t border-gray-100 space-y-4">
+                  <div className="flex items-center gap-2">
+                    <Key className="w-4 h-4 text-[#d97706]" />
+                    <h3 className="font-heading font-bold text-sm text-text">Change Password</h3>
+                    <span className="font-body text-xs text-text-muted">(Leave blank to keep current password)</span>
                   </div>
-                  {pwdErrors.newPassword && <p className="text-red-500 text-xs font-body mt-1">{pwdErrors.newPassword.message}</p>}
+
+                  {/* Current Password */}
+                  <div>
+                    <label className="block font-body text-xs font-semibold text-text-muted mb-1.5 uppercase tracking-wide">
+                      Current Password {newPasswordValue ? '*' : ''}
+                    </label>
+                    <div className="relative">
+                      <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted/60" />
+                      <input
+                        type={showCurrent ? 'text' : 'password'}
+                        {...register('currentPassword', {
+                          validate: (val) => !newPasswordValue || !!val?.trim() || 'Current password is required to change password',
+                        })}
+                        placeholder="••••••••"
+                        className="w-full pl-11 pr-11 py-3 bg-background rounded-xl border border-gray-200 font-body text-sm text-text outline-none focus:border-primary/30 focus:ring-2 focus:ring-primary/10"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowCurrent(!showCurrent)}
+                        className="absolute right-4 top-1/2 -translate-y-1/2 text-text-muted hover:text-text transition-colors"
+                      >
+                        {showCurrent ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </button>
+                    </div>
+                    {errors.currentPassword && <p className="text-red-500 text-xs font-body mt-1">{errors.currentPassword.message}</p>}
+                  </div>
+
+                  {/* New Password */}
+                  <div>
+                    <label className="block font-body text-xs font-semibold text-text-muted mb-1.5 uppercase tracking-wide">
+                      New Password
+                    </label>
+                    <div className="relative">
+                      <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted/60" />
+                      <input
+                        type={showNew ? 'text' : 'password'}
+                        {...register('newPassword', {
+                          minLength: { value: 6, message: 'Min 6 characters' },
+                        })}
+                        placeholder="Min 6 characters"
+                        className="w-full pl-11 pr-11 py-3 bg-background rounded-xl border border-gray-200 font-body text-sm text-text outline-none focus:border-primary/30 focus:ring-2 focus:ring-primary/10"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowNew(!showNew)}
+                        className="absolute right-4 top-1/2 -translate-y-1/2 text-text-muted hover:text-text transition-colors"
+                      >
+                        {showNew ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </button>
+                    </div>
+                    {errors.newPassword && <p className="text-red-500 text-xs font-body mt-1">{errors.newPassword.message}</p>}
+                  </div>
+
+                  {/* Confirm New Password */}
+                  <div>
+                    <label className="block font-body text-xs font-semibold text-text-muted mb-1.5 uppercase tracking-wide">
+                      Confirm New Password
+                    </label>
+                    <div className="relative">
+                      <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted/60" />
+                      <input
+                        type={showConfirm ? 'text' : 'password'}
+                        {...register('confirmPassword', {
+                          validate: (val) => !newPasswordValue || val === newPasswordValue || 'Passwords do not match',
+                        })}
+                        placeholder="Repeat new password"
+                        className="w-full pl-11 pr-11 py-3 bg-background rounded-xl border border-gray-200 font-body text-sm text-text outline-none focus:border-primary/30 focus:ring-2 focus:ring-primary/10"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowConfirm(!showConfirm)}
+                        className="absolute right-4 top-1/2 -translate-y-1/2 text-text-muted hover:text-text transition-colors"
+                      >
+                        {showConfirm ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </button>
+                    </div>
+                    {errors.confirmPassword && <p className="text-red-500 text-xs font-body mt-1">{errors.confirmPassword.message}</p>}
+                  </div>
                 </div>
 
-                <div>
-                  <label className="block font-body text-xs font-semibold text-text-muted mb-1.5 uppercase tracking-wide">Confirm New Password</label>
-                  <div className="relative">
-                    <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted/60" />
-                    <input
-                      type={showConfirm ? 'text' : 'password'}
-                      {...registerPwd('confirmPassword', {
-                        required: 'Confirm password is required',
-                        validate: (val) => val === watchPwd('newPassword') || 'Passwords do not match',
-                      })}
-                      placeholder="Repeat new password"
-                      className="w-full pl-11 pr-11 py-3 bg-background rounded-xl border border-gray-200 font-body text-sm text-text outline-none focus:border-primary/30 focus:ring-2 focus:ring-primary/10"
-                    />
-                    <button type="button" onClick={() => setShowConfirm(!showConfirm)} className="absolute right-4 top-1/2 -translate-y-1/2 text-text-muted">
-                      {showConfirm ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                    </button>
-                  </div>
-                  {pwdErrors.confirmPassword && <p className="text-red-500 text-xs font-body mt-1">{pwdErrors.confirmPassword.message}</p>}
+                {/* Submit Button */}
+                <div className="pt-4 border-t border-gray-100 flex justify-end">
+                  <button
+                    type="submit"
+                    disabled={isSubmitting || credentialsLoading}
+                    className="px-6 py-3 bg-primary hover:bg-primary-hover text-white rounded-xl font-body text-sm font-bold transition-colors shadow-sm shadow-primary/20 disabled:opacity-50 flex items-center gap-2"
+                  >
+                    {isSubmitting ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        Saving Changes...
+                      </>
+                    ) : (
+                      <>
+                        <Save className="w-4 h-4" />
+                        Save Changes
+                      </>
+                    )}
+                  </button>
                 </div>
               </form>
-            </div>
-
-            <div className="pt-4 border-t border-gray-100 flex justify-end">
-              <button
-                type="submit"
-                form="password-form"
-                disabled={pwdSubmitting}
-                className="px-6 py-3 bg-primary hover:bg-primary-hover text-white rounded-xl font-body text-sm font-bold transition-colors shadow-sm shadow-primary/20 disabled:opacity-50 flex items-center gap-2"
-              >
-                {pwdSubmitting ? (
-                  <>
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                    Updating Password...
-                  </>
-                ) : (
-                  <>
-                    <Key className="w-4 h-4" />
-                    Update Password
-                  </>
-                )}
-              </button>
-            </div>
+            )}
           </div>
         </div>
       )}

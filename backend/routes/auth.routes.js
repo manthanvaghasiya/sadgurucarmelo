@@ -172,12 +172,12 @@ router.get('/me', protect, async (req, res) => {
 });
 
 // ═══════════════════════════════════════════════
-//  PUT /api/auth/profile — Update own profile (name, email, phone, address)
+//  PUT /api/auth/profile — Update own profile (email, password, etc.)
 // ═══════════════════════════════════════════════
 router.put('/profile', protect, async (req, res) => {
   try {
-    const { name, email, phone, address } = req.body;
-    const user = await User.findById(req.user.id);
+    const { name, email, phone, address, currentPassword, newPassword } = req.body;
+    const user = await User.findById(req.user.id).select('+password');
 
     if (!user) {
       return res.status(404).json({ success: false, message: 'User not found' });
@@ -201,11 +201,35 @@ router.put('/profile', protect, async (req, res) => {
     if (phone !== undefined) user.phone = phone.trim();
     if (address !== undefined) user.address = address.trim();
 
+    // If changing password
+    if (newPassword && newPassword.trim()) {
+      if (!currentPassword) {
+        return res.status(400).json({
+          success: false,
+          message: 'Current password is required to set a new password',
+        });
+      }
+      if (newPassword.trim().length < 6) {
+        return res.status(400).json({
+          success: false,
+          message: 'New password must be at least 6 characters',
+        });
+      }
+      const isMatch = await user.matchPassword(currentPassword);
+      if (!isMatch) {
+        return res.status(401).json({
+          success: false,
+          message: 'Current password is incorrect',
+        });
+      }
+      user.password = newPassword.trim();
+    }
+
     await user.save();
 
     res.json({
       success: true,
-      message: 'Profile updated successfully',
+      message: newPassword && email ? 'Credentials updated successfully' : newPassword ? 'Password updated successfully' : 'Email updated successfully',
       data: {
         _id: user._id,
         name: user.name,
