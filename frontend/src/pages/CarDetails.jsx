@@ -1,7 +1,11 @@
 import { useParams, Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import SEO from '../components/SEO';
-import { Fuel, Settings2, User, Gauge, MessageCircle, MapPin, Star, Tag, Check, ShieldCheck, Palette, RotateCw, CheckCircle2, ChevronLeft, ChevronRight, ArrowLeftRight, Download } from 'lucide-react';
+import {
+    Fuel, Settings2, User, Gauge, MessageCircle, MapPin, Star, Tag, Check,
+    ShieldCheck, Palette, RotateCw, CheckCircle2, ChevronLeft, ChevronRight,
+    ArrowLeftRight, Download, Maximize2, Share2, X, ArrowLeft
+} from 'lucide-react';
 import toast from 'react-hot-toast';
 import axiosInstance from '../api/axiosConfig';
 import CarCard from '../components/CarCard';
@@ -18,10 +22,86 @@ export default function CarDetails() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [activeImage, setActiveImage] = useState(null);
+    const [activeImageIdx, setActiveImageIdx] = useState(0);
+    const [isLightboxOpen, setIsLightboxOpen] = useState(false);
+    const [touchStart, setTouchStart] = useState(null);
+    const [touchEnd, setTouchEnd] = useState(null);
     const [relatedCars, setRelatedCars] = useState([]);
     const [viewMode, setViewMode] = useState('standard'); // 'standard' or '360'
 
     const whatsappUrl = car ? getCarWhatsAppLink(car) : '#';
+
+    // Normalized list of gallery images
+    const images = car?.images && car.images.length > 0 ? car.images : (car?.image ? [car.image] : []);
+
+    // Sync activeImage whenever activeImageIdx changes or car loads
+    useEffect(() => {
+        if (images.length > 0) {
+            setActiveImage(images[activeImageIdx] || images[0]);
+        }
+    }, [activeImageIdx, car]);
+
+    // Keyboard navigation for Lightbox
+    useEffect(() => {
+        const handleKeyDown = (e) => {
+            if (!isLightboxOpen) return;
+            if (e.key === 'Escape') setIsLightboxOpen(false);
+            if (e.key === 'ArrowLeft' && images.length > 1) {
+                setActiveImageIdx((prev) => (prev === 0 ? images.length - 1 : prev - 1));
+            }
+            if (e.key === 'ArrowRight' && images.length > 1) {
+                setActiveImageIdx((prev) => (prev === images.length - 1 ? 0 : prev + 1));
+            }
+        };
+        if (isLightboxOpen) {
+            window.addEventListener('keydown', handleKeyDown);
+            document.body.style.overflow = 'hidden';
+        } else {
+            document.body.style.overflow = '';
+        }
+        return () => {
+            window.removeEventListener('keydown', handleKeyDown);
+            document.body.style.overflow = '';
+        };
+    }, [isLightboxOpen, images.length]);
+
+    // Mobile touch swipe handlers
+    const minSwipeDistance = 45;
+    const onTouchStart = (e) => {
+        setTouchEnd(null);
+        setTouchStart(e.targetTouches[0].clientX);
+    };
+    const onTouchMove = (e) => setTouchEnd(e.targetTouches[0].clientX);
+    const onTouchEnd = () => {
+        if (!touchStart || !touchEnd) return;
+        const distance = touchStart - touchEnd;
+        if (distance > minSwipeDistance && images.length > 1) {
+            // Swiped left -> next
+            setActiveImageIdx((prev) => (prev === images.length - 1 ? 0 : prev + 1));
+        } else if (distance < -minSwipeDistance && images.length > 1) {
+            // Swiped right -> prev
+            setActiveImageIdx((prev) => (prev === 0 ? images.length - 1 : prev - 1));
+        }
+    };
+
+    const handleShare = async () => {
+        const shareUrl = window.location.href;
+        const shareTitle = `${car?.make || 'Sadguru'} ${car?.model || 'Car'} (${car?.year || ''}) | Sadguru Car Melo`;
+        if (navigator.share) {
+            try {
+                await navigator.share({
+                    title: shareTitle,
+                    text: `Check out this ${car?.make} ${car?.model} at Sadguru Car Melo, Surat!`,
+                    url: shareUrl,
+                });
+            } catch {
+                // User dismissed share
+            }
+        } else {
+            navigator.clipboard.writeText(shareUrl);
+            toast.success('લિંક કોપી થઈ ગઈ છે · Link copied to clipboard!');
+        }
+    };
 
     const handleDownloadAllImages = async () => {
         const imagesToDownload = car?.images && car.images.length > 0 ? car.images : [car?.image].filter(Boolean);
@@ -202,96 +282,183 @@ export default function CarDetails() {
 
                     {/* 1. Media Gallery — Always first */}
                     <div className="lg:col-span-2 order-1">
-                        <div className="bg-surface p-4 rounded-2xl shadow-sm border border-gray-100">
+                        {/* Top Quick Actions Bar (Like Hari Ram: Back, Share, Save) */}
+                        <div className="flex items-center justify-between gap-3 mb-4">
+                            <Link
+                                to="/inventory"
+                                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white border border-slate-200 text-slate-700 hover:text-brand-orange hover:border-brand-orange text-xs font-bold transition-all shadow-xs"
+                            >
+                                <ArrowLeft className="w-3.5 h-3.5" />
+                                <span>બધી કાર જુઓ · Back to Inventory</span>
+                            </Link>
+
+                            <div className="flex items-center gap-2">
+                                <button
+                                    type="button"
+                                    onClick={handleShare}
+                                    className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white border border-slate-200 text-slate-700 hover:text-brand-orange hover:bg-brand-orange/5 text-xs font-bold transition-all shadow-xs active:scale-95"
+                                    title="Share Car Details"
+                                >
+                                    <Share2 className="w-3.5 h-3.5" />
+                                    <span className="hidden sm:inline">શેર કરો · Share</span>
+                                </button>
+
+                                <button
+                                    type="button"
+                                    onClick={handleDownloadAllImages}
+                                    className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white border border-slate-200 text-slate-700 hover:text-brand-orange hover:bg-brand-orange/5 text-xs font-bold transition-all shadow-xs active:scale-95"
+                                    title="Download All Photos"
+                                >
+                                    <Download className="w-3.5 h-3.5" />
+                                    <span className="hidden sm:inline">સેવ કરો · Save</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div className="bg-surface p-3 sm:p-4 rounded-2xl sm:rounded-3xl shadow-sm border border-gray-100">
 
                             {/* Main Big Screen Viewer */}
-                            <div className={`relative w-full bg-gray-200 rounded-2xl overflow-hidden mb-4 shadow-lg group ${viewMode === '360' && (car.spinImages || []).length > 0 ? 'aspect-[4/3] lg:aspect-video' : ''}`}>
+                            <div
+                                className={`relative w-full bg-slate-950 rounded-2xl sm:rounded-3xl overflow-hidden mb-4 shadow-xl border border-slate-100 group flex items-center justify-center cursor-pointer select-none ${
+                                    viewMode === '360' && (car.spinImages || []).length > 0
+                                        ? 'aspect-[4/3] lg:aspect-video'
+                                        : 'aspect-[4/3] sm:aspect-[16/10]'
+                                }`}
+                                onTouchStart={onTouchStart}
+                                onTouchMove={onTouchMove}
+                                onTouchEnd={onTouchEnd}
+                                onClick={() => {
+                                    if (viewMode === 'standard' && images.length > 0) {
+                                        setIsLightboxOpen(true);
+                                    }
+                                }}
+                            >
                                 {viewMode === '360' && (car.spinImages || []).length > 0 ? (
                                     <Car360Viewer images={car.spinImages || []} title="360° EXTERIOR SPIN" />
                                 ) : (
-                                    <img src={getOptimizedUrl(activeImage, 1200)} alt="Car View" loading="lazy" className="w-full h-auto object-contain transition-transform duration-700 group-hover:scale-[1.02]" />
-                                )}
-
-                                {/* Simple Status Badge (No longer a toggle button) */}
-                                {viewMode !== '360' && (
-                                    <div className="absolute top-4 left-4 flex gap-2 z-10 pointer-events-none">
-                                        <div className="bg-primary text-white text-[10px] font-heading font-bold px-3 py-1.5 rounded flex items-center gap-1.5 uppercase tracking-wider shadow-sm backdrop-blur-md bg-opacity-90">
-                                            GALLERY VIEW
-                                        </div>
-                                    </div>
-                                )}
-
-                                {/* Image Navigation Arrows */}
-                                {viewMode !== '360' && (car.images || []).length > 1 && (
                                     <>
-                                        <button 
+                                        <img
+                                            src={getOptimizedUrl(images[activeImageIdx] || activeImage, 1200)}
+                                            alt={`${car.make} ${car.model} Photo ${activeImageIdx + 1}`}
+                                            loading="eager"
+                                            className="w-full h-full object-contain transition-transform duration-500 group-hover:scale-[1.02]"
+                                        />
+
+                                        {/* Top Badges */}
+                                        <div className="absolute top-3.5 left-3.5 flex items-center gap-2 z-20 pointer-events-none">
+                                            {/* Image Counter Badge (like Hari Ram) */}
+                                            {images.length > 1 && (
+                                                <span className="px-3 py-1 rounded-full bg-slate-900/80 backdrop-blur-md text-white font-heading font-bold text-xs border border-white/15 shadow-md">
+                                                    {activeImageIdx + 1} / {images.length}
+                                                </span>
+                                            )}
+                                            {car.status === 'Coming Soon' && (
+                                                <span className="px-2.5 py-1 rounded-md bg-amber-500 text-white font-black text-[10px] uppercase tracking-wider shadow">
+                                                    Coming Soon
+                                                </span>
+                                            )}
+                                            {car.status === 'Sold' && (
+                                                <span className="px-3 py-1 rounded-md bg-red-600 text-white font-black text-xs uppercase tracking-wider shadow-lg">
+                                                    SOLD OUT
+                                                </span>
+                                            )}
+                                        </div>
+
+                                        {/* Maximize / Fullscreen Button (Bottom-Right) */}
+                                        <button
+                                            type="button"
                                             onClick={(e) => {
                                                 e.stopPropagation();
-                                                const currentIndex = (car.images || []).indexOf(activeImage);
-                                                if (currentIndex > 0) {
-                                                    setActiveImage((car.images || [])[currentIndex - 1]);
-                                                }
+                                                setIsLightboxOpen(true);
                                             }}
-                                            className={`absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/80 hover:bg-white text-text rounded-full flex items-center justify-center shadow-md backdrop-blur-sm transition-all z-20 ${
-                                                (car.images || []).indexOf(activeImage) === 0 ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:scale-110'
-                                            }`}
-                                            disabled={(car.images || []).indexOf(activeImage) === 0}
+                                            className="absolute bottom-3.5 right-3.5 z-20 w-10 h-10 rounded-full bg-slate-900/80 hover:bg-slate-900 text-white backdrop-blur-md border border-white/20 flex items-center justify-center shadow-lg transition-transform hover:scale-110 active:scale-95"
+                                            title="મોટો ફોટો જુઓ · Open Fullscreen View"
                                         >
-                                            <ChevronLeft className="w-6 h-6" />
+                                            <Maximize2 className="w-4 h-4" />
                                         </button>
-                                        <button 
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                const currentIndex = (car.images || []).indexOf(activeImage);
-                                                if (currentIndex < (car.images || []).length - 1) {
-                                                    setActiveImage((car.images || [])[currentIndex + 1]);
-                                                }
-                                            }}
-                                            className={`absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/80 hover:bg-white text-text rounded-full flex items-center justify-center shadow-md backdrop-blur-sm transition-all z-20 ${
-                                                (car.images || []).indexOf(activeImage) === (car.images || []).length - 1 ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:scale-110'
-                                            }`}
-                                            disabled={(car.images || []).indexOf(activeImage) === (car.images || []).length - 1}
-                                        >
-                                            <ChevronRight className="w-6 h-6" />
-                                        </button>
+
+                                        {/* Left / Right Chevron Arrows */}
+                                        {images.length > 1 && (
+                                            <>
+                                                <button
+                                                    type="button"
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        setActiveImageIdx((prev) => (prev === 0 ? images.length - 1 : prev - 1));
+                                                    }}
+                                                    className="absolute left-3 top-1/2 -translate-y-1/2 z-20 w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-slate-900/70 hover:bg-slate-900 text-white backdrop-blur-md border border-white/20 flex items-center justify-center shadow-lg opacity-90 sm:opacity-0 sm:group-hover:opacity-100 transition-all hover:scale-110 active:scale-95"
+                                                    title="Previous Image"
+                                                >
+                                                    <ChevronLeft className="w-6 h-6" />
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        setActiveImageIdx((prev) => (prev === images.length - 1 ? 0 : prev + 1));
+                                                    }}
+                                                    className="absolute right-3 top-1/2 -translate-y-1/2 z-20 w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-slate-900/70 hover:bg-slate-900 text-white backdrop-blur-md border border-white/20 flex items-center justify-center shadow-lg opacity-90 sm:opacity-0 sm:group-hover:opacity-100 transition-all hover:scale-110 active:scale-95"
+                                                    title="Next Image"
+                                                >
+                                                    <ChevronRight className="w-6 h-6" />
+                                                </button>
+                                            </>
+                                        )}
                                     </>
                                 )}
                             </div>
 
-                            {/* Thumbnail Strip (Scrollable) */}
-                            <div className="flex overflow-x-auto gap-3 pb-2 scrollbar-thin scrollbar-thumb-gray-200 scrollbar-track-transparent">
-
+                            {/* Progressive Thumbnail Strip (Scrollable with Snap) */}
+                            <div className="flex items-center gap-2.5 overflow-x-auto pb-2 scrollbar-none snap-x">
                                 {/* 1. The 360° Spin Thumbnail (Always First if it exists) */}
                                 {(car.spinImages || []).length > 0 && (
                                     <button
+                                        type="button"
                                         onClick={() => setViewMode('360')}
-                                        className={`relative shrink-0 w-24 sm:w-32 aspect-video bg-gray-900 rounded-lg overflow-hidden cursor-pointer transition-all duration-300 focus:outline-none 
-                                            ${viewMode === '360' ? 'ring-2 ring-accent ring-offset-2 opacity-100 z-10' : 'opacity-70 hover:opacity-100 hover:ring-2 hover:ring-accent/50 hover:ring-offset-1'}`
-                                        }
+                                        className={`relative shrink-0 w-24 sm:w-32 aspect-[16/10] bg-slate-950 rounded-xl overflow-hidden cursor-pointer transition-all duration-300 snap-start border-2 ${
+                                            viewMode === '360'
+                                                ? 'border-brand-orange ring-2 ring-brand-orange/40 scale-[0.98] shadow-md'
+                                                : 'border-transparent opacity-75 hover:opacity-100'
+                                        }`}
                                     >
-                                        <img src={getOptimizedUrl((car.spinImages || [])[0], 240)} className="w-full h-full object-contain opacity-50 blur-[1px]" alt="360 Spin" loading="lazy" />
+                                        <img
+                                            src={getOptimizedUrl((car.spinImages || [])[0], 240)}
+                                            className="w-full h-full object-cover opacity-50 blur-[1px]"
+                                            alt="360 Spin"
+                                            loading="lazy"
+                                        />
                                         <div className="absolute inset-0 flex flex-col items-center justify-center text-white">
-                                            <RotateCw className="w-6 h-6 mb-1" />
-                                            <span className="font-heading font-bold text-[10px] tracking-wider uppercase">360° Spin</span>
+                                            <RotateCw className="w-5 h-5 mb-1 text-brand-orange" />
+                                            <span className="font-heading font-black text-[9px] tracking-wider uppercase text-amber-300">
+                                                360° Spin
+                                            </span>
                                         </div>
                                     </button>
                                 )}
 
                                 {/* 2. Standard Photo Thumbnails */}
-                                {(car.images || []).length > 0 && (car.images || []).map((img, i) => {
-                                    const isActive = activeImage === img && viewMode === 'standard';
+                                {images.map((img, i) => {
+                                    const isActive = i === activeImageIdx && viewMode === 'standard';
                                     return (
                                         <button
                                             key={i}
+                                            type="button"
                                             onClick={() => {
-                                                setActiveImage(img);
+                                                setActiveImageIdx(i);
                                                 setViewMode('standard');
                                             }}
-                                            className={`relative shrink-0 w-24 sm:w-32 aspect-video bg-gray-200 rounded-lg overflow-hidden cursor-pointer transition-all duration-300 focus:outline-none 
-                                                ${isActive ? 'ring-2 ring-primary ring-offset-2 opacity-100 z-10' : 'opacity-60 hover:opacity-100 hover:ring-2 hover:ring-primary/30 hover:ring-offset-1'}`
-                                            }
+                                            className={`relative shrink-0 w-24 sm:w-32 aspect-[16/10] bg-slate-100 rounded-xl overflow-hidden cursor-pointer transition-all duration-300 snap-start border-2 ${
+                                                isActive
+                                                    ? 'border-brand-orange ring-2 ring-brand-orange/40 scale-[0.98] shadow-md'
+                                                    : 'border-transparent opacity-70 hover:opacity-100 hover:border-slate-300'
+                                            }`}
                                         >
-                                            <img src={getOptimizedUrl(img, 240)} className="w-full h-full object-contain" alt={`Thumb ${i + 1}`} loading="lazy" />
+                                            <img
+                                                src={getOptimizedUrl(img, 240)}
+                                                className="w-full h-full object-cover"
+                                                alt={`Thumbnail ${i + 1}`}
+                                                loading="lazy"
+                                            />
                                         </button>
                                     );
                                 })}
@@ -649,6 +816,128 @@ export default function CarDetails() {
                     </div>
                 )}
             </div>
+
+            {/* ════ Full-Screen High-Definition Lightbox Modal ════ */}
+            {isLightboxOpen && images.length > 0 && (
+                <div
+                    className="fixed inset-0 z-[9999] bg-slate-950/95 backdrop-blur-2xl flex flex-col justify-between p-3 sm:p-6 select-none animate-[fadeIn_200ms_ease-out]"
+                    onTouchStart={onTouchStart}
+                    onTouchMove={onTouchMove}
+                    onTouchEnd={onTouchEnd}
+                    onClick={() => setIsLightboxOpen(false)}
+                >
+                    {/* Top Navigation Bar */}
+                    <div
+                        className="flex items-center justify-between w-full max-w-7xl mx-auto z-30 pt-2 sm:pt-0"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <button
+                            type="button"
+                            onClick={() => setIsLightboxOpen(false)}
+                            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white/10 hover:bg-white/20 text-white font-heading font-bold text-xs border border-white/15 backdrop-blur-md transition-all active:scale-95"
+                        >
+                            <ArrowLeft className="w-4 h-4" />
+                            <span>પાછા જાઓ · Back</span>
+                        </button>
+
+                        <div className="px-3.5 py-1 rounded-full bg-white/10 border border-white/15 backdrop-blur-md text-white font-heading font-bold text-xs tracking-wider">
+                            {activeImageIdx + 1} / {images.length}
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                            <button
+                                type="button"
+                                onClick={handleShare}
+                                className="w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center border border-white/15 backdrop-blur-md transition-transform active:scale-95"
+                                title="Share"
+                            >
+                                <Share2 className="w-4 h-4" />
+                            </button>
+                            <button
+                                type="button"
+                                onClick={handleDownloadAllImages}
+                                className="w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center border border-white/15 backdrop-blur-md transition-transform active:scale-95"
+                                title="Download All Photos"
+                            >
+                                <Download className="w-4 h-4" />
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => setIsLightboxOpen(false)}
+                                className="w-9 h-9 rounded-full bg-red-600/80 hover:bg-red-600 text-white flex items-center justify-center border border-red-400/40 backdrop-blur-md transition-transform active:scale-95 ml-1"
+                                title="Close"
+                            >
+                                <X className="w-4 h-4" />
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* Main Center Image */}
+                    <div
+                        className="relative flex-1 w-full max-w-6xl mx-auto flex items-center justify-center my-3 overflow-hidden"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <img
+                            src={getOptimizedUrl(images[activeImageIdx], 1600)}
+                            alt={`${car.make} ${car.model} Fullscreen ${activeImageIdx + 1}`}
+                            className="max-h-[75vh] max-w-full object-contain rounded-xl sm:rounded-2xl shadow-2xl transition-all duration-300"
+                        />
+
+                        {/* Lightbox Prev / Next Controls */}
+                        {images.length > 1 && (
+                            <>
+                                <button
+                                    type="button"
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        setActiveImageIdx((prev) => (prev === 0 ? images.length - 1 : prev - 1));
+                                    }}
+                                    className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-white/10 hover:bg-white/25 text-white border border-white/20 backdrop-blur-md flex items-center justify-center shadow-xl transition-all hover:scale-110 active:scale-90"
+                                    title="Previous"
+                                >
+                                    <ChevronLeft className="w-7 h-7" />
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        setActiveImageIdx((prev) => (prev === images.length - 1 ? 0 : prev + 1));
+                                    }}
+                                    className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-white/10 hover:bg-white/25 text-white border border-white/20 backdrop-blur-md flex items-center justify-center shadow-xl transition-all hover:scale-110 active:scale-90"
+                                    title="Next"
+                                >
+                                    <ChevronRight className="w-7 h-7" />
+                                </button>
+                            </>
+                        )}
+                    </div>
+
+                    {/* Bottom Mini Thumbnails Strip */}
+                    <div
+                        className="w-full max-w-4xl mx-auto flex items-center justify-center gap-2 overflow-x-auto py-2 scrollbar-none z-30"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        {images.map((img, idx) => (
+                            <button
+                                key={`lb-thumb-${idx}`}
+                                type="button"
+                                onClick={() => setActiveImageIdx(idx)}
+                                className={`relative shrink-0 w-12 sm:w-16 aspect-[16/10] rounded-lg overflow-hidden border-2 transition-all ${
+                                    activeImageIdx === idx
+                                        ? 'border-brand-orange scale-110 shadow-lg'
+                                        : 'border-white/20 opacity-50 hover:opacity-100'
+                                }`}
+                            >
+                                <img
+                                    src={getOptimizedUrl(img, 150)}
+                                    alt={`Frame ${idx + 1}`}
+                                    className="w-full h-full object-cover"
+                                />
+                            </button>
+                        ))}
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
