@@ -340,32 +340,20 @@ export default function HeroSection() {
             ૧૫૦+ વેરિફાઇડ કાર, ૧૨૦+ પોઈન્ટ ટેકનિકલ ઈન્સ્પેક્શન અને સંપૂર્ણ ભરોસા સાથે તમારા પરિવાર માટે શ્રેષ્ઠ કાર.
           </motion.p>
 
-          {/* Action CTAs */}
+          {/* Action CTA: Book Test Drive in Rich Brand Orange */}
           <motion.div
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 0.25 }}
-            className="relative mt-6 sm:mt-7 flex flex-wrap items-center justify-center gap-3 sm:gap-5"
+            className="relative mt-5 sm:mt-6 flex items-center justify-center"
           >
-            {/* Primary Action Button: Explore Cars */}
-            <button
-              onClick={() => navigate('/inventory')}
-              className="group relative inline-flex items-center gap-2.5 px-6 sm:px-8 py-3 sm:py-3.5 rounded-xl bg-gradient-to-r from-brand-orange to-[#e68415] text-white font-heading font-black text-xs sm:text-sm shadow-[0_10px_25px_rgba(245,148,35,0.32)] hover:shadow-[0_14px_35px_rgba(245,148,35,0.45)] hover:-translate-y-0.5 active:translate-y-0 transition-all duration-300 cursor-pointer overflow-hidden"
-            >
-              <div className="absolute inset-0 bg-white/20 -translate-x-full group-hover:translate-x-full transition-transform duration-700 pointer-events-none" />
-              <Car className="w-4 h-4 text-white" />
-              <span>ગાડીઓ શોધો · Explore 150+ Cars</span>
-              <ArrowRight className="w-3.5 h-3.5 text-white group-hover:translate-x-1 transition-transform" />
-            </button>
-
-            {/* Elevated Secondary Action: Instant Test Drive */}
-            <div className="relative">
+            <div className="relative inline-block">
               {/* Floating Live Indicator Badge */}
-              <div className="absolute -top-2.5 right-3 z-10 pointer-events-none">
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-gradient-to-r from-emerald-500 to-teal-600 text-white text-[9px] font-black uppercase tracking-wider shadow-sm">
+              <div className="absolute -top-2.5 right-4 z-10 pointer-events-none">
+                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-slate-900 text-white text-[9px] font-black uppercase tracking-wider shadow-sm border border-brand-orange/40">
                   <span className="relative flex h-1.5 w-1.5">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75" />
-                    <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-white" />
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-orange opacity-75" />
+                    <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-brand-orange" />
                   </span>
                   Takes 2-3 Mins
                 </span>
@@ -373,22 +361,24 @@ export default function HeroSection() {
 
               <button
                 onClick={() => setShowModal(true)}
-                className="group relative inline-flex items-center gap-2.5 px-5 sm:px-6 py-2.5 sm:py-3 rounded-xl bg-white hover:bg-slate-50 text-slate-800 font-heading font-bold text-xs sm:text-sm border-2 border-emerald-500/35 hover:border-emerald-500 shadow-[0_6px_20px_rgba(16,185,129,0.1)] hover:shadow-[0_10px_28px_rgba(16,185,129,0.18)] hover:-translate-y-0.5 active:translate-y-0 transition-all duration-300 cursor-pointer"
+                className="group relative inline-flex items-center gap-3 px-6 sm:px-8 py-3 sm:py-3.5 rounded-2xl bg-gradient-to-r from-brand-orange via-[#f79e32] to-[#e68415] text-white font-heading shadow-[0_10px_28px_rgba(245,148,35,0.38)] hover:shadow-[0_14px_38px_rgba(245,148,35,0.52)] hover:-translate-y-0.5 active:translate-y-0 transition-all duration-300 cursor-pointer overflow-hidden border border-amber-300/40"
               >
-                <div className="flex items-center justify-center w-7 h-7 rounded-lg bg-emerald-50 text-emerald-600 group-hover:bg-emerald-500 group-hover:text-white transition-colors">
-                  <Sparkles className="w-3.5 h-3.5" />
+                <div className="absolute inset-0 bg-white/20 -translate-x-full group-hover:translate-x-full transition-transform duration-700 pointer-events-none" />
+
+                <div className="flex items-center justify-center w-8 h-8 rounded-xl bg-white/20 backdrop-blur-xs text-white group-hover:scale-110 transition-transform">
+                  <Sparkles className="w-4 h-4 fill-white/30" />
                 </div>
 
                 <div className="flex flex-col text-left">
-                  <span className="font-heading font-black text-slate-900 group-hover:text-emerald-700 transition-colors text-xs sm:text-sm leading-tight">
+                  <span className="font-heading font-black text-white text-xs sm:text-sm sm:text-[15px] leading-tight drop-shadow-2xs">
                     ટેસ્ટ ડ્રાઈવ બુક કરો · Book Test Drive
                   </span>
-                  <span className="text-[10px] font-body text-slate-500 font-medium leading-tight">
+                  <span className="text-[10px] sm:text-[11px] font-body text-orange-100 font-semibold leading-tight mt-0.5">
                     ડોરસ્ટેપ અથવા શોરૂમ વિઝિટ
                   </span>
                 </div>
 
-                <ChevronRight className="w-3.5 h-3.5 text-emerald-600 group-hover:translate-x-0.5 transition-transform ml-0.5" />
+                <ChevronRight className="w-4 h-4 text-white group-hover:translate-x-1 transition-transform ml-1" />
               </button>
             </div>
           </motion.div>
