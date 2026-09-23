@@ -19,54 +19,19 @@ import WhyChooseUs from '../components/WhyChooseUs';
 import LiveTicker from '../components/LiveTicker';
 import PromoBanners from '../components/PromoBanners';
 
-const CATEGORIES = [
-  { id: 'all', label: 'બધી કાર · All Cars', icon: '🚙' },
-  { id: 'suv', label: 'SUV · સ્પોર્ટ્સ યુટિલિટી', icon: '🚘' },
-  { id: 'sedan', label: 'Sedan · સેડાન', icon: '🚗' },
-  { id: 'hatchback', label: 'Hatchback · ફેમિલી કાર', icon: '🛞' },
-  { id: 'automatic', label: 'Automatic · ઓટોમેટિક', icon: '⚡' }
-];
-
 export default function Home() {
   const { cars, isLoading } = useCars();
   const navigate = useNavigate();
-  const [selectedCategory, setSelectedCategory] = useState('all');
 
-  // Filter available cars based on category
-  const availableCars = useMemo(() => {
-    return cars ? cars.filter(car => car.status === 'Available') : [];
+  // Available verified cars with featured cars prioritized
+  const displayedCars = useMemo(() => {
+    if (!cars || !cars.length) return [];
+    const available = cars.filter(car => car.status === 'Available');
+    const featured = available.filter(c => c.isFeaturedOnHome);
+    const nonFeatured = available.filter(c => !c.isFeaturedOnHome);
+    const list = featured.length > 0 ? [...featured, ...nonFeatured] : available;
+    return list.slice(0, 8);
   }, [cars]);
-
-  const filteredCars = useMemo(() => {
-    if (!availableCars.length) return [];
-
-    switch (selectedCategory) {
-      case 'suv':
-        return availableCars.filter(c =>
-          c.bodyType?.toLowerCase().includes('suv') ||
-          /creta|brezza|seltos|scorpio|thar|fortuner|harrier|venue|nexon|xuv|safari|innova|bolero|ecosport|duster|punch|taigun|kushaq|grand vitara|jimny/i.test(`${c.make} ${c.model}`)
-        );
-      case 'sedan':
-        return availableCars.filter(c =>
-          c.bodyType?.toLowerCase().includes('sedan') ||
-          /city|verna|ciaz|dzire|amaze|aura|slavia|virtus|accent|corolla|civic|rapid|octavia|etios/i.test(`${c.make} ${c.model}`)
-        );
-      case 'hatchback':
-        return availableCars.filter(c =>
-          c.bodyType?.toLowerCase().includes('hatchback') ||
-          /swift|baleno|i20|wagon|tiago|alto|i10|kwid|ignis|polo|glanza|celerio|s-presso|altroz|brio/i.test(`${c.make} ${c.model}`)
-        );
-      case 'automatic':
-        return availableCars.filter(c => c.transmission?.toLowerCase() === 'automatic');
-      case 'all':
-      default: {
-        const featured = availableCars.filter(c => c.isFeaturedOnHome);
-        return featured.length > 0 ? featured : availableCars;
-      }
-    }
-  }, [availableCars, selectedCategory]);
-
-  const displayedCars = filteredCars.slice(0, 8);
 
   return (
     <div className="min-h-screen flex flex-col relative bg-gradient-to-b from-slate-50 via-white to-slate-50">
@@ -119,27 +84,6 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Interactive Category Filter Pills */}
-            <div className="mb-10 flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
-              {CATEGORIES.map((cat) => {
-                const isActive = selectedCategory === cat.id;
-                return (
-                  <button
-                    key={cat.id}
-                    onClick={() => setSelectedCategory(cat.id)}
-                    className={`flex items-center gap-2 px-4 py-2.5 rounded-xl font-heading text-xs sm:text-sm font-bold whitespace-nowrap transition-all duration-300 cursor-pointer ${
-                      isActive
-                        ? 'bg-brand-orange text-white shadow-md shadow-brand-orange/30 scale-102 ring-2 ring-brand-orange/30'
-                        : 'bg-white hover:bg-slate-50 text-slate-700 border border-gray-200 hover:border-brand-orange/40 shadow-xs'
-                    }`}
-                  >
-                    <span>{cat.icon}</span>
-                    <span>{cat.label}</span>
-                  </button>
-                );
-              })}
-            </div>
-
             {/* Car Cards Grid */}
             <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
               {isLoading ? (
@@ -154,16 +98,16 @@ export default function Home() {
                 <div className="col-span-full flex flex-col items-center justify-center py-20 text-center bg-white/80 backdrop-blur-md rounded-3xl border border-dashed border-gray-300 p-8 shadow-sm">
                   <Car className="w-14 h-14 text-slate-300 mb-3" />
                   <p className="font-heading text-lg sm:text-xl text-primary font-bold mb-2">
-                    આ કેટેગરીમાં કાર ઉપલબ્ધ નથી
+                    હાલમાં કોઈ કાર ઉપલબ્ધ નથી
                   </p>
                   <p className="font-body text-slate-500 text-sm mb-5">
-                    બીજી કેટેગરી પસંદ કરો અથવા સંપૂર્ણ ઇન્વેન્ટરી જુઓ.
+                    સંપૂર્ણ સ્ટોક તપાસવા માટે ઇન્વેન્ટરી પેજ જુઓ.
                   </p>
                   <button
-                    onClick={() => setSelectedCategory('all')}
-                    className="px-6 py-2.5 rounded-full bg-brand-orange text-white font-bold text-xs uppercase tracking-wider shadow-md hover:bg-orange-600 transition-all"
+                    onClick={() => navigate('/inventory')}
+                    className="px-6 py-2.5 rounded-full bg-brand-orange text-white font-bold text-xs uppercase tracking-wider shadow-md hover:bg-orange-600 transition-all cursor-pointer"
                   >
-                    બધી કાર જુઓ (View All)
+                    બધી કાર જુઓ · View All Cars
                   </button>
                 </div>
               ) : (
