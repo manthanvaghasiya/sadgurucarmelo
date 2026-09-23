@@ -77,7 +77,7 @@ export default function LiveTicker() {
             <div className="flex items-center justify-center gap-1.5 mb-1.5">
               <Sparkles className="w-3.5 h-3.5 text-amber-400 animate-pulse" />
               <span className="w-4 h-[1px] bg-gradient-to-r from-transparent to-amber-400" />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-white to-amber-200 font-extrabold text-[10px] tracking-[0.2em] uppercase">
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-white to-amber-200 font-bold text-[10px] tracking-[0.2em] uppercase">
                 નવું આગમન · JUST ARRIVED
               </span>
               <span className="w-4 h-[1px] bg-gradient-to-l from-transparent to-amber-400" />

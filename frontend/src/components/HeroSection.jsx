@@ -262,16 +262,17 @@ export default function HeroSection() {
           </motion.p>
 
           {/* Dual Action CTAs + Dotted Curved Arrow & Badge */}
+          {/* Action CTAs */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.3 }}
-            className="relative mt-8 sm:mt-10 flex flex-wrap items-center justify-center gap-4 sm:gap-5"
+            className="relative mt-8 sm:mt-10 flex flex-wrap items-center justify-center gap-4 sm:gap-6"
           >
-            {/* Primary CTA */}
+            {/* Primary Action Button: Explore Cars */}
             <button
               onClick={() => navigate('/inventory')}
-              className="group relative inline-flex items-center gap-3 px-7 sm:px-9 py-3.5 sm:py-4 rounded-xl bg-gradient-to-r from-brand-orange to-[#e68415] text-white font-heading font-black text-sm sm:text-base shadow-[0_10px_30px_rgba(245,148,35,0.35)] hover:shadow-[0_15px_40px_rgba(245,148,35,0.5)] hover:-translate-y-0.5 active:translate-y-0 transition-all duration-300 cursor-pointer overflow-hidden"
+              className="group relative inline-flex items-center gap-3 px-8 sm:px-10 py-4 sm:py-4.5 rounded-2xl bg-gradient-to-r from-brand-orange to-[#e68415] text-white font-heading font-black text-sm sm:text-base shadow-[0_12px_32px_rgba(245,148,35,0.35)] hover:shadow-[0_18px_45px_rgba(245,148,35,0.5)] hover:-translate-y-0.5 active:translate-y-0 transition-all duration-300 cursor-pointer overflow-hidden"
             >
               <div className="absolute inset-0 bg-white/20 -translate-x-full group-hover:translate-x-full transition-transform duration-700 pointer-events-none" />
               <Car className="w-5 h-5 text-white" />
@@ -279,36 +280,40 @@ export default function HeroSection() {
               <ArrowRight className="w-4 h-4 text-white group-hover:translate-x-1 transition-transform" />
             </button>
 
-            {/* Dotted Curved SVG Arrow pointing to "Takes just 2-3 mins" Pill */}
-            <div className="hidden md:flex items-center gap-2 pl-1 select-none">
-              <svg className="w-14 h-7 text-brand-orange overflow-visible" viewBox="0 0 55 25" fill="none">
-                <path
-                  d="M 5 20 C 22 22, 32 4, 50 8"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeDasharray="4 4"
-                  strokeLinecap="round"
-                />
-                <polyline points="44,4 52,8 48,15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
+            {/* Elevated Secondary Action: Instant Test Drive (Feels 100% like a luxury interactive button!) */}
+            <div className="relative">
+              {/* Floating Live Indicator Badge */}
+              <div className="absolute -top-3 right-4 z-10 pointer-events-none">
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-gradient-to-r from-emerald-500 to-teal-600 text-white text-[10px] font-black uppercase tracking-wider shadow-md shadow-emerald-500/25">
+                  <span className="relative flex h-2 w-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75" />
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-white" />
+                  </span>
+                  Takes 2-3 Mins
+                </span>
+              </div>
 
               <button
                 onClick={() => setShowModal(true)}
-                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-700 text-xs font-bold transition-all shadow-xs cursor-pointer"
+                className="group relative inline-flex items-center gap-3.5 px-6 sm:px-8 py-3.5 sm:py-4 rounded-2xl bg-white hover:bg-slate-50 text-slate-800 font-heading font-bold text-sm sm:text-base border-2 border-emerald-500/35 hover:border-emerald-500 shadow-[0_8px_25px_rgba(16,185,129,0.12)] hover:shadow-[0_12px_35px_rgba(16,185,129,0.22)] hover:-translate-y-0.5 active:translate-y-0 transition-all duration-300 cursor-pointer"
               >
-                <Sparkles className="w-3.5 h-3.5 text-emerald-500" />
-                <span>Takes just 2-3 mins · ટેસ્ટ ડ્રાઈવ બુક કરો</span>
+                {/* Radar Icon Box */}
+                <div className="flex items-center justify-center w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 group-hover:bg-emerald-500 group-hover:text-white transition-colors">
+                  <Sparkles className="w-4 h-4" />
+                </div>
+
+                <div className="flex flex-col text-left">
+                  <span className="font-heading font-black text-slate-900 group-hover:text-emerald-700 transition-colors text-sm sm:text-base leading-tight">
+                    ટેસ્ટ ડ્રાઈવ બુક કરો · Book Test Drive
+                  </span>
+                  <span className="text-[11px] font-body text-slate-500 font-medium leading-tight">
+                    ડોરસ્ટેપ અથવા શોરૂમ વિઝિટ
+                  </span>
+                </div>
+
+                <ChevronRight className="w-4 h-4 text-emerald-600 group-hover:translate-x-1 transition-transform ml-1" />
               </button>
             </div>
-
-            {/* Secondary CTA */}
-            <button
-              onClick={() => navigate('/sell-your-car')}
-              className="inline-flex items-center gap-2 px-6 sm:px-7 py-3.5 sm:py-4 rounded-xl bg-white hover:bg-slate-50 text-slate-800 font-heading font-bold text-sm sm:text-base border border-gray-200 hover:border-brand-orange/40 shadow-xs hover:shadow-md transition-all duration-300 cursor-pointer"
-            >
-              <span>કાર વેચો / એક્સચેન્જ · Sell Car</span>
-              <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-brand-orange group-hover:translate-x-0.5 transition-all" />
-            </button>
           </motion.div>
         </div>
 
