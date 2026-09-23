@@ -130,29 +130,9 @@ export default function Inventory() {
           </button>
         </div>
 
-        {/* Breadcrumbs */}
-        <nav className="flex mb-3" aria-label="Breadcrumb">
-          <ol className="flex items-center space-x-2 font-body text-xs font-semibold text-slate-400 uppercase tracking-wider">
-            <li><a href="/" className="hover:text-slate-800 transition-colors">Home</a></li>
-            <li><span className="text-slate-300">/</span></li>
-            <li><a href="/inventory" className="hover:text-slate-800 transition-colors">Surat</a></li>
-            <li><span className="text-slate-300">/</span></li>
-            <li aria-current="page" className="text-brand-orange">Verified Showroom</li>
-          </ol>
-        </nav>
-
-        {/* Ampère Page Headline */}
+        {/* Page Headline */}
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-6 sm:mb-8 pb-4 border-b border-slate-200/70">
           <div>
-            <div className="flex items-center gap-2 mb-1.5">
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-heading font-black tracking-widest uppercase bg-orange-50 text-brand-orange border border-orange-200/60">
-                <span className="w-1.5 h-1.5 rounded-full bg-brand-orange animate-pulse" />
-                Live Stock • Surat
-              </span>
-              <span className="text-xs font-semibold text-slate-400">
-                120+ Points Inspected
-              </span>
-            </div>
             <h1 className="font-heading font-extrabold text-2xl sm:text-4xl text-slate-900 tracking-tight">
               {availableCars.length}+ Cars, Inspected & Ready
             </h1>
