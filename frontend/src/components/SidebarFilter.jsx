@@ -1,6 +1,6 @@
-import { useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { RotateCcw, Check, Sparkles, ShieldCheck, CheckCircle2 } from 'lucide-react';
+import { RotateCcw, Check, Sparkles, ShieldCheck, CheckCircle2, Search } from 'lucide-react';
 import BrandLogo from './BrandLogo';
 
 export default function SidebarFilter({
@@ -14,6 +14,7 @@ export default function SidebarFilter({
   onClose
 }) {
   const [searchParams, setSearchParams] = useSearchParams();
+  const [brandSearch, setBrandSearch] = useState('');
 
   // Price Range Bounds snapping
   const exactMin = Number(priceRangeBounds[0]) || 0;
@@ -149,19 +150,14 @@ export default function SidebarFilter({
     <aside className="w-full lg:sticky lg:top-24 h-full lg:h-fit lg:max-h-[calc(100vh-6.5rem)] overflow-y-auto bg-white p-5 sm:p-6 lg:rounded-3xl lg:shadow-[0_4px_24px_rgba(0,0,0,0.05)] lg:border lg:border-slate-200/90 flex flex-col gap-6 select-none">
 
       {/* ── Sidebar Header ── */}
-      <div className="flex items-center justify-between pb-4 border-b border-slate-100">
-        <div>
-          <span className="text-[10px] font-heading font-bold uppercase tracking-widest text-brand-orange">
-            Precision Search
-          </span>
-          <h2 className="font-heading font-bold text-lg text-slate-900 leading-tight">
-            Filters
-          </h2>
-        </div>
+      <div className="flex items-center justify-between pb-3.5 border-b border-slate-100">
+        <h2 className="font-heading font-extrabold text-xl text-slate-900 tracking-tight">
+          Filter
+        </h2>
         {hasActiveFilters && (
           <button
             onClick={clearAll}
-            className="inline-flex items-center gap-1 text-xs font-semibold text-slate-500 hover:text-brand-orange transition-colors px-2 py-1 rounded-lg hover:bg-orange-50"
+            className="inline-flex items-center gap-1 text-xs font-semibold text-slate-500 hover:text-brand-orange transition-colors px-2.5 py-1 rounded-lg hover:bg-orange-50"
           >
             <RotateCcw className="w-3.5 h-3.5" />
             <span>Reset All</span>
@@ -337,7 +333,7 @@ export default function SidebarFilter({
         </div>
       </div>
 
-      {/* ── 3. Brand Filter with Vector Logos & Counts ── */}
+      {/* ── 3. Brand Filter with Authentic Vector Logos & Counts ── */}
       {availableBrands.length > 0 && (
         <div className="flex flex-col gap-3 pt-2 border-t border-slate-100">
           <div className="flex items-center justify-between">
@@ -351,53 +347,69 @@ export default function SidebarFilter({
             )}
           </div>
 
-          <div className="flex flex-col gap-1 max-h-56 overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-slate-200">
-            {availableBrands.map(make => {
-              const isChecked = activeMakes.includes(make);
-              const count = brandCounts[make] || 0;
-              return (
-                <button
-                  key={make}
-                  type="button"
-                  onClick={() => toggleMake(make)}
-                  className={`w-full flex items-center justify-between px-3 py-2 rounded-xl transition-all text-left ${
-                    isChecked
-                      ? 'bg-orange-50 border border-brand-orange/40 text-slate-900 font-bold'
-                      : 'hover:bg-slate-50 text-slate-700 font-medium'
-                  }`}
-                >
-                  <div className="flex items-center gap-2.5 min-w-0">
-                    {/* Custom Checkbox */}
-                    <div
-                      className={`w-4 h-4 rounded-md flex items-center justify-center transition-colors border ${
-                        isChecked
-                          ? 'bg-brand-orange border-brand-orange text-white'
-                          : 'border-slate-300 bg-white'
-                      }`}
-                    >
-                      {isChecked && <Check className="w-3 h-3 stroke-[3]" />}
+          {/* Quick Search if more than 5 brands */}
+          {availableBrands.length > 5 && (
+            <div className="relative">
+              <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+              <input
+                type="text"
+                value={brandSearch}
+                onChange={(e) => setBrandSearch(e.target.value)}
+                placeholder="Search brand..."
+                className="w-full pl-8 pr-3 py-1.5 rounded-xl border border-slate-200 bg-slate-50/80 text-xs font-medium text-slate-800 focus:outline-none focus:border-brand-orange focus:bg-white transition-all shadow-2xs"
+              />
+            </div>
+          )}
+
+          <div className="flex flex-col gap-1 max-h-60 overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-slate-200">
+            {availableBrands
+              .filter(make => !brandSearch.trim() || (make || '').toLowerCase().includes(brandSearch.toLowerCase().trim()))
+              .map(make => {
+                const isChecked = activeMakes.includes(make);
+                const count = brandCounts[make] || 0;
+                return (
+                  <button
+                    key={make}
+                    type="button"
+                    onClick={() => toggleMake(make)}
+                    className={`w-full flex items-center justify-between px-3 py-2 rounded-xl transition-all text-left group ${
+                      isChecked
+                        ? 'bg-orange-50 border border-brand-orange/40 text-slate-900 font-bold'
+                        : 'hover:bg-slate-50 text-slate-700 font-medium'
+                    }`}
+                  >
+                    <div className="flex items-center gap-3 min-w-0">
+                      {/* Custom Checkbox */}
+                      <div
+                        className={`w-4 h-4 rounded-md flex items-center justify-center transition-colors border ${
+                          isChecked
+                            ? 'bg-brand-orange border-brand-orange text-white'
+                            : 'border-slate-300 bg-white group-hover:border-slate-400'
+                        }`}
+                      >
+                        {isChecked && <Check className="w-3 h-3 stroke-[3]" />}
+                      </div>
+
+                      {/* Official Automotive Vector Logo */}
+                      <BrandLogo make={make} variant="inline" className="w-5 h-5 text-slate-800 shrink-0" />
+
+                      {/* Brand Name */}
+                      <span className="text-sm truncate font-heading uppercase tracking-wide">{make}</span>
                     </div>
 
-                    {/* Automotive Vector Logo */}
-                    <BrandLogo make={make} variant="inline" className="w-4 h-4 text-slate-800" />
-
-                    {/* Brand Name */}
-                    <span className="text-sm truncate font-heading">{make}</span>
-                  </div>
-
-                  {/* Vehicle Count Badge */}
-                  {count > 0 && (
-                    <span className={`text-[11px] px-2 py-0.5 rounded-full font-semibold shrink-0 ${
-                      isChecked
-                        ? 'bg-brand-orange/15 text-brand-orange'
-                        : 'bg-slate-100 text-slate-500'
-                    }`}>
-                      {count}
-                    </span>
-                  )}
-                </button>
-              );
-            })}
+                    {/* Vehicle Count Badge */}
+                    {count > 0 && (
+                      <span className={`text-[11px] px-2 py-0.5 rounded-full font-semibold shrink-0 ${
+                        isChecked
+                          ? 'bg-brand-orange/15 text-brand-orange'
+                          : 'bg-slate-100 text-slate-500'
+                      }`}>
+                        {count}
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
           </div>
         </div>
       )}
