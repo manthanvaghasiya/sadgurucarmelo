@@ -11,6 +11,7 @@ import axiosInstance from '../api/axiosConfig';
 import CarCard from '../components/CarCard';
 import Car360Viewer from '../components/Car360Viewer';
 import EmiCalculator from '../components/EmiCalculator';
+import BrandLogo from '../components/BrandLogo';
 import { getCarWhatsAppLink } from '../utils/whatsapp';
 import { getOptimizedUrl } from '../utils/imageUtils';
 import { useCompare } from '../context/CompareContext';
@@ -33,6 +34,17 @@ export default function CarDetails() {
     const [viewMode, setViewMode] = useState('standard'); // 'standard' or '360'
 
     const whatsappUrl = car ? getCarWhatsAppLink(car) : '#';
+
+    // Calculate monthly EMI estimate (80% loan principal, 10.5% rate, 5-year tenure)
+    const calculateCarEmi = (priceVal) => {
+        const num = typeof priceVal === 'number' ? priceVal : parseInt(String(priceVal || '').replace(/[^0-9]/g, ''), 10);
+        if (!num || num < 50000) return null;
+        const principal = num * 0.8;
+        const rate = 10.5 / (12 * 100);
+        const tenure = 60;
+        return Math.round((principal * rate * Math.pow(1 + rate, tenure)) / (Math.pow(1 + rate, tenure) - 1));
+    };
+    const carEmi = car ? calculateCarEmi(car.price) : null;
 
     // Normalized list of gallery images (includes generated Car Details Summary Card)
     const rawImages = car?.images && Array.isArray(car.images) && car.images.length > 0
@@ -422,20 +434,27 @@ export default function CarDetails() {
             <div className="max-w-7xl mx-auto">
 
                 {/* Page Header */}
-                <div className="mb-8">
-                    <nav className="flex mb-4" aria-label="Breadcrumb">
-                        <ol className="flex items-center space-x-2 font-body text-xs font-semibold text-text-muted">
-                            <li><Link to="/" className="hover:text-primary transition-colors">Used Cars</Link></li>
-                            <li><span className="text-gray-400">{'>'}</span></li>
-                            <li><span className="text-text">{car.make || 'Cars'}</span></li>
-                            <li><span className="text-gray-400">{'>'}</span></li>
-                            <li aria-current="page" className="text-text">{car.model || 'Model'}</li>
-                        </ol>
-                    </nav>
-                    <h1 className="font-heading font-bold text-3xl sm:text-4xl text-text leading-tight tracking-tight flex flex-wrap items-center gap-3">
+                <div className="mb-6 sm:mb-8 pb-4 border-b border-slate-200/70">
+                    <div className="flex flex-wrap items-center justify-between gap-3 mb-2.5">
+                        <nav aria-label="Breadcrumb">
+                            <ol className="flex items-center space-x-2 font-body text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                                <li><Link to="/" className="hover:text-slate-800 transition-colors">Home</Link></li>
+                                <li><span className="text-slate-300">/</span></li>
+                                <li><Link to="/inventory" className="hover:text-slate-800 transition-colors">Inventory</Link></li>
+                                <li><span className="text-slate-300">/</span></li>
+                                <li><span className="text-slate-600">{car.make || 'Cars'}</span></li>
+                                <li><span className="text-slate-300">/</span></li>
+                                <li aria-current="page" className="text-brand-orange">{car.model || 'Model'}</li>
+                            </ol>
+                        </nav>
+                        {car.make && (
+                            <BrandLogo make={car.make} variant="badge" />
+                        )}
+                    </div>
+                    <h1 className="font-heading font-extrabold text-3xl sm:text-4xl text-slate-900 leading-tight tracking-tight flex flex-wrap items-center gap-3">
                         {car.make || ''} {car.model || 'Vehicle'} {car.year ? `(${car.year})` : ''}
                         {car.variantTier && (
-                            <span className="text-lg sm:text-xl font-body font-bold text-text-muted bg-gray-100 px-3 py-1 rounded-lg">
+                            <span className="text-sm sm:text-base font-heading font-bold text-slate-600 bg-slate-100 px-3 py-1 rounded-xl border border-slate-200">
                                 {car.variantTier} Variant
                             </span>
                         )}
@@ -671,9 +690,14 @@ export default function CarDetails() {
                                     ))}
                                 </div>
 
-                                <h2 className="font-heading font-bold text-[36px] text-accent mb-1 leading-none">
+                                <h2 className="font-heading font-extrabold text-3xl sm:text-4xl text-slate-900 mb-2 leading-none tracking-tight">
                                     {typeof car.price === 'number' ? `₹${car.price.toLocaleString('en-IN')}` : (car.price ? `₹${car.price}` : 'કિંમત માટે સંપર્ક કરો')}
                                 </h2>
+                                {carEmi && (
+                                    <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-orange-50 text-brand-orange border border-orange-200/70 mb-3">
+                                        <span>અંદાજિત EMI: <strong>₹{carEmi.toLocaleString('en-IN')}/mo*</strong></span>
+                                    </div>
+                                )}
                                 <p className="font-body text-xs text-text-muted mb-4">Last updated: {car.updatedAt && !isNaN(new Date(car.updatedAt).getTime()) ? new Date(car.updatedAt).toLocaleDateString() : new Date().toLocaleDateString()}</p>
 
                                 {car.loanAvailable && (
@@ -998,12 +1022,18 @@ export default function CarDetails() {
                                     image={relatedCar.image || (Array.isArray(relatedCar.images) && relatedCar.images[0])}
                                     title={`${relatedCar.make || ''} ${relatedCar.model || 'Car'} ${relatedCar.year ? `(${relatedCar.year})` : ''}`}
                                     price={typeof relatedCar.price === 'number' ? `₹${relatedCar.price.toLocaleString('en-IN')}` : (relatedCar.price ? `₹${relatedCar.price}` : 'Call for Price')}
+                                    rawPrice={relatedCar.price}
                                     fuel={relatedCar.fuelType || relatedCar.fuel || 'N/A'}
                                     transmission={relatedCar.transmission || 'N/A'}
                                     owner={relatedCar.owner || '1st Owner'}
                                     kms={typeof relatedCar.kms === 'number' ? `${relatedCar.kms.toLocaleString('en-IN')} KM` : (relatedCar.kms ? `${relatedCar.kms} KM` : 'N/A')}
                                     isKmGenuine={relatedCar.isKmGenuine}
+                                    make={relatedCar.make}
+                                    model={relatedCar.model}
+                                    year={relatedCar.year}
+                                    location="Surat, Gujarat"
                                     badges={relatedCar.badges || []}
+                                    car={relatedCar}
                                 />
                             ))}
                         </div>

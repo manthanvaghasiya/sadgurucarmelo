@@ -122,12 +122,18 @@ export default function Home() {
                       image={car.image}
                       title={`${car.make} ${car.model} (${car.year})`}
                       price={car.price >= 100000 ? `₹${(car.price / 100000).toFixed(2)} Lakhs` : `₹${(car.price || 0).toLocaleString('en-IN')}`}
+                      rawPrice={car.price}
                       badges={car.badges || []}
                       fuel={car.fuelType}
                       transmission={car.transmission}
                       owner={car.owner || '1st Owner'}
                       kms={`${(car.kms || 0).toLocaleString('en-IN')} KM`}
                       isKmGenuine={car.isKmGenuine}
+                      make={car.make}
+                      model={car.model}
+                      year={car.year}
+                      location="Surat, Gujarat"
+                      car={car}
                     />
                   </div>
                 ))
