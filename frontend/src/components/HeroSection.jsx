@@ -16,142 +16,168 @@ import toast from 'react-hot-toast';
 // High-definition fallback showcase vehicles in case inventory is loading
 const FALLBACK_SHOWCASE = [
   {
-    _id: 'showcase-1',
-    make: 'Hyundai',
-    model: 'Creta SX (O)',
-    year: 2022,
-    price: 1375000,
+    _id: 'showcase-kia-seltos',
+    make: 'Kia',
+    model: 'SELTOS',
+    variant: 'GTX+ Sunroof',
+    year: 2025,
+    price: 1850000,
     fuelType: 'Diesel',
     transmission: 'Automatic',
-    kms: 38000,
+    kms: 13000,
     owner: '1st Owner',
+    color: 'SILVER',
+    bodyType: 'SUV',
+    isKmGenuine: true,
+    image: 'https://images.unsplash.com/photo-1583121274602-3e2820c69888?auto=format&fit=crop&w=1000&q=80',
+    category: 'suv',
+    isComingSoon: true
+  },
+  {
+    _id: 'showcase-ford-ecosport',
+    make: 'Ford',
+    model: 'ECOSPORT',
+    variant: 'Titanium S',
+    year: 2020,
+    price: 750000,
+    fuelType: 'Diesel',
+    transmission: 'Manual',
+    kms: 68000,
+    owner: '1st Owner',
+    color: 'Panther Black',
+    bodyType: 'SUV',
     isKmGenuine: true,
     image: 'https://images.unsplash.com/photo-1549399542-7e3f8b79c341?auto=format&fit=crop&w=1000&q=80',
     category: 'suv'
   },
   {
-    _id: 'showcase-2',
+    _id: 'showcase-honda-city',
     make: 'Honda',
-    model: 'City ZX',
-    year: 2021,
-    price: 1050000,
+    model: 'CITY ZX',
+    variant: 'Sunroof Edition',
+    year: 2022,
+    price: 1120000,
     fuelType: 'Petrol',
     transmission: 'Automatic',
-    kms: 42000,
+    kms: 31000,
     owner: '1st Owner',
+    color: 'SILVER',
+    bodyType: 'Sedan',
     isKmGenuine: true,
     image: 'https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&w=1000&q=80',
     category: 'sedan'
   },
   {
-    _id: 'showcase-3',
-    make: 'Maruti Suzuki',
-    model: 'Swift ZXi+',
+    _id: 'showcase-hyundai-creta',
+    make: 'Hyundai',
+    model: 'CRETA SX (O)',
+    variant: 'Turbo DCT',
     year: 2023,
-    price: 725000,
+    price: 1480000,
+    fuelType: 'Petrol',
+    transmission: 'Automatic',
+    kms: 24000,
+    owner: '1st Owner',
+    color: 'Polar White',
+    bodyType: 'SUV',
+    isKmGenuine: true,
+    image: 'https://images.unsplash.com/photo-1549399542-7e3f8b79c341?auto=format&fit=crop&w=1000&q=80',
+    category: 'suv'
+  },
+  {
+    _id: 'showcase-maruti-swift',
+    make: 'Maruti Suzuki',
+    model: 'SWIFT ZXi+',
+    variant: 'Dual Tone',
+    year: 2023,
+    price: 780000,
     fuelType: 'Petrol',
     transmission: 'Manual',
     kms: 18000,
     owner: '1st Owner',
+    color: 'Solid Red',
+    bodyType: 'Hatchback',
     isKmGenuine: true,
     image: 'https://images.unsplash.com/photo-1617814076367-b759c7d7e738?auto=format&fit=crop&w=1000&q=80',
     category: 'hatchback'
-  },
-  {
-    _id: 'showcase-4',
-    make: 'Kia',
-    model: 'Seltos GTX+',
-    year: 2022,
-    price: 1450000,
-    fuelType: 'Diesel',
-    transmission: 'Automatic',
-    kms: 32000,
-    owner: '1st Owner',
-    isKmGenuine: true,
-    image: 'https://images.unsplash.com/photo-1583121274602-3e2820c69888?auto=format&fit=crop&w=1000&q=80',
-    category: 'suv'
   }
 ];
 
 const ARC_CATEGORIES = [
   { id: 'all', label: 'બધી કાર · All Cars', icon: '🚙' },
+  { id: 'coming_soon', label: 'કમિંગ સૂન · Coming Soon', icon: '✨' },
   { id: 'suv', label: 'SUV · સ્પોર્ટ્સ યુટિલિટી', icon: '🚘' },
   { id: 'sedan', label: 'Sedan · સેડાન', icon: '🚗' },
   { id: 'hatchback', label: 'Hatchback · ફેમિલી કાર', icon: '🛞' },
   { id: 'automatic', label: 'Automatic · ઓટોમેટિક', icon: '⚡' }
 ];
 
-const BRAND_BUBBLES = [
-  {
-    name: 'Tata Motors',
-    tag: 'TATA',
-    logo: (
-      <svg viewBox="0 0 36 20" className="w-5 h-3.5 fill-slate-800 group-hover:fill-brand-orange transition-colors">
-        <text x="18" y="15" textAnchor="middle" fontFamily="system-ui, sans-serif" fontWeight="900" fontSize="12" letterSpacing="1.2">TATA</text>
+// Dynamic Brand Logo SVG Renderer
+const renderBrandLogo = (make = '') => {
+  const m = (make || '').toLowerCase();
+  if (m.includes('kia')) {
+    return (
+      <svg viewBox="0 0 36 18" className="w-6 h-3.5 fill-current">
+        <text x="18" y="14" textAnchor="middle" fontFamily="system-ui, sans-serif" fontWeight="900" fontSize="13" letterSpacing="1.2">KIA</text>
       </svg>
-    ),
-    floatClass: 'animate-node-float-1',
-    pos: 'top-2 left-6',
-  },
-  {
-    name: 'Hyundai',
-    tag: 'HYUNDAI',
-    logo: (
-      <svg viewBox="0 0 36 22" className="w-5 h-3.5 fill-none stroke-slate-800 group-hover:stroke-brand-orange transition-colors" strokeWidth="2">
+    );
+  }
+  if (m.includes('hyundai')) {
+    return (
+      <svg viewBox="0 0 36 22" className="w-6 h-4 fill-none stroke-current" strokeWidth="2.2">
         <ellipse cx="18" cy="11" rx="15" ry="9" />
         <path d="M13 6 C13 11, 16 16, 16 16 M23 6 C23 11, 20 16, 20 16 M11 11 L25 11" strokeLinecap="round" />
       </svg>
-    ),
-    floatClass: 'animate-node-float-2',
-    pos: 'top-4 right-2',
-  },
-  {
-    name: 'Mahindra',
-    tag: 'MAHINDRA',
-    logo: (
-      <svg viewBox="0 0 36 22" className="w-5 h-3.5 fill-none stroke-slate-800 group-hover:stroke-brand-orange transition-colors" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+    );
+  }
+  if (m.includes('tata')) {
+    return (
+      <svg viewBox="0 0 36 20" className="w-6 h-3.5 fill-current">
+        <text x="18" y="15" textAnchor="middle" fontFamily="system-ui, sans-serif" fontWeight="900" fontSize="12" letterSpacing="1.5">TATA</text>
+      </svg>
+    );
+  }
+  if (m.includes('ford')) {
+    return (
+      <svg viewBox="0 0 36 20" className="w-6 h-3.5 fill-none stroke-current" strokeWidth="1.8">
+        <ellipse cx="18" cy="10" rx="16" ry="8" />
+        <text x="18" y="13" textAnchor="middle" fontFamily="serif" fontStyle="italic" fontWeight="bold" fontSize="9" fill="currentColor" stroke="none">Ford</text>
+      </svg>
+    );
+  }
+  if (m.includes('maruti') || m.includes('suzuki')) {
+    return (
+      <svg viewBox="0 0 30 22" className="w-5 h-4 fill-current">
+        <path d="M 20 3 L 10 3 C 7 3 7 8 10 9 L 19 10 C 22 11 22 15 19 16 L 9 16 L 9 18 L 19 18 C 24 18 24 13 21 12 L 12 11 C 9 10 9 5 12 5 L 20 5 Z" />
+      </svg>
+    );
+  }
+  if (m.includes('honda')) {
+    return (
+      <svg viewBox="0 0 32 24" className="w-5 h-4 fill-none stroke-current" strokeWidth="2.2">
+        <rect x="4" y="3" width="24" height="18" rx="3" />
+        <path d="M 10 6 L 10 18 M 22 6 L 22 18 M 10 12 L 22 12" strokeLinecap="round" />
+      </svg>
+    );
+  }
+  if (m.includes('mahindra')) {
+    return (
+      <svg viewBox="0 0 36 22" className="w-6 h-4 fill-none stroke-current" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
         <path d="M 7 17 L 12 5 L 18 13 L 24 5 L 29 17" />
       </svg>
-    ),
-    floatClass: 'animate-node-float-3',
-    pos: 'top-[36%] left-1',
-  },
-  {
-    name: 'Kia',
-    tag: 'KIA',
-    logo: (
-      <svg viewBox="0 0 36 18" className="w-5 h-3 fill-slate-800 group-hover:fill-brand-orange transition-colors">
-        <text x="18" y="14" textAnchor="middle" fontFamily="system-ui, sans-serif" fontWeight="900" fontSize="12" letterSpacing="1">KIA</text>
-      </svg>
-    ),
-    floatClass: 'animate-node-float-1',
-    pos: 'top-[36%] right-6',
-  },
-  {
-    name: 'Toyota',
-    tag: 'TOYOTA',
-    logo: (
-      <svg viewBox="0 0 36 22" className="w-5 h-3.5 fill-none stroke-slate-800 group-hover:stroke-brand-orange transition-colors" strokeWidth="1.8">
+    );
+  }
+  if (m.includes('toyota')) {
+    return (
+      <svg viewBox="0 0 36 22" className="w-6 h-4 fill-none stroke-current" strokeWidth="1.8">
         <ellipse cx="18" cy="11" rx="15" ry="9" />
         <ellipse cx="18" cy="8.5" rx="9" ry="4.5" />
         <ellipse cx="18" cy="11" rx="4" ry="7.5" />
       </svg>
-    ),
-    floatClass: 'animate-node-float-2',
-    pos: 'bottom-10 left-6',
-  },
-  {
-    name: 'Maruti Suzuki',
-    tag: 'MARUTI',
-    logo: (
-      <svg viewBox="0 0 30 22" className="w-5 h-3.5 fill-slate-800 group-hover:fill-brand-orange transition-colors">
-        <path d="M 20 3 L 10 3 C 7 3 7 8 10 9 L 19 10 C 22 11 22 15 19 16 L 9 16 L 9 18 L 19 18 C 24 18 24 13 21 12 L 12 11 C 9 10 9 5 12 5 L 20 5 Z" />
-      </svg>
-    ),
-    floatClass: 'animate-node-float-3',
-    pos: 'bottom-6 right-2',
-  },
-];
+    );
+  }
+  return <Car className="w-5 h-5 text-current" />;
+};
 
 export default function HeroSection() {
   const navigate = useNavigate();
@@ -165,7 +191,7 @@ export default function HeroSection() {
   const [formData, setFormData] = useState({ name: '', phone: '' });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Filter cars from inventory or fall back
+  // Filter cars from inventory or fall back with priority for featured models
   const displayCars = useMemo(() => {
     let list = cars && cars.length > 0
       ? cars.filter(c => c.status === 'Available' && c.image)
@@ -173,12 +199,26 @@ export default function HeroSection() {
 
     if (list.length === 0) {
       list = FALLBACK_SHOWCASE;
+    } else {
+      // Ensure our flagship Kia Seltos and Ford EcoSport are easily discoverable
+      const hasKia = list.some(c => /seltos/i.test(`${c.make} ${c.model}`));
+      if (!hasKia) {
+        list = [FALLBACK_SHOWCASE[0], ...list];
+      }
     }
 
+    if (selectedCategory === 'coming_soon') {
+      const upcoming = list.filter(c =>
+        c.status?.toLowerCase().includes('soon') ||
+        c.isComingSoon ||
+        /2024|2025/i.test(String(c.year || ''))
+      );
+      return upcoming.length > 0 ? upcoming : [FALLBACK_SHOWCASE[0]];
+    }
     if (selectedCategory === 'suv') {
       const suvs = list.filter(c =>
         c.bodyType?.toLowerCase().includes('suv') ||
-        /creta|brezza|seltos|scorpio|thar|fortuner|harrier|venue|nexon|xuv|safari|innova/i.test(`${c.make} ${c.model}`)
+        /creta|brezza|seltos|scorpio|thar|fortuner|harrier|venue|nexon|xuv|safari|innova|ecosport/i.test(`${c.make} ${c.model}`)
       );
       return suvs.length > 0 ? suvs : list;
     }
@@ -220,7 +260,7 @@ export default function HeroSection() {
     return () => clearInterval(interval);
   }, [displayCars.length]);
 
-  const activeCar = displayCars[currentCarIndex] || displayCars[0];
+  const activeCar = displayCars[currentCarIndex] || displayCars[0] || FALLBACK_SHOWCASE[0];
 
   const formatPrice = (price) => {
     return price >= 100000
@@ -272,7 +312,7 @@ export default function HeroSection() {
       title: `${activeCar.make} ${activeCar.model} (${activeCar.year})`,
       price: formatPrice(activeCar.price)
     })
-    : 'https://wa.me/919913634447';
+    : 'https://wa.me/919913634447?text=Hello%20Sadguru%20Car%20Surat%2C%20I%20am%20interested%20in%20your%20verified%20cars.';
 
   return (
     <section className="relative w-full bg-gradient-to-b from-[#f8fafc] via-[#ffffff] to-[#f8fafc] overflow-hidden pt-6 pb-12 lg:pt-8 lg:pb-16">
@@ -389,82 +429,158 @@ export default function HeroSection() {
 
 
         {/* ═══════════════════════════════════════════════════════════════════
-            2. THE COMPACT AUTOMOTIVE RADIAL ARC SHOWCASE (Vasundhara Reference)
+            2. THE AUTOMOTIVE TELEMETRY SHOWCASE:
+               Left Side (Specs & Brand) — Center Arc (Clean Car HUD) — Right Side (Performance & Trust)
             ═══════════════════════════════════════════════════════════════════ */}
-        <div className="relative w-full max-w-[1140px] mx-auto mt-2 sm:mt-4">
+        <div className="relative w-full max-w-[1180px] mx-auto mt-2 sm:mt-4">
 
           {/* SVG CIRCUIT TRACER WIRES (Desktop Only) */}
           <div className="hidden xl:block absolute inset-0 pointer-events-none z-0">
-            <svg className="w-full h-full" viewBox="0 0 1140 460" fill="none" preserveAspectRatio="none">
+            <svg className="w-full h-full" viewBox="0 0 1180 480" fill="none" preserveAspectRatio="none">
               <defs>
                 <linearGradient id="wireGradLeft" x1="0%" y1="0%" x2="100%" y2="0%">
-                  <stop offset="0%" stopColor="#cbd5e1" stopOpacity="0.3" />
+                  <stop offset="0%" stopColor="#cbd5e1" stopOpacity="0.25" />
                   <stop offset="60%" stopColor="#F59423" stopOpacity="0.75" />
                   <stop offset="100%" stopColor="#F59423" stopOpacity="0.2" />
                 </linearGradient>
                 <linearGradient id="wireGradRight" x1="0%" y1="0%" x2="100%" y2="0%">
                   <stop offset="0%" stopColor="#F59423" stopOpacity="0.2" />
                   <stop offset="40%" stopColor="#F59423" stopOpacity="0.75" />
-                  <stop offset="100%" stopColor="#cbd5e1" stopOpacity="0.3" />
+                  <stop offset="100%" stopColor="#cbd5e1" stopOpacity="0.25" />
                 </linearGradient>
               </defs>
 
-              {/* Left Connector Lines from Brand Bubbles to Center Arc */}
-              <path d="M 170 50 C 230 50, 260 110, 310 130" stroke="url(#wireGradLeft)" strokeWidth="1.5" className="animate-wire-dash" />
-              <path d="M 230 160 C 270 160, 280 180, 300 200" stroke="url(#wireGradLeft)" strokeWidth="1.5" className="animate-wire-dash" />
-              <path d="M 170 250 C 230 250, 260 250, 300 250" stroke="url(#wireGradLeft)" strokeWidth="1.5" className="animate-wire-dash" />
-              <path d="M 220 330 C 265 330, 285 290, 310 280" stroke="url(#wireGradLeft)" strokeWidth="1.5" className="animate-wire-dash" />
+              {/* Left Connector Lines from Spec Cards to Center Arc */}
+              <path d="M 280 65 C 320 65, 335 120, 360 140" stroke="url(#wireGradLeft)" strokeWidth="1.5" className="animate-wire-dash" />
+              <path d="M 280 150 C 315 150, 330 180, 350 200" stroke="url(#wireGradLeft)" strokeWidth="1.5" className="animate-wire-dash" />
+              <path d="M 280 235 C 315 235, 330 240, 350 250" stroke="url(#wireGradLeft)" strokeWidth="1.5" className="animate-wire-dash" />
+              <path d="M 280 320 C 320 320, 335 290, 360 280" stroke="url(#wireGradLeft)" strokeWidth="1.5" className="animate-wire-dash" />
 
-              {/* Right Connector Lines from Center Arc to Milestone Cards */}
-              <path d="M 830 130 C 865 110, 880 75, 915 75" stroke="url(#wireGradRight)" strokeWidth="1.5" className="animate-wire-dash" />
-              <path d="M 840 200 C 870 200, 885 180, 915 180" stroke="url(#wireGradRight)" strokeWidth="1.5" className="animate-wire-dash" />
-              <path d="M 830 280 C 865 295, 880 290, 915 290" stroke="url(#wireGradRight)" strokeWidth="1.5" className="animate-wire-dash" />
+              {/* Right Connector Lines from Center Arc to Performance Nodes */}
+              <path d="M 820 140 C 845 120, 860 65, 900 65" stroke="url(#wireGradRight)" strokeWidth="1.5" className="animate-wire-dash" />
+              <path d="M 830 200 C 850 180, 865 150, 900 150" stroke="url(#wireGradRight)" strokeWidth="1.5" className="animate-wire-dash" />
+              <path d="M 830 250 C 850 240, 865 235, 900 235" stroke="url(#wireGradRight)" strokeWidth="1.5" className="animate-wire-dash" />
+              <path d="M 820 280 C 845 290, 860 320, 900 320" stroke="url(#wireGradRight)" strokeWidth="1.5" className="animate-wire-dash" />
             </svg>
           </div>
 
           <div className="grid grid-cols-1 xl:grid-cols-12 gap-4 lg:gap-6 items-center relative z-10">
 
-            {/* ── LEFT COLUMN: FLOATING CIRCULAR BRAND BUBBLES ── */}
-            <div className="hidden xl:flex xl:col-span-3 flex-col justify-center">
-              <div className="flex items-center gap-1.5 mb-2 pl-2">
+            {/* ═══════════════════════════════════════════════════════════════════
+                LEFT COLUMN: 4 VEHICLE SPECIFICATIONS & BRAND IDENTITY NODES
+                ═══════════════════════════════════════════════════════════════════ */}
+            <div className="hidden xl:flex xl:col-span-3 flex-col gap-3 justify-center">
+              {/* Column Header */}
+              <div className="flex items-center gap-1.5 mb-1 pl-1">
                 <Sparkles className="w-3.5 h-3.5 text-brand-orange" />
-                <span className="text-[10px] font-black uppercase tracking-wider text-slate-500">
-                  ટોપ વેરિફાઇડ બ્રાન્ડ્સ · Top Brands
+                <span className="text-[11px] font-heading font-black uppercase tracking-wider text-slate-700">
+                  કાર સ્પેસિફિકેશન · Vehicle Specs
                 </span>
               </div>
 
-              <div className="relative h-[360px] w-full">
-                {BRAND_BUBBLES.map((brand) => (
-                  <div
-                    key={brand.name}
-                    className={`absolute ${brand.pos} ${brand.floatClass} flex items-center gap-2 p-1.5 pr-2.5 rounded-xl bg-white/95 backdrop-blur-md border border-slate-200/90 shadow-[0_6px_18px_rgba(15,23,42,0.06)] hover:shadow-md hover:border-brand-orange/50 hover:scale-105 transition-all cursor-pointer group`}
-                    title={brand.name}
-                  >
-                    <div className="w-8 h-8 rounded-lg bg-slate-50 border border-slate-100 flex items-center justify-center shrink-0 group-hover:bg-orange-50 transition-colors">
-                      {brand.logo}
-                    </div>
-                    <div className="text-left">
-                      <p className="text-[10px] font-heading font-black text-slate-800 group-hover:text-brand-orange leading-tight transition-colors">
-                        {brand.tag}
-                      </p>
-                      <span className="text-[8.5px] font-body text-slate-400 font-semibold block leading-tight">
-                        Verified
-                      </span>
-                    </div>
+              {/* Node 1: Brand & Logo */}
+              <div className="animate-node-float-1 bg-white/95 backdrop-blur-md p-3.5 rounded-2xl border border-slate-200/80 shadow-[0_6px_20px_rgba(15,23,42,0.06)] hover:shadow-lg hover:border-brand-orange/50 transition-all group">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center shrink-0 text-slate-800 group-hover:text-brand-orange group-hover:bg-orange-50 transition-colors">
+                    {renderBrandLogo(activeCar.make)}
                   </div>
-                ))}
+                  <div>
+                    <span className="text-[10px] font-heading font-black text-brand-orange uppercase tracking-wider block">
+                      ટોપ વેરિફાઇડ બ્રાન્ડ
+                    </span>
+                    <h4 className="font-heading font-black text-sm text-slate-900 leading-tight">
+                      {activeCar.make} {activeCar.model?.split(' ')[0]}
+                    </h4>
+                    <span className="text-[10px] font-body text-slate-400 font-semibold block">
+                      100% Certified Inspection
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Node 2: Fuel Type */}
+              <div className="animate-node-float-2 bg-white/95 backdrop-blur-md p-3.5 rounded-2xl border border-slate-200/80 shadow-[0_6px_20px_rgba(15,23,42,0.06)] hover:shadow-lg hover:border-amber-300 transition-all group ml-2">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-amber-50 border border-amber-100 flex items-center justify-center shrink-0 text-amber-600 group-hover:scale-105 transition-transform">
+                    <Fuel className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <span className="text-[10px] font-heading font-bold text-slate-400 uppercase tracking-wider block">
+                      Fuel · ઈંધણ
+                    </span>
+                    <h4 className="font-heading font-black text-sm text-slate-900 leading-tight">
+                      {activeCar.fuelType || 'Petrol / Diesel'}
+                    </h4>
+                    <span className="text-[10px] font-body text-slate-500 font-medium block">
+                      હાઇ માઇલેજ &amp; બેસ્ટ પર્ફોર્મન્સ
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Node 3: Body Style & Color */}
+              <div className="animate-node-float-3 bg-white/95 backdrop-blur-md p-3.5 rounded-2xl border border-slate-200/80 shadow-[0_6px_20px_rgba(15,23,42,0.06)] hover:shadow-lg hover:border-sky-300 transition-all group">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-sky-50 border border-sky-100 flex items-center justify-center shrink-0 text-sky-600 group-hover:scale-105 transition-transform">
+                    <Car className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <span className="text-[10px] font-heading font-bold text-slate-400 uppercase tracking-wider block">
+                      Body &amp; Color · બોડી લાઈન
+                    </span>
+                    <h4 className="font-heading font-black text-sm text-slate-900 leading-tight">
+                      {activeCar.bodyType || 'SUV / Sedan'} • {activeCar.color || 'SILVER'}
+                    </h4>
+                    <span className="text-[10px] font-body text-slate-500 font-medium block">
+                      ઓરિજિનલ પેઇન્ટ &amp; ક્લીન બોડી
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Node 4: 120+ Point Inspection */}
+              <div className="animate-node-float-1 bg-white/95 backdrop-blur-md p-3.5 rounded-2xl border border-slate-200/80 shadow-[0_6px_20px_rgba(15,23,42,0.06)] hover:shadow-lg hover:border-emerald-300 transition-all group ml-1">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-emerald-50 border border-emerald-100 flex items-center justify-center shrink-0 text-emerald-600 group-hover:scale-105 transition-transform">
+                    <ShieldCheck className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <span className="text-[10px] font-heading font-black text-emerald-600 uppercase tracking-wider block">
+                      ટેકનિકલ સર્ટિફિકેશન
+                    </span>
+                    <h4 className="font-heading font-black text-sm text-slate-900 leading-tight">
+                      🛡️ ૧૨૦+ પોઈન્ટ ચેક પાસ
+                    </h4>
+                    <span className="text-[10px] font-body text-slate-500 font-medium block">
+                      ઈન્સ્પેક્શન પાસ &amp; નોન-એક્સિડેન્ટલ
+                    </span>
+                  </div>
+                </div>
               </div>
             </div>
 
 
-            {/* ── CENTER COLUMN: THE COMPACT RADIAL ARC STAGE SHOWCASE ── */}
+            {/* ═══════════════════════════════════════════════════════════════════
+                CENTER COLUMN: THE RADIAL ARC STAGE SHOWCASE WITH FOCUSED CAR HUD
+                ═══════════════════════════════════════════════════════════════════ */}
             <div className="col-span-1 xl:col-span-6 flex flex-col items-center">
               <div className="relative w-full max-w-[560px] rounded-t-[280px] pt-4 pb-3 px-3 sm:px-4 bg-gradient-to-b from-brand-orange/[0.06] via-amber-200/[0.02] to-white/95 border-t-2 border-l-2 border-r-2 border-amber-400/40 shadow-[0_15px_40px_-10px_rgba(245,148,35,0.14)] backdrop-blur-sm">
 
                 {/* Subtle top laser glow */}
                 <div className="absolute top-0 inset-x-14 h-[2px] bg-gradient-to-r from-transparent via-brand-orange to-transparent animate-pulse" />
 
-                {/* Arc Top Segment Ribbon (like Vasundhara's Experts / Talent / Core Team) */}
+                {/* Coming Soon & Live Stock Flag Badge */}
+                <div className="flex items-center justify-center mb-2 z-20 relative">
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-gradient-to-r from-amber-500/15 via-orange-500/20 to-amber-500/15 border border-brand-orange/30 text-slate-900 text-[10px] sm:text-xs font-heading font-black uppercase tracking-wider shadow-2xs">
+                    <span className="relative flex h-2 w-2">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-orange opacity-75" />
+                      <span className="relative inline-flex rounded-full h-2 w-2 bg-brand-orange" />
+                    </span>
+                    ✨ નવું સ્ટોક આગમન / COMING SOON SHOWCASE
+                  </span>
+                </div>
+
+                {/* Arc Top Segment Ribbon */}
                 <div className="flex items-center justify-center gap-1.5 sm:gap-2 mb-2 z-20 relative text-[10px] font-heading font-black uppercase tracking-wider text-slate-600">
                   <span className="flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-white/85 border border-slate-200/80 shadow-2xs">
                     <ShieldCheck className="w-3 h-3 text-emerald-600" /> વેરિફાઇડ કાર
@@ -477,7 +593,7 @@ export default function HeroSection() {
                   </span>
                 </div>
 
-                {/* Category Pills (Compact) */}
+                {/* Category Pills (Including Coming Soon) */}
                 <div className="flex items-center justify-center gap-1 sm:gap-1.5 flex-wrap mb-1 z-20 relative">
                   {ARC_CATEGORIES.map((cat) => {
                     const isActive = selectedCategory === cat.id;
@@ -501,7 +617,7 @@ export default function HeroSection() {
                 </div>
 
                 {/* Car Showcase Stage */}
-                <div className="relative w-full h-[160px] sm:h-[195px] flex items-center justify-center my-0.5">
+                <div className="relative w-full h-[165px] sm:h-[200px] flex items-center justify-center my-0.5">
                   <AnimatePresence mode="wait">
                     {activeCar && (
                       <motion.div
@@ -522,7 +638,7 @@ export default function HeroSection() {
                           transition={{ repeat: Infinity, duration: 4.5, ease: 'easeInOut' }}
                           src={getOptimizedUrl(activeCar.image, 800)}
                           alt={`${activeCar.make} ${activeCar.model}`}
-                          className="w-full max-h-[145px] sm:max-h-[180px] object-contain drop-shadow-[0_12px_22px_rgba(15,23,42,0.18)] select-none hover:scale-105 transition-transform duration-500"
+                          className="w-full max-h-[150px] sm:max-h-[185px] object-contain drop-shadow-[0_12px_22px_rgba(15,23,42,0.18)] select-none hover:scale-105 transition-transform duration-500"
                         />
                       </motion.div>
                     )}
@@ -546,70 +662,42 @@ export default function HeroSection() {
                   </button>
                 </div>
 
-                {/* ── COMPACT INTEGRATED CAR INFORMATION HUD ── */}
+                {/* ── CLEAN CENTER CAR HUD CARD (Strictly Focused As User Requested) ── */}
                 {activeCar && (
-                  <div className="relative z-20 w-full bg-white/95 backdrop-blur-md border border-slate-200/90 rounded-xl p-3 sm:p-3.5 shadow-[0_8px_25px_rgba(15,23,42,0.06)]">
+                  <div className="relative z-20 w-full bg-white/95 backdrop-blur-md border border-slate-200/90 rounded-2xl p-4 sm:p-5 shadow-[0_10px_30px_rgba(15,23,42,0.06)]">
                     {/* Header + Price */}
-                    <div className="flex items-center justify-between gap-2 pb-2 border-b border-gray-100">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pb-3 border-b border-gray-100">
                       <div>
-                        <div className="flex items-center gap-1.5 mb-0.5">
-                          <span className="px-1.5 py-0.2 rounded bg-emerald-50 border border-emerald-200 text-emerald-700 text-[9px] font-black uppercase tracking-wider">
+                        <div className="flex items-center gap-1.5 mb-1">
+                          <span className="px-2 py-0.5 rounded-md bg-emerald-50 border border-emerald-200 text-emerald-700 text-[10px] font-black uppercase tracking-wider">
                             VERIFIED CAR
                           </span>
-                          {activeCar.year && (
-                            <span className="text-[11px] font-bold text-slate-500">
-                              {activeCar.year} Model
-                            </span>
-                          )}
+                          <span className="px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 text-[10px] font-bold">
+                            {activeCar.year || '2025'} Model
+                          </span>
                         </div>
-                        <h3 className="font-heading font-black text-base sm:text-lg text-slate-900 leading-tight">
+                        <h3 className="font-heading font-black text-xl sm:text-2xl text-slate-900 tracking-tight leading-tight">
                           {activeCar.make} {activeCar.model}
                         </h3>
                       </div>
 
-                      <div className="text-right shrink-0">
-                        <p className="font-heading font-black text-lg sm:text-xl text-brand-orange leading-none">
+                      <div className="text-left sm:text-right shrink-0">
+                        <p className="font-heading font-black text-2xl sm:text-3xl text-brand-orange leading-none">
                           {formatPrice(activeCar.price)}
                         </p>
-                        <p className="text-[10px] font-body text-slate-500 font-semibold mt-0.5">
-                          EMI from <span className="text-slate-800 font-bold">{calculateEmi(activeCar.price)}</span>/mo*
+                        <p className="text-xs font-body text-slate-500 font-semibold mt-1">
+                          EMI from <span className="text-slate-900 font-bold">{calculateEmi(activeCar.price)}</span>/mo*
                         </p>
                       </div>
                     </div>
 
-                    {/* Integrated Trust Highlights (As Requested by User!) */}
-                    <div className="grid grid-cols-4 gap-1.5 py-2 border-b border-gray-100 text-center">
-                      <div className="bg-slate-50/80 px-1 py-1 rounded-lg border border-slate-100">
-                        <span className="text-[10px] font-heading font-black text-slate-800 block">🛡️ ૧૨૦+ પોઈન્ટ</span>
-                        <span className="text-[8.5px] text-slate-500 font-medium block truncate">ઈન્સ્પેક્શન પાસ</span>
-                      </div>
-                      <div className="bg-slate-50/80 px-1 py-1 rounded-lg border border-slate-100">
-                        <span className="text-[10px] font-heading font-black text-slate-800 block">⚡ ૧૦૦% જેન્યુઇન</span>
-                        <span className="text-[8.5px] text-slate-500 font-medium block truncate">ઓરિજિનલ KM</span>
-                      </div>
-                      <div className="bg-slate-50/80 px-1 py-1 rounded-lg border border-slate-100">
-                        <span className="text-[10px] font-heading font-black text-slate-800 block">🏦 ૦ ડાઉન પેમેન્ટ</span>
-                        <span className="text-[8.5px] text-slate-500 font-medium block truncate">બેંક લોન ઉપલબ્ધ</span>
-                      </div>
-                      <div className="bg-slate-50/80 px-1 py-1 rounded-lg border border-slate-100">
-                        <span className="text-[10px] font-heading font-black text-slate-800 block">📄 ફ્રી RTO</span>
-                        <span className="text-[8.5px] text-slate-500 font-medium block truncate">ટ્રાન્સફર પ્રક્રિયા</span>
-                      </div>
-                    </div>
-
-                    {/* Action Row */}
-                    <div className="flex items-center gap-2 pt-2">
-                      <div className="hidden sm:flex items-center gap-1.5 text-[10px] font-body font-bold text-slate-600 pr-1">
-                        <span className="px-1.5 py-0.5 rounded bg-slate-100">{activeCar.fuelType || 'Petrol'}</span>
-                        <span className="px-1.5 py-0.5 rounded bg-slate-100">{activeCar.transmission || 'Manual'}</span>
-                        <span className="px-1.5 py-0.5 rounded bg-slate-100">{(activeCar.kms || 35000).toLocaleString('en-IN')} KM</span>
-                      </div>
-
+                    {/* Direct Action Buttons & Controls */}
+                    <div className="flex items-center gap-2.5 pt-3">
                       <button
                         onClick={() => navigate(activeCar._id ? `/car-details/${activeCar._id}` : '/inventory')}
-                        className="flex-1 py-2 px-3 rounded-lg bg-primary hover:bg-slate-800 text-white font-heading font-bold text-xs flex items-center justify-center gap-1.5 transition-all shadow-xs cursor-pointer"
+                        className="flex-1 py-2.5 px-4 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-heading font-black text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-all shadow-xs cursor-pointer"
                       >
-                        <Eye className="w-3.5 h-3.5" />
+                        <Eye className="w-4 h-4 text-brand-orange" />
                         <span>ગાડી જુઓ · View Car</span>
                       </button>
 
@@ -617,21 +705,21 @@ export default function HeroSection() {
                         href={whatsappUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="py-2 px-3.5 rounded-lg bg-[#25D366] hover:bg-[#20bd5a] text-white font-heading font-bold text-xs flex items-center justify-center gap-1.5 transition-all shadow-xs cursor-pointer"
+                        className="py-2.5 px-4 sm:px-5 rounded-xl bg-[#25D366] hover:bg-[#20bd5a] text-white font-heading font-black text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-all shadow-xs cursor-pointer"
                       >
-                        <MessageCircle className="w-3.5 h-3.5 fill-current" />
+                        <MessageCircle className="w-4 h-4 fill-current" />
                         <span>WhatsApp</span>
                       </a>
                     </div>
 
                     {/* Dot Pagination */}
-                    <div className="flex items-center justify-center gap-1 mt-2">
+                    <div className="flex items-center justify-center gap-1 mt-2.5">
                       {displayCars.map((_, idx) => (
                         <button
                           key={idx}
                           onClick={() => setCurrentCarIndex(idx)}
-                          className={`h-1 rounded-full transition-all cursor-pointer ${
-                            currentCarIndex === idx ? 'w-5 bg-brand-orange' : 'w-1 bg-gray-300 hover:bg-gray-400'
+                          className={`h-1.5 rounded-full transition-all cursor-pointer ${
+                            currentCarIndex === idx ? 'w-6 bg-brand-orange' : 'w-1.5 bg-gray-300 hover:bg-gray-400'
                           }`}
                           aria-label={`Slide ${idx + 1}`}
                         />
@@ -641,65 +729,133 @@ export default function HeroSection() {
                 )}
 
               </div>
+
+              {/* ── MOBILE / TABLET SPECS TELEMETRY GRID (Under Dome on smaller screens) ── */}
+              <div className="xl:hidden grid grid-cols-2 sm:grid-cols-4 gap-2 mt-4 w-full max-w-[560px]">
+                <div className="bg-white p-2.5 rounded-xl border border-slate-200/90 shadow-2xs">
+                  <span className="text-[10px] text-slate-400 font-bold uppercase block">Fuel</span>
+                  <p className="text-xs font-heading font-black text-slate-800">{activeCar.fuelType || 'Petrol'}</p>
+                </div>
+                <div className="bg-white p-2.5 rounded-xl border border-slate-200/90 shadow-2xs">
+                  <span className="text-[10px] text-slate-400 font-bold uppercase block">Transmission</span>
+                  <p className="text-xs font-heading font-black text-slate-800">{activeCar.transmission || 'Automatic'}</p>
+                </div>
+                <div className="bg-white p-2.5 rounded-xl border border-slate-200/90 shadow-2xs">
+                  <span className="text-[10px] text-slate-400 font-bold uppercase block">Owner</span>
+                  <p className="text-xs font-heading font-black text-slate-800">{activeCar.owner || '1st Owner'}</p>
+                </div>
+                <div className="bg-white p-2.5 rounded-xl border border-slate-200/90 shadow-2xs">
+                  <span className="text-[10px] text-slate-400 font-bold uppercase block">Genuine KM</span>
+                  <p className="text-xs font-heading font-black text-slate-800">{(activeCar.kms || 32000).toLocaleString('en-IN')} KM</p>
+                </div>
+                <div className="bg-white p-2.5 rounded-xl border border-slate-200/90 shadow-2xs">
+                  <span className="text-[10px] text-slate-400 font-bold uppercase block">Body &amp; Color</span>
+                  <p className="text-xs font-heading font-black text-slate-800">{activeCar.bodyType || 'SUV'} • {activeCar.color || 'SILVER'}</p>
+                </div>
+                <div className="bg-white p-2.5 rounded-xl border border-slate-200/90 shadow-2xs">
+                  <span className="text-[10px] text-emerald-600 font-bold uppercase block">120+ Point</span>
+                  <p className="text-xs font-heading font-black text-slate-800">Inspection Pass</p>
+                </div>
+                <div className="bg-white p-2.5 rounded-xl border border-slate-200/90 shadow-2xs">
+                  <span className="text-[10px] text-brand-orange font-bold uppercase block">Bank Finance</span>
+                  <p className="text-xs font-heading font-black text-slate-800">0 Down Payment</p>
+                </div>
+                <div className="bg-white p-2.5 rounded-xl border border-slate-200/90 shadow-2xs">
+                  <span className="text-[10px] text-indigo-600 font-bold uppercase block">RTO Process</span>
+                  <p className="text-xs font-heading font-black text-slate-800">100% Free Transfer</p>
+                </div>
+              </div>
             </div>
 
 
-            {/* ── RIGHT COLUMN: 3 SLIM STATUS MILESTONE CARDS (Vasundhara Reference) ── */}
+            {/* ═══════════════════════════════════════════════════════════════════
+                RIGHT COLUMN: 4 VEHICLE PERFORMANCE, OWNERSHIP & FINANCE NODES
+                ═══════════════════════════════════════════════════════════════════ */}
             <div className="hidden xl:flex xl:col-span-3 flex-col gap-3 justify-center">
+              {/* Column Header */}
               <div className="flex items-center gap-1.5 mb-1 pl-1">
                 <Award className="w-3.5 h-3.5 text-brand-orange" />
-                <span className="text-[10px] font-black uppercase tracking-wider text-slate-500">
-                  સદગુરુ ભરોસો · Proven Trust
+                <span className="text-[11px] font-heading font-black uppercase tracking-wider text-slate-700">
+                  ઓનરશિપ &amp; ફાઇનાન્સ · Ownership &amp; Loan
                 </span>
               </div>
 
-              {/* Card 1 */}
-              <div className="animate-node-float-1 bg-white/95 backdrop-blur-md p-3 rounded-xl border border-slate-200/80 shadow-xs hover:shadow-md hover:border-emerald-300 transition-all group">
-                <div className="flex items-center gap-2.5">
-                  <div className="w-8 h-8 rounded-lg bg-emerald-50 border border-emerald-100 flex items-center justify-center shrink-0 text-emerald-600">
-                    <CheckCircle2 className="w-4 h-4" />
+              {/* Node 1: Transmission */}
+              <div className="animate-node-float-1 bg-white/95 backdrop-blur-md p-3.5 rounded-2xl border border-slate-200/80 shadow-[0_6px_20px_rgba(15,23,42,0.06)] hover:shadow-lg hover:border-indigo-300 transition-all group">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-indigo-50 border border-indigo-100 flex items-center justify-center shrink-0 text-indigo-600 group-hover:scale-105 transition-transform">
+                    <Settings2 className="w-5 h-5" />
                   </div>
                   <div>
-                    <h4 className="font-heading font-black text-xs text-slate-800 leading-tight">
-                      Quality Inspection Certified
+                    <span className="text-[10px] font-heading font-bold text-slate-400 uppercase tracking-wider block">
+                      Transmission · ગિયરબોક્સ
+                    </span>
+                    <h4 className="font-heading font-black text-sm text-slate-900 leading-tight">
+                      {activeCar.transmission || 'Automatic'}
                     </h4>
-                    <p className="text-[10px] font-body text-slate-500 font-medium leading-tight mt-0.5">
-                      ૧૨૦+ પોઈન્ટ ટેકનિકલ ઈન્સ્પેક્શન પાસ
-                    </p>
+                    <span className="text-[10px] font-body text-slate-500 font-medium block">
+                      સ્મૂથ ડ્રાઇવિંગ એક્સપીરિયન્સ
+                    </span>
                   </div>
                 </div>
               </div>
 
-              {/* Card 2 */}
-              <div className="animate-node-float-2 bg-white/95 backdrop-blur-md p-3 rounded-xl border border-slate-200/80 shadow-xs hover:shadow-md hover:border-amber-300 transition-all group mr-2">
-                <div className="flex items-center gap-2.5">
-                  <div className="w-8 h-8 rounded-lg bg-amber-50 border border-amber-100 flex items-center justify-center shrink-0 text-amber-600">
-                    <Zap className="w-4 h-4" />
+              {/* Node 2: Ownership */}
+              <div className="animate-node-float-2 bg-white/95 backdrop-blur-md p-3.5 rounded-2xl border border-slate-200/80 shadow-[0_6px_20px_rgba(15,23,42,0.06)] hover:shadow-lg hover:border-purple-300 transition-all group mr-2">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-purple-50 border border-purple-100 flex items-center justify-center shrink-0 text-purple-600 group-hover:scale-105 transition-transform">
+                    <User className="w-5 h-5" />
                   </div>
                   <div>
-                    <h4 className="font-heading font-black text-xs text-slate-800 leading-tight">
-                      Instant Loan Approval in 2h
+                    <span className="text-[10px] font-heading font-bold text-slate-400 uppercase tracking-wider block">
+                      Owner · માલિકી
+                    </span>
+                    <h4 className="font-heading font-black text-sm text-slate-900 leading-tight">
+                      {activeCar.owner || '1st Owner'}
                     </h4>
-                    <p className="text-[10px] font-body text-slate-500 font-medium leading-tight mt-0.5">
-                      ટોપ બેંકો દ્વારા ઝડપી લોન મંજૂરી
-                    </p>
+                    <span className="text-[10px] font-body text-slate-500 font-medium block">
+                      સિંગલ ઓનર જેન્યુઇન કાર
+                    </span>
                   </div>
                 </div>
               </div>
 
-              {/* Card 3 */}
-              <div className="animate-node-float-3 bg-white/95 backdrop-blur-md p-3 rounded-xl border border-slate-200/80 shadow-xs hover:shadow-md hover:border-brand-orange/40 transition-all group">
-                <div className="flex items-center gap-2.5">
-                  <div className="w-8 h-8 rounded-lg bg-orange-50 border border-orange-100 flex items-center justify-center shrink-0 text-brand-orange">
-                    <Award className="w-4 h-4" />
+              {/* Node 3: Genuine Mileage */}
+              <div className="animate-node-float-3 bg-white/95 backdrop-blur-md p-3.5 rounded-2xl border border-slate-200/80 shadow-[0_6px_20px_rgba(15,23,42,0.06)] hover:shadow-lg hover:border-emerald-300 transition-all group">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-emerald-50 border border-emerald-100 flex items-center justify-center shrink-0 text-emerald-600 group-hover:scale-105 transition-transform">
+                    <Gauge className="w-5 h-5" />
                   </div>
                   <div>
-                    <h4 className="font-heading font-black text-xs text-slate-800 leading-tight">
-                      10,000+ Happy Surat Families
+                    <span className="text-[10px] font-heading font-black text-emerald-600 uppercase tracking-wider block">
+                      ઓરિજિનલ સર્વિસ રેકોર્ડ
+                    </span>
+                    <h4 className="font-heading font-black text-sm text-slate-900 leading-tight">
+                      ⚡ {(activeCar.kms || 87000).toLocaleString('en-IN')} KM
                     </h4>
-                    <p className="text-[10px] font-body text-slate-500 font-medium leading-tight mt-0.5">
-                      ૪.૮★ રેટિંગ સાથે ભરોસાપાત્ર કાર મેળો
-                    </p>
+                    <span className="text-[10px] font-body text-slate-500 font-medium block">
+                      ૧૦૦% જેન્યુઇન કિલોમીટર
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Node 4: 0 Down Payment & Free RTO */}
+              <div className="animate-node-float-1 bg-white/95 backdrop-blur-md p-3.5 rounded-2xl border border-slate-200/80 shadow-[0_6px_20px_rgba(15,23,42,0.06)] hover:shadow-lg hover:border-brand-orange/40 transition-all group mr-1">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-orange-50 border border-orange-100 flex items-center justify-center shrink-0 text-brand-orange group-hover:scale-105 transition-transform">
+                    <Landmark className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <span className="text-[10px] font-heading font-black text-brand-orange uppercase tracking-wider block">
+                      સરળ લોન &amp; કાગળિયાં
+                    </span>
+                    <h4 className="font-heading font-black text-sm text-slate-900 leading-tight">
+                      🏦 ૦ ડાઉન પેમેન્ટ • 📄 ફ્રી RTO
+                    </h4>
+                    <span className="text-[10px] font-body text-slate-500 font-medium block">
+                      ૨ કલાકમાં લોન &amp; લીગલ ટ્રાન્સફર
+                    </span>
                   </div>
                 </div>
               </div>
