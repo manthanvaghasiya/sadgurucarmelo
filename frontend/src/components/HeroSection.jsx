@@ -350,35 +350,37 @@ export default function HeroSection() {
             <div className="relative inline-block">
               {/* Floating Live Indicator Badge */}
               <div className="absolute -top-2.5 right-4 z-10 pointer-events-none">
-                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-slate-900 text-white text-[9px] font-black uppercase tracking-wider shadow-sm border border-brand-orange/40">
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-slate-900 text-white text-[9px] font-black uppercase tracking-wider shadow-sm border border-brand-orange/40">
                   <span className="relative flex h-1.5 w-1.5">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-orange opacity-75" />
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75" />
                     <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-brand-orange" />
                   </span>
-                  Takes 2-3 Mins
+                  ⚡ Takes 30 Sec
                 </span>
               </div>
 
               <button
                 onClick={() => setShowModal(true)}
-                className="group relative inline-flex items-center gap-3 px-6 sm:px-8 py-3 sm:py-3.5 rounded-2xl bg-gradient-to-r from-brand-orange via-[#f79e32] to-[#e68415] text-white font-heading shadow-[0_10px_28px_rgba(245,148,35,0.38)] hover:shadow-[0_14px_38px_rgba(245,148,35,0.52)] hover:-translate-y-0.5 active:translate-y-0 transition-all duration-300 cursor-pointer overflow-hidden border border-amber-300/40"
+                className="group relative inline-flex items-center gap-3 px-7 sm:px-9 py-3.5 sm:py-4 rounded-2xl bg-gradient-to-r from-brand-orange via-[#f79e32] to-[#e68415] text-white font-heading shadow-[0_10px_28px_rgba(245,148,35,0.4)] hover:shadow-[0_14px_38px_rgba(245,148,35,0.55)] hover:-translate-y-0.5 active:translate-y-0 transition-all duration-300 cursor-pointer overflow-hidden border border-amber-300/50"
               >
                 <div className="absolute inset-0 bg-white/20 -translate-x-full group-hover:translate-x-full transition-transform duration-700 pointer-events-none" />
 
-                <div className="flex items-center justify-center w-8 h-8 rounded-xl bg-white/20 backdrop-blur-xs text-white group-hover:scale-110 transition-transform">
-                  <Sparkles className="w-4 h-4 fill-white/30" />
+                {/* Impressive Automotive Steering Wheel Icon with Interactive Turn on Hover */}
+                <div className="flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-white/25 backdrop-blur-md text-white group-hover:scale-110 group-hover:rotate-12 transition-all duration-300 shadow-[inset_0_1px_2px_rgba(255,255,255,0.4)] border border-white/25 shrink-0">
+                  <svg viewBox="0 0 24 24" className="w-5 h-5 fill-none stroke-current" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="12" cy="12" r="9.5" />
+                    <circle cx="12" cy="12" r="2.8" className="fill-white/35" />
+                    <path d="M12 2.5v6.7" />
+                    <path d="M5.2 16.7l5.2-3" />
+                    <path d="M18.8 16.7l-5.2-3" />
+                  </svg>
                 </div>
 
-                <div className="flex flex-col text-left">
-                  <span className="font-heading font-black text-white text-xs sm:text-sm sm:text-[15px] leading-tight drop-shadow-2xs">
-                    ટેસ્ટ ડ્રાઈવ બુક કરો · Book Test Drive
-                  </span>
-                  <span className="text-[10px] sm:text-[11px] font-body text-orange-100 font-semibold leading-tight mt-0.5">
-                    ડોરસ્ટેપ અથવા શોરૂમ વિઝિટ
-                  </span>
-                </div>
+                <span className="font-heading font-black text-white text-sm sm:text-base leading-none tracking-tight drop-shadow-2xs">
+                  ટેસ્ટ ડ્રાઈવ બુક કરો · Book Test Drive
+                </span>
 
-                <ChevronRight className="w-4 h-4 text-white group-hover:translate-x-1 transition-transform ml-1" />
+                <ChevronRight className="w-4 h-4 text-white group-hover:translate-x-1 transition-transform ml-0.5" />
               </button>
             </div>
           </motion.div>
@@ -862,7 +864,7 @@ export default function HeroSection() {
                 disabled={isSubmitting}
                 className="w-full bg-brand-orange hover:bg-orange-600 text-white font-heading font-black py-3 rounded-xl transition-all shadow-md disabled:opacity-70 mt-2 cursor-pointer"
               >
-                {isSubmitting ? 'સબમિટ થઈ રહ્યું છે...' : 'ટેસ્ટ ડ્રાઈવ કન્ફર્મ કરો (Takes 2 mins)'}
+                {isSubmitting ? 'સબમિટ થઈ રહ્યું છે...' : 'ટેસ્ટ ડ્રાઈવ કન્ફર્મ કરો (Takes 30 sec)'}
               </button>
             </form>
           </div>
