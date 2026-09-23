@@ -14,7 +14,10 @@ export function CarProvider({ children }) {
     setError(null);
     try {
       const response = await axiosInstance.get('/cars?limit=1000');
-      setCars(response.data.data || response.data);
+      const carList = Array.isArray(response.data?.data)
+        ? response.data.data
+        : (Array.isArray(response.data) ? response.data : []);
+      setCars(carList);
     } catch (err) {
       setError(err.response?.data?.message || err.message || 'Failed to fetch cars');
     } finally {

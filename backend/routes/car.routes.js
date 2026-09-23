@@ -1,4 +1,5 @@
 import express from 'express';
+import mongoose from 'mongoose';
 import NodeCache from 'node-cache';
 import Car from '../models/Car.js';
 import { upload } from '../config/cloudinary.js';
@@ -179,12 +180,16 @@ router.get('/filters', checkCache, async (req, res) => {
 // ═══════════════════════════════════════════════
 router.get('/:id', checkCache, async (req, res) => {
   try {
+    if (!req.params.id || !mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(404).json({ success: false, message: 'Vehicle not found' });
+    }
     const car = await Car.findById(req.params.id).lean();
     if (!car) {
       return res.status(404).json({ success: false, message: 'Car not found' });
     }
     res.json({ success: true, data: car });
   } catch (error) {
+    console.error('Get car by ID error:', error);
     res.status(500).json({ success: false, message: 'Server error' });
   }
 });

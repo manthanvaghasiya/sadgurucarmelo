@@ -23,15 +23,19 @@ export default function Home() {
   const { cars, isLoading } = useCars();
   const navigate = useNavigate();
 
+  // Available verified cars
+  const availableCars = useMemo(() => {
+    return (cars || []).filter(car => car.status === 'Available');
+  }, [cars]);
+
   // Available verified cars with featured cars prioritized
   const displayedCars = useMemo(() => {
-    if (!cars || !cars.length) return [];
-    const available = cars.filter(car => car.status === 'Available');
-    const featured = available.filter(c => c.isFeaturedOnHome);
-    const nonFeatured = available.filter(c => !c.isFeaturedOnHome);
-    const list = featured.length > 0 ? [...featured, ...nonFeatured] : available;
+    if (!availableCars.length) return [];
+    const featured = availableCars.filter(c => c.isFeaturedOnHome);
+    const nonFeatured = availableCars.filter(c => !c.isFeaturedOnHome);
+    const list = featured.length > 0 ? [...featured, ...nonFeatured] : availableCars;
     return list.slice(0, 8);
-  }, [cars]);
+  }, [availableCars]);
 
   return (
     <div className="min-h-screen flex flex-col relative bg-gradient-to-b from-slate-50 via-white to-slate-50">

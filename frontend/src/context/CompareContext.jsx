@@ -10,7 +10,9 @@ export function CompareProvider({ children }) {
   const [compareCars, setCompareCars] = useState(() => {
     try {
       const saved = localStorage.getItem('sadguru_compare_cars');
-      return saved ? JSON.parse(saved) : [];
+      if (!saved) return [];
+      const parsed = JSON.parse(saved);
+      return Array.isArray(parsed) ? parsed : [];
     } catch {
       return [];
     }
@@ -19,7 +21,7 @@ export function CompareProvider({ children }) {
   // Save to localStorage whenever compareCars updates
   useEffect(() => {
     try {
-      localStorage.setItem('sadguru_compare_cars', JSON.stringify(compareCars));
+      localStorage.setItem('sadguru_compare_cars', JSON.stringify(Array.isArray(compareCars) ? compareCars : []));
     } catch (e) {
       console.warn('Failed to save compare cars to storage', e);
     }
@@ -27,19 +29,21 @@ export function CompareProvider({ children }) {
 
   // Sync with latest cars data from CarContext to ensure full specs are populated
   useEffect(() => {
-    if (!cars || cars.length === 0 || compareCars.length === 0) return;
+    if (!Array.isArray(cars) || cars.length === 0 || !Array.isArray(compareCars) || compareCars.length === 0) return;
 
     setCompareCars((prev) => {
+      if (!Array.isArray(prev)) return [];
       let changed = false;
       const updated = prev.map((item) => {
+        if (!item) return item;
         const itemId = String(item._id || item.id || '');
-        const fullCar = cars.find((c) => String(c._id || c.id || '') === itemId);
+        const fullCar = cars.find((c) => String(c?._id || c?.id || '') === itemId);
         if (fullCar && (!item.displacement || !item.features || !item.manufacturingYear)) {
           changed = true;
           return { ...fullCar, ...item, ...fullCar };
         }
         return item;
-      });
+      }).filter(Boolean);
       return changed ? updated : prev;
     });
   }, [cars]);

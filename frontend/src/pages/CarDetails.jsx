@@ -15,6 +15,7 @@ import { getCarWhatsAppLink } from '../utils/whatsapp';
 import { getOptimizedUrl } from '../utils/imageUtils';
 import { useCompare } from '../context/CompareContext';
 import { generateCarDetailCard } from '../utils/carDetailCardGenerator';
+import { FALLBACK_SHOWCASE } from '../data/showcaseData';
 
 export default function CarDetails() {
     const { id } = useParams();
@@ -34,16 +35,24 @@ export default function CarDetails() {
     const whatsappUrl = car ? getCarWhatsAppLink(car) : '#';
 
     // Normalized list of gallery images (includes generated Car Details Summary Card)
-    const rawImages = car?.images && car.images.length > 0 ? car.images : (car?.image ? [car.image] : []);
+    const rawImages = car?.images && Array.isArray(car.images) && car.images.length > 0
+        ? car.images
+        : (car?.image ? [car.image] : []);
     const images = detailCardUrl ? [...rawImages, detailCardUrl] : rawImages;
 
     // Generate branded Car Details Card whenever car data loads
     useEffect(() => {
+        let isMounted = true;
         if (car) {
-            generateCarDetailCard(car).then((cardUrl) => {
-                if (cardUrl) setDetailCardUrl(cardUrl);
-            }).catch((err) => console.error('Failed to generate detail card:', err));
+            try {
+                generateCarDetailCard(car).then((cardUrl) => {
+                    if (isMounted && cardUrl) setDetailCardUrl(cardUrl);
+                }).catch((err) => console.warn('Failed to generate detail card:', err));
+            } catch (err) {
+                console.warn('Sync error in generateCarDetailCard:', err);
+            }
         }
+        return () => { isMounted = false; };
     }, [car]);
 
     // Sync activeImage whenever activeImageIdx changes or car loads
@@ -199,7 +208,9 @@ export default function CarDetails() {
                 allImageSources.push({ url: getOptimizedUrl(img, 1200), name: `${car.make || 'Sadguru'}-${car.model || 'Car'}-${idx + 1}.jpg` });
             });
 
-            const shareText = `🚗 *${car.make} ${car.model} ${car.variant || ''} (${car.year})*\n💰 કિંમત: ₹${car.price?.toLocaleString('en-IN')}\n🛣️ કિ.મી.: ${car.kmDriven?.toLocaleString('en-IN')} km\n⛽ ઇંધણ: ${car.fuel}\n📍 સદ્ગુરુ કાર મેળો, સુરત\n🔗 વધુ વિગતો: ${window.location.href}`;
+            const priceStr = typeof car.price === 'number' ? `₹${car.price.toLocaleString('en-IN')}` : (car.price || 'કિંમત માટે સંપર્ક કરો');
+            const kmsStr = typeof car.kms === 'number' ? `${car.kms.toLocaleString('en-IN')} km` : (car.kms || car.kmDriven || 'N/A');
+            const shareText = `🚗 *${car.make || ''} ${car.model || 'Car'} ${car.variant || ''} (${car.year || ''})*\n💰 કિંમત: ${priceStr}\n🛣️ કિ.મી.: ${kmsStr}\n⛽ ઇંધણ: ${car.fuelType || car.fuel || 'N/A'}\n📍 સદ્ગુરુ કાર મેળો, વરાછા, સુરત\n🔗 વધુ વિગતો: ${window.location.href}`;
 
             // Check if Web Share API with files is supported
             let canShareFiles = false;
@@ -225,7 +236,7 @@ export default function CarDetails() {
             if (canShareFiles && filesToShare.length > 0) {
                 toast.dismiss('send-images');
                 await navigator.share({
-                    title: `${car.make} ${car.model} (${car.year})`,
+                    title: `${car.make || 'Sadguru'} ${car.model || 'Car'} (${car.year || ''})`,
                     text: shareText,
                     files: filesToShare,
                 });
@@ -254,16 +265,32 @@ export default function CarDetails() {
 
     useEffect(() => {
         window.scrollTo(0, 0);
+        let isMounted = true;
         const fetchCar = async () => {
             setLoading(true);
             setError('');
             setCar(null);
+
+            // 1. Instant check for showcase fallback vehicles (from HeroSection)
+            if (id && String(id).startsWith('showcase-')) {
+                const showcaseCar = FALLBACK_SHOWCASE.find((c) => c._id === id);
+                if (showcaseCar && isMounted) {
+                    setCar(showcaseCar);
+                    setActiveImage(showcaseCar.image);
+                    setLoading(false);
+                    return;
+                }
+            }
+
             try {
                 const res = await axiosInstance.get(`/cars/${id}`);
-                if (res.data.success) {
+                if (!isMounted) return;
+
+                if (res.data && res.data.success && res.data.data) {
                     const fetchedCar = res.data.data;
                     setCar(fetchedCar);
-                    setActiveImage(fetchedCar.image || (fetchedCar.images && fetchedCar.images[0]) || 'https://placehold.co/1200x800/e2e8f0/64748b?text=No+Image');
+                    const defaultImg = fetchedCar.image || (Array.isArray(fetchedCar.images) && fetchedCar.images[0]) || 'https://placehold.co/1200x800/e2e8f0/64748b?text=Sadguru+Car+Surat';
+                    setActiveImage(defaultImg);
 
                     // NEW: Automatically set viewMode to '360' if the car has spin images
                     if ((fetchedCar.spinImages || []).length > 0) {
@@ -272,27 +299,46 @@ export default function CarDetails() {
 
                     // Fetch "Similar Cars"
                     try {
-                        const relatedRes = await axiosInstance.get(`/cars?make=${fetchedCar.make}&limit=5&status=Available`);
-                        if (relatedRes.data.success || relatedRes.data.data) {
-                            const relatedArray = relatedRes.data.data || [];
+                        const makeQuery = encodeURIComponent(fetchedCar.make || '');
+                        const relatedRes = await axiosInstance.get(`/cars?make=${makeQuery}&limit=5&status=Available`);
+                        if (isMounted && (relatedRes.data?.success || relatedRes.data?.data)) {
+                            const relatedArray = Array.isArray(relatedRes.data.data) ? relatedRes.data.data : [];
                             const filteredRelated = relatedArray
                                 .filter(c => (c._id || c.id) !== id)
                                 .slice(0, 3);
                             setRelatedCars(filteredRelated);
                         }
                     } catch (relatedErr) {
-                        console.error('Failed to fetch related cars', relatedErr);
+                        console.warn('Failed to fetch related cars', relatedErr);
                     }
                 } else {
-                    setError(res.data.message || 'Car not found');
+                    // Check fallback showcase before showing error
+                    const showcaseMatch = FALLBACK_SHOWCASE.find((c) => c._id === id);
+                    if (showcaseMatch) {
+                        setCar(showcaseMatch);
+                        setActiveImage(showcaseMatch.image);
+                    } else {
+                        setError(res.data?.message || 'વાહન ઉપલબ્ધ નથી · Vehicle not found');
+                    }
                 }
             } catch (err) {
-                setError(err.response?.data?.message || 'Failed to fetch car details.');
+                if (isMounted) {
+                    const showcaseMatch = FALLBACK_SHOWCASE.find((c) => c._id === id);
+                    if (showcaseMatch) {
+                        setCar(showcaseMatch);
+                        setActiveImage(showcaseMatch.image);
+                    } else {
+                        setError(err.response?.data?.message || 'વાહન લોડ કરવામાં સમસ્યા આવી · Failed to fetch car details.');
+                    }
+                }
             } finally {
-                setLoading(false);
+                if (isMounted) {
+                    setLoading(false);
+                }
             }
         };
         if (id) fetchCar();
+        return () => { isMounted = false; };
     }, [id]);
 
     if (loading) {
@@ -305,15 +351,20 @@ export default function CarDetails() {
 
     if (error || !car) {
         return (
-            <div className="min-h-screen flex flex-col items-center justify-center bg-background text-center px-4">
+            <div className="min-h-screen flex flex-col items-center justify-center bg-background text-center px-4 py-16">
                 <div className="w-16 h-16 bg-red-100 text-red-500 rounded-full flex items-center justify-center mb-4">
                     <ShieldCheck className="w-8 h-8" />
                 </div>
-                <h2 className="font-heading font-bold text-2xl text-text mb-2">Car Not Found</h2>
-                <p className="font-body text-text-muted mb-6">{error || "The car you're looking for doesn't exist or was removed."}</p>
-                <a href="/" className="px-6 py-3 bg-primary text-white rounded-xl font-body font-bold hover:bg-primary-hover transition-colors">
-                    Browse All Cars
-                </a>
+                <h2 className="font-heading font-bold text-2xl text-text mb-2">વાહન ઉપલબ્ધ નથી · Vehicle Not Available</h2>
+                <p className="font-body text-text-muted mb-6 max-w-md">{error || "The car you're looking for doesn't exist, is sold, or was removed."}</p>
+                <div className="flex flex-wrap items-center justify-center gap-3">
+                    <Link to="/" className="px-6 py-3 bg-slate-900 text-white rounded-xl font-body font-bold hover:bg-slate-800 transition-colors">
+                        🏠 હોમ પેજ · Home Page
+                    </Link>
+                    <Link to="/inventory" className="px-6 py-3 bg-primary text-white rounded-xl font-body font-bold hover:bg-primary-hover transition-colors">
+                        🚗 બધી કાર જુઓ · Browse All Cars
+                    </Link>
+                </div>
             </div>
         );
     }
@@ -321,21 +372,21 @@ export default function CarDetails() {
     return (
         <div className="bg-background min-h-screen py-10 px-4">
             <SEO
-                title={`Used ${car.make} ${car.model} ${car.year} for Sale in Surat | Sadguru Car Surat`}
-                description={`Buy ${car.make} ${car.model} (${car.year}) at ₹${car.price?.toLocaleString('en-IN')}. ${car.fuelType || ''}, ${car.transmission || ''}, ${car.kms?.toLocaleString('en-IN') || ''} KM. Certified pre-owned at Sadguru Car Surat, Surat.`}
+                title={`Used ${car.make || 'Certified'} ${car.model || 'Car'} ${car.year ? car.year : ''} for Sale in Surat | Sadguru Car Surat`}
+                description={`Buy ${car.make || ''} ${car.model || ''} ${car.year ? `(${car.year})` : ''} at ${typeof car.price === 'number' ? `₹${car.price.toLocaleString('en-IN')}` : (car.price || 'Best Price')}. ${car.fuelType || ''}, ${car.transmission || ''}, ${typeof car.kms === 'number' ? `${car.kms.toLocaleString('en-IN')} KM` : (car.kms || '')}. Certified pre-owned at Sadguru Car Surat, Surat.`}
                 image={car.image}
-                url={`https://sadgurucarsurat.com/car/${car._id || car.id}`}
+                url={`https://sadgurucarsurat.com/car/${car._id || car.id || ''}`}
                 schema={{
                     "@context": "https://schema.org",
                     "@type": "Vehicle",
-                    "name": `${car.make} ${car.model} ${car.year}`,
+                    "name": `${car.make || ''} ${car.model || ''} ${car.year || ''}`.trim(),
                     "image": car.image,
-                    "description": car.description || `Certified pre-owned ${car.make} ${car.model} (${car.year}) available at Sadguru Car Surat.`,
+                    "description": car.description || `Certified pre-owned ${car.make || ''} ${car.model || ''} (${car.year || ''}) available at Sadguru Car Surat.`,
                     "brand": {
                         "@type": "Brand",
-                        "name": car.make
+                        "name": car.make || 'Sadguru Car Surat'
                     },
-                    "model": car.model,
+                    "model": car.model || 'Car',
                     "vehicleModelDate": car.year,
                     "mileageFromOdometer": {
                         "@type": "QuantitativeValue",
@@ -374,15 +425,15 @@ export default function CarDetails() {
                 <div className="mb-8">
                     <nav className="flex mb-4" aria-label="Breadcrumb">
                         <ol className="flex items-center space-x-2 font-body text-xs font-semibold text-text-muted">
-                            <li><a href="/" className="hover:text-primary transition-colors">Used Cars</a></li>
+                            <li><Link to="/" className="hover:text-primary transition-colors">Used Cars</Link></li>
                             <li><span className="text-gray-400">{'>'}</span></li>
-                            <li><span className="text-text">{car.make}</span></li>
+                            <li><span className="text-text">{car.make || 'Cars'}</span></li>
                             <li><span className="text-gray-400">{'>'}</span></li>
-                            <li aria-current="page" className="text-text">{car.model}</li>
+                            <li aria-current="page" className="text-text">{car.model || 'Model'}</li>
                         </ol>
                     </nav>
                     <h1 className="font-heading font-bold text-3xl sm:text-4xl text-text leading-tight tracking-tight flex flex-wrap items-center gap-3">
-                        {car.make} {car.model} ({car.year})
+                        {car.make || ''} {car.model || 'Vehicle'} {car.year ? `(${car.year})` : ''}
                         {car.variantTier && (
                             <span className="text-lg sm:text-xl font-body font-bold text-text-muted bg-gray-100 px-3 py-1 rounded-lg">
                                 {car.variantTier} Variant
@@ -468,8 +519,8 @@ export default function CarDetails() {
                                 ) : (
                                     <>
                                         <img
-                                            src={getOptimizedUrl(images[activeImageIdx] || activeImage, 1200)}
-                                            alt={`${car.make} ${car.model} Photo ${activeImageIdx + 1}`}
+                                            src={getOptimizedUrl(images[activeImageIdx] || activeImage || car.image, 1200) || 'https://placehold.co/1200x800/e2e8f0/64748b?text=Sadguru+Car+Surat'}
+                                            alt={`${car.make || ''} ${car.model || 'Car'} Photo ${activeImageIdx + 1}`}
                                             loading="eager"
                                             className="w-full h-full object-contain transition-transform duration-500 group-hover:scale-[1.02]"
                                         />
@@ -620,7 +671,9 @@ export default function CarDetails() {
                                     ))}
                                 </div>
 
-                                <h2 className="font-heading font-bold text-[36px] text-accent mb-1 leading-none">₹{car.price?.toLocaleString('en-IN')}</h2>
+                                <h2 className="font-heading font-bold text-[36px] text-accent mb-1 leading-none">
+                                    {typeof car.price === 'number' ? `₹${car.price.toLocaleString('en-IN')}` : (car.price ? `₹${car.price}` : 'કિંમત માટે સંપર્ક કરો')}
+                                </h2>
                                 <p className="font-body text-xs text-text-muted mb-4">Last updated: {car.updatedAt && !isNaN(new Date(car.updatedAt).getTime()) ? new Date(car.updatedAt).toLocaleDateString() : new Date().toLocaleDateString()}</p>
 
                                 {car.loanAvailable && (
@@ -640,7 +693,7 @@ export default function CarDetails() {
                                         </div>
                                         <div className="flex flex-col">
                                             <span className="font-heading text-[10px] uppercase tracking-widest text-text-muted">Fuel</span>
-                                            <span className="font-body font-bold text-[13px] text-text">{car.fuelType}</span>
+                                            <span className="font-body font-bold text-[13px] text-text">{car.fuelType || 'N/A'}</span>
                                         </div>
                                     </div>
                                     <div className="flex items-center gap-3">
@@ -649,7 +702,7 @@ export default function CarDetails() {
                                         </div>
                                         <div className="flex flex-col">
                                             <span className="font-heading text-[10px] uppercase tracking-widest text-text-muted">Transmission</span>
-                                            <span className="font-body font-bold text-[13px] text-text">{car.transmission}</span>
+                                            <span className="font-body font-bold text-[13px] text-text">{car.transmission || 'N/A'}</span>
                                         </div>
                                     </div>
                                     <div className="flex items-center gap-3">
@@ -674,7 +727,9 @@ export default function CarDetails() {
                                                     </span>
                                                 )}
                                             </div>
-                                            <span className="font-body font-bold text-[12px] sm:text-[13px] text-text truncate">{car.kms?.toLocaleString('en-IN')} KM</span>
+                                            <span className="font-body font-bold text-[12px] sm:text-[13px] text-text truncate">
+                                                {typeof car.kms === 'number' ? `${car.kms.toLocaleString('en-IN')} KM` : (car.kms ? `${car.kms} KM` : 'N/A')}
+                                            </span>
                                         </div>
                                     </div>
                                     <div className="flex items-center gap-3">
@@ -898,7 +953,7 @@ export default function CarDetails() {
                         </div>
 
                         {/* Interactive EMI Loan Calculator */}
-                        <EmiCalculator carPrice={car.price} carTitle={`${car.make} ${car.model} (${car.year})`} />
+                        <EmiCalculator carPrice={typeof car.price === 'number' ? car.price : (Number(car.price) || 500000)} carTitle={`${car.make || ''} ${car.model || 'Car'} (${car.year || ''})`} />
 
                         {/* Dealer Info Box (Mobile Only) - Appears after specs */}
                         <div className="flex lg:hidden bg-gray-50 rounded-2xl p-6 border border-gray-100 items-start gap-4 mt-6">
@@ -933,20 +988,20 @@ export default function CarDetails() {
                     <div className="mt-20 md:mt-28 pt-12 border-t border-gray-100 pb-8">
                         <div className="flex items-center justify-between mb-8">
                             <h2 className="font-heading font-bold text-2xl text-slate-900 tracking-tight">Similar Cars You Might Like</h2>
-                            <a href={`/inventory?make=${car.make}`} className="font-body text-sm font-bold text-primary hover:text-primary-hover transition-colors hidden sm:block">View all {car.make} models →</a>
+                            <Link to={`/inventory?make=${encodeURIComponent(car.make || '')}`} className="font-body text-sm font-bold text-primary hover:text-primary-hover transition-colors hidden sm:block">View all {car.make} models →</Link>
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                             {relatedCars.map((relatedCar) => (
                                 <CarCard
                                     key={relatedCar._id || relatedCar.id}
                                     id={relatedCar._id || relatedCar.id}
-                                    image={relatedCar.image || (relatedCar.images && relatedCar.images[0])}
-                                    title={`${relatedCar.make} ${relatedCar.model} (${relatedCar.year})`}
-                                    price={`₹${relatedCar.price?.toLocaleString('en-IN')}`}
-                                    fuel={relatedCar.fuelType}
-                                    transmission={relatedCar.transmission}
-                                    owner={relatedCar.owner}
-                                    kms={`${relatedCar.kms?.toLocaleString('en-IN')} KM`}
+                                    image={relatedCar.image || (Array.isArray(relatedCar.images) && relatedCar.images[0])}
+                                    title={`${relatedCar.make || ''} ${relatedCar.model || 'Car'} ${relatedCar.year ? `(${relatedCar.year})` : ''}`}
+                                    price={typeof relatedCar.price === 'number' ? `₹${relatedCar.price.toLocaleString('en-IN')}` : (relatedCar.price ? `₹${relatedCar.price}` : 'Call for Price')}
+                                    fuel={relatedCar.fuelType || relatedCar.fuel || 'N/A'}
+                                    transmission={relatedCar.transmission || 'N/A'}
+                                    owner={relatedCar.owner || '1st Owner'}
+                                    kms={typeof relatedCar.kms === 'number' ? `${relatedCar.kms.toLocaleString('en-IN')} KM` : (relatedCar.kms ? `${relatedCar.kms} KM` : 'N/A')}
                                     isKmGenuine={relatedCar.isKmGenuine}
                                     badges={relatedCar.badges || []}
                                 />

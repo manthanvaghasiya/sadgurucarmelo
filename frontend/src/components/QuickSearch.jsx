@@ -26,7 +26,7 @@ export default function QuickSearch({ compact = false }) {
           setAvailableBrands(fetchedMakes);
           setBrandModelMap(fetchedMap);
 
-          const allModels = [...new Set(fetchedMap.flatMap(item => item.models))].filter(Boolean).sort();
+          const allModels = [...new Set(fetchedMap.flatMap(item => item?.models || []))].filter(Boolean).sort();
           setAvailableModels(allModels);
         }
       } catch (error) {
@@ -44,10 +44,10 @@ export default function QuickSearch({ compact = false }) {
     setSelectedModel('');
 
     if (newBrand) {
-      const match = brandModelMap.find(m => m._id === newBrand);
-      setAvailableModels(match && match.models ? match.models.filter(Boolean).sort() : []);
+      const match = brandModelMap.find(m => m?._id === newBrand);
+      setAvailableModels(match && Array.isArray(match.models) ? match.models.filter(Boolean).sort() : []);
     } else {
-      const allModels = [...new Set(brandModelMap.flatMap(item => item.models))].filter(Boolean).sort();
+      const allModels = [...new Set(brandModelMap.flatMap(item => item?.models || []))].filter(Boolean).sort();
       setAvailableModels(allModels);
     }
   };
