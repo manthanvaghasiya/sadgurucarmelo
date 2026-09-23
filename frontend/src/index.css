@@ -88,6 +88,58 @@
 }
 
 /* ═══════════════════════════════════════════════════
+   RADIAL HERO STAGE & SVG CIRCUIT TRACER ANIMATIONS
+   ═══════════════════════════════════════════════════ */
+@keyframes wire-dash {
+  0% {
+    stroke-dashoffset: 40;
+  }
+  100% {
+    stroke-dashoffset: 0;
+  }
+}
+
+.animate-wire-dash {
+  stroke-dasharray: 6 6;
+  animation: wire-dash 3s linear infinite;
+}
+
+@keyframes node-float-slow {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+.animate-node-float-1 {
+  animation: node-float-slow 4s ease-in-out infinite;
+}
+.animate-node-float-2 {
+  animation: node-float-slow 4.5s ease-in-out infinite 0.8s;
+}
+.animate-node-float-3 {
+  animation: node-float-slow 5s ease-in-out infinite 1.6s;
+}
+
+@keyframes arc-glow-pulse {
+  0%, 100% {
+    opacity: 0.6;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.9;
+    transform: scale(1.02);
+  }
+}
+
+.animate-arc-glow {
+  animation: arc-glow-pulse 4s ease-in-out infinite;
+}
+
+
+/* ═══════════════════════════════════════════════════
    PREMIUM INVENTORY GRID — Visual Enhancement Layer
    ═══════════════════════════════════════════════════ */
 

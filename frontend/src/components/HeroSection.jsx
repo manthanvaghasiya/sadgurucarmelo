@@ -1,54 +1,154 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Car, MapPin, ChevronRight, Sparkles, ArrowRight, X } from 'lucide-react';
-import axiosInstance from '../api/axiosConfig';
-import toast from 'react-hot-toast';
+import {
+  Car, MapPin, ChevronRight, ChevronLeft, Sparkles, ArrowRight,
+  ShieldCheck, Zap, Landmark, FileText, CheckCircle2, Award,
+  Fuel, Settings2, Gauge, User, MessageCircle, Eye, Calendar,
+  ArrowUpRight, X
+} from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useCars } from '../context/CarContext';
+import { getCarWhatsAppLink } from '../utils/whatsapp';
+import { getOptimizedUrl } from '../utils/imageUtils';
+import axiosInstance from '../api/axiosConfig';
+import toast from 'react-hot-toast';
+
+// High-definition fallback showcase vehicles in case inventory is loading
+const FALLBACK_SHOWCASE = [
+  {
+    _id: 'showcase-1',
+    make: 'Hyundai',
+    model: 'Creta SX (O)',
+    year: 2022,
+    price: 1375000,
+    fuelType: 'Diesel',
+    transmission: 'Automatic',
+    kms: 38000,
+    owner: '1st Owner',
+    isKmGenuine: true,
+    image: 'https://images.unsplash.com/photo-1549399542-7e3f8b79c341?auto=format&fit=crop&w=1000&q=80',
+    category: 'suv'
+  },
+  {
+    _id: 'showcase-2',
+    make: 'Honda',
+    model: 'City ZX',
+    year: 2021,
+    price: 1050000,
+    fuelType: 'Petrol',
+    transmission: 'Automatic',
+    kms: 42000,
+    owner: '1st Owner',
+    isKmGenuine: true,
+    image: 'https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&w=1000&q=80',
+    category: 'sedan'
+  },
+  {
+    _id: 'showcase-3',
+    make: 'Maruti Suzuki',
+    model: 'Swift ZXi+',
+    year: 2023,
+    price: 725000,
+    fuelType: 'Petrol',
+    transmission: 'Manual',
+    kms: 18000,
+    owner: '1st Owner',
+    isKmGenuine: true,
+    image: 'https://images.unsplash.com/photo-1617814076367-b759c7d7e738?auto=format&fit=crop&w=1000&q=80',
+    category: 'hatchback'
+  },
+  {
+    _id: 'showcase-4',
+    make: 'Kia',
+    model: 'Seltos GTX+',
+    year: 2022,
+    price: 1450000,
+    fuelType: 'Diesel',
+    transmission: 'Automatic',
+    kms: 32000,
+    owner: '1st Owner',
+    isKmGenuine: true,
+    image: 'https://images.unsplash.com/photo-1583121274602-3e2820c69888?auto=format&fit=crop&w=1000&q=80',
+    category: 'suv'
+  }
+];
+
+const ARC_CATEGORIES = [
+  { id: 'all', label: 'બધી કાર · All Cars', icon: '🚙' },
+  { id: 'suv', label: 'SUV · સ્પોર્ટ્સ યુટિલિટી', icon: '🚘' },
+  { id: 'sedan', label: 'Sedan · સેડાન', icon: '🚗' },
+  { id: 'hatchback', label: 'Hatchback · ફેમિલી કાર', icon: '🛞' },
+  { id: 'automatic', label: 'Automatic · ઓટોમેટિક', icon: '⚡' }
+];
 
 export default function HeroSection() {
   const navigate = useNavigate();
   const { cars } = useCars();
 
-  // Coming Soon Carousel State
+  const [selectedCategory, setSelectedCategory] = useState('all');
   const [currentCarIndex, setCurrentCarIndex] = useState(0);
-  const comingSoonCars = cars.filter(c => c.status === 'Coming Soon');
 
-  // Notify Modal State
+  // Test Drive / Inquiry Modal
   const [showModal, setShowModal] = useState(false);
   const [formData, setFormData] = useState({ name: '', phone: '' });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!formData.name || !formData.phone) return toast.error('Please fill in both fields');
-    try {
-      setIsSubmitting(true);
-      const currentCar = comingSoonCars[currentCarIndex];
-      const message = `I am interested in the coming soon car: ${currentCar?.make} ${currentCar?.model} ${currentCar?.year ? `(${currentCar.year})` : ''}`;
-      await axiosInstance.post('/messages', {
-        name: formData.name,
-        phone: formData.phone,
-        message,
-        type: 'Notify'
-      });
-      toast.success("We'll notify you when it's available!");
-      setShowModal(false);
-      setFormData({ name: '', phone: '' });
-    } catch (error) {
-      toast.error('Failed to submit. Please try again.');
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+  // Filter cars from inventory or fall back
+  const displayCars = useMemo(() => {
+    let list = cars && cars.length > 0
+      ? cars.filter(c => c.status === 'Available' && c.image)
+      : [];
 
+    if (list.length === 0) {
+      list = FALLBACK_SHOWCASE;
+    }
+
+    if (selectedCategory === 'suv') {
+      const suvs = list.filter(c =>
+        c.bodyType?.toLowerCase().includes('suv') ||
+        /creta|brezza|seltos|scorpio|thar|fortuner|harrier|venue|nexon|xuv|safari|innova/i.test(`${c.make} ${c.model}`)
+      );
+      return suvs.length > 0 ? suvs : list;
+    }
+    if (selectedCategory === 'sedan') {
+      const sedans = list.filter(c =>
+        c.bodyType?.toLowerCase().includes('sedan') ||
+        /city|verna|ciaz|dzire|amaze|aura|slavia|virtus/i.test(`${c.make} ${c.model}`)
+      );
+      return sedans.length > 0 ? sedans : list;
+    }
+    if (selectedCategory === 'hatchback') {
+      const hatch = list.filter(c =>
+        c.bodyType?.toLowerCase().includes('hatchback') ||
+        /swift|baleno|i20|wagon|tiago|alto|i10|kwid/i.test(`${c.make} ${c.model}`)
+      );
+      return hatch.length > 0 ? hatch : list;
+    }
+    if (selectedCategory === 'automatic') {
+      const autos = list.filter(c => c.transmission?.toLowerCase() === 'automatic');
+      return autos.length > 0 ? autos : list;
+    }
+
+    return list.slice(0, 6);
+  }, [cars, selectedCategory]);
+
+  // Ensure currentCarIndex is in bounds
   useEffect(() => {
-    if (comingSoonCars.length <= 1) return;
+    if (currentCarIndex >= displayCars.length) {
+      setCurrentCarIndex(0);
+    }
+  }, [displayCars.length, currentCarIndex]);
+
+  // Auto-slide every 6.5 seconds
+  useEffect(() => {
+    if (displayCars.length <= 1) return;
     const interval = setInterval(() => {
-      setCurrentCarIndex((prev) => (prev + 1) % comingSoonCars.length);
-    }, 8000); // Slower carousel speed for better user focus
+      setCurrentCarIndex((prev) => (prev + 1) % displayCars.length);
+    }, 6500);
     return () => clearInterval(interval);
-  }, [comingSoonCars.length]);
+  }, [displayCars.length]);
+
+  const activeCar = displayCars[currentCarIndex] || displayCars[0];
 
   const formatPrice = (price) => {
     return price >= 100000
@@ -56,407 +156,529 @@ export default function HeroSection() {
       : `₹${(price || 0).toLocaleString('en-IN')}`;
   };
 
-  // Animation Variants
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: { opacity: 1, transition: { staggerChildren: 0.15, delayChildren: 0.1 } }
+  const calculateEmi = (price) => {
+    if (!price) return '₹9,500';
+    const loanAmount = price * 0.8;
+    const monthlyRate = 0.095 / 12;
+    const months = 60;
+    const emi = (loanAmount * monthlyRate * Math.pow(1 + monthlyRate, months)) / (Math.pow(1 + monthlyRate, months) - 1);
+    return `₹${Math.round(emi).toLocaleString('en-IN')}`;
   };
 
-  const textStaggerVariants = {
-    hidden: { opacity: 0 },
-    visible: { opacity: 1, transition: { staggerChildren: 0.12, delayChildren: 0.2 } }
+  const nextCar = () => {
+    setCurrentCarIndex((prev) => (prev + 1) % displayCars.length);
   };
 
-  const wordVariants = {
-    hidden: { opacity: 0, y: 20, filter: 'blur(8px)' },
-    visible: { opacity: 1, y: 0, filter: 'blur(0px)', transition: { duration: 0.8, ease: [0.22, 1, 0.36, 1] } }
+  const prevCar = () => {
+    setCurrentCarIndex((prev) => (prev - 1 + displayCars.length) % displayCars.length);
   };
 
-  const itemVariants = {
-    hidden: { opacity: 0, y: 30 },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease: [0.22, 1, 0.36, 1] } }
-  };
-
-  const carSlideVariants = {
-    enter: { opacity: 0, x: 120, scale: 0.75, filter: 'blur(16px)' },
-    center: {
-      opacity: 1, x: 0, scale: 1, filter: 'blur(0px)',
-      transition: { duration: 1, type: 'spring', bounce: 0.3 }
-    },
-    exit: {
-      opacity: 0, x: -120, scale: 0.85, filter: 'blur(16px)',
-      transition: { duration: 0.7, ease: 'easeIn' }
+  const handleTestDriveSubmit = async (e) => {
+    e.preventDefault();
+    if (!formData.name || !formData.phone) return toast.error('Please enter name and phone');
+    try {
+      setIsSubmitting(true);
+      const message = `Test Drive Inquiry for: ${activeCar?.make} ${activeCar?.model} (${activeCar?.year || ''})`;
+      await axiosInstance.post('/messages', {
+        name: formData.name,
+        phone: formData.phone,
+        message,
+        type: 'Test Drive'
+      });
+      toast.success('ટેસ્ટ ડ્રાઈવ બુકિંગ વિગત મળી ગઈ છે! અમે ટૂંક સમયમાં સંપર્ક કરીશું.');
+      setShowModal(false);
+      setFormData({ name: '', phone: '' });
+    } catch {
+      toast.error('Failed to submit. Please try again.');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
-  const currentCar = comingSoonCars[currentCarIndex];
-
-  // Headline broken down for word-by-word reveal
-  const headlineLine1 = ["તમારી", "મનપસંદ", "કાર,"];
-  const headlineLine2 = ["મેળવવી", "સાવ", "સરળ."];
+  const whatsappUrl = activeCar
+    ? getCarWhatsAppLink({
+      title: `${activeCar.make} ${activeCar.model} (${activeCar.year})`,
+      price: formatPrice(activeCar.price)
+    })
+    : 'https://wa.me/919913634447';
 
   return (
-    <section className="relative w-full min-h-[100dvh] bg-[#030303] overflow-hidden font-['Inter',sans-serif]">
+    <section className="relative w-full bg-gradient-to-b from-[#f8fafc] via-[#ffffff] to-[#f8fafc] overflow-hidden pt-12 pb-20 lg:pt-16 lg:pb-28">
 
-      {/* ════════════════════════════════════════════════════════════════
-          PREMIUM ABSTRACT BACKGROUND
-      ════════════════════════════════════════════════════════════════ */}
-      <div className="absolute inset-0 pointer-events-none z-0">
-        {/* Primary warm gradient orb — top-left */}
-        <div className="absolute top-[-20%] left-[-10%] w-[55vw] h-[55vw] bg-brand-orange/[0.08] rounded-full blur-[180px] animate-pulse"></div>
-        {/* Secondary cool gradient orb — bottom-right */}
-        <div className="absolute bottom-[-15%] right-[-10%] w-[60vw] h-[60vw] bg-amber-500/[0.04] rounded-full blur-[180px] animate-pulse" style={{ animationDelay: '2.5s' }}></div>
-        {/* Centered radial accent behind the car column */}
-        <div className="absolute top-[30%] right-[10%] w-[40vw] h-[40vw] bg-gradient-to-tr from-amber-600/[0.06] to-orange-400/[0.03] rounded-full blur-[160px] hidden lg:block"></div>
+      {/* ═══════════════════════════════════════════════════════════════════
+          BACKGROUND AMBIENT TEXTURE & GLOW
+          ═══════════════════════════════════════════════════════════════════ */}
+      <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden">
+        {/* Soft Warm Radial Orb */}
+        <div className="absolute top-10 left-1/2 -translate-x-1/2 w-[700px] h-[500px] bg-gradient-to-b from-brand-orange/[0.08] via-amber-400/[0.04] to-transparent rounded-full blur-[140px] pointer-events-none" />
+        <div className="absolute -top-20 left-10 w-96 h-96 bg-sky-200/20 rounded-full blur-[120px] pointer-events-none" />
+        <div className="absolute top-1/2 right-10 w-96 h-96 bg-amber-200/20 rounded-full blur-[120px] pointer-events-none" />
 
-        {/* Subtle grid pattern for depth texture */}
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxwYXRoIGQ9Ik00MCAwaC0xdjQwaDFWMHptMCAzOWgtNDB2MWg0MHYtMXoiIGZpbGw9IiNmZmZmZmYiIGZpbGwtb3BhY2l0eT0iMC4wMyIgZmlsbC1ydWxlPSJldmVub2RkIi8+Cjwvc3ZnPg==')] opacity-30"></div>
-
-        {/* Vignette overlay */}
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_transparent_0%,_#030303_100%)] opacity-70"></div>
+        {/* Subtle dot pattern */}
+        <div className="absolute inset-0 bg-[radial-gradient(#cbd5e1_1px,transparent_1px)] [background-size:24px_24px] opacity-35" />
       </div>
 
-      {/* ════════════════════════════════════════════════════════════════
-          MAIN GRID LAYOUT
-      ════════════════════════════════════════════════════════════════ */}
-      <div className="relative z-10 w-full max-w-[1600px] mx-auto px-6 sm:px-10 lg:px-16 grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-4 pt-20 pb-20 lg:pt-0 lg:pb-0 items-center min-h-[100dvh]">
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
-        {/* ──────────────────────────────────────────────────
-            LEFT COLUMN: TYPOGRAPHY & CTA
-        ────────────────────────────────────────────────── */}
-        <motion.div
-          className="col-span-1 lg:col-span-6 flex flex-col justify-center order-2 lg:order-1 pt-2 lg:pt-0"
-          initial="hidden"
-          animate="visible"
-          variants={containerVariants}
-        >
-          {/* Brand pill */}
-          <motion.div variants={itemVariants} className="flex items-center gap-3 mb-6">
-            <div className="h-[2px] w-12 bg-gradient-to-r from-brand-orange to-transparent"></div>
-            <span className="text-brand-orange text-[15px] font-heading font-black tracking-wide uppercase drop-shadow-sm">સદગુરુ કાર મેળો – વિશ્વાસ અને ગુણવત્તા.</span>
+        {/* ═══════════════════════════════════════════════════════════════════
+            1. TOP HEADLINE & REFERENCE-INSPIRED DUAL CTA WITH DOTTED ARROW
+            ═══════════════════════════════════════════════════════════════════ */}
+        <div className="text-center max-w-4xl mx-auto mb-10 lg:mb-14">
+          {/* Top Pill */}
+          <motion.div
+            initial={{ opacity: 0, y: -15 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-orange-50 border border-brand-orange/20 shadow-xs mb-5"
+          >
+            <Sparkles className="w-3.5 h-3.5 text-brand-orange" />
+            <span className="text-xs font-black uppercase tracking-[0.16em] text-brand-orange">
+              સુરતનો #1 ભરોસાપાત્ર કાર મેળો · Trusted Car Partner
+            </span>
           </motion.div>
 
-          {/* Main headline with Staggered Word Reveal — 2 lines on all screens */}
+          {/* Centered Main Headline */}
           <motion.h1
-            variants={textStaggerVariants}
-            className="text-[2.6rem] sm:text-5xl lg:text-[3.5rem] xl:text-[4.2rem] text-white font-black tracking-tight leading-[1.15] py-1"
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, delay: 0.1 }}
+            className="text-3xl sm:text-5xl lg:text-[3.75rem] font-black text-slate-900 tracking-tight leading-[1.14]"
           >
-            {/* Line 1: તમારી સપનાની કાર, */}
-            <div className="flex flex-wrap gap-x-2 sm:gap-x-3 lg:gap-x-4 overflow-hidden">
-              {headlineLine1.map((word, i) => (
-                <motion.span key={`w1-${i}`} variants={wordVariants} className="inline-block">
-                  {(word === "મનપસંદ" || word === "કાર,") ? (
-                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-orange via-amber-400 to-yellow-500 drop-shadow-sm">{word}</span>
-                  ) : word}
-                </motion.span>
-              ))}
-            </div>
-            {/* Line 2: હવે તમારી નજીકમાં મળશે. */}
-            <div className="flex flex-wrap gap-x-2 sm:gap-x-3 lg:gap-x-4 overflow-hidden text-slate-100">
-              {headlineLine2.map((word, i) => (
-                <motion.span key={`w2-${i}`} variants={wordVariants} className="inline-block">
-                  {word}
-                </motion.span>
-              ))}
-            </div>
+            સુરતનો સૌથી વિશ્વાસપાત્ર &amp; <br className="hidden sm:inline" />
+            <span className="text-slate-900">Certified Used Car </span>
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-orange via-amber-500 to-yellow-500">
+              Showroom
+            </span>
           </motion.h1>
 
-          {/* Description */}
-          <motion.p variants={itemVariants} className="text-base lg:text-lg text-slate-400 mt-6 lg:mt-8 font-medium leading-relaxed max-w-lg drop-shadow-sm border-l-2 border-white/10 pl-4 py-1">
-            સુરતનો સૌથી વિશ્વાસપાત્ર વેરિફાઇડ કાર ડીલર (Trusted Dealer).
-            શ્રેષ્ઠ કિંમત, સચોટ ગુણવત્તા અને ૧૦૦% ભરોસાપાત્ર કાર.
+          {/* Subtitle */}
+          <motion.p
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, delay: 0.2 }}
+            className="text-base sm:text-lg text-slate-600 font-medium max-w-2xl mx-auto mt-4 sm:mt-5 leading-relaxed"
+          >
+            ૧૫૦+ વેરિફાઇડ કાર, ૧૨૦+ પોઈન્ટ ટેકનિકલ ઈન્સ્પેક્શન અને સંપૂર્ણ ભરોસા સાથે તમારા પરિવાર માટે શ્રેષ્ઠ કાર મેળવવી હવે સાવ સરળ.
           </motion.p>
 
-          {/* Dual Action CTAs */}
-          <motion.div variants={itemVariants} className="mt-8 flex flex-wrap items-center gap-3 sm:gap-4">
+          {/* Dual Action CTAs + Dotted Curved Arrow & Badge */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.3 }}
+            className="relative mt-8 sm:mt-10 flex flex-wrap items-center justify-center gap-4 sm:gap-5"
+          >
+            {/* Primary CTA */}
             <button
               onClick={() => navigate('/inventory')}
-              className="group relative inline-flex items-center gap-2.5 px-6 sm:px-8 py-3.5 sm:py-4 rounded-xl bg-gradient-to-r from-brand-orange to-[#e68415] text-white font-heading font-black text-sm sm:text-base tracking-wide shadow-[0_10px_30px_rgba(245,148,35,0.4)] hover:shadow-[0_15px_40px_rgba(245,148,35,0.6)] hover:-translate-y-0.5 active:translate-y-0 transition-all duration-300 overflow-hidden cursor-pointer"
+              className="group relative inline-flex items-center gap-3 px-7 sm:px-9 py-3.5 sm:py-4 rounded-xl bg-gradient-to-r from-brand-orange to-[#e68415] text-white font-heading font-black text-sm sm:text-base shadow-[0_10px_30px_rgba(245,148,35,0.35)] hover:shadow-[0_15px_40px_rgba(245,148,35,0.5)] hover:-translate-y-0.5 active:translate-y-0 transition-all duration-300 cursor-pointer overflow-hidden"
             >
               <div className="absolute inset-0 bg-white/20 -translate-x-full group-hover:translate-x-full transition-transform duration-700 pointer-events-none" />
               <Car className="w-5 h-5 text-white" />
-              <span>ગાડીઓ જુઓ · Explore Cars</span>
+              <span>ગાડીઓ શોધો · Explore 150+ Cars</span>
               <ArrowRight className="w-4 h-4 text-white group-hover:translate-x-1 transition-transform" />
             </button>
 
+            {/* Dotted Curved SVG Arrow pointing to "Takes just 2-3 mins" Pill */}
+            <div className="hidden md:flex items-center gap-2 pl-1 select-none">
+              <svg className="w-14 h-7 text-brand-orange overflow-visible" viewBox="0 0 55 25" fill="none">
+                <path
+                  d="M 5 20 C 22 22, 32 4, 50 8"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeDasharray="4 4"
+                  strokeLinecap="round"
+                />
+                <polyline points="44,4 52,8 48,15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+
+              <button
+                onClick={() => setShowModal(true)}
+                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-700 text-xs font-bold transition-all shadow-xs cursor-pointer"
+              >
+                <Sparkles className="w-3.5 h-3.5 text-emerald-500" />
+                <span>Takes just 2-3 mins · ટેસ્ટ ડ્રાઈવ બુક કરો</span>
+              </button>
+            </div>
+
+            {/* Secondary CTA */}
             <button
               onClick={() => navigate('/sell-your-car')}
-              className="inline-flex items-center gap-2 px-5 sm:px-7 py-3.5 sm:py-4 rounded-xl bg-white/[0.06] hover:bg-white/[0.12] text-white font-heading font-bold text-sm sm:text-base border border-white/15 backdrop-blur-md hover:border-amber-400/40 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-300 cursor-pointer shadow-sm"
+              className="inline-flex items-center gap-2 px-6 sm:px-7 py-3.5 sm:py-4 rounded-xl bg-white hover:bg-slate-50 text-slate-800 font-heading font-bold text-sm sm:text-base border border-gray-200 hover:border-brand-orange/40 shadow-xs hover:shadow-md transition-all duration-300 cursor-pointer"
             >
               <span>કાર વેચો / એક્સચેન્જ · Sell Car</span>
-              <ChevronRight className="w-4 h-4 text-slate-300 group-hover:text-amber-400 group-hover:translate-x-0.5 transition-all" />
+              <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-brand-orange group-hover:translate-x-0.5 transition-all" />
             </button>
           </motion.div>
-
-          {/* Trust stats & Location */}
-          <motion.div variants={itemVariants} className="mt-8 pt-6 border-t border-white/10 flex flex-wrap items-center gap-3 sm:gap-4">
-            {/* Trust Pill: 150+ Certified Cars */}
-            <div className="flex items-center gap-2 bg-white/[0.04] backdrop-blur-md px-3.5 py-2 rounded-xl border border-white/10 shadow-sm">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-              <span className="text-white font-black text-xs sm:text-sm">૧૫૦+ કાર સ્ટોકમાં</span>
-              <span className="text-slate-400 text-[10px] hidden sm:inline uppercase tracking-wider font-semibold">· Certified</span>
-            </div>
-
-            {/* Google rating pill */}
-            <div className="flex items-center gap-2 bg-white/[0.04] backdrop-blur-md px-3.5 py-2 rounded-xl border border-white/10 shadow-sm">
-              <div className="flex items-center gap-0.5">
-                {[...Array(5)].map((_, i) => (
-                  <svg key={i} className="w-3.5 h-3.5 text-yellow-400 fill-yellow-400" viewBox="0 0 20 20">
-                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                  </svg>
-                ))}
-              </div>
-              <span className="text-white font-bold text-xs sm:text-sm">4.8★</span>
-              <div className="h-3.5 w-[1px] bg-white/20"></div>
-              <span className="text-slate-300 text-[10px] uppercase tracking-wider font-semibold">ગૂગલ રેટિંગ</span>
-            </div>
-
-            {/* Since 2011 Pill */}
-            <div className="hidden sm:flex items-center gap-1.5 bg-white/[0.04] backdrop-blur-md px-3.5 py-2 rounded-xl border border-white/10 shadow-sm">
-              <span className="text-amber-400 font-bold text-xs">૧૪+ વર્ષ વિશ્વાસ</span>
-              <span className="text-slate-400 text-[10px] uppercase tracking-wider">· Est. 2011</span>
-            </div>
-
-            {/* Location link */}
-            <button
-              onClick={() => navigate('/contact')}
-              className="flex items-center gap-1.5 px-3.5 py-2 bg-white/[0.04] hover:bg-white/10 backdrop-blur-md rounded-xl border border-white/10 transition-all duration-300 group cursor-pointer"
-            >
-              <MapPin className="w-3.5 h-3.5 text-brand-orange" />
-              <span className="text-white font-medium text-xs sm:text-sm tracking-wide">વરાછા, સુરત</span>
-              <ChevronRight className="w-3.5 h-3.5 text-white/50 group-hover:text-brand-orange group-hover:translate-x-0.5 transition-transform" />
-            </button>
-          </motion.div>
-        </motion.div>
+        </div>
 
 
-        {/* ──────────────────────────────────────────────────
-            RIGHT COLUMN: CAR SHOWCASE — FIXED LAYOUT (NO OVERLAP)
-        ────────────────────────────────────────────────── */}
-        <div className="col-span-1 lg:col-span-6 relative order-1 lg:order-2 w-full mt-6 lg:mt-0">
-          {comingSoonCars.length > 0 ? (
-            <>
-              {/* Infinite Marquee Text Background */}
-              <div className="absolute inset-0 flex items-end justify-center overflow-hidden pointer-events-none z-0 pb-2 lg:pb-4">
-                <motion.div
-                  animate={{ x: [0, -1500] }}
-                  transition={{ repeat: Infinity, duration: 40, ease: 'linear' }}
-                  className="whitespace-nowrap"
-                >
-                  <h2 className="text-[3rem] lg:text-[6rem] font-black uppercase text-transparent bg-clip-text bg-gradient-to-r from-transparent via-amber-500/[0.12] to-transparent select-none tracking-tighter">
-                    COMING SOON • COMING SOON • COMING SOON •
-                  </h2>
-                </motion.div>
+        {/* ═══════════════════════════════════════════════════════════════════
+            2. THE AUTOMOTIVE RADIAL ARC STAGE SHOWCASE (Reference-Inspired)
+            ═══════════════════════════════════════════════════════════════════ */}
+        <div className="relative w-full max-w-[1360px] mx-auto mt-6">
+
+          {/* SVG CIRCUIT TRACER WIRES (Desktop Only) */}
+          <div className="hidden xl:block absolute inset-0 pointer-events-none z-0">
+            <svg className="w-full h-full" viewBox="0 0 1360 620" fill="none" preserveAspectRatio="none">
+              <defs>
+                <linearGradient id="wireGradientLeft" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stopColor="#cbd5e1" stopOpacity="0.4" />
+                  <stop offset="50%" stopColor="#F59423" stopOpacity="0.8" />
+                  <stop offset="100%" stopColor="#F59423" stopOpacity="0.2" />
+                </linearGradient>
+                <linearGradient id="wireGradientRight" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stopColor="#F59423" stopOpacity="0.2" />
+                  <stop offset="50%" stopColor="#F59423" stopOpacity="0.8" />
+                  <stop offset="100%" stopColor="#cbd5e1" stopOpacity="0.4" />
+                </linearGradient>
+              </defs>
+
+              {/* Left Lines connecting Nodes to Center Arc */}
+              <path d="M 230 110 C 310 110, 360 210, 440 220" stroke="url(#wireGradientLeft)" strokeWidth="1.5" className="animate-wire-dash" />
+              <path d="M 240 220 C 320 220, 370 240, 430 250" stroke="url(#wireGradientLeft)" strokeWidth="1.5" className="animate-wire-dash" />
+              <path d="M 230 330 C 310 330, 360 290, 440 280" stroke="url(#wireGradientLeft)" strokeWidth="1.5" className="animate-wire-dash" />
+              <path d="M 220 440 C 320 440, 370 340, 450 320" stroke="url(#wireGradientLeft)" strokeWidth="1.5" className="animate-wire-dash" />
+
+              {/* Right Lines connecting Center Arc to Milestone Cards */}
+              <path d="M 920 220 C 990 210, 1040 120, 1110 120" stroke="url(#wireGradientRight)" strokeWidth="1.5" className="animate-wire-dash" />
+              <path d="M 930 260 C 1000 260, 1030 260, 1100 260" stroke="url(#wireGradientRight)" strokeWidth="1.5" className="animate-wire-dash" />
+              <path d="M 920 310 C 990 310, 1040 400, 1110 400" stroke="url(#wireGradientRight)" strokeWidth="1.5" className="animate-wire-dash" />
+            </svg>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center relative z-10">
+
+            {/* ── LEFT COLUMN: ORBITING CONNECTED NODES ── */}
+            <div className="hidden xl:flex xl:col-span-3 flex-col gap-6 justify-center">
+              {/* Node 1 */}
+              <div className="animate-node-float-1 flex items-center gap-3.5 bg-white/95 backdrop-blur-md p-3.5 rounded-2xl border border-gray-100 shadow-[0_8px_25px_rgba(15,23,42,0.06)] hover:border-brand-orange/40 hover:shadow-lg transition-all group">
+                <div className="w-11 h-11 rounded-xl bg-blue-50 border border-blue-100 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+                  <ShieldCheck className="w-5 h-5 text-blue-600" />
+                </div>
+                <div>
+                  <h4 className="font-heading font-black text-xs text-slate-800 uppercase tracking-wider">૧૨૦+ પોઈન્ટ ચેક</h4>
+                  <p className="text-[11px] font-body text-slate-500 font-medium">સંપૂર્ણ ટેકનિકલ ઈન્સ્પેક્શન</p>
+                </div>
               </div>
 
-              {/* Central Glowing Orb behind car */}
-              <motion.div
-                key={`glow-${currentCarIndex}`}
-                initial={{ scale: 0.5, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                transition={{ duration: 2, ease: "easeOut" }}
-                className="absolute top-[15%] left-1/2 -translate-x-1/2 w-[75%] h-[55%] bg-gradient-to-tr from-amber-500/15 to-brand-orange/5 blur-[120px] rounded-full pointer-events-none z-0"
-              />
+              {/* Node 2 */}
+              <div className="animate-node-float-2 flex items-center gap-3.5 bg-white/95 backdrop-blur-md p-3.5 rounded-2xl border border-gray-100 shadow-[0_8px_25px_rgba(15,23,42,0.06)] hover:border-brand-orange/40 hover:shadow-lg transition-all group ml-3">
+                <div className="w-11 h-11 rounded-xl bg-emerald-50 border border-emerald-100 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+                  <Gauge className="w-5 h-5 text-emerald-600" />
+                </div>
+                <div>
+                  <h4 className="font-heading font-black text-xs text-slate-800 uppercase tracking-wider">૧૦૦% જેન્યુઇન KM</h4>
+                  <p className="text-[11px] font-body text-slate-500 font-medium">ઓરિજિનલ સર્વિસ રેકોર્ડ</p>
+                </div>
+              </div>
 
-              {/* ═══════════════════════════════════════════════
-                  FLEX COLUMN: Image on top → Info Card below
-                  This uses normal document flow to PREVENT overlap
-              ═══════════════════════════════════════════════ */}
-              <AnimatePresence mode="wait">
-                <motion.div
-                  key={currentCarIndex}
-                  variants={carSlideVariants}
-                  initial="enter"
-                  animate="center"
-                  exit="exit"
-                  className="relative z-10 flex flex-col items-center w-full"
-                >
-                  {/* ── CAR IMAGE ── */}
-                  <div
-                    className="relative w-full flex items-center justify-center pt-0 lg:pt-6 pb-0 cursor-pointer z-20 group"
-                    onClick={() => setShowModal(true)}
-                  >
-                    <motion.div
-                      animate={{ y: [0, -16, 0], rotateZ: [0, -0.5, 0, 0.5, 0] }}
-                      transition={{
-                        y: { repeat: Infinity, duration: 4.5, ease: "easeInOut" },
-                        rotateZ: { repeat: Infinity, duration: 9, ease: "easeInOut" }
-                      }}
-                      className="w-full flex justify-center"
-                    >
-                      <img
-                        src={currentCar.image || 'https://placehold.co/800x400/111/333?text=Incoming+Vehicle'}
-                        alt={`${currentCar.make} ${currentCar.model}`}
-                        className="w-[90%] sm:w-[85%] lg:w-[95%] xl:w-full h-auto object-contain drop-shadow-[0_40px_60px_rgba(0,0,0,0.75)] max-h-[35vh] sm:max-h-[38vh] lg:max-h-[42vh] xl:max-h-[50vh] transform-gpu transition-transform duration-500 group-hover:scale-105"
-                      />
-                    </motion.div>
-                  </div>
+              {/* Node 3 */}
+              <div className="animate-node-float-3 flex items-center gap-3.5 bg-white/95 backdrop-blur-md p-3.5 rounded-2xl border border-gray-100 shadow-[0_8px_25px_rgba(15,23,42,0.06)] hover:border-brand-orange/40 hover:shadow-lg transition-all group ml-1">
+                <div className="w-11 h-11 rounded-xl bg-orange-50 border border-orange-100 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+                  <Landmark className="w-5 h-5 text-brand-orange" />
+                </div>
+                <div>
+                  <h4 className="font-heading font-black text-xs text-slate-800 uppercase tracking-wider">૦ ડાઉન પેમેન્ટ લોન</h4>
+                  <p className="text-[11px] font-body text-slate-500 font-medium">ઝડપી બેંક લોન એપ્રૂવલ</p>
+                </div>
+              </div>
 
-                  {/* ── GLASSMORPHISM INFO CARD (Below the car — no overlap) ── */}
-                  <div className="w-full sm:w-[92%] lg:w-[95%] xl:w-[90%] z-30 group mt-0 mb-7 lg:-mt-8">
-                    <motion.div
-                      initial={{ opacity: 0, y: 40 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.9, delay: 0.35, type: "spring", bounce: 0.35 }}
-                      onClick={() => setShowModal(true)}
-                      className="relative bg-white/[0.04] backdrop-blur-[50px] border border-white/[0.08] p-5 sm:p-6 lg:px-8 lg:py-6 rounded-[1.75rem] cursor-pointer shadow-[0_8px_32px_rgba(0,0,0,0.5),_inset_0_1px_0_rgba(255,255,255,0.06)] overflow-hidden transform-gpu hover:-translate-y-1.5 hover:bg-white/[0.06] hover:border-amber-500/25 hover:shadow-[0_12px_48px_rgba(245,158,11,0.12)] transition-all duration-500 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 lg:gap-0"
-                    >
-                      {/* Shimmer sweep on hover */}
-                      <div className="absolute inset-0 w-[200%] h-full bg-gradient-to-r from-transparent via-white/[0.04] to-transparent -translate-x-full group-hover:translate-x-0 transition-transform duration-[1.5s] ease-out pointer-events-none" />
+              {/* Node 4 */}
+              <div className="animate-node-float-1 flex items-center gap-3.5 bg-white/95 backdrop-blur-md p-3.5 rounded-2xl border border-gray-100 shadow-[0_8px_25px_rgba(15,23,42,0.06)] hover:border-brand-orange/40 hover:shadow-lg transition-all group">
+                <div className="w-11 h-11 rounded-xl bg-purple-50 border border-purple-100 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+                  <FileText className="w-5 h-5 text-purple-600" />
+                </div>
+                <div>
+                  <h4 className="font-heading font-black text-xs text-slate-800 uppercase tracking-wider">૧૦૦% ફ્રી RTO ટ્રાન્સફર</h4>
+                  <p className="text-[11px] font-body text-slate-500 font-medium">સરળ અને કાયદેસર પ્રક્રિયા</p>
+                </div>
+              </div>
+            </div>
 
-                      {/* Left: Title & Specs */}
-                      <div className="w-full lg:w-auto flex-1 z-10 relative">
-                        {/* Header Badge */}
-                        <div className="flex items-center gap-3 mb-3">
-                          <div className="relative flex items-center justify-center w-8 h-8 rounded-full bg-amber-500/10 border border-amber-500/20 shadow-[0_0_15px_rgba(245,158,11,0.15)]">
-                            <div className="absolute w-full h-full rounded-full border border-amber-500/40 animate-[spin_4s_linear_infinite]" />
-                            <Sparkles className="w-4 h-4 text-amber-500" />
-                          </div>
-                          <span className="relative inline-flex items-center justify-center whitespace-nowrap px-4 py-1.5 text-[11px] sm:text-[13px] font-black tracking-[0.2em] uppercase rounded-full bg-gradient-to-r from-amber-400 via-yellow-400 to-brand-orange text-[#0a0a0a] shadow-[0_0_25px_rgba(245,158,11,0.6)] transform hover:scale-105 transition-all duration-300 animate-pulse">
-                            COMING SOON
-                          </span>
-                        </div>
 
-                        {/* Car Name */}
-                        <h3 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-2.5 leading-tight group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-white group-hover:to-amber-200 transition-all duration-500">
-                          {currentCar.make} <span className="font-light">{currentCar.model}</span>
-                        </h3>
+            {/* ── CENTER COLUMN: THE LUMINOUS RADIAL ARC STAGE WITH DYNAMIC CAR ── */}
+            <div className="col-span-1 xl:col-span-6 flex flex-col items-center">
 
-                        {/* Spec Chips */}
-                        {(currentCar.year || currentCar.fuelType || currentCar.transmission) && (
-                          <div className="flex items-center gap-2 lg:hidden">
-                            <span className="flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-white/[0.06] border border-white/[0.08] text-slate-300 text-xs font-bold uppercase tracking-wider whitespace-nowrap">
-                              {currentCar.year && <span>{currentCar.year}</span>}
-                              {currentCar.year && currentCar.fuelType && <span className="text-amber-500/60">•</span>}
-                              {currentCar.fuelType && <span>{currentCar.fuelType}</span>}
-                              {currentCar.fuelType && currentCar.transmission && <span className="text-amber-500/60">•</span>}
-                              {currentCar.transmission && <span>{currentCar.transmission}</span>}
-                            </span>
-                          </div>
-                        )}
-                      </div>
+              {/* Circular Arc Stage Frame */}
+              <div className="relative w-full max-w-[680px] rounded-t-[340px] sm:rounded-t-[380px] pt-8 pb-4 px-4 sm:px-6 bg-gradient-to-b from-brand-orange/[0.07] via-amber-300/[0.04] to-white/90 border-t-2 border-l-2 border-r-2 border-amber-400/50 shadow-[0_20px_60px_-15px_rgba(245,148,35,0.18)] backdrop-blur-sm">
 
-                      {/* Vertical / Horizontal Divider */}
-                      <div className="w-full lg:w-[1px] h-[1px] lg:h-20 bg-gradient-to-r lg:bg-gradient-to-b from-transparent via-amber-500/40 to-transparent lg:mx-8 relative z-10" />
+                {/* Subtle Arc Laser Highlight */}
+                <div className="absolute top-0 inset-x-12 h-[2px] bg-gradient-to-r from-transparent via-brand-orange to-transparent animate-pulse" />
 
-                      {/* Right: Price & CTA */}
-                      <div className="flex items-center justify-between lg:justify-end lg:flex-col lg:items-end gap-3 w-full lg:w-auto relative z-10">
-                        {/* Spec chips — only visible on lg+ (above price) */}
-                        {(currentCar.year || currentCar.fuelType || currentCar.transmission) && (
-                          <div className="hidden lg:flex items-center gap-2 flex-wrap justify-end">
-                            <span className="flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-white/[0.06] border border-white/[0.08] text-slate-300 text-xs font-bold uppercase tracking-wider whitespace-nowrap">
-                              {currentCar.year && <span>{currentCar.year}</span>}
-                              {currentCar.year && currentCar.fuelType && <span className="text-amber-500/60">•</span>}
-                              {currentCar.fuelType && <span>{currentCar.fuelType}</span>}
-                              {currentCar.fuelType && currentCar.transmission && <span className="text-amber-500/60">•</span>}
-                              {currentCar.transmission && <span>{currentCar.transmission}</span>}
-                            </span>
-                          </div>
-                        )}
-                        {/* Price + Arrow */}
-                        <div className="flex items-center gap-5 w-full lg:w-auto justify-between lg:justify-end">
-                          <div className="flex flex-col lg:items-end lg:text-right">
-                            <p className="text-[10px] text-amber-500/70 uppercase tracking-[0.15em] font-bold mb-1.5 flex items-center gap-1.5">
-                              Expected Pricing
-                            </p>
-                            {currentCar.price > 0 ? (
-                              <p className="text-2xl sm:text-3xl font-black text-white tracking-tight drop-shadow-md">
-                                {formatPrice(currentCar.price)}
-                              </p>
-                            ) : (
-                              <p className="text-xl sm:text-2xl font-black text-white/85 tracking-tight drop-shadow-md bg-white/10 px-3 py-1 rounded-md">
-                                Revealing Soon
-                              </p>
-                            )}
-                          </div>
-                          <motion.div
-                            whileHover={{ scale: 1.1, rotate: -15 }}
-                            whileTap={{ scale: 0.9 }}
-                            className="w-13 h-13 sm:w-14 sm:h-14 rounded-full bg-gradient-to-br from-amber-500 to-brand-orange shadow-[0_0_30px_rgba(245,158,11,0.35)] flex items-center justify-center transition-all duration-300 relative overflow-hidden shrink-0"
-                          >
-                            <div className="absolute inset-0 bg-white/20 scale-0 group-hover:scale-100 transition-transform duration-500 rounded-full" />
-                            <ArrowRight className="w-6 h-6 text-black relative z-10" strokeWidth={2.5} />
-                          </motion.div>
-                        </div>
-                      </div>
+                {/* Arc Category Selector Tabs (Curved Header inside Arc) */}
+                <div className="flex items-center justify-center gap-1.5 sm:gap-2 flex-wrap mb-4 z-20 relative">
+                  {ARC_CATEGORIES.map((cat) => {
+                    const isActive = selectedCategory === cat.id;
+                    return (
+                      <button
+                        key={cat.id}
+                        onClick={() => {
+                          setSelectedCategory(cat.id);
+                          setCurrentCarIndex(0);
+                        }}
+                        className={`px-3 py-1 sm:px-3.5 sm:py-1.5 rounded-full font-heading text-[11px] sm:text-xs font-bold transition-all cursor-pointer ${
+                          isActive
+                            ? 'bg-brand-orange text-white shadow-md shadow-brand-orange/30 scale-105'
+                            : 'bg-white/80 hover:bg-white text-slate-700 border border-gray-200 shadow-xs'
+                        }`}
+                      >
+                        <span>{cat.icon} {cat.label.split('·')[0]}</span>
+                      </button>
+                    );
+                  })}
+                </div>
 
-                      {/* Progress Bar */}
-                      <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-white/5 rounded-b-[1.75rem] overflow-hidden">
-                        <motion.div
-                          initial={{ scaleX: 0 }}
-                          animate={{ scaleX: 1 }}
-                          transition={{ duration: 5, ease: "linear" }}
-                          className="h-full bg-gradient-to-r from-amber-500 to-brand-orange origin-left shadow-[0_0_8px_rgba(245,158,11,0.5)]"
+                {/* Central Car Stage & Animated Transition */}
+                <div className="relative w-full h-[220px] sm:h-[290px] md:h-[330px] flex items-center justify-center my-2">
+                  <AnimatePresence mode="wait">
+                    {activeCar && (
+                      <motion.div
+                        key={activeCar._id || currentCarIndex}
+                        initial={{ opacity: 0, scale: 0.88, y: 15, filter: 'blur(8px)' }}
+                        animate={{ opacity: 1, scale: 1, y: 0, filter: 'blur(0px)' }}
+                        exit={{ opacity: 0, scale: 0.92, y: -15, filter: 'blur(8px)' }}
+                        transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+                        className="relative w-full h-full flex flex-col items-center justify-center cursor-pointer"
+                        onClick={() => activeCar._id && navigate(`/car-details/${activeCar._id}`)}
+                      >
+                        {/* Floor Spotlight Reflection */}
+                        <div className="absolute bottom-2 w-3/4 h-8 bg-black/20 rounded-full blur-xl pointer-events-none" />
+
+                        {/* Car Image with Floating Animation */}
+                        <motion.img
+                          animate={{ y: [0, -6, 0] }}
+                          transition={{ repeat: Infinity, duration: 4.5, ease: 'easeInOut' }}
+                          src={getOptimizedUrl(activeCar.image, 800)}
+                          alt={`${activeCar.make} ${activeCar.model}`}
+                          className="w-full max-h-[190px] sm:max-h-[250px] md:max-h-[290px] object-contain drop-shadow-[0_20px_30px_rgba(15,23,42,0.22)] select-none hover:scale-105 transition-transform duration-500"
                         />
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+
+                  {/* Navigation Arrows */}
+                  <button
+                    onClick={(e) => { e.stopPropagation(); prevCar(); }}
+                    className="absolute left-1 sm:left-2 top-1/2 -translate-y-1/2 w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-white/90 hover:bg-white text-slate-700 shadow-md border border-gray-100 flex items-center justify-center transition-all active:scale-95 z-20 cursor-pointer"
+                    title="Previous Car"
+                  >
+                    <ChevronLeft className="w-5 h-5" />
+                  </button>
+
+                  <button
+                    onClick={(e) => { e.stopPropagation(); nextCar(); }}
+                    className="absolute right-1 sm:right-2 top-1/2 -translate-y-1/2 w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-white/90 hover:bg-white text-slate-700 shadow-md border border-gray-100 flex items-center justify-center transition-all active:scale-95 z-20 cursor-pointer"
+                    title="Next Car"
+                  >
+                    <ChevronRight className="w-5 h-5" />
+                  </button>
+                </div>
+
+                {/* ── CAR HUD CONTROL CARD (Embedded at Base of Arc) ── */}
+                {activeCar && (
+                  <div className="relative z-20 w-full bg-white/95 backdrop-blur-xl border border-gray-200/90 rounded-2xl p-4 sm:p-5 shadow-[0_15px_40px_rgba(15,23,42,0.08)]">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-gray-100">
+                      <div>
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="px-2 py-0.5 rounded bg-emerald-50 border border-emerald-200 text-emerald-700 text-[10px] font-black uppercase tracking-wider">
+                            VERIFIED CAR
+                          </span>
+                          {activeCar.year && (
+                            <span className="text-xs font-bold text-slate-500">
+                              {activeCar.year} Model
+                            </span>
+                          )}
+                        </div>
+                        <h3 className="font-heading font-black text-lg sm:text-xl text-slate-900 leading-tight">
+                          {activeCar.make} {activeCar.model}
+                        </h3>
                       </div>
-                    </motion.div>
+
+                      {/* Price & EMI Pill */}
+                      <div className="text-left sm:text-right shrink-0">
+                        <p className="font-heading font-black text-xl sm:text-2xl text-brand-orange">
+                          {formatPrice(activeCar.price)}
+                        </p>
+                        <p className="text-[11px] font-body text-slate-500 font-semibold">
+                          EMI from <span className="text-slate-800 font-bold">{calculateEmi(activeCar.price)}</span>/mo*
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Spec Chips Row */}
+                    <div className="grid grid-cols-4 gap-2 my-3 text-center text-xs font-body font-semibold text-slate-700">
+                      <div className="bg-slate-50 p-1.5 rounded-lg border border-slate-100 truncate">
+                        <Fuel className="w-3.5 h-3.5 text-brand-orange mx-auto mb-0.5" />
+                        <span className="text-[11px] truncate block">{activeCar.fuelType || 'Petrol'}</span>
+                      </div>
+                      <div className="bg-slate-50 p-1.5 rounded-lg border border-slate-100 truncate">
+                        <Settings2 className="w-3.5 h-3.5 text-brand-orange mx-auto mb-0.5" />
+                        <span className="text-[11px] truncate block">{activeCar.transmission || 'Manual'}</span>
+                      </div>
+                      <div className="bg-slate-50 p-1.5 rounded-lg border border-slate-100 truncate">
+                        <Gauge className="w-3.5 h-3.5 text-brand-orange mx-auto mb-0.5" />
+                        <span className="text-[11px] truncate block">{(activeCar.kms || 35000).toLocaleString('en-IN')} KM</span>
+                      </div>
+                      <div className="bg-slate-50 p-1.5 rounded-lg border border-slate-100 truncate">
+                        <User className="w-3.5 h-3.5 text-brand-orange mx-auto mb-0.5" />
+                        <span className="text-[11px] truncate block">{activeCar.owner || '1st Owner'}</span>
+                      </div>
+                    </div>
+
+                    {/* Action Row */}
+                    <div className="flex items-center gap-2 pt-1">
+                      <button
+                        onClick={() => navigate(activeCar._id ? `/car-details/${activeCar._id}` : '/inventory')}
+                        className="flex-1 py-2.5 rounded-xl bg-primary hover:bg-slate-800 text-white font-heading font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-all shadow-xs cursor-pointer"
+                      >
+                        <Eye className="w-4 h-4" />
+                        <span>ગાડી જુઓ · View Car Details</span>
+                      </button>
+
+                      <a
+                        href={whatsappUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="py-2.5 px-4 rounded-xl bg-[#25D366] hover:bg-[#20bd5a] text-white font-heading font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-all shadow-xs cursor-pointer"
+                      >
+                        <MessageCircle className="w-4 h-4 fill-current" />
+                        <span>WhatsApp</span>
+                      </a>
+                    </div>
+
+                    {/* Dot Pagination */}
+                    <div className="flex items-center justify-center gap-1.5 mt-3">
+                      {displayCars.map((_, idx) => (
+                        <button
+                          key={idx}
+                          onClick={() => setCurrentCarIndex(idx)}
+                          className={`h-1.5 rounded-full transition-all cursor-pointer ${
+                            currentCarIndex === idx ? 'w-6 bg-brand-orange' : 'w-1.5 bg-gray-300 hover:bg-gray-400'
+                          }`}
+                          aria-label={`Slide ${idx + 1}`}
+                        />
+                      ))}
+                    </div>
                   </div>
+                )}
 
-                </motion.div>
-              </AnimatePresence>
-
-
-            </>
-          ) : (
-            // Fallback empty state
-            <div className="w-full h-[50vh] flex flex-col items-center justify-center opacity-30 select-none pointer-events-none z-10">
-              <Car className="w-28 h-28 text-white/10 mb-4" />
-              <h2 className="text-[3rem] lg:text-[4rem] font-black uppercase text-white/5 tracking-tighter">Verified Collection</h2>
+              </div>
             </div>
-          )}
+
+
+            {/* ── RIGHT COLUMN: FLOATING MILESTONE NOTIFICATION CARDS ── */}
+            <div className="hidden xl:flex xl:col-span-3 flex-col gap-6 justify-center">
+              {/* Card 1 */}
+              <div className="animate-node-float-1 bg-white/95 backdrop-blur-md p-4 rounded-2xl border border-gray-100 shadow-[0_8px_25px_rgba(15,23,42,0.06)] hover:border-emerald-300 hover:shadow-lg transition-all group">
+                <div className="flex items-center gap-3 mb-1.5">
+                  <div className="w-9 h-9 rounded-xl bg-emerald-50 border border-emerald-100 flex items-center justify-center shrink-0">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                  </div>
+                  <h4 className="font-heading font-black text-xs text-slate-800">
+                    Quality Inspection Certified
+                  </h4>
+                </div>
+                <p className="text-[11px] font-body text-slate-500 pl-12 leading-relaxed">
+                  ૧૨૦+ પોઈન્ટ ટેકનિકલ ઈન્સ્પેક્શન સફળતાપૂર્વક પાસ થયેલ વાહનો.
+                </p>
+              </div>
+
+              {/* Card 2 */}
+              <div className="animate-node-float-2 bg-white/95 backdrop-blur-md p-4 rounded-2xl border border-gray-100 shadow-[0_8px_25px_rgba(15,23,42,0.06)] hover:border-amber-300 hover:shadow-lg transition-all group mr-2">
+                <div className="flex items-center gap-3 mb-1.5">
+                  <div className="w-9 h-9 rounded-xl bg-amber-50 border border-amber-100 flex items-center justify-center shrink-0">
+                    <Zap className="w-4 h-4 text-amber-600" />
+                  </div>
+                  <h4 className="font-heading font-black text-xs text-slate-800">
+                    Instant Loan Approval in 2h
+                  </h4>
+                </div>
+                <p className="text-[11px] font-body text-slate-500 pl-12 leading-relaxed">
+                  ટોપ બેંકો દ્વારા સરળ કાગળિયાં સાથે ઝડપી લોન મંજૂરી.
+                </p>
+              </div>
+
+              {/* Card 3 */}
+              <div className="animate-node-float-3 bg-white/95 backdrop-blur-md p-4 rounded-2xl border border-gray-100 shadow-[0_8px_25px_rgba(15,23,42,0.06)] hover:border-orange-300 hover:shadow-lg transition-all group">
+                <div className="flex items-center gap-3 mb-1.5">
+                  <div className="w-9 h-9 rounded-xl bg-orange-50 border border-orange-100 flex items-center justify-center shrink-0">
+                    <Award className="w-4 h-4 text-brand-orange" />
+                  </div>
+                  <h4 className="font-heading font-black text-xs text-slate-800">
+                    10,000+ Happy Surat Families
+                  </h4>
+                </div>
+                <p className="text-[11px] font-body text-slate-500 pl-12 leading-relaxed">
+                  ૪.૮★ રેટિંગ સાથે સુરતનો સૌથી ભરોસાપાત્ર કાર મેળો (Trusted Dealer).
+                </p>
+              </div>
+            </div>
+
+          </div>
         </div>
 
       </div>
 
-      {/* Notify Modal */}
+      {/* ═══════════════════════════════════════════════════════════════════
+          TEST DRIVE BOOKING MODAL
+          ═══════════════════════════════════════════════════════════════════ */}
       {showModal && (
-        <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm px-4 pb-28 sm:p-4 animate-fade-in" onClick={() => setShowModal(false)}>
-          <div className="bg-white rounded-3xl sm:rounded-2xl w-full max-w-md overflow-hidden shadow-2xl animate-[slide-up_0.4s_cubic-bezier(0.16,1,0.3,1)] sm:animate-scale-in" onClick={(e) => e.stopPropagation()}>
-            <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-slate-50">
-              <h3 className="font-heading font-bold text-xl text-slate-800">Get Notified</h3>
+        <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm px-4 pb-20 sm:p-4 animate-fade-in" onClick={() => setShowModal(false)}>
+          <div className="bg-white rounded-3xl sm:rounded-2xl w-full max-w-md overflow-hidden shadow-2xl animate-scale-in" onClick={(e) => e.stopPropagation()}>
+            <div className="p-5 border-b border-gray-100 flex justify-between items-center bg-slate-50">
+              <div className="flex items-center gap-2">
+                <Car className="w-5 h-5 text-brand-orange" />
+                <h3 className="font-heading font-black text-lg text-slate-800">ટેસ્ટ ડ્રાઈવ બુક કરો</h3>
+              </div>
               <button onClick={() => setShowModal(false)} className="text-gray-400 hover:text-gray-700 transition">
                 <X className="w-5 h-5" />
               </button>
             </div>
-            <form onSubmit={handleSubmit} className="p-6 space-y-4 font-body">
-              {currentCar && (
-                <p className="text-sm text-slate-500 mb-4">
-                  Register your interest for the <span className="font-semibold text-brand-orange">{currentCar.make} {currentCar.model}</span>.
-                </p>
+            <form onSubmit={handleTestDriveSubmit} className="p-6 space-y-4 font-body">
+              {activeCar && (
+                <div className="bg-slate-50 p-3 rounded-xl border border-slate-100 flex items-center gap-3">
+                  <img src={getOptimizedUrl(activeCar.image, 200)} alt={activeCar.model} className="w-16 h-12 object-contain" />
+                  <div>
+                    <p className="text-xs font-bold text-slate-800">{activeCar.make} {activeCar.model}</p>
+                    <p className="text-xs font-semibold text-brand-orange">{formatPrice(activeCar.price)}</p>
+                  </div>
+                </div>
               )}
               <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-1">Full Name</label>
+                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">તમારું પૂરું નામ *</label>
                 <input
                   type="text"
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:border-brand-orange focus:ring-1 focus:ring-brand-orange outline-none transition-all text-slate-800"
-                  placeholder="Enter your name"
+                  className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:border-brand-orange focus:ring-1 focus:ring-brand-orange outline-none transition-all text-slate-800 text-sm"
+                  placeholder="e.g. રમેશભાઈ પટેલ"
                   required
                 />
               </div>
               <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-1">Mobile Number</label>
+                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">મોબાઇલ નંબર *</label>
                 <input
                   type="tel"
                   value={formData.phone}
                   onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                  className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:border-brand-orange focus:ring-1 focus:ring-brand-orange outline-none transition-all text-slate-800"
-                  placeholder="Enter your phone number"
+                  className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:border-brand-orange focus:ring-1 focus:ring-brand-orange outline-none transition-all text-slate-800 text-sm"
+                  placeholder="+91 99136 34447"
                   required
                 />
               </div>
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full bg-brand-orange hover:bg-orange-600 text-white font-semibold py-3 rounded-xl transition-all disabled:opacity-70 mt-2"
+                className="w-full bg-brand-orange hover:bg-orange-600 text-white font-heading font-black py-3 rounded-xl transition-all shadow-md disabled:opacity-70 mt-2 cursor-pointer"
               >
-                {isSubmitting ? 'Submitting...' : 'Notify Me'}
+                {isSubmitting ? 'સબમિટ થઈ રહ્યું છે...' : 'ટેસ્ટ ડ્રાઈવ કન્ફર્મ કરો (Takes 2 mins)'}
               </button>
             </form>
           </div>
         </div>
       )}
+
     </section>
   );
 }
