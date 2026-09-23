@@ -167,30 +167,64 @@ export default function HeroSection() {
             શ્રેષ્ઠ કિંમત, સર્વોત્તમ ગુણવત્તા અને અતૂટ ભરોસાનું એકમાત્ર નામ.
           </motion.p>
 
-          {/* Trust badges & Location */}
-          <motion.div variants={itemVariants} className="mt-10 flex flex-col sm:flex-row items-start sm:items-center gap-5">
+          {/* Dual Action CTAs */}
+          <motion.div variants={itemVariants} className="mt-8 flex flex-wrap items-center gap-3 sm:gap-4">
+            <button
+              onClick={() => navigate('/inventory')}
+              className="group relative inline-flex items-center gap-2.5 px-6 sm:px-8 py-3.5 sm:py-4 rounded-xl bg-gradient-to-r from-brand-orange to-[#e68415] text-white font-heading font-black text-sm sm:text-base tracking-wide shadow-[0_10px_30px_rgba(245,148,35,0.4)] hover:shadow-[0_15px_40px_rgba(245,148,35,0.6)] hover:-translate-y-0.5 active:translate-y-0 transition-all duration-300 overflow-hidden cursor-pointer"
+            >
+              <div className="absolute inset-0 bg-white/20 -translate-x-full group-hover:translate-x-full transition-transform duration-700 pointer-events-none" />
+              <Car className="w-5 h-5 text-white" />
+              <span>ગાડીઓ જુઓ · Explore Cars</span>
+              <ArrowRight className="w-4 h-4 text-white group-hover:translate-x-1 transition-transform" />
+            </button>
+
+            <button
+              onClick={() => navigate('/sell-your-car')}
+              className="inline-flex items-center gap-2 px-5 sm:px-7 py-3.5 sm:py-4 rounded-xl bg-white/[0.06] hover:bg-white/[0.12] text-white font-heading font-bold text-sm sm:text-base border border-white/15 backdrop-blur-md hover:border-amber-400/40 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-300 cursor-pointer shadow-sm"
+            >
+              <span>કાર વેચો / એક્સચેન્જ · Sell Car</span>
+              <ChevronRight className="w-4 h-4 text-slate-300 group-hover:text-amber-400 group-hover:translate-x-0.5 transition-all" />
+            </button>
+          </motion.div>
+
+          {/* Trust stats & Location */}
+          <motion.div variants={itemVariants} className="mt-8 pt-6 border-t border-white/10 flex flex-wrap items-center gap-3 sm:gap-4">
+            {/* Trust Pill: 150+ Certified Cars */}
+            <div className="flex items-center gap-2 bg-white/[0.04] backdrop-blur-md px-3.5 py-2 rounded-xl border border-white/10 shadow-sm">
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+              <span className="text-white font-black text-xs sm:text-sm">૧૫૦+ કાર સ્ટોકમાં</span>
+              <span className="text-slate-400 text-[10px] hidden sm:inline uppercase tracking-wider font-semibold">· Certified</span>
+            </div>
+
             {/* Google rating pill */}
-            <div className="flex items-center gap-2 bg-white/5 backdrop-blur-md px-4 py-2.5 rounded-full border border-white/10 shadow-lg">
+            <div className="flex items-center gap-2 bg-white/[0.04] backdrop-blur-md px-3.5 py-2 rounded-xl border border-white/10 shadow-sm">
               <div className="flex items-center gap-0.5">
                 {[...Array(5)].map((_, i) => (
-                  <svg key={i} className="w-4 h-4 text-yellow-500 fill-yellow-500" viewBox="0 0 20 20">
+                  <svg key={i} className="w-3.5 h-3.5 text-yellow-400 fill-yellow-400" viewBox="0 0 20 20">
                     <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                   </svg>
                 ))}
               </div>
-              <span className="text-white font-bold text-sm ml-1">4.8/5.0</span>
-              <div className="h-4 w-[1px] bg-white/20 mx-1"></div>
-              <span className="text-slate-300 text-[10px] uppercase tracking-widest font-bold">ગૂગલ રિવ્યુઝ</span>
+              <span className="text-white font-bold text-xs sm:text-sm">4.8★</span>
+              <div className="h-3.5 w-[1px] bg-white/20"></div>
+              <span className="text-slate-300 text-[10px] uppercase tracking-wider font-semibold">ગૂગલ રેટિંગ</span>
+            </div>
+
+            {/* Since 2011 Pill */}
+            <div className="hidden sm:flex items-center gap-1.5 bg-white/[0.04] backdrop-blur-md px-3.5 py-2 rounded-xl border border-white/10 shadow-sm">
+              <span className="text-amber-400 font-bold text-xs">૧૪+ વર્ષ વિશ્વાસ</span>
+              <span className="text-slate-400 text-[10px] uppercase tracking-wider">· Est. 2011</span>
             </div>
 
             {/* Location link */}
             <button
               onClick={() => navigate('/contact')}
-              className="flex items-center gap-2 px-4 py-2.5 bg-white/5 hover:bg-white/10 backdrop-blur-md rounded-full border border-white/10 transition-all duration-300 group cursor-pointer"
+              className="flex items-center gap-1.5 px-3.5 py-2 bg-white/[0.04] hover:bg-white/10 backdrop-blur-md rounded-xl border border-white/10 transition-all duration-300 group cursor-pointer"
             >
-              <MapPin className="w-4 h-4 text-brand-orange" />
-              <span className="text-white font-medium text-sm tracking-wide">વરાછા, સુરત</span>
-              <ChevronRight className="w-4 h-4 text-white/50 group-hover:text-brand-orange group-hover:translate-x-1 transition-transform" />
+              <MapPin className="w-3.5 h-3.5 text-brand-orange" />
+              <span className="text-white font-medium text-xs sm:text-sm tracking-wide">વરાછા, સુરત</span>
+              <ChevronRight className="w-3.5 h-3.5 text-white/50 group-hover:text-brand-orange group-hover:translate-x-0.5 transition-transform" />
             </button>
           </motion.div>
         </motion.div>

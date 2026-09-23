@@ -138,8 +138,8 @@ export default function HappyCustomers() {
 
       <div className="max-w-7xl mx-auto relative z-10">
         <div className="text-center mb-12 max-w-3xl mx-auto">
-          <span className="flex items-center justify-center gap-2 text-sm font-heading font-bold text-[#d1108a] uppercase tracking-widest mb-4">
-            <Sparkles className="w-4 h-4" /> The Sadguru Family
+          <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-brand-orange/10 border border-brand-orange/20 text-brand-orange text-xs sm:text-sm font-heading font-bold uppercase tracking-widest mb-4 shadow-sm">
+            <Sparkles className="w-4 h-4 text-brand-orange" /> The Sadguru Family · ડિલિવરી સેલિબ્રેશન
           </span>
           <h2 className="font-heading text-4xl md:text-5xl font-bold text-[#1a2b3c] mb-6 leading-tight">
             Our <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-orange via-amber-400 to-yellow-500">Happy Customers</span>

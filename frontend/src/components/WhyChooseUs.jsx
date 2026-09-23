@@ -99,6 +99,43 @@ export default function WhyChooseUs() {
 
 
 
+                {/* Animated Stats Bar */}
+                <motion.div
+                    className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 mb-16 max-w-5xl mx-auto"
+                    variants={staggerContainer}
+                    initial="hidden"
+                    whileInView="visible"
+                    viewport={{ once: true, amount: 0.2 }}
+                >
+                    <motion.div variants={staggerChild} className="bg-white/80 backdrop-blur-md rounded-2xl p-5 sm:p-6 text-center border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
+                        <p className="font-heading font-black text-3xl sm:text-4xl text-primary mb-1">
+                            <AnimatedCounter target={150} suffix="+" />
+                        </p>
+                        <p className="text-xs sm:text-sm font-body text-slate-500 font-semibold">સર્ટિફાઈડ કાર સ્ટોક</p>
+                    </motion.div>
+
+                    <motion.div variants={staggerChild} className="bg-white/80 backdrop-blur-md rounded-2xl p-5 sm:p-6 text-center border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
+                        <p className="font-heading font-black text-3xl sm:text-4xl text-brand-orange mb-1">
+                            <AnimatedCounter target={10000} suffix="+" />
+                        </p>
+                        <p className="text-xs sm:text-sm font-body text-slate-500 font-semibold">ખુશ ગ્રાહક પરિવારો</p>
+                    </motion.div>
+
+                    <motion.div variants={staggerChild} className="bg-white/80 backdrop-blur-md rounded-2xl p-5 sm:p-6 text-center border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
+                        <p className="font-heading font-black text-3xl sm:text-4xl text-emerald-600 mb-1">
+                            <AnimatedCounter target={120} suffix="+" />
+                        </p>
+                        <p className="text-xs sm:text-sm font-body text-slate-500 font-semibold">પોઇન્ટ ટેકનિકલ ચેક</p>
+                    </motion.div>
+
+                    <motion.div variants={staggerChild} className="bg-white/80 backdrop-blur-md rounded-2xl p-5 sm:p-6 text-center border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
+                        <p className="font-heading font-black text-3xl sm:text-4xl text-slate-800 mb-1">
+                            <AnimatedCounter target={14} suffix="+ વર્ષ" />
+                        </p>
+                        <p className="text-xs sm:text-sm font-body text-slate-500 font-semibold">સુરતમાં અતૂટ વિશ્વાસ (2011)</p>
+                    </motion.div>
+                </motion.div>
+
                 {/* Feature cards */}
                 <motion.div
                     className="grid grid-cols-1 sm:grid-cols-3 gap-8 lg:gap-12"
@@ -109,15 +146,15 @@ export default function WhyChooseUs() {
                 >
                     {/* Feature 1 */}
                     <motion.div
-                        className="group flex flex-col items-center text-center"
+                        className="group flex flex-col items-center text-center p-6 rounded-3xl bg-white/60 hover:bg-white border border-gray-100 hover:border-slate-200 shadow-sm hover:shadow-xl transition-all duration-300"
                         variants={staggerChild}
                     >
                         <motion.div
-                            className="relative w-24 h-24 rounded-3xl bg-blue-50 border border-blue-100 flex items-center justify-center mb-7 group-hover:scale-110 group-hover:shadow-xl group-hover:shadow-blue-500/20 transition-all duration-500"
+                            className="relative w-20 h-20 rounded-2xl bg-slate-100 border border-slate-200 flex items-center justify-center mb-6 group-hover:scale-110 group-hover:shadow-lg group-hover:shadow-slate-500/20 transition-all duration-500"
                             whileHover={{ rotate: 5 }}
                         >
-                            <div className="absolute inset-0 rounded-3xl border border-blue-200 border-dashed animate-[spin_8s_linear_infinite]" />
-                            <CheckCircle className="w-11 h-11 text-blue-500 relative z-10" />
+                            <div className="absolute inset-0 rounded-2xl border border-slate-300 border-dashed animate-[spin_8s_linear_infinite]" />
+                            <CheckCircle className="w-10 h-10 text-primary relative z-10" />
                         </motion.div>
                         <h3 className="font-heading text-xl font-bold text-slate-900 mb-3">Certified અને 100% Tested Cars</h3>
                         <p className="font-body text-slate-600 text-[15px] leading-relaxed max-w-xs">
@@ -127,15 +164,15 @@ export default function WhyChooseUs() {
 
                     {/* Feature 2 */}
                     <motion.div
-                        className="group flex flex-col items-center text-center"
+                        className="group flex flex-col items-center text-center p-6 rounded-3xl bg-white/60 hover:bg-white border border-gray-100 hover:border-emerald-200 shadow-sm hover:shadow-xl transition-all duration-300"
                         variants={staggerChild}
                     >
                         <motion.div
-                            className="relative w-24 h-24 rounded-3xl bg-emerald-50 border border-emerald-100 flex items-center justify-center mb-7 group-hover:scale-110 group-hover:shadow-xl group-hover:shadow-emerald-500/20 transition-all duration-500"
+                            className="relative w-20 h-20 rounded-2xl bg-emerald-50 border border-emerald-100 flex items-center justify-center mb-6 group-hover:scale-110 group-hover:shadow-lg group-hover:shadow-emerald-500/20 transition-all duration-500"
                             whileHover={{ rotate: -5 }}
                         >
-                            <div className="absolute inset-0 rounded-3xl border border-emerald-200 border-dashed animate-[spin_10s_linear_infinite_reverse]" />
-                            <Landmark className="w-11 h-11 text-emerald-500 relative z-10" />
+                            <div className="absolute inset-0 rounded-2xl border border-emerald-200 border-dashed animate-[spin_10s_linear_infinite_reverse]" />
+                            <Landmark className="w-10 h-10 text-emerald-600 relative z-10" />
                         </motion.div>
                         <h3 className="font-heading text-xl font-bold text-slate-900 mb-3">ઝડપી Loan અને Finance</h3>
                         <p className="font-body text-slate-600 text-[15px] leading-relaxed max-w-xs">
@@ -145,15 +182,15 @@ export default function WhyChooseUs() {
 
                     {/* Feature 3 */}
                     <motion.div
-                        className="group flex flex-col items-center text-center"
+                        className="group flex flex-col items-center text-center p-6 rounded-3xl bg-white/60 hover:bg-white border border-gray-100 hover:border-orange-200 shadow-sm hover:shadow-xl transition-all duration-300"
                         variants={staggerChild}
                     >
                         <motion.div
-                            className="relative w-24 h-24 rounded-3xl bg-purple-50 border border-purple-100 flex items-center justify-center mb-7 group-hover:scale-110 group-hover:shadow-xl group-hover:shadow-purple-500/20 transition-all duration-500"
+                            className="relative w-20 h-20 rounded-2xl bg-orange-50 border border-orange-100 flex items-center justify-center mb-6 group-hover:scale-110 group-hover:shadow-lg group-hover:shadow-orange-500/20 transition-all duration-500"
                             whileHover={{ rotate: 5 }}
                         >
-                            <div className="absolute inset-0 rounded-3xl border border-purple-200 border-dashed animate-[spin_12s_linear_infinite]" />
-                            <Headphones className="w-11 h-11 text-purple-500 relative z-10" />
+                            <div className="absolute inset-0 rounded-2xl border border-orange-200 border-dashed animate-[spin_12s_linear_infinite]" />
+                            <Headphones className="w-10 h-10 text-brand-orange relative z-10" />
                         </motion.div>
                         <h3 className="font-heading text-xl font-bold text-slate-900 mb-3">સુરતની શ્રેષ્ઠ Local Support</h3>
                         <p className="font-body text-slate-600 text-[15px] leading-relaxed max-w-xs">
