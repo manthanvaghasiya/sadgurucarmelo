@@ -1,10 +1,9 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { Fuel, Settings2, Gauge, MessageCircle, Eye, CheckCircle2, ArrowLeftRight, Download, MapPin, Sparkles, Star } from 'lucide-react';
+import { Fuel, Settings2, User, Gauge, MessageCircle, Eye, CheckCircle2, ArrowLeftRight, Download, Sparkles, Star } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { getCarWhatsAppLink } from '../utils/whatsapp';
 import { getOptimizedUrl } from '../utils/imageUtils';
 import { useCompare } from '../context/CompareContext';
-import BrandLogo from './BrandLogo';
 
 export default function CarCard({
   id = '1',
@@ -29,9 +28,6 @@ export default function CarCard({
   const { toggleCompare, isInCompare } = useCompare();
   const whatsappUrl = getCarWhatsAppLink({ title, price });
   const isCompared = isInCompare(id);
-
-  // Extract or detect make
-  const detectedMake = make || (car && car.make) || (title ? title.split(' ')[0] : 'Sadguru');
 
   // Calculate monthly EMI estimate (80% loan principal, 10.5% rate, 5-year tenure)
   const calculateEmi = () => {
@@ -112,17 +108,17 @@ export default function CarCard({
   return (
     <div
       onClick={handleCardClick}
-      className={`group relative rounded-3xl bg-white border border-slate-200/90 shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:shadow-[0_18px_40px_rgba(0,0,0,0.09)] hover:-translate-y-1.5 transition-all duration-300 flex flex-col h-full cursor-pointer overflow-hidden ${
+      className={`group relative rounded-2xl sm:rounded-3xl bg-white border border-slate-200/90 shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:shadow-[0_18px_36px_rgba(0,0,0,0.09)] hover:-translate-y-1.5 transition-all duration-300 flex flex-col h-full cursor-pointer overflow-hidden ${
         isCompared ? 'ring-2 ring-brand-orange shadow-brand-orange/15' : ''
       }`}
     >
-      {/* ── Image Showcase Area ── */}
-      <div className="relative aspect-[16/10] bg-gradient-to-b from-slate-50 via-slate-100/70 to-slate-200/50 overflow-hidden flex items-center justify-center">
+      {/* ── Image Showcase Area (Clean, natural aspect like old design) ── */}
+      <div className="car-card-image-wrap relative overflow-hidden bg-slate-100 flex items-center justify-center">
         <img
           src={getOptimizedUrl(image, 600)}
           alt={title}
           loading="lazy"
-          className="w-full h-full object-contain p-2.5 sm:p-3 group-hover:scale-105 transition-transform duration-500 ease-out"
+          className="w-full h-auto object-contain group-hover:scale-105 transition-transform duration-500 ease-out"
         />
 
         {/* Top-Left Status Pill */}
@@ -143,10 +139,12 @@ export default function CarCard({
               100% Genuine KM
             </span>
           ) : (
-            <span className="inline-flex items-center gap-1 text-[10px] font-heading font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-slate-900/80 backdrop-blur-md text-white border border-white/10 shadow-sm">
-              <Star className="w-3 h-3 text-amber-400 fill-amber-400" />
-              Great Deal
-            </span>
+            badges && badges.length > 0 ? (
+              <span className="inline-flex items-center gap-1 text-[10px] font-heading font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-slate-900/80 backdrop-blur-md text-white border border-white/10 shadow-sm">
+                <Star className="w-3 h-3 text-amber-400 fill-amber-400" />
+                {badges[0]}
+              </span>
+            ) : null
           )}
         </div>
 
@@ -171,32 +169,19 @@ export default function CarCard({
             <ArrowLeftRight className="w-3.5 h-3.5 stroke-[2.2]" />
           </button>
         </div>
-
-        {/* Bottom-Right Signature Brand Pin (Ampère style) */}
-        <div className="absolute bottom-3 right-3 z-10">
-          <BrandLogo make={detectedMake} variant="pin" />
-        </div>
       </div>
 
       {/* ── Content & Spec Body ── */}
       <div className="p-4 sm:p-5 flex flex-col flex-grow justify-between bg-white">
         <div>
-          {/* Subtitle / Location Pill */}
-          <div className="flex items-center gap-1.5 text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">
-            <MapPin className="w-3 h-3 text-brand-orange shrink-0" />
-            <span>{location}</span>
-            <span>•</span>
-            <span>{owner}</span>
-          </div>
-
           {/* Title */}
-          <h3 className="font-heading font-bold text-base sm:text-lg text-slate-900 group-hover:text-primary transition-colors line-clamp-1 mb-2.5">
+          <h3 className="font-heading font-bold text-base sm:text-lg text-slate-900 group-hover:text-primary transition-colors line-clamp-1 mb-2">
             {title}
           </h3>
 
           {/* Pricing Row: Price + Est. EMI Badge */}
-          <div className="flex flex-wrap items-baseline gap-2 sm:gap-2.5 mb-4">
-            <span className="font-heading font-extrabold text-xl sm:text-2xl text-slate-900 tracking-tight">
+          <div className="flex flex-wrap items-baseline justify-between gap-2 mb-3.5">
+            <span className="font-heading font-extrabold text-xl sm:text-2xl text-accent tracking-tight">
               {price}
             </span>
             {monthlyEmi && (
@@ -206,58 +191,33 @@ export default function CarCard({
             )}
           </div>
 
-          {/* Ampère-Style 3-Column Spec Matrix */}
-          <div className="grid grid-cols-3 gap-1.5 py-2.5 px-3 rounded-2xl bg-slate-50 border border-slate-100 text-center mb-4">
-            {/* Mileage */}
-            <div className="flex flex-col items-center justify-center border-r border-slate-200/70 pr-1">
-              <span className="text-[10px] font-medium text-slate-400 uppercase tracking-wider flex items-center gap-1">
-                <Gauge className="w-3 h-3 text-slate-500" /> KM
-              </span>
-              <span className="font-heading font-bold text-xs sm:text-[13px] text-slate-800 truncate max-w-full">
-                {kms}
-              </span>
+          {/* Core Specs Grid: 4 Clean Chips */}
+          <div className="grid grid-cols-2 gap-2 mb-4 font-body text-xs text-slate-600">
+            <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-100/90 px-2.5 py-1.5 rounded-xl">
+              <Fuel className="w-3.5 h-3.5 text-primary shrink-0" />
+              <span className="font-semibold truncate">{fuel}</span>
             </div>
-
-            {/* Fuel */}
-            <div className="flex flex-col items-center justify-center border-r border-slate-200/70 px-1">
-              <span className="text-[10px] font-medium text-slate-400 uppercase tracking-wider flex items-center gap-1">
-                <Fuel className="w-3 h-3 text-slate-500" /> Fuel
-              </span>
-              <span className="font-heading font-bold text-xs sm:text-[13px] text-slate-800 truncate max-w-full">
-                {fuel}
-              </span>
+            <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-100/90 px-2.5 py-1.5 rounded-xl">
+              <Settings2 className="w-3.5 h-3.5 text-primary shrink-0" />
+              <span className="font-semibold truncate">{transmission}</span>
             </div>
-
-            {/* Transmission */}
-            <div className="flex flex-col items-center justify-center pl-1">
-              <span className="text-[10px] font-medium text-slate-400 uppercase tracking-wider flex items-center gap-1">
-                <Settings2 className="w-3 h-3 text-slate-500" /> Gear
-              </span>
-              <span className="font-heading font-bold text-xs sm:text-[13px] text-slate-800 truncate max-w-full">
-                {transmission}
-              </span>
+            <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-100/90 px-2.5 py-1.5 rounded-xl overflow-hidden">
+              <Gauge className="w-3.5 h-3.5 text-primary shrink-0" />
+              <span className="font-semibold truncate">{kms}</span>
             </div>
-          </div>
-
-          {/* Trust Rating / Inspection Guarantee */}
-          <div className="flex items-center justify-between text-[11px] text-slate-500 mb-4 px-1">
-            <span className="inline-flex items-center gap-1 font-medium">
-              <Star className="w-3 h-3 text-amber-500 fill-amber-500" />
-              <strong className="text-slate-700">4.8</strong> (Sadguru Verified)
-            </span>
-            <span className="inline-flex items-center gap-1 text-emerald-600 font-semibold text-[10px]">
-              <CheckCircle2 className="w-3 h-3" />
-              120+ Points
-            </span>
+            <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-100/90 px-2.5 py-1.5 rounded-xl">
+              <User className="w-3.5 h-3.5 text-primary shrink-0" />
+              <span className="font-semibold truncate">{owner || '1st Owner'}</span>
+            </div>
           </div>
         </div>
 
         {/* ── Action Buttons ── */}
-        <div className="flex items-center gap-2 pt-3 border-t border-slate-100">
+        <div className="flex items-center gap-2 pt-3 border-t border-slate-100 mt-auto">
           <Link
             to={`/car-details/${id}`}
             onClick={(e) => e.stopPropagation()}
-            className="flex-1 inline-flex items-center justify-center gap-1.5 py-2.5 rounded-xl border border-slate-200 bg-white text-slate-800 font-heading font-bold text-xs hover:border-slate-900 hover:bg-slate-900 hover:text-white transition-all duration-200 shadow-xs"
+            className="flex-1 inline-flex items-center justify-center gap-1.5 py-2.5 rounded-xl border border-slate-200 bg-white text-slate-800 font-heading font-bold text-xs hover:border-slate-900 hover:bg-slate-900 hover:text-white transition-all duration-200 shadow-2xs"
           >
             <Eye className="w-3.5 h-3.5" />
             <span>ગાડી જુઓ · View</span>
@@ -267,7 +227,7 @@ export default function CarCard({
             target="_blank"
             rel="noopener noreferrer"
             onClick={(e) => e.stopPropagation()}
-            className="flex-1 inline-flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-[#25D366] text-white font-heading font-bold text-xs hover:bg-[#20bd5a] transition-all duration-200 shadow-md shadow-emerald-500/20 active:scale-95"
+            className="flex-1 inline-flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-[#25D366] text-white font-heading font-bold text-xs hover:bg-[#20bd5a] transition-all duration-200 shadow-md shadow-emerald-500/15 active:scale-95 uppercase"
           >
             <MessageCircle className="w-3.5 h-3.5 fill-current" />
             <span>WHATSAPP</span>
@@ -276,4 +236,5 @@ export default function CarCard({
       </div>
     </div>
   );
-}
+}
+
