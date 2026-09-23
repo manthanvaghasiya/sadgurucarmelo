@@ -103,15 +103,6 @@ const FALLBACK_SHOWCASE = [
   }
 ];
 
-const ARC_CATEGORIES = [
-  { id: 'all', label: 'બધી કાર · All Cars', icon: '🚙' },
-  { id: 'coming_soon', label: 'કમિંગ સૂન · Coming Soon', icon: '✨' },
-  { id: 'suv', label: 'SUV · સ્પોર્ટ્સ યુટિલિટી', icon: '🚘' },
-  { id: 'sedan', label: 'Sedan · સેડાન', icon: '🚗' },
-  { id: 'hatchback', label: 'Hatchback · ફેમિલી કાર', icon: '🛞' },
-  { id: 'automatic', label: 'Automatic · ઓટોમેટિક', icon: '⚡' }
-];
-
 // Dynamic Brand Logo SVG Renderer
 const renderBrandLogo = (make = '') => {
   const m = (make || '').toLowerCase();
@@ -183,7 +174,6 @@ export default function HeroSection() {
   const navigate = useNavigate();
   const { cars } = useCars();
 
-  const [selectedCategory, setSelectedCategory] = useState('all');
   const [currentCarIndex, setCurrentCarIndex] = useState(0);
 
   // Test Drive / Inquiry Modal
@@ -207,42 +197,8 @@ export default function HeroSection() {
       }
     }
 
-    if (selectedCategory === 'coming_soon') {
-      const upcoming = list.filter(c =>
-        c.status?.toLowerCase().includes('soon') ||
-        c.isComingSoon ||
-        /2024|2025/i.test(String(c.year || ''))
-      );
-      return upcoming.length > 0 ? upcoming : [FALLBACK_SHOWCASE[0]];
-    }
-    if (selectedCategory === 'suv') {
-      const suvs = list.filter(c =>
-        c.bodyType?.toLowerCase().includes('suv') ||
-        /creta|brezza|seltos|scorpio|thar|fortuner|harrier|venue|nexon|xuv|safari|innova|ecosport/i.test(`${c.make} ${c.model}`)
-      );
-      return suvs.length > 0 ? suvs : list;
-    }
-    if (selectedCategory === 'sedan') {
-      const sedans = list.filter(c =>
-        c.bodyType?.toLowerCase().includes('sedan') ||
-        /city|verna|ciaz|dzire|amaze|aura|slavia|virtus/i.test(`${c.make} ${c.model}`)
-      );
-      return sedans.length > 0 ? sedans : list;
-    }
-    if (selectedCategory === 'hatchback') {
-      const hatch = list.filter(c =>
-        c.bodyType?.toLowerCase().includes('hatchback') ||
-        /swift|baleno|i20|wagon|tiago|alto|i10|kwid/i.test(`${c.make} ${c.model}`)
-      );
-      return hatch.length > 0 ? hatch : list;
-    }
-    if (selectedCategory === 'automatic') {
-      const autos = list.filter(c => c.transmission?.toLowerCase() === 'automatic');
-      return autos.length > 0 ? autos : list;
-    }
-
-    return list.slice(0, 6);
-  }, [cars, selectedCategory]);
+    return list.slice(0, 8);
+  }, [cars]);
 
   // Ensure currentCarIndex is in bounds
   useEffect(() => {
@@ -439,28 +395,28 @@ export default function HeroSection() {
             <svg className="w-full h-full" viewBox="0 0 1180 480" fill="none" preserveAspectRatio="none">
               <defs>
                 <linearGradient id="wireGradLeft" x1="0%" y1="0%" x2="100%" y2="0%">
-                  <stop offset="0%" stopColor="#cbd5e1" stopOpacity="0.25" />
-                  <stop offset="60%" stopColor="#F59423" stopOpacity="0.75" />
-                  <stop offset="100%" stopColor="#F59423" stopOpacity="0.2" />
+                  <stop offset="0%" stopColor="#cbd5e1" stopOpacity="0.2" />
+                  <stop offset="60%" stopColor="#F59423" stopOpacity="0.8" />
+                  <stop offset="100%" stopColor="#F59423" stopOpacity="0.3" />
                 </linearGradient>
                 <linearGradient id="wireGradRight" x1="0%" y1="0%" x2="100%" y2="0%">
-                  <stop offset="0%" stopColor="#F59423" stopOpacity="0.2" />
-                  <stop offset="40%" stopColor="#F59423" stopOpacity="0.75" />
-                  <stop offset="100%" stopColor="#cbd5e1" stopOpacity="0.25" />
+                  <stop offset="0%" stopColor="#F59423" stopOpacity="0.3" />
+                  <stop offset="40%" stopColor="#F59423" stopOpacity="0.8" />
+                  <stop offset="100%" stopColor="#cbd5e1" stopOpacity="0.2" />
                 </linearGradient>
               </defs>
 
-              {/* Left Connector Lines from Spec Cards to Center Arc */}
-              <path d="M 280 65 C 320 65, 335 120, 360 140" stroke="url(#wireGradLeft)" strokeWidth="1.5" className="animate-wire-dash" />
-              <path d="M 280 150 C 315 150, 330 180, 350 200" stroke="url(#wireGradLeft)" strokeWidth="1.5" className="animate-wire-dash" />
-              <path d="M 280 235 C 315 235, 330 240, 350 250" stroke="url(#wireGradLeft)" strokeWidth="1.5" className="animate-wire-dash" />
-              <path d="M 280 320 C 320 320, 335 290, 360 280" stroke="url(#wireGradLeft)" strokeWidth="1.5" className="animate-wire-dash" />
+              {/* Left Connector Lines from Spec Cards to Square Showcase */}
+              <path d="M 285 75 L 302 75" stroke="url(#wireGradLeft)" strokeWidth="1.8" className="animate-wire-dash" />
+              <path d="M 285 165 L 302 165" stroke="url(#wireGradLeft)" strokeWidth="1.8" className="animate-wire-dash" />
+              <path d="M 285 255 L 302 255" stroke="url(#wireGradLeft)" strokeWidth="1.8" className="animate-wire-dash" />
+              <path d="M 285 345 L 302 345" stroke="url(#wireGradLeft)" strokeWidth="1.8" className="animate-wire-dash" />
 
-              {/* Right Connector Lines from Center Arc to Performance Nodes */}
-              <path d="M 820 140 C 845 120, 860 65, 900 65" stroke="url(#wireGradRight)" strokeWidth="1.5" className="animate-wire-dash" />
-              <path d="M 830 200 C 850 180, 865 150, 900 150" stroke="url(#wireGradRight)" strokeWidth="1.5" className="animate-wire-dash" />
-              <path d="M 830 250 C 850 240, 865 235, 900 235" stroke="url(#wireGradRight)" strokeWidth="1.5" className="animate-wire-dash" />
-              <path d="M 820 280 C 845 290, 860 320, 900 320" stroke="url(#wireGradRight)" strokeWidth="1.5" className="animate-wire-dash" />
+              {/* Right Connector Lines from Square Showcase to Performance Nodes */}
+              <path d="M 878 75 L 895 75" stroke="url(#wireGradRight)" strokeWidth="1.8" className="animate-wire-dash" />
+              <path d="M 878 165 L 895 165" stroke="url(#wireGradRight)" strokeWidth="1.8" className="animate-wire-dash" />
+              <path d="M 878 255 L 895 255" stroke="url(#wireGradRight)" strokeWidth="1.8" className="animate-wire-dash" />
+              <path d="M 878 345 L 895 345" stroke="url(#wireGradRight)" strokeWidth="1.8" className="animate-wire-dash" />
             </svg>
           </div>
 
@@ -561,105 +517,84 @@ export default function HeroSection() {
 
 
             {/* ═══════════════════════════════════════════════════════════════════
-                CENTER COLUMN: THE RADIAL ARC STAGE SHOWCASE WITH FOCUSED CAR HUD
+                CENTER COLUMN: SQUARE SHOWROOM SHOWCASE WITH ENLARGED FRAMED CAR & HUD
                 ═══════════════════════════════════════════════════════════════════ */}
             <div className="col-span-1 xl:col-span-6 flex flex-col items-center">
-              <div className="relative w-full max-w-[560px] rounded-t-[280px] pt-4 pb-3 px-3 sm:px-4 bg-gradient-to-b from-brand-orange/[0.06] via-amber-200/[0.02] to-white/95 border-t-2 border-l-2 border-r-2 border-amber-400/40 shadow-[0_15px_40px_-10px_rgba(245,148,35,0.14)] backdrop-blur-sm">
+              {/* Square / Rectangular Showroom Shape with Amber/Yellow Neon Border */}
+              <div className="relative w-full max-w-[580px] rounded-3xl p-3.5 sm:p-5 bg-gradient-to-b from-amber-500/[0.06] via-orange-500/[0.02] to-white/98 border-2 border-brand-orange/45 shadow-[0_0_35px_rgba(245,148,35,0.14),0_15px_40px_-10px_rgba(15,23,42,0.12)] backdrop-blur-md">
 
-                {/* Subtle top laser glow */}
-                <div className="absolute top-0 inset-x-14 h-[2px] bg-gradient-to-r from-transparent via-brand-orange to-transparent animate-pulse" />
+                {/* Subtle top laser glow line */}
+                <div className="absolute top-0 inset-x-12 h-[2.5px] bg-gradient-to-r from-transparent via-amber-400 to-transparent animate-pulse rounded-full" />
 
-                {/* Coming Soon & Live Stock Flag Badge */}
-                <div className="flex items-center justify-center mb-2 z-20 relative">
-                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-gradient-to-r from-amber-500/15 via-orange-500/20 to-amber-500/15 border border-brand-orange/30 text-slate-900 text-[10px] sm:text-xs font-heading font-black uppercase tracking-wider shadow-2xs">
-                    <span className="relative flex h-2 w-2">
+                {/* ONLY SHOW THIS BADGE (As Explicitly Requested) */}
+                <div className="flex items-center justify-center mb-3.5 z-20 relative">
+                  <span className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-gradient-to-r from-amber-500/15 via-orange-500/20 to-amber-500/15 border border-brand-orange/40 text-slate-900 text-xs sm:text-sm font-heading font-black uppercase tracking-wider shadow-xs">
+                    <span className="relative flex h-2.5 w-2.5">
                       <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-orange opacity-75" />
-                      <span className="relative inline-flex rounded-full h-2 w-2 bg-brand-orange" />
+                      <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-brand-orange" />
                     </span>
                     ✨ નવું સ્ટોક આગમન / COMING SOON SHOWCASE
                   </span>
                 </div>
 
-                {/* Arc Top Segment Ribbon */}
-                <div className="flex items-center justify-center gap-1.5 sm:gap-2 mb-2 z-20 relative text-[10px] font-heading font-black uppercase tracking-wider text-slate-600">
-                  <span className="flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-white/85 border border-slate-200/80 shadow-2xs">
-                    <ShieldCheck className="w-3 h-3 text-emerald-600" /> વેરિફાઇડ કાર
-                  </span>
-                  <span className="flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-amber-50 border border-amber-200/80 text-amber-800 shadow-2xs">
-                    ⭐ ૪.૮★ વિશ્વાસપાત્ર ડીલર
-                  </span>
-                  <span className="flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-white/85 border border-slate-200/80 shadow-2xs">
-                    🚗 ૧૫૦+ કાર સ્ટોક
-                  </span>
-                </div>
+                {/* HIGH-TECH LUXURY AUTOMOTIVE STUDIO CAR FRAME */}
+                <div className="relative w-full rounded-2xl border-2 border-amber-400/50 bg-gradient-to-b from-slate-900/[0.03] via-amber-500/[0.015] to-slate-900/[0.04] p-3 sm:p-4 mb-3 overflow-hidden shadow-inner group">
+                  {/* 4 Luxury Corner Frame Accent Brackets */}
+                  <div className="absolute top-2.5 left-2.5 w-4 h-4 border-t-2 border-l-2 border-brand-orange rounded-tl-xs pointer-events-none" />
+                  <div className="absolute top-2.5 right-2.5 w-4 h-4 border-t-2 border-r-2 border-brand-orange rounded-tr-xs pointer-events-none" />
+                  <div className="absolute bottom-2.5 left-2.5 w-4 h-4 border-b-2 border-l-2 border-brand-orange rounded-bl-xs pointer-events-none" />
+                  <div className="absolute bottom-2.5 right-2.5 w-4 h-4 border-b-2 border-r-2 border-brand-orange rounded-br-xs pointer-events-none" />
 
-                {/* Category Pills (Including Coming Soon) */}
-                <div className="flex items-center justify-center gap-1 sm:gap-1.5 flex-wrap mb-1 z-20 relative">
-                  {ARC_CATEGORIES.map((cat) => {
-                    const isActive = selectedCategory === cat.id;
-                    return (
-                      <button
-                        key={cat.id}
-                        onClick={() => {
-                          setSelectedCategory(cat.id);
-                          setCurrentCarIndex(0);
-                        }}
-                        className={`px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full font-heading text-[10px] sm:text-[11px] font-bold transition-all cursor-pointer ${
-                          isActive
-                            ? 'bg-brand-orange text-white shadow-xs scale-105'
-                            : 'bg-white/90 hover:bg-white text-slate-700 border border-gray-200 shadow-2xs'
-                        }`}
-                      >
-                        <span>{cat.icon} {cat.label.split('·')[0]}</span>
-                      </button>
-                    );
-                  })}
-                </div>
+                  {/* Corner Inspection Tag */}
+                  <div className="absolute top-2.5 right-3 px-2 py-0.5 rounded-md bg-white/90 backdrop-blur-sm border border-amber-300/60 shadow-2xs text-[9px] font-heading font-black tracking-wider text-brand-orange uppercase pointer-events-none">
+                    ⭐ 100% INSPECTED
+                  </div>
 
-                {/* Car Showcase Stage */}
-                <div className="relative w-full h-[165px] sm:h-[200px] flex items-center justify-center my-0.5">
-                  <AnimatePresence mode="wait">
-                    {activeCar && (
-                      <motion.div
-                        key={activeCar._id || currentCarIndex}
-                        initial={{ opacity: 0, scale: 0.9, y: 8, filter: 'blur(5px)' }}
-                        animate={{ opacity: 1, scale: 1, y: 0, filter: 'blur(0px)' }}
-                        exit={{ opacity: 0, scale: 0.94, y: -8, filter: 'blur(5px)' }}
-                        transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-                        className="relative w-full h-full flex flex-col items-center justify-center cursor-pointer"
-                        onClick={() => activeCar._id && navigate(`/car-details/${activeCar._id}`)}
-                      >
-                        {/* Floor Spotlight Reflection */}
-                        <div className="absolute bottom-1 w-3/4 h-5 bg-black/15 rounded-full blur-lg pointer-events-none" />
+                  {/* Significantly Increased Stage Height for Large Car Display */}
+                  <div className="relative w-full h-[235px] sm:h-[285px] md:h-[315px] flex items-center justify-center">
+                    <AnimatePresence mode="wait">
+                      {activeCar && (
+                        <motion.div
+                          key={activeCar._id || currentCarIndex}
+                          initial={{ opacity: 0, scale: 0.92, y: 8, filter: 'blur(5px)' }}
+                          animate={{ opacity: 1, scale: 1, y: 0, filter: 'blur(0px)' }}
+                          exit={{ opacity: 0, scale: 0.94, y: -8, filter: 'blur(5px)' }}
+                          transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+                          className="relative w-full h-full flex flex-col items-center justify-center cursor-pointer"
+                          onClick={() => activeCar._id && navigate(`/car-details/${activeCar._id}`)}
+                        >
+                          {/* Floor Spotlight Shadow */}
+                          <div className="absolute bottom-2 w-4/5 h-6 bg-black/20 rounded-full blur-xl pointer-events-none" />
 
-                        {/* Car Image with Floating Animation */}
-                        <motion.img
-                          animate={{ y: [0, -4, 0] }}
-                          transition={{ repeat: Infinity, duration: 4.5, ease: 'easeInOut' }}
-                          src={getOptimizedUrl(activeCar.image, 800)}
-                          alt={`${activeCar.make} ${activeCar.model}`}
-                          className="w-full max-h-[150px] sm:max-h-[185px] object-contain drop-shadow-[0_12px_22px_rgba(15,23,42,0.18)] select-none hover:scale-105 transition-transform duration-500"
-                        />
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
+                          {/* Large Car Image with Gentle Float */}
+                          <motion.img
+                            animate={{ y: [0, -6, 0] }}
+                            transition={{ repeat: Infinity, duration: 4.5, ease: 'easeInOut' }}
+                            src={getOptimizedUrl(activeCar.image, 1000)}
+                            alt={`${activeCar.make} ${activeCar.model}`}
+                            className="w-full max-h-[215px] sm:max-h-[265px] md:max-h-[295px] object-contain drop-shadow-[0_16px_28px_rgba(15,23,42,0.22)] select-none hover:scale-105 transition-transform duration-500"
+                          />
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
 
-                  {/* Navigation Controls */}
-                  <button
-                    onClick={(e) => { e.stopPropagation(); prevCar(); }}
-                    className="absolute left-1 top-1/2 -translate-y-1/2 w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-white/90 hover:bg-white text-slate-700 shadow border border-gray-100 flex items-center justify-center transition-all active:scale-95 z-20 cursor-pointer"
-                    title="Previous Car"
-                  >
-                    <ChevronLeft className="w-4 h-4" />
-                  </button>
+                    {/* Navigation Controls */}
+                    <button
+                      onClick={(e) => { e.stopPropagation(); prevCar(); }}
+                      className="absolute left-1.5 top-1/2 -translate-y-1/2 w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-white/95 hover:bg-white text-slate-800 hover:text-brand-orange shadow-md border border-amber-200/90 flex items-center justify-center transition-all hover:scale-110 active:scale-95 z-20 cursor-pointer"
+                      title="Previous Car"
+                    >
+                      <ChevronLeft className="w-5 h-5" />
+                    </button>
 
-                  <button
-                    onClick={(e) => { e.stopPropagation(); nextCar(); }}
-                    className="absolute right-1 top-1/2 -translate-y-1/2 w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-white/90 hover:bg-white text-slate-700 shadow border border-gray-100 flex items-center justify-center transition-all active:scale-95 z-20 cursor-pointer"
-                    title="Next Car"
-                  >
-                    <ChevronRight className="w-4 h-4" />
-                  </button>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); nextCar(); }}
+                      className="absolute right-1.5 top-1/2 -translate-y-1/2 w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-white/95 hover:bg-white text-slate-800 hover:text-brand-orange shadow-md border border-amber-200/90 flex items-center justify-center transition-all hover:scale-110 active:scale-95 z-20 cursor-pointer"
+                      title="Next Car"
+                    >
+                      <ChevronRight className="w-5 h-5" />
+                    </button>
+                  </div>
                 </div>
 
                 {/* ── CLEAN CENTER CAR HUD CARD (Strictly Focused As User Requested) ── */}
