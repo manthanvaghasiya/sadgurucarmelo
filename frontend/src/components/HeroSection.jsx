@@ -31,6 +31,45 @@ const FALLBACK_SHOWCASE = [
     isKmGenuine: true,
     image: 'https://images.unsplash.com/photo-1583121274602-3e2820c69888?auto=format&fit=crop&w=1000&q=80',
     category: 'suv',
+    status: 'Coming Soon',
+    isComingSoon: true
+  },
+  {
+    _id: 'showcase-tata-safari',
+    make: 'Tata',
+    model: 'SAFARI',
+    variant: 'XZA+ Dark Edition',
+    year: 2025,
+    price: 1650000,
+    fuelType: 'Diesel',
+    transmission: 'Automatic',
+    kms: 19000,
+    owner: '1st Owner',
+    color: 'Oberon Black',
+    bodyType: 'SUV',
+    isKmGenuine: true,
+    image: 'https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&w=1000&q=80',
+    category: 'suv',
+    status: 'Coming Soon',
+    isComingSoon: true
+  },
+  {
+    _id: 'showcase-hyundai-creta',
+    make: 'Hyundai',
+    model: 'CRETA SX (O)',
+    variant: 'Turbo DCT',
+    year: 2025,
+    price: 1480000,
+    fuelType: 'Petrol',
+    transmission: 'Automatic',
+    kms: 16000,
+    owner: '1st Owner',
+    color: 'Polar White',
+    bodyType: 'SUV',
+    isKmGenuine: true,
+    image: 'https://images.unsplash.com/photo-1549399542-7e3f8b79c341?auto=format&fit=crop&w=1000&q=80',
+    category: 'suv',
+    status: 'Coming Soon',
     isComingSoon: true
   },
   {
@@ -38,68 +77,38 @@ const FALLBACK_SHOWCASE = [
     make: 'Ford',
     model: 'ECOSPORT',
     variant: 'Titanium S',
-    year: 2020,
+    year: 2024,
     price: 750000,
     fuelType: 'Diesel',
     transmission: 'Manual',
-    kms: 68000,
+    kms: 48000,
     owner: '1st Owner',
     color: 'Panther Black',
     bodyType: 'SUV',
     isKmGenuine: true,
     image: 'https://images.unsplash.com/photo-1549399542-7e3f8b79c341?auto=format&fit=crop&w=1000&q=80',
-    category: 'suv'
+    category: 'suv',
+    status: 'Coming Soon',
+    isComingSoon: true
   },
   {
-    _id: 'showcase-honda-city',
-    make: 'Honda',
-    model: 'CITY ZX',
-    variant: 'Sunroof Edition',
-    year: 2022,
-    price: 1120000,
-    fuelType: 'Petrol',
+    _id: 'showcase-maruti-grandvitara',
+    make: 'Maruti Suzuki',
+    model: 'GRAND VITARA',
+    variant: 'Alpha+ Strong Hybrid',
+    year: 2025,
+    price: 1580000,
+    fuelType: 'Hybrid',
     transmission: 'Automatic',
-    kms: 31000,
+    kms: 11000,
     owner: '1st Owner',
-    color: 'SILVER',
-    bodyType: 'Sedan',
-    isKmGenuine: true,
-    image: 'https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&w=1000&q=80',
-    category: 'sedan'
-  },
-  {
-    _id: 'showcase-hyundai-creta',
-    make: 'Hyundai',
-    model: 'CRETA SX (O)',
-    variant: 'Turbo DCT',
-    year: 2023,
-    price: 1480000,
-    fuelType: 'Petrol',
-    transmission: 'Automatic',
-    kms: 24000,
-    owner: '1st Owner',
-    color: 'Polar White',
+    color: 'Opulent Red',
     bodyType: 'SUV',
     isKmGenuine: true,
-    image: 'https://images.unsplash.com/photo-1549399542-7e3f8b79c341?auto=format&fit=crop&w=1000&q=80',
-    category: 'suv'
-  },
-  {
-    _id: 'showcase-maruti-swift',
-    make: 'Maruti Suzuki',
-    model: 'SWIFT ZXi+',
-    variant: 'Dual Tone',
-    year: 2023,
-    price: 780000,
-    fuelType: 'Petrol',
-    transmission: 'Manual',
-    kms: 18000,
-    owner: '1st Owner',
-    color: 'Solid Red',
-    bodyType: 'Hatchback',
-    isKmGenuine: true,
     image: 'https://images.unsplash.com/photo-1617814076367-b759c7d7e738?auto=format&fit=crop&w=1000&q=80',
-    category: 'hatchback'
+    category: 'suv',
+    status: 'Coming Soon',
+    isComingSoon: true
   }
 ];
 
@@ -181,23 +190,26 @@ export default function HeroSection() {
   const [formData, setFormData] = useState({ name: '', phone: '' });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Filter cars from inventory or fall back with priority for featured models
+  // Filter cars to ONLY display Coming Soon vehicles in this showcase
   const displayCars = useMemo(() => {
-    let list = cars && cars.length > 0
-      ? cars.filter(c => c.status === 'Available' && c.image)
-      : [];
+    // 1. Extract only Coming Soon inventory vehicles
+    const comingSoonList = (cars || []).filter(c => {
+      if (!c.image) return false;
+      const status = (c.status || '').trim().toLowerCase();
+      return (
+        status === 'coming soon' ||
+        status.includes('soon') ||
+        status.includes('upcoming') ||
+        c.isComingSoon === true
+      );
+    });
 
-    if (list.length === 0) {
-      list = FALLBACK_SHOWCASE;
-    } else {
-      // Ensure our flagship Kia Seltos and Ford EcoSport are easily discoverable
-      const hasKia = list.some(c => /seltos/i.test(`${c.make} ${c.model}`));
-      if (!hasKia) {
-        list = [FALLBACK_SHOWCASE[0], ...list];
-      }
+    if (comingSoonList.length > 0) {
+      return comingSoonList;
     }
 
-    return list.slice(0, 8);
+    // 2. If no Coming Soon cars exist in database yet, fallback to curated Coming Soon models
+    return FALLBACK_SHOWCASE;
   }, [cars]);
 
   // Ensure currentCarIndex is in bounds
@@ -246,14 +258,14 @@ export default function HeroSection() {
     if (!formData.name || !formData.phone) return toast.error('Please enter name and phone');
     try {
       setIsSubmitting(true);
-      const message = `Test Drive Inquiry for: ${activeCar?.make} ${activeCar?.model} (${activeCar?.year || ''})`;
+      const message = `Coming Soon Car Inquiry for: ${activeCar?.make} ${activeCar?.model} (${activeCar?.year || ''})`;
       await axiosInstance.post('/messages', {
         name: formData.name,
         phone: formData.phone,
         message,
         type: 'Test Drive'
       });
-      toast.success('ટેસ્ટ ડ્રાઈવ બુકિંગ વિગત મળી ગઈ છે! અમે ટૂંક સમયમાં સંપર્ક કરીશું.');
+      toast.success('ટેસ્ટ ડ્રાઈવ / ઇન્ક્વાયરી બુકિંગ વિગત મળી ગઈ છે! અમે ટૂંક સમયમાં સંપર્ક કરીશું.');
       setShowModal(false);
       setFormData({ name: '', phone: '' });
     } catch {
@@ -264,11 +276,10 @@ export default function HeroSection() {
   };
 
   const whatsappUrl = activeCar
-    ? getCarWhatsAppLink({
-      title: `${activeCar.make} ${activeCar.model} (${activeCar.year})`,
-      price: formatPrice(activeCar.price)
-    })
-    : 'https://wa.me/919913634447?text=Hello%20Sadguru%20Car%20Surat%2C%20I%20am%20interested%20in%20your%20verified%20cars.';
+    ? `https://wa.me/919913634447?text=${encodeURIComponent(
+      `Hello Sadguru Car Surat, I am interested in the upcoming/coming soon ${activeCar.make} ${activeCar.model} (${activeCar.year}) priced at ${formatPrice(activeCar.price)}. Please share more details and arrival update!`
+    )}`
+    : 'https://wa.me/919913634447?text=Hello%20Sadguru%20Car%20Surat%2C%20I%20am%20interested%20in%20your%20upcoming%20verified%20cars.';
 
   return (
     <section className="relative w-full bg-gradient-to-b from-[#f8fafc] via-[#ffffff] to-[#f8fafc] overflow-hidden pt-6 pb-12 lg:pt-8 lg:pb-16">
@@ -545,9 +556,10 @@ export default function HeroSection() {
                   <div className="absolute bottom-2.5 left-2.5 w-4 h-4 border-b-2 border-l-2 border-brand-orange rounded-bl-xs pointer-events-none" />
                   <div className="absolute bottom-2.5 right-2.5 w-4 h-4 border-b-2 border-r-2 border-brand-orange rounded-br-xs pointer-events-none" />
 
-                  {/* Corner Inspection Tag */}
-                  <div className="absolute top-2.5 right-3 px-2 py-0.5 rounded-md bg-white/90 backdrop-blur-sm border border-amber-300/60 shadow-2xs text-[9px] font-heading font-black tracking-wider text-brand-orange uppercase pointer-events-none">
-                    ⭐ 100% INSPECTED
+                  {/* Corner Coming Soon Tag */}
+                  <div className="absolute top-2.5 right-3 px-2 py-0.5 rounded-md bg-amber-50/95 backdrop-blur-sm border border-amber-300/70 shadow-2xs text-[9px] font-heading font-black tracking-wider text-amber-800 uppercase pointer-events-none flex items-center gap-1">
+                    <Sparkles className="w-2.5 h-2.5 text-brand-orange" />
+                    <span>COMING SOON</span>
                   </div>
 
                   {/* Significantly Increased Stage Height for Large Car Display */}
@@ -604,6 +616,13 @@ export default function HeroSection() {
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pb-3 border-b border-gray-100">
                       <div>
                         <div className="flex items-center gap-1.5 mb-1">
+                          <span className="px-2 py-0.5 rounded-md bg-amber-50 border border-amber-200 text-amber-800 text-[10px] font-black uppercase tracking-wider flex items-center gap-1">
+                            <span className="relative flex h-1.5 w-1.5">
+                              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-orange opacity-75" />
+                              <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-brand-orange" />
+                            </span>
+                            COMING SOON
+                          </span>
                           <span className="px-2 py-0.5 rounded-md bg-emerald-50 border border-emerald-200 text-emerald-700 text-[10px] font-black uppercase tracking-wider">
                             VERIFIED CAR
                           </span>
