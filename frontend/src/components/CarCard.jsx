@@ -179,41 +179,52 @@ export default function CarCard({
             {title}
           </h3>
 
-          {/* Pricing Row: Price + Est. EMI Badge */}
-          <div className="flex flex-wrap items-baseline justify-between gap-2 mb-3.5">
-            <span className="font-heading font-extrabold text-xl sm:text-2xl text-accent tracking-tight">
+          {/* Pricing Row: Price + Est. EMI Badge (Single non-wrapping row) */}
+          <div className="flex items-center justify-between gap-1.5 mb-3 min-h-[32px]">
+            <span className="font-heading font-extrabold text-xl sm:text-2xl text-accent tracking-tight truncate">
               {price}
             </span>
             {monthlyEmi && (
-              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-orange-50 text-brand-orange border border-orange-200/70 tracking-tight">
+              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-orange-50 text-brand-orange border border-orange-200/70 tracking-tight shrink-0 whitespace-nowrap">
                 Est. {monthlyEmi}/mo*
               </span>
             )}
           </div>
 
-          {/* Core Specs Grid: 4 Clean Chips */}
-          <div className="grid grid-cols-2 gap-2 mb-4 font-body text-xs text-slate-600">
-            <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-100/90 px-2.5 py-1.5 rounded-xl">
+          {/* Core Specs Grid: 4 Clean Balanced Chips */}
+          <div className="grid grid-cols-2 gap-2 mb-2.5 font-body text-xs text-slate-700">
+            <div className="flex items-center gap-2 bg-slate-50 border border-slate-100/90 px-2.5 py-2 rounded-xl">
               <Fuel className="w-3.5 h-3.5 text-primary shrink-0" />
               <span className="font-semibold truncate">{fuel}</span>
             </div>
-            <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-100/90 px-2.5 py-1.5 rounded-xl">
+            <div className="flex items-center gap-2 bg-slate-50 border border-slate-100/90 px-2.5 py-2 rounded-xl">
               <Settings2 className="w-3.5 h-3.5 text-primary shrink-0" />
               <span className="font-semibold truncate">{transmission}</span>
             </div>
-            <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-100/90 px-2.5 py-1.5 rounded-xl overflow-hidden">
+            <div className="flex items-center gap-2 bg-slate-50 border border-slate-100/90 px-2.5 py-2 rounded-xl overflow-hidden">
               <Gauge className="w-3.5 h-3.5 text-primary shrink-0" />
               <span className="font-semibold truncate">{kms}</span>
             </div>
-            <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-100/90 px-2.5 py-1.5 rounded-xl">
+            <div className="flex items-center gap-2 bg-slate-50 border border-slate-100/90 px-2.5 py-2 rounded-xl">
               <User className="w-3.5 h-3.5 text-primary shrink-0" />
               <span className="font-semibold truncate">{owner || '1st Owner'}</span>
             </div>
           </div>
+
+          {/* Dealership USPs / Trust Strip — Eliminates empty gap with high-converting proof points */}
+          <div className="flex items-center justify-between py-1.5 px-3 rounded-xl bg-slate-50 border border-slate-100 text-[11px] font-medium text-slate-600 mb-3">
+            <span className="flex items-center gap-1 text-emerald-700 font-semibold">
+              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 stroke-[2.5]" />
+              ૧૦૦% ફ્રી RTO ટ્રાન્સફર
+            </span>
+            <span className="text-slate-600 font-semibold">
+              ૦ ડાઉન પેમેન્ટ
+            </span>
+          </div>
         </div>
 
         {/* ── Action Buttons ── */}
-        <div className="flex items-center gap-2 pt-3 border-t border-slate-100 mt-auto">
+        <div className="flex items-center gap-2 pt-3 border-t border-slate-100">
           <Link
             to={`/car-details/${id}`}
             onClick={(e) => e.stopPropagation()}
@@ -227,7 +238,7 @@ export default function CarCard({
             target="_blank"
             rel="noopener noreferrer"
             onClick={(e) => e.stopPropagation()}
-            className="flex-1 inline-flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-[#25D366] text-white font-heading font-bold text-xs hover:bg-[#20bd5a] transition-all duration-200 shadow-md shadow-emerald-500/15 active:scale-95 uppercase"
+            className="flex-1 inline-flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-[#25D366] text-white font-heading font-bold text-xs hover:bg-[#20bd5a] transition-all duration-200 shadow-md shadow-emerald-500/15 active:scale-95 uppercase tracking-wider"
           >
             <MessageCircle className="w-3.5 h-3.5 fill-current" />
             <span>WHATSAPP</span>
