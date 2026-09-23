@@ -22,10 +22,9 @@ import PromoBanners from '../components/PromoBanners';
 const CATEGORIES = [
   { id: 'all', label: 'બધી કાર · All Cars', icon: '🚙' },
   { id: 'suv', label: 'SUV · સ્પોર્ટ્સ યુટિલિટી', icon: '🚘' },
-  { id: 'sedan', label: 'Sedan · પ્રીમિયમ સેડાન', icon: '🚗' },
+  { id: 'sedan', label: 'Sedan · સેડાન', icon: '🚗' },
   { id: 'hatchback', label: 'Hatchback · ફેમિલી કાર', icon: '🛞' },
-  { id: 'automatic', label: 'Automatic · ઓટોમેટિક', icon: '⚡' },
-  { id: 'budget', label: 'Under ₹5L · ૫ લાખ નીચે', icon: '💰' }
+  { id: 'automatic', label: 'Automatic · ઓટોમેટિક', icon: '⚡' }
 ];
 
 export default function Home() {
@@ -59,8 +58,6 @@ export default function Home() {
         );
       case 'automatic':
         return availableCars.filter(c => c.transmission?.toLowerCase() === 'automatic');
-      case 'budget':
-        return availableCars.filter(c => c.price && c.price <= 500000);
       case 'all':
       default: {
         const featured = availableCars.filter(c => c.isFeaturedOnHome);
@@ -106,13 +103,13 @@ export default function Home() {
             <div className="flex flex-col xl:flex-row xl:items-end justify-between mb-8 gap-6">
               <div className="xl:flex-1 pr-4">
                 <span className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-brand-orange/10 border border-brand-orange/20 text-brand-orange text-xs font-heading font-black tracking-widest uppercase mb-3 shadow-xs">
-                  <Sparkles className="w-3.5 h-3.5" /> પ્રીમિયમ સર્ટિફાઈડ કલેક્શન
+                  <Sparkles className="w-3.5 h-3.5" /> વેરિફાઇડ કાર કલેક્શન · Verified Cars
                 </span>
                 <h2 className="font-heading text-3xl sm:text-4xl md:text-5xl font-black text-primary leading-tight">
                   Explore Our <span className="inventory-heading-gradient text-transparent bg-clip-text bg-gradient-to-r from-brand-orange via-amber-500 to-yellow-500">Verified Cars</span>
                 </h2>
                 <p className="font-body text-slate-500 mt-2 text-sm sm:text-base max-w-xl">
-                  ૧૫૦+ ગુણવત્તાયુક્ત સર્ટિફાઈડ કાર, સંપૂર્ણ સર્વિસ હિસ્ટ્રી અને ૧૨૦+ પોઈન્ટ ટેકનિકલ ઈન્સ્પેક્શન સાથે.
+                  ૧૫૦+ ગુણવત્તાયુક્ત વેરિફાઇડ કાર (Verified Cars), સંપૂર્ણ સર્વિસ હિસ્ટ્રી અને ૧૨૦+ પોઈન્ટ ટેકનિકલ ઈન્સ્પેક્શન સાથે.
                 </p>
               </div>
 
@@ -216,13 +213,13 @@ export default function Home() {
             {/* Heading */}
             <div className="text-center mb-16 max-w-3xl mx-auto">
               <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-brand-orange/10 border border-brand-orange/20 text-brand-orange font-heading font-bold text-xs uppercase tracking-[0.2em] mb-4 shadow-xs">
-                પ્રીમિયમ ડીલરશીપ સેવાઓ · OUR CORE SERVICES
+                વિશ્વાસપાત્ર ડીલર સેવાઓ · TRUSTED DEALERSHIP SERVICES
               </span>
               <h2 className="font-heading text-3xl sm:text-4xl md:text-5xl font-black text-slate-900 mb-6 leading-tight">
                 સુરતમાં <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-orange via-amber-500 to-yellow-500">ખરીદ, વેચાણ અને Exchange</span> માટેનું સંપૂર્ણ Solution
               </h2>
               <p className="font-body text-slate-600 text-base sm:text-lg leading-relaxed">
-                પારદર્શક પ્રક્રિયા અને સુરતના હજારો પરિવારોના વિશ્વાસ સાથે. તમારી દરેક જરૂરિયાત માટે ૧૦૦% સેફ અને સરળ કાર ડીલિંગનો અનુભવ.
+                પારદર્શક પ્રક્રિયા અને સુરતના હજારો પરિવારોના વિશ્વાસ સાથે. તમારી દરેક જરૂરિયાત માટે ૧૦૦% સેફ અને સરળ કાર ડીલિંગનો અનુભવ (Trusted Dealer).
               </p>
             </div>
 
@@ -236,7 +233,7 @@ export default function Home() {
                 </div>
                 <h3 className="font-heading text-2xl font-black text-slate-900 mb-3">સર્ટિફાઈડ કાર ખરીદો</h3>
                 <p className="font-body text-slate-600 text-sm leading-relaxed mb-6">
-                  તમારા પરિવારના ભરોસા માટે ૧૫૦+ પ્રીમિયમ સર્ટિફાઈડ કાર. દરેક કારનું ૧૨૦+ પોઈન્ટ ટેકનિકલ ઈન્સ્પેક્શન અને વાજબી કિંમત.
+                  તમારા પરિવારના ભરોસા માટે ૧૫૦+ વેરિફાઇડ કાર (Verified Cars). દરેક કારનું ૧૨૦+ પોઈન્ટ ટેકનિકલ ઈન્સ્પેક્શન અને વાજબી કિંમત.
                 </p>
                 <div className="space-y-2 mb-8 mt-auto text-xs font-semibold text-slate-700 font-body">
                   <div className="flex items-center gap-2">
@@ -302,7 +299,7 @@ export default function Home() {
                 </div>
                 <h3 className="font-heading text-2xl font-black text-slate-900 mb-3">જૂની કારનું શ્રેષ્ઠ એક્સચેન્જ</h3>
                 <p className="font-body text-slate-600 text-sm leading-relaxed mb-6">
-                  તમારી જૂની કાર આપીને શ્રેષ્ઠ એક્સચેન્જ બોનસ સાથે તમારી મનપસંદ નવી અથવા પ્રીમિયમ કારમાં અપગ્રેડ કરો.
+                  તમારી જૂની કાર આપીને શ્રેષ્ઠ એક્સચેન્જ બોનસ સાથે તમારી મનપસંદ વેરિફાઇડ કારમાં અપગ્રેડ કરો (Trusted Dealer).
                 </p>
                 <div className="space-y-2 mb-8 mt-auto text-xs font-semibold text-slate-700 font-body">
                   <div className="flex items-center gap-2">
@@ -423,7 +420,7 @@ export default function Home() {
                     </div>
                     <div>
                       <h4 className="font-heading font-bold text-lg text-white">સદગુરુ કાર મેળો</h4>
-                      <p className="text-xs text-slate-400">સુરતનું સૌથી વિશ્વાસપાત્ર સેકન્ડ હેન્ડ કાર શોરૂમ</p>
+                      <p className="text-xs text-slate-400">સુરતનો સૌથી વિશ્વાસપાત્ર વેરિફાઇડ કાર ડીલર (Trusted Dealer)</p>
                     </div>
                   </div>
 

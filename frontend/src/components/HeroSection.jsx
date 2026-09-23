@@ -163,8 +163,8 @@ export default function HeroSection() {
 
           {/* Description */}
           <motion.p variants={itemVariants} className="text-base lg:text-lg text-slate-400 mt-6 lg:mt-8 font-medium leading-relaxed max-w-lg drop-shadow-sm border-l-2 border-white/10 pl-4 py-1">
-            સુરતનું સૌથી વિશ્વાસપાત્ર લક્ઝરી કાર ડેસ્ટિનેશન.
-            શ્રેષ્ઠ કિંમત, સર્વોત્તમ ગુણવત્તા અને અતૂટ ભરોસાનું એકમાત્ર નામ.
+            સુરતનો સૌથી વિશ્વાસપાત્ર વેરિફાઇડ કાર ડીલર (Trusted Dealer).
+            શ્રેષ્ઠ કિંમત, સચોટ ગુણવત્તા અને ૧૦૦% ભરોસાપાત્ર કાર.
           </motion.p>
 
           {/* Dual Action CTAs */}
@@ -401,7 +401,7 @@ export default function HeroSection() {
             // Fallback empty state
             <div className="w-full h-[50vh] flex flex-col items-center justify-center opacity-30 select-none pointer-events-none z-10">
               <Car className="w-28 h-28 text-white/10 mb-4" />
-              <h2 className="text-[3rem] lg:text-[4rem] font-black uppercase text-white/5 tracking-tighter">Premium Collection</h2>
+              <h2 className="text-[3rem] lg:text-[4rem] font-black uppercase text-white/5 tracking-tighter">Verified Collection</h2>
             </div>
           )}
         </div>

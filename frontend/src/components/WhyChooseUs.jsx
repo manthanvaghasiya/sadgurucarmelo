@@ -93,7 +93,7 @@ export default function WhyChooseUs() {
                         અમને શા માટે <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-orange to-amber-500">Choose</span> કરશો?
                     </h2>
                     <p className="font-body text-slate-600 text-lg max-w-xl mx-auto leading-relaxed">
-                        સુરતના હજારો પરિવારોનો અતૂટ વિશ્વાસ. <span className="font-bold text-slate-800">Premium Car</span> ખરીદવાનો સુરક્ષિત અને સરળ અનુભવ.
+                        સુરતના હજારો પરિવારોનો અતૂટ વિશ્વાસ. <span className="font-bold text-slate-800">Verified Car</span> ખરીદવાનો સુરક્ષિત અને સરળ અનુભવ (Trusted Dealer).
                     </p>
                 </motion.div>
 
