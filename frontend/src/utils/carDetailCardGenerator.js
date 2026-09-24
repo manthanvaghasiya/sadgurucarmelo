@@ -25,7 +25,7 @@ export async function generateCarDetailCard(car) {
       }
 
       const W = 900;
-      const H = 740;
+      const H = 550;
       canvas.width = W;
       canvas.height = H;
 
@@ -57,36 +57,36 @@ export async function generateCarDetailCard(car) {
         }
       };
 
-      const paddingX = 50;
-      const contentW = W - paddingX * 2; // 800px
+      const paddingX = 40;
+      const contentW = W - paddingX * 2; // 820px
 
       // 2. Car Make & Model Title
       ctx.fillStyle = '#0f172a';
-      ctx.font = '900 38px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+      ctx.font = '900 32px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
       const makeModel = `${car.make || ''} ${car.model || ''}`.trim().toUpperCase();
-      ctx.fillText(makeModel || 'CAR DETAILS', paddingX, 68);
+      ctx.fillText(makeModel || 'CAR DETAILS', paddingX, 52);
 
       // 3. Variant & Model Year
       ctx.fillStyle = '#64748b';
-      ctx.font = 'bold 18px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+      ctx.font = 'bold 15px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
       const variantStr = (car.variant || '').toUpperCase();
       const yearStr = `Model Year: ${car.year || car.registerYear || car.manufacturingYear || 'N/A'}`;
       const subtitle = variantStr ? `${variantStr} • ${yearStr}` : yearStr;
-      ctx.fillText(subtitle, paddingX, 105);
+      ctx.fillText(subtitle, paddingX, 78);
 
       // 4. Special Offer Price Banner Box
-      const priceBoxY = 135;
-      const priceBoxH = 100;
-      drawRoundRect(paddingX, priceBoxY, contentW, priceBoxH, 16, '#fff7ed', '#fed7aa');
+      const priceBoxY = 96;
+      const priceBoxH = 76;
+      drawRoundRect(paddingX, priceBoxY, contentW, priceBoxH, 12, '#fff7ed', '#fed7aa');
 
       ctx.fillStyle = '#c2410c';
-      ctx.font = 'bold 13px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
-      ctx.fillText('SPECIAL OFFER PRICE', paddingX + 28, priceBoxY + 34);
+      ctx.font = 'bold 11px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+      ctx.fillText('SPECIAL OFFER PRICE', paddingX + 22, priceBoxY + 25);
 
       ctx.fillStyle = '#ea580c';
-      ctx.font = '900 46px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+      ctx.font = '900 36px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
       const priceText = car.price ? `₹${Number(car.price).toLocaleString('en-IN')}` : 'Ask for Price';
-      ctx.fillText(priceText, paddingX + 28, priceBoxY + 80);
+      ctx.fillText(priceText, paddingX + 22, priceBoxY + 62);
 
       // 5. Specifications Grid (2 Columns x 4 Rows)
       const specs = [
@@ -132,11 +132,11 @@ export async function generateCarDetailCard(car) {
         }
       ];
 
-      const gridStartY = 255;
-      const cardW = (contentW - 20) / 2; // 390px
-      const cardH = 92;
-      const gapX = 20;
-      const gapY = 16;
+      const gridStartY = 188;
+      const cardW = (contentW - 14) / 2; // 403px
+      const cardH = 74;
+      const gapX = 14;
+      const gapY = 10;
 
       specs.forEach((s, idx) => {
         const col = idx % 2;
@@ -145,21 +145,21 @@ export async function generateCarDetailCard(car) {
         const cy = gridStartY + row * (cardH + gapY);
 
         // Card Container
-        drawRoundRect(cx, cy, cardW, cardH, 14, '#f8fafc', '#e2e8f0');
+        drawRoundRect(cx, cy, cardW, cardH, 12, '#f8fafc', '#e2e8f0');
 
         // Emoji / Icon
-        ctx.font = '28px "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", sans-serif';
-        ctx.fillText(s.icon, cx + 18, cy + 56);
+        ctx.font = '22px "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", sans-serif';
+        ctx.fillText(s.icon, cx + 14, cy + 46);
 
         // Label
         ctx.fillStyle = '#64748b';
-        ctx.font = 'bold 12px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
-        ctx.fillText(s.label, cx + 64, cy + 36);
+        ctx.font = 'bold 11px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+        ctx.fillText(s.label, cx + 52, cy + 28);
 
         // Value
         ctx.fillStyle = '#0f172a';
-        ctx.font = '900 20px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
-        ctx.fillText(String(s.val).substring(0, 22), cx + 64, cy + 66);
+        ctx.font = '900 18px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+        ctx.fillText(String(s.val).substring(0, 24), cx + 52, cy + 54);
       });
 
       resolve(canvas.toDataURL('image/jpeg', 0.95));

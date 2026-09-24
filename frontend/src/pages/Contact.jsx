@@ -1,4 +1,5 @@
-import { Phone, MapPin, Clock, MessageCircle } from 'lucide-react';
+import { Phone, MapPin, Clock } from 'lucide-react';
+import WhatsAppIcon from '../components/WhatsAppIcon';
 import { useForm } from 'react-hook-form';
 import { Helmet } from 'react-helmet-async';
 import toast from 'react-hot-toast';
@@ -246,7 +247,7 @@ export default function Contact() {
                 rel="noopener noreferrer"
                 className="w-full flex items-center justify-center gap-2 bg-[#25D366] text-white font-body font-bold text-sm sm:text-base py-3 sm:py-4 min-h-[48px] sm:min-h-[56px] rounded-xl hover:bg-[#128C7E] active:scale-95 shadow-md transition-all"
               >
-                <MessageCircle className="w-5 h-5 sm:w-6 sm:h-6 fill-current" />
+                <WhatsAppIcon className="w-5 h-5 sm:w-6 sm:h-6 shrink-0" />
                 Start WhatsApp Chat
               </a>
             </motion.div>

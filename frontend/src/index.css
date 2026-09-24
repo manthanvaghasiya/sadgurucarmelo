@@ -735,13 +735,13 @@
 
   /* ── Action buttons — premium mobile treatment ── */
   .car-action-btn {
-    border-radius: 8px;
     font-weight: 700;
-    letter-spacing: 0.03em;
+    letter-spacing: 0.02em;
     position: relative;
     overflow: hidden;
-    padding-top: 8px;
-    padding-bottom: 8px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
   }
 
   /* Subtle inner gradient sheen */
@@ -754,33 +754,20 @@
     height: 50%;
     background: linear-gradient(180deg, rgba(255,255,255,0.15), transparent);
     pointer-events: none;
-    opacity: 1;
-    border-radius: 8px 8px 0 0;
+    opacity: 0.8;
   }
 
   /* Active (tap) state for buttons */
   .car-action-btn:active {
     transform: scale(0.93);
     transition: transform 0.1s ease;
-    filter: brightness(0.92);
-  }
-
-  /* View button — gradient border with brand accent */
-  .car-action-btn[class*="border-primary"] {
-    border-color: rgba(0, 0, 0, 0.25);
-    background: linear-gradient(135deg, rgba(248,250,252,0.8), rgba(255,255,255,0.9));
-    color: #0f172a;
-  }
-
-  .car-action-btn[class*="border-primary"]:active {
-    border-color: rgba(0, 0, 0, 0.45);
-    background: linear-gradient(135deg, rgba(0,0,0,0.05), rgba(248,250,252,0.9));
+    filter: brightness(0.94);
   }
 
   /* WhatsApp button — deeper shadow on mobile */
   .car-action-btn[class*="bg-[#25D366]"] {
     box-shadow:
-      0 2px 8px -2px rgba(37, 211, 102, 0.3),
+      0 2px 8px -2px rgba(37, 211, 102, 0.4),
       0 1px 3px rgba(0,0,0,0.08);
   }
 

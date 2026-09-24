@@ -7,7 +7,6 @@ import {
   CheckCircle2,
   X,
   Phone,
-  MessageCircle,
   ShieldCheck,
   Banknote,
   Clock,
@@ -16,6 +15,7 @@ import {
   Loader2,
   AlertCircle
 } from 'lucide-react';
+import WhatsAppIcon from '../components/WhatsAppIcon';
 import toast from 'react-hot-toast';
 import imageCompression from 'browser-image-compression';
 import axiosInstance from '../api/axiosConfig';
@@ -266,7 +266,7 @@ export default function SellYourCar() {
                 rel="noopener noreferrer"
                 className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-8 py-3.5 rounded-xl bg-[#25D366] text-white font-bold hover:bg-[#20bd5a] transition-all shadow-md"
               >
-                <MessageCircle className="w-5 h-5" />
+                <WhatsAppIcon className="w-5 h-5" />
                 Chat on WhatsApp Directly
               </a>
               <button
@@ -655,7 +655,7 @@ export default function SellYourCar() {
               rel="noopener noreferrer"
               className="px-5 py-2.5 rounded-xl bg-[#25D366] text-white font-bold text-xs flex items-center gap-2 hover:bg-[#20bd5a] transition-all shadow-sm"
             >
-              <MessageCircle className="w-4 h-4" />
+              <WhatsAppIcon className="w-4 h-4" />
               WhatsApp
             </a>
           </div>

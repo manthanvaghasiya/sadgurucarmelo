@@ -3,13 +3,14 @@ import { useNavigate } from 'react-router-dom';
 import {
   Car, MapPin, ChevronRight, ChevronLeft, Sparkles, ArrowRight,
   ShieldCheck, Zap, Landmark, FileText, CheckCircle2, Award,
-  Fuel, Settings2, Gauge, User, MessageCircle, Eye, Calendar,
+  Fuel, Settings2, Gauge, User, Eye, Calendar,
   ArrowUpRight, X
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useCars } from '../context/CarContext';
 import { getCarWhatsAppLink } from '../utils/whatsapp';
 import { getOptimizedUrl } from '../utils/imageUtils';
+import WhatsAppIcon from './WhatsAppIcon';
 import axiosInstance from '../api/axiosConfig';
 import toast from 'react-hot-toast';
 
@@ -264,13 +265,13 @@ export default function HeroSection() {
 
               <button
                 onClick={() => setShowModal(true)}
-                className="group relative inline-flex items-center gap-3 px-7 sm:px-9 py-3.5 sm:py-4 rounded-2xl bg-gradient-to-r from-brand-orange via-[#f79e32] to-[#e68415] text-white font-heading shadow-[0_10px_28px_rgba(245,148,35,0.4)] hover:shadow-[0_14px_38px_rgba(245,148,35,0.55)] hover:-translate-y-0.5 active:translate-y-0 transition-all duration-300 cursor-pointer overflow-hidden border border-amber-300/50"
+                className="group relative inline-flex items-center gap-2.5 sm:gap-3 px-6 sm:px-8 py-2 sm:py-2.5 rounded-xl sm:rounded-2xl bg-gradient-to-r from-brand-orange via-[#f79e32] to-[#e68415] text-white font-heading shadow-[0_8px_22px_rgba(245,148,35,0.35)] hover:shadow-[0_12px_28px_rgba(245,148,35,0.5)] hover:-translate-y-0.5 active:translate-y-0 transition-all duration-300 cursor-pointer overflow-hidden border border-amber-300/50"
               >
                 <div className="absolute inset-0 bg-white/20 -translate-x-full group-hover:translate-x-full transition-transform duration-700 pointer-events-none" />
 
                 {/* Impressive Automotive Steering Wheel Icon with Interactive Turn on Hover */}
-                <div className="flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-white/25 backdrop-blur-md text-white group-hover:scale-110 group-hover:rotate-12 transition-all duration-300 shadow-[inset_0_1px_2px_rgba(255,255,255,0.4)] border border-white/25 shrink-0">
-                  <svg viewBox="0 0 24 24" className="w-5 h-5 fill-none stroke-current" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                <div className="flex items-center justify-center w-7 h-7 sm:w-7.5 sm:h-7.5 rounded-lg sm:rounded-xl bg-white/25 backdrop-blur-md text-white group-hover:scale-110 group-hover:rotate-12 transition-all duration-300 shadow-[inset_0_1px_2px_rgba(255,255,255,0.4)] border border-white/25 shrink-0">
+                  <svg viewBox="0 0 24 24" className="w-4 h-4 sm:w-4.5 sm:h-4.5 fill-none stroke-current" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
                     <circle cx="12" cy="12" r="9.5" />
                     <circle cx="12" cy="12" r="2.8" className="fill-white/35" />
                     <path d="M12 2.5v6.7" />
@@ -541,23 +542,27 @@ export default function HeroSection() {
                     </div>
 
                     {/* Direct Action Buttons & Controls */}
-                    <div className="flex items-center gap-2.5 pt-3">
+                    <div className="flex items-center gap-2 pt-3">
                       <button
                         onClick={() => navigate(activeCar._id ? `/car-details/${activeCar._id}` : '/inventory')}
-                        className="flex-1 py-2.5 px-4 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-heading font-black text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-all shadow-xs cursor-pointer"
+                        className="flex-1 h-10 px-3 sm:px-4 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-heading font-black text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-all shadow-xs cursor-pointer min-w-0"
                       >
-                        <Eye className="w-4 h-4 text-brand-orange" />
-                        <span>ગાડી જુઓ · View Car</span>
+                        <Eye className="w-4 h-4 text-brand-orange shrink-0" />
+                        <span className="truncate">
+                          <span className="sm:hidden">View Car</span>
+                          <span className="hidden sm:inline">ગાડી જુઓ · View Car</span>
+                        </span>
                       </button>
 
                       <a
                         href={whatsappUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="py-2.5 px-4 sm:px-5 rounded-xl bg-[#25D366] hover:bg-[#20bd5a] text-white font-heading font-black text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-all shadow-xs cursor-pointer"
+                        className="h-10 w-10 sm:w-auto p-0 sm:px-5 rounded-xl bg-[#25D366] hover:bg-[#20bd5a] text-white font-heading font-black text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-all shadow-xs cursor-pointer shrink-0"
+                        title="Chat on WhatsApp"
                       >
-                        <MessageCircle className="w-4 h-4 fill-current" />
-                        <span>WhatsApp</span>
+                        <WhatsAppIcon className="w-4 h-4 shrink-0" />
+                        <span className="hidden sm:inline">WhatsApp</span>
                       </a>
                     </div>
 
@@ -579,8 +584,8 @@ export default function HeroSection() {
 
               </div>
 
-              {/* ── MOBILE / TABLET SPECS TELEMETRY GRID (Under Dome on smaller screens) ── */}
-              <div className="xl:hidden grid grid-cols-2 sm:grid-cols-4 gap-2 mt-4 w-full max-w-[560px]">
+              {/* ── SPECS TELEMETRY GRID (Hidden on mobile phones, shown on tablet, desktop has side columns) ── */}
+              <div className="hidden md:grid xl:hidden grid-cols-2 sm:grid-cols-4 gap-2 mt-4 w-full max-w-[560px]">
                 <div className="bg-white p-2.5 rounded-xl border border-slate-200/90 shadow-2xs">
                   <span className="text-[10px] text-slate-400 font-bold uppercase block">Fuel</span>
                   <p className="text-xs font-heading font-black text-slate-800">{activeCar.fuelType || 'Petrol'}</p>

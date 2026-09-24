@@ -54,6 +54,7 @@ import subscriptionRoutes from './routes/subscription.routes.js';
 import aiRoutes from './routes/ai.routes.js';
 import analyticsRoutes from './routes/analytics.routes.js';
 import systemHealthRoutes from './routes/systemHealth.routes.js';
+import uploadRoutes from './routes/upload.routes.js';
 
 // ── Load env variables ──
 // (done automatically via 'dotenv/config' at top)
@@ -162,6 +163,7 @@ apiRouter.use('/notifications', subscriptionRoutes);
 apiRouter.use('/ai', aiRoutes);
 apiRouter.use('/analytics', analyticsRoutes);
 apiRouter.use('/system', systemHealthRoutes);
+apiRouter.use('/upload', uploadRoutes);
 
 app.use('/api', apiRouter);
 app.use('/', apiRouter);

@@ -1,5 +1,15 @@
 import { v2 as cloudinary } from 'cloudinary';
-import { upload, isR2Configured, uploadBufferToR2, deleteFromR2 } from './storage.js';
+import {
+  upload,
+  isImageKitConfigured,
+  isR2Configured,
+  uploadToImageKit,
+  deleteFromImageKit,
+  uploadBufferToR2,
+  deleteFromR2,
+  uploadMedia,
+  deleteMedia,
+} from './storage.js';
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -7,5 +17,15 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-export { upload, isR2Configured, uploadBufferToR2, deleteFromR2 };
+export {
+  upload,
+  isImageKitConfigured,
+  isR2Configured,
+  uploadToImageKit,
+  deleteFromImageKit,
+  uploadBufferToR2,
+  deleteFromR2,
+  uploadMedia,
+  deleteMedia,
+};
 export default cloudinary;

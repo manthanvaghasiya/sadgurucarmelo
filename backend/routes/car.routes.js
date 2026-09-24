@@ -2,7 +2,7 @@ import express from 'express';
 import mongoose from 'mongoose';
 import NodeCache from 'node-cache';
 import Car from '../models/Car.js';
-import { upload } from '../config/cloudinary.js';
+import { upload, deleteMedia } from '../config/cloudinary.js';
 import { protect, admin } from '../middleware/authMiddleware.js';
 import { broadcastNewCar } from './subscription.routes.js';
 
@@ -224,8 +224,28 @@ router.post('/', protect, admin, handleUpload, async (req, res) => {
       carData.spinImages = carData.spinImages.split(',').map(u => u.trim()).filter(Boolean);
     }
     
-    if (req.files && req.files.length > 0) {
-      const imageUrls = req.files.map(file => file.path);
+    // 1. Support pre-uploaded images from photo-by-photo upload (ImageKit/R2)
+    if (carData.images && (Array.isArray(carData.images) || typeof carData.images === 'string')) {
+      let parsedImages = carData.images;
+      if (typeof parsedImages === 'string') {
+        try { parsedImages = JSON.parse(parsedImages); } catch {}
+      }
+      if (Array.isArray(parsedImages) && parsedImages.length > 0) {
+        carData.images = parsedImages;
+        const mainIndex = parseInt(req.body.mainPhotoIndex, 10) || 0;
+        if (carData.images[mainIndex]) {
+          const mainImg = carData.images[mainIndex];
+          carData.images.splice(mainIndex, 1);
+          carData.images.unshift(mainImg);
+        }
+        const first = carData.images[0];
+        carData.image = typeof first === 'object' && first?.url ? first.url : first;
+      }
+    } else if (req.files && req.files.length > 0) {
+      const imageUrls = req.files.map(file => ({
+        url: file.path,
+        publicId: file.filename,
+      }));
       
       const mainIndex = parseInt(req.body.mainPhotoIndex, 10) || 0;
       if (imageUrls[mainIndex]) {
@@ -235,10 +255,10 @@ router.post('/', protect, admin, handleUpload, async (req, res) => {
       }
 
       carData.images = imageUrls;
-      carData.image = imageUrls[0];
-    } else {
+      carData.image = imageUrls[0]?.url || imageUrls[0];
+    } else if (!carData.image) {
       carData.image = 'https://placehold.co/600x400/e2e8f0/64748b?text=' + encodeURIComponent(`${carData.make || 'Car'} ${carData.model || ''}`);
-      carData.images = [carData.image];
+      carData.images = [{ url: carData.image }];
     }
 
     const car = await Car.create(carData);
@@ -272,12 +292,34 @@ router.put('/:id', protect, admin, handleUpload, async (req, res) => {
     }
 
     let finalImages = [];
-    if (req.body.keptImages) {
+    if (updateData.images && (Array.isArray(updateData.images) || typeof updateData.images === 'string')) {
+      let parsed = updateData.images;
+      if (typeof parsed === 'string') {
+        try { parsed = JSON.parse(parsed); } catch {}
+      }
+      if (Array.isArray(parsed)) {
+        finalImages = parsed;
+      }
+    } else if (req.body.keptImages) {
         if (Array.isArray(req.body.keptImages)) {
             finalImages = req.body.keptImages;
         } else {
             finalImages = [req.body.keptImages];
         }
+    }
+
+    // Direct deletion support for removed publicIds/URLs
+    if (updateData.deletedImages) {
+      let deleted = updateData.deletedImages;
+      if (typeof deleted === 'string') {
+        try { deleted = JSON.parse(deleted); } catch {}
+      }
+      if (Array.isArray(deleted)) {
+        for (const item of deleted) {
+          if (item) await deleteMedia(item);
+        }
+      }
+      delete updateData.deletedImages;
     }
 
     if (req.files && req.files.length > 0) {
@@ -318,13 +360,23 @@ router.put('/:id', protect, admin, handleUpload, async (req, res) => {
       updateData.image = '';
     }
 
+    const existingCar = await Car.findById(req.params.id);
+    if (!existingCar) {
+      return res.status(404).json({ success: false, message: 'Car not found' });
+    }
+
+    // Clean up removed images from cloud storage (ImageKit / R2 / Cloudinary)
+    if (Array.isArray(existingCar.images) && existingCar.images.length > 0) {
+      const removedImages = existingCar.images.filter(img => img && !finalImages.includes(img));
+      for (const imgUrl of removedImages) {
+        await deleteMedia(imgUrl);
+      }
+    }
+
     const car = await Car.findByIdAndUpdate(req.params.id, updateData, {
       new: true,
       runValidators: true,
     });
-    if (!car) {
-      return res.status(404).json({ success: false, message: 'Car not found' });
-    }
     
     carCache.flushAll(); // Delete stale cache records
     
@@ -339,15 +391,31 @@ router.put('/:id', protect, admin, handleUpload, async (req, res) => {
 // ═══════════════════════════════════════════════
 router.delete('/:id', protect, admin, async (req, res) => {
   try {
-    const car = await Car.findByIdAndDelete(req.params.id);
+    const car = await Car.findById(req.params.id);
     if (!car) {
       return res.status(404).json({ success: false, message: 'Car not found' });
     }
+
+    // Delete all associated media from cloud storage (ImageKit / R2 / Cloudinary)
+    const imagesToDelete = [
+      ...(Array.isArray(car.images) ? car.images : []),
+      ...(Array.isArray(car.spinImages) ? car.spinImages : []),
+      car.image,
+      car.vr360Image,
+    ].filter(Boolean);
+
+    const uniqueImages = [...new Set(imagesToDelete)];
+    for (const imgUrl of uniqueImages) {
+      await deleteMedia(imgUrl);
+    }
+
+    await Car.findByIdAndDelete(req.params.id);
     
     carCache.flushAll();
     
-    res.json({ success: true, message: 'Vehicle successfully deleted.' });
+    res.json({ success: true, message: 'Vehicle and associated media successfully deleted.' });
   } catch (error) {
+    console.error('Delete car error:', error);
     res.status(500).json({ success: false, message: 'Server error' });
   }
 });

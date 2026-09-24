@@ -113,7 +113,7 @@ const carSchema = new mongoose.Schema(
       type: String, // Single hero image
     },
     images: {
-      type: [String], // Array of image URLs
+      type: [mongoose.Schema.Types.Mixed], // Supports both { url, publicId } objects and legacy string URLs
       default: [],
     },
     spinImages: {

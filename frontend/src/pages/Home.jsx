@@ -1,13 +1,14 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import {
   CheckCircle, Banknote, ShieldCheck,
   Search, Star, MapPin, Phone, RefreshCw,
   Clock, ArrowRight, Sparkles, Award, ArrowUpRight,
-  MessageCircle, Car, ChevronRight
+  Car, ChevronRight, ChevronLeft
 } from 'lucide-react';
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
+import WhatsAppIcon from '../components/WhatsAppIcon';
 import CarCard from '../components/CarCard';
 import SkeletonCarCard from '../components/SkeletonCarCard';
 import { useCars } from '../context/CarContext';
@@ -19,9 +20,118 @@ import WhyChooseUs from '../components/WhyChooseUs';
 import LiveTicker from '../components/LiveTicker';
 import PromoBanners from '../components/PromoBanners';
 
+// 3 Core Dealership Services
+const dealershipServices = [
+  {
+    id: 'buy',
+    tabName: 'કાર ખરીદો',
+    tabBadge: '150+ કાર',
+    title: 'સર્ટિફાઈડ કાર ખરીદો',
+    desc: 'તમારા પરિવારના ભરોસા માટે ૧૫૦+ વેરિફાઇડ કાર. ૧૨૦+ પોઈન્ટ ટેકનિકલ ઈન્સ્પેક્શન અને વાજબી કિંમત.',
+    icon: ShieldCheck,
+    iconBg: 'bg-slate-100 text-primary',
+    topLine: 'via-slate-800',
+    borderHover: 'hover:border-slate-300',
+    btnBg: 'bg-slate-900 group-hover:bg-slate-800 text-white',
+    btnLink: '/inventory',
+    btnText: 'સર્ટિફાઈડ કાર જુઓ',
+    bullets: [
+      '૧૨૦+ પોઈન્ટ ટેકનિકલ ચેક',
+      '૧૦૦% સચોટ કિલોમીટર (Genuine KM)',
+      'સરળ બેંક લોન અને ફાઇનાન્સ સુવિધા',
+    ],
+  },
+  {
+    id: 'sell',
+    tabName: 'કાર વેચો',
+    tabBadge: 'ઇન્સ્ટન્ટ પેમેન્ટ',
+    title: 'તમારી કાર તરત જ વેચો',
+    desc: 'પારદર્શક મૂલ્યાંકન અને તુરંત બેંક પેમેન્ટ સાથે તમારી જૂની કારની મેળવો શ્રેષ્ઠ બજાર કિંમત, કોઈ પણ ઝંઝટ વગર.',
+    icon: Banknote,
+    iconBg: 'bg-emerald-50 text-emerald-600',
+    topLine: 'via-emerald-500',
+    borderHover: 'hover:border-emerald-300',
+    btnBg: 'bg-emerald-600 group-hover:bg-emerald-700 text-white',
+    btnLink: '/sell-your-car',
+    btnText: 'ઓનલાઇન વેલ્યુએશન મેળવો',
+    bullets: [
+      '૩૦ મિનિટમાં બેસ્ટ બજાર વેલ્યુએશન',
+      'સીધું ઇન્સ્ટન્ટ બેંક ટ્રાન્સફર પેમેન્ટ',
+      '૧૦૦% મફત RTO દસ્તાવેજ ટ્રાન્સફર',
+    ],
+  },
+  {
+    id: 'exchange',
+    tabName: 'એક્સચેન્જ',
+    tabBadge: 'બેસ્ટ બોનસ',
+    title: 'જૂની કારનું શ્રેષ્ઠ એક્સચેન્જ',
+    desc: 'તમારી જૂની કાર આપીને શ્રેષ્ઠ એક્સચેન્જ બોનસ સાથે તમારી મનપસંદ વેરિફાઇડ કારમાં અપગ્રેડ કરો (Trusted Dealer).',
+    icon: RefreshCw,
+    iconBg: 'bg-orange-50 text-brand-orange',
+    topLine: 'via-brand-orange',
+    borderHover: 'hover:border-orange-300',
+    btnBg: 'bg-brand-orange group-hover:bg-orange-600 text-white',
+    btnLink: '/about?service=exchange',
+    btnText: 'એક્સચેન્જ ઓફર્સ જાણો',
+    bullets: [
+      'કોઈ પણ કંપની/મોડેલનું એક્સચેન્જ સ્વીકાર્ય',
+      'આકર્ષક એક્સચેન્જ બોનસ અને ડિસ્કાઉન્ટ',
+      'સેમ-ડે ડિલિવરી અને ઝીરો ડાઉન પેમેન્ટ',
+    ],
+  },
+];
+
 export default function Home() {
   const { cars, isLoading } = useCars();
   const navigate = useNavigate();
+
+  // Active service index for compact mobile view
+  const [activeServiceIndex, setActiveServiceIndex] = useState(0);
+
+  const handleServiceSwipe = (event, info) => {
+    const threshold = 35;
+    if (info.offset.x < -threshold || info.velocity.x < -300) {
+      setActiveServiceIndex((prev) => (prev + 1) % dealershipServices.length);
+    } else if (info.offset.x > threshold || info.velocity.x > 300) {
+      setActiveServiceIndex((prev) => (prev - 1 + dealershipServices.length) % dealershipServices.length);
+    }
+  };
+
+  // Detect mobile view for mobile-only scrolling animations
+  const [isMobile, setIsMobile] = useState(() =>
+    typeof window !== 'undefined' ? window.innerWidth < 768 : false
+  );
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  // Scrolling animation applied strictly on mobile view
+  const mobileCardAnim = isMobile
+    ? {
+        initial: { opacity: 0, y: 40, scale: 0.96 },
+        whileInView: { opacity: 1, y: 0, scale: 1 },
+        viewport: { once: true, amount: 0.2 },
+        transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] },
+      }
+    : {
+        initial: false,
+      };
+
+  const mobileHeadingAnim = isMobile
+    ? {
+        initial: { opacity: 0, y: 25 },
+        whileInView: { opacity: 1, y: 0 },
+        viewport: { once: true, amount: 0.2 },
+        transition: { duration: 0.5, ease: 'easeOut' },
+      }
+    : {
+        initial: false,
+      };
 
   // Available verified cars
   const availableCars = useMemo(() => {
@@ -122,18 +232,12 @@ export default function Home() {
                       image={car.image}
                       title={`${car.make} ${car.model} (${car.year})`}
                       price={car.price >= 100000 ? `₹${(car.price / 100000).toFixed(2)} Lakhs` : `₹${(car.price || 0).toLocaleString('en-IN')}`}
-                      rawPrice={car.price}
                       badges={car.badges || []}
                       fuel={car.fuelType}
                       transmission={car.transmission}
                       owner={car.owner || '1st Owner'}
                       kms={`${(car.kms || 0).toLocaleString('en-IN')} KM`}
                       isKmGenuine={car.isKmGenuine}
-                      make={car.make}
-                      model={car.model}
-                      year={car.year}
-                      location="Surat, Gujarat"
-                      car={car}
                     />
                   </div>
                 ))
@@ -162,121 +266,174 @@ export default function Home() {
         </section>
 
         {/* 4. Core Dealership Services Section */}
-        <section className="py-20 px-4 sm:px-6 lg:px-8 bg-transparent relative">
+        <section className="py-10 sm:py-16 md:py-20 px-4 sm:px-6 lg:px-8 bg-transparent relative">
           <div className="max-w-7xl mx-auto">
             {/* Heading */}
-            <div className="text-center mb-16 max-w-3xl mx-auto">
-              <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-brand-orange/10 border border-brand-orange/20 text-brand-orange font-heading font-bold text-xs uppercase tracking-[0.2em] mb-4 shadow-xs">
+            <motion.div
+              {...mobileHeadingAnim}
+              className="text-center mb-6 sm:mb-12 md:mb-16 max-w-3xl mx-auto"
+            >
+              <span className="inline-flex items-center gap-2 px-3.5 py-1 sm:px-4 sm:py-1.5 rounded-full bg-brand-orange/10 border border-brand-orange/20 text-brand-orange font-heading font-bold text-[11px] sm:text-xs uppercase tracking-[0.18em] mb-3 sm:mb-4 shadow-xs">
                 વિશ્વાસપાત્ર ડીલર સેવાઓ · TRUSTED DEALERSHIP SERVICES
               </span>
-              <h2 className="font-heading text-3xl sm:text-4xl md:text-5xl font-black text-slate-900 mb-6 leading-tight">
+              <h2 className="font-heading text-2xl sm:text-4xl md:text-5xl font-black text-slate-900 mb-3 sm:mb-6 leading-tight">
                 સુરતમાં <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-orange via-amber-500 to-yellow-500">ખરીદ, વેચાણ અને Exchange</span> માટેનું સંપૂર્ણ Solution
               </h2>
-              <p className="font-body text-slate-600 text-base sm:text-lg leading-relaxed">
+              <p className="font-body text-slate-600 text-xs sm:text-base md:text-lg leading-relaxed max-w-2xl mx-auto">
                 પારદર્શક પ્રક્રિયા અને સુરતના હજારો પરિવારોના વિશ્વાસ સાથે. તમારી દરેક જરૂરિયાત માટે ૧૦૦% સેફ અને સરળ કાર ડીલિંગનો અનુભવ (Trusted Dealer).
               </p>
+            </motion.div>
+
+            {/* ── MOBILE VIEW: Interactive Compact Animated Showcase (Reduces ~75% vertical space) ── */}
+            <div className="md:hidden max-w-md mx-auto">
+              {/* Segmented Liquid Switcher Tabs */}
+              <div className="flex items-center p-1 bg-slate-100/90 backdrop-blur-sm rounded-2xl mb-3.5 border border-slate-200/80 shadow-2xs">
+                {dealershipServices.map((service, idx) => {
+                  const isSelected = activeServiceIndex === idx;
+                  const TabIcon = service.icon;
+                  return (
+                    <button
+                      key={service.id}
+                      onClick={() => setActiveServiceIndex(idx)}
+                      className={`relative flex-1 py-2 px-2 rounded-xl text-xs font-heading font-black transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+                        isSelected ? 'text-white' : 'text-slate-600 hover:text-slate-900'
+                      }`}
+                    >
+                      {isSelected && (
+                        <motion.div
+                          layoutId="activeServiceTabPill"
+                          className="absolute inset-0 bg-slate-900 rounded-xl shadow-xs"
+                          transition={{ type: "spring", stiffness: 380, damping: 32 }}
+                        />
+                      )}
+                      <span className="relative z-10 flex items-center gap-1.5">
+                        <TabIcon className="w-3.5 h-3.5" />
+                        <span>{service.tabName}</span>
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Animated Active Service Card with Touch Swipe */}
+              {(() => {
+                const activeService = dealershipServices[activeServiceIndex];
+                const ServiceIcon = activeService.icon;
+                return (
+                  <div className="relative">
+                    <AnimatePresence mode="wait">
+                      <motion.div
+                        key={activeService.id}
+                        drag="x"
+                        dragConstraints={{ left: 0, right: 0 }}
+                        dragElastic={0.2}
+                        onDragEnd={handleServiceSwipe}
+                        initial={{ opacity: 0, x: 20, scale: 0.98 }}
+                        animate={{ opacity: 1, x: 0, scale: 1 }}
+                        exit={{ opacity: 0, x: -20, scale: 0.98 }}
+                        transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
+                        className="relative bg-white/95 backdrop-blur-md rounded-2xl p-4 sm:p-5 border border-slate-200/90 shadow-md flex flex-col cursor-grab active:cursor-grabbing overflow-hidden"
+                      >
+                        {/* Top Accent Gradient Line */}
+                        <div className={`absolute top-0 inset-x-6 h-[2.5px] bg-gradient-to-r from-transparent ${activeService.topLine} to-transparent`} />
+
+                        {/* Card Header: Icon + Badge + Title */}
+                        <div className="flex items-center gap-3 mb-2.5">
+                          <div className={`w-11 h-11 rounded-xl ${activeService.iconBg} flex items-center justify-center shrink-0 shadow-2xs`}>
+                            <ServiceIcon className="w-5 h-5" />
+                          </div>
+                          <div>
+                            <span className="inline-block px-2 py-0.5 rounded-md bg-amber-50 border border-amber-200 text-amber-800 text-[9px] font-black uppercase tracking-wider mb-0.5">
+                              {activeService.tabBadge}
+                            </span>
+                            <h3 className="font-heading text-lg font-black text-slate-900 leading-tight">
+                              {activeService.title}
+                            </h3>
+                          </div>
+                        </div>
+
+                        {/* Description */}
+                        <p className="font-body text-slate-600 text-xs leading-relaxed mb-3">
+                          {activeService.desc}
+                        </p>
+
+                        {/* Bullets Checklist */}
+                        <div className="space-y-1.5 mb-3.5 text-xs font-semibold text-slate-700 font-body bg-slate-50/90 p-2.5 rounded-xl border border-slate-100">
+                          {activeService.bullets.map((b, i) => (
+                            <div key={i} className="flex items-center gap-2">
+                              <CheckCircle className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+                              <span>{b}</span>
+                            </div>
+                          ))}
+                        </div>
+
+                        {/* Action CTA */}
+                        <Link
+                          to={activeService.btnLink}
+                          className={`inline-flex items-center justify-between w-full px-4 py-2.5 rounded-xl ${activeService.btnBg} font-heading font-bold text-xs shadow-xs transition-all`}
+                        >
+                          <span>{activeService.btnText}</span>
+                          <ArrowRight className="w-3.5 h-3.5" />
+                        </Link>
+                      </motion.div>
+                    </AnimatePresence>
+
+                    {/* Pagination Dots + Swipe Hint */}
+                    <div className="flex items-center justify-between mt-2.5 px-1">
+                      <div className="flex items-center gap-1.5">
+                        {dealershipServices.map((_, idx) => (
+                          <button
+                            key={idx}
+                            onClick={() => setActiveServiceIndex(idx)}
+                            className={`h-1.5 rounded-full transition-all cursor-pointer ${
+                              activeServiceIndex === idx ? 'w-5 bg-brand-orange' : 'w-1.5 bg-slate-300'
+                            }`}
+                            aria-label={`Service ${idx + 1}`}
+                          />
+                        ))}
+                      </div>
+                      <span className="text-[10px] text-slate-400 font-medium">⚡ Swipe to switch</span>
+                    </div>
+                  </div>
+                );
+              })()}
             </div>
 
-            {/* 3 Luxury Service Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              {/* Card 1: Buy Certified Cars */}
-              <div className="relative group bg-white/90 backdrop-blur-md rounded-3xl p-8 border border-gray-100 hover:border-slate-300 shadow-sm hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-300 flex flex-col">
-                <div className="absolute top-0 inset-x-8 h-[2px] bg-gradient-to-r from-transparent via-slate-800 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                <div className="w-16 h-16 rounded-2xl bg-slate-100 text-primary flex items-center justify-center mb-6 group-hover:scale-110 shadow-sm transition-transform">
-                  <ShieldCheck className="w-8 h-8 text-primary" />
-                </div>
-                <h3 className="font-heading text-2xl font-black text-slate-900 mb-3">સર્ટિફાઈડ કાર ખરીદો</h3>
-                <p className="font-body text-slate-600 text-sm leading-relaxed mb-6">
-                  તમારા પરિવારના ભરોસા માટે ૧૫૦+ વેરિફાઇડ કાર (Verified Cars). દરેક કારનું ૧૨૦+ પોઈન્ટ ટેકનિકલ ઈન્સ્પેક્શન અને વાજબી કિંમત.
-                </p>
-                <div className="space-y-2 mb-8 mt-auto text-xs font-semibold text-slate-700 font-body">
-                  <div className="flex items-center gap-2">
-                    <CheckCircle className="w-4 h-4 text-emerald-500 shrink-0" />
-                    <span>૧૨૦+ પોઈન્ટ ટેકનિકલ ચેક</span>
+            {/* ── DESKTOP VIEW: Full 3 Side-by-Side Luxury Cards ── */}
+            <div className="hidden md:grid md:grid-cols-3 gap-6 lg:gap-8">
+              {dealershipServices.map((service) => {
+                const IconComponent = service.icon;
+                return (
+                  <div
+                    key={service.id}
+                    className={`relative group bg-white/90 backdrop-blur-md rounded-3xl p-7 lg:p-8 border border-gray-100 ${service.borderHover} shadow-sm hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-300 flex flex-col`}
+                  >
+                    <div className={`absolute top-0 inset-x-8 h-[2px] bg-gradient-to-r from-transparent ${service.topLine} to-transparent opacity-0 group-hover:opacity-100 transition-opacity`} />
+                    <div className={`w-16 h-16 rounded-2xl ${service.iconBg} flex items-center justify-center mb-6 group-hover:scale-110 shadow-sm transition-transform`}>
+                      <IconComponent className="w-8 h-8" />
+                    </div>
+                    <h3 className="font-heading text-2xl font-black text-slate-900 mb-3">{service.title}</h3>
+                    <p className="font-body text-slate-600 text-sm leading-relaxed mb-6">
+                      {service.desc}
+                    </p>
+                    <div className="space-y-2 mb-8 mt-auto text-xs font-semibold text-slate-700 font-body">
+                      {service.bullets.map((point, pIdx) => (
+                        <div key={pIdx} className="flex items-center gap-2">
+                          <CheckCircle className="w-4 h-4 text-emerald-500 shrink-0" />
+                          <span>{point}</span>
+                        </div>
+                      ))}
+                    </div>
+                    <Link
+                      to={service.btnLink}
+                      className={`inline-flex items-center justify-between w-full px-5 py-3 rounded-xl ${service.btnBg} font-heading font-bold text-sm transition-all duration-300 shadow-xs`}
+                    >
+                      <span>{service.btnText}</span>
+                      <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                    </Link>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <CheckCircle className="w-4 h-4 text-emerald-500 shrink-0" />
-                    <span>૧૦૦% સચોટ કિલોમીટર (Genuine KM)</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <CheckCircle className="w-4 h-4 text-emerald-500 shrink-0" />
-                    <span>સરળ બેંક લોન અને ફાઇનાન્સ સુવિધા</span>
-                  </div>
-                </div>
-                <Link
-                  to="/inventory"
-                  className="inline-flex items-center justify-between w-full px-5 py-3 rounded-xl bg-slate-50 group-hover:bg-primary text-slate-800 group-hover:text-white font-heading font-bold text-sm transition-all duration-300 shadow-xs"
-                >
-                  <span>સર્ટિફાઈડ કાર જુઓ</span>
-                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                </Link>
-              </div>
-
-              {/* Card 2: Sell Your Car Instantly */}
-              <div className="relative group bg-white/90 backdrop-blur-md rounded-3xl p-8 border border-gray-100 hover:border-emerald-300 shadow-sm hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-300 flex flex-col">
-                <div className="absolute top-0 inset-x-8 h-[2px] bg-gradient-to-r from-transparent via-emerald-500 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                <div className="w-16 h-16 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center mb-6 group-hover:scale-110 shadow-sm transition-transform">
-                  <Banknote className="w-8 h-8 text-emerald-600" />
-                </div>
-                <h3 className="font-heading text-2xl font-black text-slate-900 mb-3">તમારી કાર તરત જ વેચો</h3>
-                <p className="font-body text-slate-600 text-sm leading-relaxed mb-6">
-                  પારદર્શક મૂલ્યાંકન અને તુરંત બેંક પેમેન્ટ સાથે તમારી જૂની કારની મેળવો શ્રેષ્ઠ બજાર કિંમત, કોઈ પણ જાતની ઝંઝટ વગર.
-                </p>
-                <div className="space-y-2 mb-8 mt-auto text-xs font-semibold text-slate-700 font-body">
-                  <div className="flex items-center gap-2">
-                    <CheckCircle className="w-4 h-4 text-emerald-500 shrink-0" />
-                    <span>૩૦ મિનિટમાં બેસ્ટ બજાર વેલ્યુએશન</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <CheckCircle className="w-4 h-4 text-emerald-500 shrink-0" />
-                    <span>સીધું ઇન્સ્ટન્ટ બેંક ટ્રાન્સફર પેમેન્ટ</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <CheckCircle className="w-4 h-4 text-emerald-500 shrink-0" />
-                    <span>૧૦૦% મફત RTO દસ્તાવેજ ટ્રાન્સફર</span>
-                  </div>
-                </div>
-                <Link
-                  to="/sell-your-car"
-                  className="inline-flex items-center justify-between w-full px-5 py-3 rounded-xl bg-emerald-50/80 group-hover:bg-emerald-600 text-emerald-900 group-hover:text-white font-heading font-bold text-sm transition-all duration-300 shadow-xs"
-                >
-                  <span>ઓનલાઇન વેલ્યુએશન મેળવો</span>
-                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                </Link>
-              </div>
-
-              {/* Card 3: Hassle-Free Car Exchange */}
-              <div className="relative group bg-white/90 backdrop-blur-md rounded-3xl p-8 border border-gray-100 hover:border-orange-300 shadow-sm hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-300 flex flex-col">
-                <div className="absolute top-0 inset-x-8 h-[2px] bg-gradient-to-r from-transparent via-brand-orange to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                <div className="w-16 h-16 rounded-2xl bg-orange-50 text-brand-orange flex items-center justify-center mb-6 group-hover:scale-110 shadow-sm transition-transform">
-                  <RefreshCw className="w-8 h-8 text-brand-orange" />
-                </div>
-                <h3 className="font-heading text-2xl font-black text-slate-900 mb-3">જૂની કારનું શ્રેષ્ઠ એક્સચેન્જ</h3>
-                <p className="font-body text-slate-600 text-sm leading-relaxed mb-6">
-                  તમારી જૂની કાર આપીને શ્રેષ્ઠ એક્સચેન્જ બોનસ સાથે તમારી મનપસંદ વેરિફાઇડ કારમાં અપગ્રેડ કરો (Trusted Dealer).
-                </p>
-                <div className="space-y-2 mb-8 mt-auto text-xs font-semibold text-slate-700 font-body">
-                  <div className="flex items-center gap-2">
-                    <CheckCircle className="w-4 h-4 text-emerald-500 shrink-0" />
-                    <span>કોઈ પણ કંપની/મોડેલનું એક્સચેન્જ સ્વીકાર્ય</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <CheckCircle className="w-4 h-4 text-emerald-500 shrink-0" />
-                    <span>આકર્ષક એક્સચેન્જ બોનસ અને ડિસ્કાઉન્ટ</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <CheckCircle className="w-4 h-4 text-emerald-500 shrink-0" />
-                    <span>સેમ-ડે ડિલિવરી અને ઝીરો ડાઉન પેમેન્ટ</span>
-                  </div>
-                </div>
-                <Link
-                  to="/about?service=exchange"
-                  className="inline-flex items-center justify-between w-full px-5 py-3 rounded-xl bg-orange-50/80 group-hover:bg-brand-orange text-orange-950 group-hover:text-white font-heading font-bold text-sm transition-all duration-300 shadow-xs"
-                >
-                  <span>એક્સચેન્જ ઓફર્સ જાણો</span>
-                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                </Link>
-              </div>
+                );
+              })}
             </div>
           </div>
         </section>
@@ -359,7 +516,7 @@ export default function Home() {
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-2 px-5 py-3.5 rounded-xl bg-[#25D366] hover:bg-[#20bd5a] text-white font-heading font-bold text-sm shadow-md transition-all cursor-pointer"
                   >
-                    <MessageCircle className="w-4 h-4 fill-current" />
+                    <WhatsAppIcon className="w-4 h-4" />
                     <span>WhatsApp</span>
                   </a>
                 </div>

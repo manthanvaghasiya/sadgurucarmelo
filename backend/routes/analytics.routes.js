@@ -1,4 +1,5 @@
 import express from 'express';
+import mongoose from 'mongoose';
 import Analytics from '../models/Analytics.js';
 
 const router = express.Router();
@@ -183,6 +184,78 @@ router.get('/summary', async (req, res) => {
   } catch (err) {
     console.error('Analytics summary error:', err);
     res.status(500).json({ error: err.message });
+  }
+});
+
+// @route   GET /api/analytics/storage
+// @desc    Get MongoDB and ImageKit storage & bandwidth stats
+// @access  Public
+router.get('/storage', async (req, res) => {
+  try {
+    // MongoDB Stats
+    const db = mongoose.connection.db;
+    const dbStats = await db.stats();
+    const mongoUsedMB = (dbStats.storageSize || 0) / (1024 * 1024);
+    const mongoTotalMB = 512;
+    const mongoPercentage = (mongoUsedMB / mongoTotalMB) * 100;
+
+    // ImageKit Stats
+    let ikUsedGB = 0;
+    let ikBandwidthGB = 0;
+    
+    if (process.env.IMAGEKIT_PRIVATE_KEY) {
+      try {
+        const axios = (await import('axios')).default;
+        
+        // ImageKit requires date range for usage API (last 30 days)
+        const endDate = new Date();
+        const startDate = new Date();
+        startDate.setDate(endDate.getDate() - 30);
+        
+        const startStr = startDate.toISOString().split('T')[0];
+        const endStr = endDate.toISOString().split('T')[0];
+        
+        const ikAuth = Buffer.from(process.env.IMAGEKIT_PRIVATE_KEY + ':').toString('base64');
+        const ikRes = await axios.get(`https://api.imagekit.io/v1/accounts/usage?startDate=${startStr}&endDate=${endStr}`, {
+          headers: {
+            'Authorization': `Basic ${ikAuth}`,
+            'Accept': 'application/json'
+          }
+        });
+        
+        if (ikRes.status === 200 && ikRes.data) {
+          const ikData = ikRes.data;
+          ikUsedGB = (ikData.mediaLibraryStorageBytes || 0) / (1024 * 1024 * 1024);
+          ikBandwidthGB = (ikData.bandwidthBytes || 0) / (1024 * 1024 * 1024);
+        }
+      } catch (ikErr) {
+        console.error('Failed to fetch ImageKit stats via axios:', ikErr.message);
+      }
+    }
+
+    res.status(200).json({
+      success: true,
+      mongodb: {
+        usedMB: parseFloat(mongoUsedMB.toFixed(2)),
+        totalMB: mongoTotalMB,
+        percentage: parseFloat(mongoPercentage.toFixed(2))
+      },
+      imagekit: {
+        usedGB: parseFloat(ikUsedGB.toFixed(4)),
+        bandwidthGB: parseFloat(ikBandwidthGB.toFixed(4)),
+        totalGB: 3,
+        bandwidthTotalGB: 20
+      },
+      cloudinary: {
+        usedGB: parseFloat(ikUsedGB.toFixed(4)),
+        bandwidthGB: parseFloat(ikBandwidthGB.toFixed(4)),
+        totalGB: 3,
+        bandwidthTotalGB: 20
+      }
+    });
+  } catch (err) {
+    console.error('Storage stats error:', err);
+    res.status(500).json({ success: false, error: err.message });
   }
 });
 

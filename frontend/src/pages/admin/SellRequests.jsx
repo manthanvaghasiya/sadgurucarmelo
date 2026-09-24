@@ -4,7 +4,6 @@ import toast from 'react-hot-toast';
 import {
   Car,
   Phone,
-  MessageCircle,
   Mail,
   Trash2,
   Calendar,
@@ -19,6 +18,7 @@ import {
   Eye,
   X
 } from 'lucide-react';
+import WhatsAppIcon from '../../components/WhatsAppIcon';
 
 const STATUS_OPTIONS = ['Pending', 'Reviewed', 'Contacted', 'Closed'];
 
@@ -308,7 +308,7 @@ export default function SellRequests() {
                     rel="noopener noreferrer"
                     className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg bg-[#25D366] text-white font-bold text-xs hover:bg-[#20bd5a] transition-colors"
                   >
-                    <MessageCircle className="w-3.5 h-3.5" />
+                    <WhatsAppIcon className="w-3.5 h-3.5" />
                     WhatsApp
                   </a>
                 </div>

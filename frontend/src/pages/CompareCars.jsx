@@ -13,7 +13,6 @@ import {
   Calendar,
   IndianRupee,
   ShieldCheck,
-  MessageCircle,
   Sparkles,
   ChevronRight,
   Eye,
@@ -22,6 +21,7 @@ import {
 import { useCompare } from '../context/CompareContext';
 import { useCars } from '../context/CarContext';
 import { getOptimizedUrl } from '../utils/imageUtils';
+import WhatsAppIcon from '../components/WhatsAppIcon';
 
 export default function CompareCars() {
   const { compareCars, removeFromCompare, addToCompare, clearCompare } = useCompare();
@@ -290,12 +290,13 @@ export default function CompareCars() {
                       </div>
 
                       {/* Action Links */}
-                      <div className="grid grid-cols-2 gap-2 pt-3 border-t border-slate-100">
+                      <div className="flex items-center gap-1.5 pt-3 border-t border-slate-100">
                         <Link
                           to={`/car-details/${carId}`}
-                          className="px-3 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-900 font-bold text-xs text-center transition-colors"
+                          className="flex-1 py-2 px-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-900 font-bold text-xs text-center transition-colors truncate"
                         >
-                          વિગત જુઓ · Details
+                          <span className="sm:hidden">Details</span>
+                          <span className="hidden sm:inline">વિગત જુઓ · Details</span>
                         </Link>
                         <a
                           href={`https://wa.me/919913634447?text=${encodeURIComponent(
@@ -303,9 +304,11 @@ export default function CompareCars() {
                           )}`}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="px-3 py-2 rounded-lg bg-[#25D366] hover:bg-[#20bd5a] text-white font-bold text-xs flex items-center justify-center gap-1 transition-colors"
+                          className="w-8 h-8 sm:w-auto sm:px-3 py-2 rounded-lg bg-[#25D366] hover:bg-[#20bd5a] text-white font-bold text-xs flex items-center justify-center gap-1 transition-colors shrink-0"
+                          title="WhatsApp"
                         >
-                          <MessageCircle className="w-3.5 h-3.5" /> WhatsApp
+                          <WhatsAppIcon className="w-3.5 h-3.5" />
+                          <span className="hidden sm:inline">WhatsApp</span>
                         </a>
                       </div>
                     </div>
@@ -337,7 +340,7 @@ export default function CompareCars() {
                 <div className="mt-6 p-4 rounded-2xl bg-gradient-to-r from-emerald-500/10 via-teal-500/10 to-transparent border border-emerald-500/20 flex flex-col sm:flex-row items-center justify-between gap-3">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-xl bg-[#25D366] text-white flex items-center justify-center shrink-0 shadow-sm">
-                      <MessageCircle className="w-5 h-5" />
+                      <WhatsAppIcon className="w-5 h-5" />
                     </div>
                     <div>
                       <p className="font-heading font-bold text-slate-900 text-sm">
@@ -354,7 +357,7 @@ export default function CompareCars() {
                     rel="noopener noreferrer"
                     className="px-5 py-2.5 rounded-xl bg-[#25D366] hover:bg-[#20bd5a] text-white font-heading font-bold text-xs flex items-center gap-2 shadow-sm shrink-0 active:scale-95 transition-all"
                   >
-                    <MessageCircle className="w-4 h-4" />
+                    <WhatsAppIcon className="w-4 h-4" />
                     <span>એક્સપર્ટની સલાહ લો · Consult Expert</span>
                   </a>
                 </div>

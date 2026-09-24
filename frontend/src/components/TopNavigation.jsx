@@ -1,5 +1,6 @@
 import { Link, useLocation } from 'react-router-dom';
-import { Phone, MessageCircle } from 'lucide-react';
+import { Phone } from 'lucide-react';
+import WhatsAppIcon from './WhatsAppIcon';
 import { useCompare } from '../context/CompareContext';
 
 export default function TopNavigation() {
@@ -71,7 +72,7 @@ export default function TopNavigation() {
               rel="noopener noreferrer"
               className="border-2 border-[#25D366] text-[#25D366] hover:bg-[#25D366] hover:text-white p-2 md:px-5 md:py-2.5 rounded-lg font-body font-bold text-sm flex items-center gap-2 transition-colors"
             >
-              <MessageCircle className="w-5 h-5 md:w-4 md:h-4" />
+              <WhatsAppIcon className="w-5 h-5 md:w-4 md:h-4" />
               <span className="hidden md:inline">WhatsApp</span>
             </a>
           </div>

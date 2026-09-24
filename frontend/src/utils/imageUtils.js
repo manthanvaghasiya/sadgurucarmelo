@@ -3,6 +3,18 @@
  */
 
 /**
+ * Extracts raw image URL from either a string URL or an object { url, publicId }
+ * @param {string|object} image 
+ * @returns {string}
+ */
+export const extractImageUrl = (image) => {
+  if (!image) return '';
+  if (typeof image === 'string') return image;
+  if (typeof image === 'object' && image.url) return image.url;
+  return '';
+};
+
+/**
  * Automatically injects auto-format, auto-quality, and responsive width parameters
  * into image URLs to drastically reduce file sizes and save bandwidth.
  * 
