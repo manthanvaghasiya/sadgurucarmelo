@@ -58,7 +58,6 @@ function App() {
           <CompareProvider>
             <PWAInstallPrompt />
             <PushNotificationManager />
-            <CompareFloatingBar />
             <Toaster position="top-right" toastOptions={{ style: { fontFamily: 'var(--font-body)' } }} />
             {/* This wrapper ensures the Footer is always pushed to the bottom 
           even if the page content is short.
@@ -73,6 +72,7 @@ function App() {
                       <TopNavigation />
 
                       <MobileBottomNav />
+                      <CompareFloatingBar />
                       <main className="flex-grow">
                         <Suspense fallback={<PageLoader />}>
                           <Routes>

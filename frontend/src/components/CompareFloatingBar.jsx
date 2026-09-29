@@ -10,8 +10,12 @@ export default function CompareFloatingBar() {
   const location = useLocation();
   const [isMinimized, setIsMinimized] = useState(false);
 
-  // Don't show on the actual comparison page or if list is empty
-  if (compareCars.length === 0 || location.pathname === '/compare') {
+  // Don't show on admin panel, login page, the actual comparison page, or if list is empty
+  const isAdminOrAuth =
+    location.pathname.startsWith('/admin') ||
+    location.pathname.startsWith('/login');
+
+  if (compareCars.length === 0 || location.pathname === '/compare' || isAdminOrAuth) {
     return null;
   }
 

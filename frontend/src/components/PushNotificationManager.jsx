@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import axiosInstance from '../api/axiosConfig';
 
 // Helper to convert base64 VAPID key to Uint8Array for PushManager
@@ -16,6 +17,11 @@ function urlBase64ToUint8Array(base64String) {
 const DEFAULT_VAPID_PUBLIC_KEY = 'BFKd4ejW7KnCHmvNK27-9aVFk1tpqMMrxgfoKLz-GSLmsXctlnoOBUFOy3L-RvBm14Rftm5HkQ0DZngAsAiePMg';
 
 export default function PushNotificationManager() {
+  const location = useLocation();
+  const isAdminOrAuth =
+    location.pathname.startsWith('/admin') ||
+    location.pathname.startsWith('/login');
+
   const [showPrompt, setShowPrompt] = useState(false);
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -127,6 +133,10 @@ export default function PushNotificationManager() {
     setShowPrompt(false);
     localStorage.setItem('sadguru_push_prompt_dismissed', Date.now().toString());
   };
+
+  if (isAdminOrAuth) {
+    return null;
+  }
 
   return (
     <>
