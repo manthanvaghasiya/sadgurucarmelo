@@ -174,9 +174,9 @@ Please guide me with the loan approval process.`
               className="w-full h-2.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-brand-orange"
             />
             <div className="flex justify-between text-[10px] text-slate-400 font-semibold mt-1">
-              <span>૧ વર્ષ</span>
-              <span>૪ વર્ષ</span>
-              <span>૭ વર્ષ</span>
+              <span>1 વર્ષ</span>
+              <span>4 વર્ષ</span>
+              <span>7 વર્ષ</span>
             </div>
           </div>
         </div>

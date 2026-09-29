@@ -27,7 +27,7 @@ const dealershipServices = [
     tabName: 'કાર ખરીદો',
     tabBadge: '150+ કાર',
     title: 'સર્ટિફાઈડ કાર ખરીદો',
-    desc: 'તમારા પરિવારના ભરોસા માટે ૧૫૦+ વેરિફાઇડ કાર. ૧૨૦+ પોઈન્ટ ટેકનિકલ ઈન્સ્પેક્શન અને વાજબી કિંમત.',
+    desc: 'તમારા પરિવારના ભરોસા માટે 150+ વેરિફાઇડ કાર. 120+ પોઈન્ટ ટેકનિકલ ઈન્સ્પેક્શન અને વાજબી કિંમત.',
     icon: ShieldCheck,
     iconBg: 'bg-slate-100 text-primary',
     topLine: 'via-slate-800',
@@ -36,8 +36,8 @@ const dealershipServices = [
     btnLink: '/inventory',
     btnText: 'સર્ટિફાઈડ કાર જુઓ',
     bullets: [
-      '૧૨૦+ પોઈન્ટ ટેકનિકલ ચેક',
-      '૧૦૦% સચોટ કિલોમીટર (Genuine KM)',
+      '120+ પોઈન્ટ ટેકનિકલ ચેક',
+      '100% સચોટ કિલોમીટર (Genuine KM)',
       'સરળ બેંક લોન અને ફાઇનાન્સ સુવિધા',
     ],
   },
@@ -55,9 +55,9 @@ const dealershipServices = [
     btnLink: '/sell-your-car',
     btnText: 'ઓનલાઇન વેલ્યુએશન મેળવો',
     bullets: [
-      '૩૦ મિનિટમાં બેસ્ટ બજાર વેલ્યુએશન',
+      '30 મિનિટમાં બેસ્ટ બજાર વેલ્યુએશન',
       'સીધું ઇન્સ્ટન્ટ બેંક ટ્રાન્સફર પેમેન્ટ',
-      '૧૦૦% મફત RTO દસ્તાવેજ ટ્રાન્સફર',
+      '100% મફત RTO દસ્તાવેજ ટ્રાન્સફર',
     ],
   },
   {
@@ -188,7 +188,7 @@ export default function Home() {
                   Explore Our <span className="inventory-heading-gradient text-transparent bg-clip-text bg-gradient-to-r from-brand-orange via-amber-500 to-yellow-500">Verified Cars</span>
                 </h2>
                 <p className="font-body text-slate-500 mt-2 text-sm sm:text-base max-w-xl">
-                  ૧૫૦+ ગુણવત્તાયુક્ત વેરિફાઇડ કાર (Verified Cars), સંપૂર્ણ સર્વિસ હિસ્ટ્રી અને ૧૨૦+ પોઈન્ટ ટેકનિકલ ઈન્સ્પેક્શન સાથે.
+                  150+ ગુણવત્તાયુક્ત વેરિફાઇડ કાર (Verified Cars), સંપૂર્ણ સર્વિસ હિસ્ટ્રી અને 120+ પોઈન્ટ ટેકનિકલ ઈન્સ્પેક્શન સાથે.
                 </p>
               </div>
 
@@ -280,7 +280,7 @@ export default function Home() {
                 સુરતમાં <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-orange via-amber-500 to-yellow-500">ખરીદ, વેચાણ અને Exchange</span> માટેનું સંપૂર્ણ Solution
               </h2>
               <p className="font-body text-slate-600 text-xs sm:text-base md:text-lg leading-relaxed max-w-2xl mx-auto">
-                પારદર્શક પ્રક્રિયા અને સુરતના હજારો પરિવારોના વિશ્વાસ સાથે. તમારી દરેક જરૂરિયાત માટે ૧૦૦% સેફ અને સરળ કાર ડીલિંગનો અનુભવ (Trusted Dealer).
+                પારદર્શક પ્રક્રિયા અને સુરતના હજારો પરિવારોના વિશ્વાસ સાથે. તમારી દરેક જરૂરિયાત માટે 100% સેફ અને સરળ કાર ડીલિંગનો અનુભવ (Trusted Dealer).
               </p>
             </motion.div>
 

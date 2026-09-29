@@ -180,7 +180,7 @@ export default function CompareCars() {
               કારની સરખામણી <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-orange via-amber-500 to-yellow-500">· Compare Cars</span>
             </h1>
             <p className="text-slate-600 font-body text-sm sm:text-base mt-2 max-w-2xl leading-relaxed">
-              તમારી પસંદગીની ૨ થી ૩ ગાડીઓની કિંમત, EMI, એન્જિન ક્ષમતા અને સુવિધાઓની સાથે સરખામણી કરી શ્રેષ્ઠ નિર્ણય લો.
+              તમારી પસંદગીની 2 થી 3 ગાડીઓની કિંમત, EMI, એન્જિન ક્ષમતા અને સુવિધાઓની સાથે સરખામણી કરી શ્રેષ્ઠ નિર્ણય લો.
             </p>
           </div>
 
@@ -220,7 +220,7 @@ export default function CompareCars() {
               સરખામણી માટે કોઈ કાર પસંદ કરેલ નથી
             </h2>
             <p className="text-slate-600 font-body text-sm sm:text-base mb-8 max-w-md mx-auto leading-relaxed">
-              અમારી ઇન્વેન્ટરીમાંથી કોઈપણ ૨ અથવા ૩ ગાડીઓ પસંદ કરો અને તેમની વિશેષતાઓ એકબીજા સાથે સરખાવો.
+              અમારી ઇન્વેન્ટરીમાંથી કોઈપણ 2 અથવા 3 ગાડીઓ પસંદ કરો અને તેમની વિશેષતાઓ એકબીજા સાથે સરખાવો.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
               <button

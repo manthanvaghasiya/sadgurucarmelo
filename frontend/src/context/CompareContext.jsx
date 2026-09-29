@@ -65,7 +65,7 @@ export function CompareProvider({ children }) {
     }
 
     if (compareCars.length >= 3) {
-      toast.error('મહત્તમ ૩ કારની સરખામણી કરી શકાય છે · Maximum 3 cars can be compared');
+      toast.error('મહત્તમ 3 કારની સરખામણી કરી શકાય છે · Maximum 3 cars can be compared');
       return;
     }
 

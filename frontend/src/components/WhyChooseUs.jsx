@@ -35,7 +35,7 @@ const staggerChild = {
 const promiseCards = [
     {
         id: 'certified',
-        badge: '૧૨૦+ પોઇન્ટ વેરિફિકેશન',
+        badge: '120+ પોઇન્ટ વેરિફિકેશન',
         title: 'Certified અને 100% Tested Cars',
         desc: 'તમારી સુરક્ષા માટે દરેક Car નું 120+ પોઈન્ટનું કડક Inspection કરવામાં આવે છે.',
         icon: CheckCircle,
@@ -47,14 +47,14 @@ const promiseCards = [
         ringColor: 'border-slate-400',
         badgeBg: 'bg-slate-100 text-slate-800 border-slate-200',
         bullets: [
-            '૧૨૦+ પોઇન્ટ કડક ટેકનિકલ ઈન્સ્પેક્શન',
+            '120+ પોઇન્ટ કડક ટેકનિકલ ઈન્સ્પેક્શન',
             'નોન-એક્સિડેન્ટલ & ક્લીન હિસ્ટ્રી ગેરંટી',
-            '૧૦૦% સચોટ અને વેરિફાઇડ કિલોમીટર'
+            '100% સચોટ અને વેરિફાઇડ કિલોમીટર'
         ]
     },
     {
         id: 'finance',
-        badge: '૧૦૦% ક્વિક એપ્રૂવલ',
+        badge: '100% ક્વિક એપ્રૂવલ',
         title: 'ઝડપી Loan અને Finance',
         desc: 'Top Banks માંથી સરળ EMI અને 100% Quick Approval ની ગેરંટી.',
         icon: Landmark,
@@ -73,7 +73,7 @@ const promiseCards = [
     },
     {
         id: 'rto',
-        badge: '૧૦૦% મફત RTO ટ્રાન્સફર',
+        badge: '100% મફત RTO ટ્રાન્સફર',
         title: 'Hassle-Free RC Transfer',
         desc: 'કાગળકામની તમામ ઝંઝટમાંથી મુક્તિ. સુરત RTO નું નામ ટ્રાન્સફર સંપૂર્ણ અમારી જવાબદારી.',
         icon: FileText,
@@ -85,7 +85,7 @@ const promiseCards = [
         ringColor: 'border-blue-400',
         badgeBg: 'bg-blue-50 text-blue-800 border-blue-200',
         bullets: [
-            '૧૦૦% કાનૂની અને ઝડપી RC ઓનરશિપ ટ્રાન્સફર',
+            '100% કાનૂની અને ઝડપી RC ઓનરશિપ ટ્રાન્સફર',
             'સિંગલ / મલ્ટી ઓનર સાચી હિસ્ટ્રી ક્લિયરન્સ',
             'ચલણ ફ્રી અને ઝીરો પેન્ડિંગ ટેક્સ ખાતરી'
         ]
@@ -104,16 +104,16 @@ const promiseCards = [
         ringColor: 'border-purple-400',
         badgeBg: 'bg-purple-50 text-purple-800 border-purple-200',
         bullets: [
-            'માત્ર ૧૫ મિનિટમાં ફ્રી પારદર્શક કાર મૂલ્યાંકન',
+            'માત્ર 15 મિનિટમાં ફ્રી પારદર્શક કાર મૂલ્યાંકન',
             'એક્સચેન્જ પર સ્પેશિયલ બોનસ ડિસ્કાઉન્ટ ઓફર',
             'ઈન્સ્ટન્ટ બેંક ટ્રાન્સફર પેમેન્ટ સુવિધા'
         ]
     },
     {
         id: 'genuine',
-        badge: '૧૦૦% જેન્યુઈન મીટર',
+        badge: '100% જેન્યુઈન મીટર',
         title: 'Non-Accidental & સાચું કિલોમીટર',
-        desc: 'ઓરિજિનલ સર્વિસ રેકોર્ડ આધારિત સાચું કિલોમીટર અને નોન-એક્સિડેન્ટલ ની ૧૦૦% ખાતરી.',
+        desc: 'ઓરિજિનલ સર્વિસ રેકોર્ડ આધારિત સાચું કિલોમીટર અને નોન-એક્સિડેન્ટલ ની 100% ખાતરી.',
         icon: ShieldCheck,
         shortTitle: 'Non-Accident',
         borderAccent: 'border-amber-500/80',
@@ -124,13 +124,13 @@ const promiseCards = [
         badgeBg: 'bg-amber-50 text-amber-800 border-amber-200',
         bullets: [
             'ઓરિજિનલ સર્વિસ રેકોર્ડ સાથે વેરિફાઈડ મીટર',
-            'મેઈન ચેસીસ અને એન્જિન ૧૦૦% ઓરિજિનલ & અકબંધ',
+            'મેઈન ચેસીસ અને એન્જિન 100% ઓરિજિનલ & અકબંધ',
             'લેખિત પ્રમાણપત્ર સાથે સંપૂર્ણ માનસિક શાંતિ'
         ]
     },
     {
         id: 'support',
-        badge: '૨૪/૭ સુરત લોકલ સપોર્ટ',
+        badge: '24/7 સુરત લોકલ સપોર્ટ',
         title: 'સુરતની શ્રેષ્ઠ Local Support',
         desc: 'કાર ખરીદ્યા પછી પણ Service અને Support માટે હંમેશા હાજર.',
         icon: Headphones,
@@ -144,7 +144,7 @@ const promiseCards = [
         bullets: [
             'કાર ડિલિવરી પછી પણ સંપૂર્ણ સર્વિસ સહાય',
             'વરાછા, સુરત શોરૂમ પર રૂબરૂ ત્વરિત સપોર્ટ',
-            'સમર્પિત કાર એડવાઈઝર દ્વારા ૨૪/૭ માર્ગદર્શન'
+            'સમર્પિત કાર એડવાઈઝર દ્વારા 24/7 માર્ગદર્શન'
         ]
     }
 ];

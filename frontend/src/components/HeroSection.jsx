@@ -244,7 +244,7 @@ export default function HeroSection() {
             transition={{ duration: 0.6, delay: 0.2 }}
             className="text-sm sm:text-base text-slate-600 font-medium max-w-xl mx-auto mt-2.5 sm:mt-3 leading-relaxed"
           >
-            ૧૫૦+ વેરિફાઇડ કાર, ૧૨૦+ પોઈન્ટ ટેકનિકલ ઈન્સ્પેક્શન અને સંપૂર્ણ ભરોસા સાથે તમારા પરિવાર માટે શ્રેષ્ઠ કાર.
+            150+ વેરિફાઇડ કાર, 120+ પોઈન્ટ ટેકનિકલ ઈન્સ્પેક્શન અને સંપૂર્ણ ભરોસા સાથે તમારા પરિવાર માટે શ્રેષ્ઠ કાર.
           </motion.p>
 
           {/* Action CTA: Explore Cars (or Book Test Drive when enabled) */}
@@ -302,7 +302,7 @@ export default function HeroSection() {
                       <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75" />
                       <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-brand-orange" />
                     </span>
-                    ⚡ ૧૫૦+ લાઈવ સ્ટોક · Surat
+                    ⚡ 150+ લાઈવ સ્ટોક · Surat
                   </span>
                 </div>
 
@@ -450,7 +450,7 @@ export default function HeroSection() {
                       ટેકનિકલ સર્ટિફિકેશન
                     </span>
                     <h4 className="font-heading font-black text-sm text-slate-900 leading-tight">
-                      🛡️ ૧૨૦+ પોઈન્ટ ચેક પાસ
+                      🛡️ 120+ પોઈન્ટ ચેક પાસ
                     </h4>
                     <span className="text-[10px] font-body text-slate-500 font-medium block">
                       ઈન્સ્પેક્શન પાસ &amp; નોન-એક્સિડેન્ટલ
@@ -726,7 +726,7 @@ export default function HeroSection() {
                       ⚡ {(activeCar.kms || 87000).toLocaleString('en-IN')} KM
                     </h4>
                     <span className="text-[10px] font-body text-slate-500 font-medium block">
-                      ૧૦૦% જેન્યુઇન કિલોમીટર
+                      100% જેન્યુઇન કિલોમીટર
                     </span>
                   </div>
                 </div>
@@ -743,10 +743,10 @@ export default function HeroSection() {
                       સરળ લોન &amp; કાગળિયાં
                     </span>
                     <h4 className="font-heading font-black text-sm text-slate-900 leading-tight">
-                      🏦 ૦ ડાઉન પેમેન્ટ • 📄 ફ્રી RTO
+                      🏦 0 ડાઉન પેમેન્ટ • 📄 ફ્રી RTO
                     </h4>
                     <span className="text-[10px] font-body text-slate-500 font-medium block">
-                      ૨ કલાકમાં લોન &amp; લીગલ ટ્રાન્સફર
+                      2 કલાકમાં લોન &amp; લીગલ ટ્રાન્સફર
                     </span>
                   </div>
                 </div>
