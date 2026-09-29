@@ -3,12 +3,12 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import {
   CheckCircle, Banknote, ShieldCheck,
-  Search, Star, MapPin, Phone, RefreshCw,
-  Clock, ArrowRight, Sparkles, Award, ArrowUpRight,
+  Search, Star, RefreshCw,
+  ArrowRight, Sparkles,
   Car, ChevronRight, ChevronLeft
 } from 'lucide-react';
 import { motion, AnimatePresence } from "framer-motion";
-import WhatsAppIcon from '../components/WhatsAppIcon';
+
 import CarCard from '../components/CarCard';
 import SkeletonCarCard from '../components/SkeletonCarCard';
 import { useCars } from '../context/CarContext';
@@ -450,124 +450,7 @@ export default function Home() {
         {/* 8. Happy Customers Gallery */}
         <HappyCustomers />
 
-        {/* 9. Showroom Visit & Direct Contact CTA Section */}
-        <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-slate-900 via-primary to-slate-950 text-white relative overflow-hidden">
-          {/* Ambient Glow */}
-          <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-brand-orange/10 rounded-full blur-[140px] pointer-events-none" />
-          <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-amber-500/5 rounded-full blur-[120px] pointer-events-none" />
 
-          <div className="max-w-7xl mx-auto relative z-10">
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
-              {/* Left Column: Showroom Info */}
-              <div className="lg:col-span-7">
-                <span className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 border border-white/15 text-amber-400 font-heading font-bold text-xs uppercase tracking-widest mb-4">
-                  <MapPin className="w-3.5 h-3.5 text-brand-orange" /> સુરત શોરૂમ મુલાકાત
-                </span>
-                <h2 className="font-heading text-3xl sm:text-4xl md:text-5xl font-black text-white leading-tight mb-4">
-                  સદગુરુ કાર મેળો, વરાછા સુરતની <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-orange via-amber-400 to-yellow-500">મુલાકાત લો</span>
-                </h2>
-                <p className="font-body text-slate-300 text-base sm:text-lg mb-8 leading-relaxed max-w-2xl">
-                  આવો રૂબરૂ મળીને તમારી પસંદગીની કાર જુઓ, ટેસ્ટ ડ્રાઈવ લો અને શ્રેષ્ઠ ડીલ મેળવો. અમારા અનુભવી સ્ટાફ તમારી સેવામાં હંમેશા હાજર છે.
-                </p>
-
-                {/* Showroom Specs */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
-                  <div className="flex items-start gap-3 bg-white/5 backdrop-blur-md p-4 rounded-2xl border border-white/10">
-                    <MapPin className="w-5 h-5 text-brand-orange shrink-0 mt-0.5" />
-                    <div>
-                      <h3 className="font-heading font-bold text-sm text-white">સરનામું · Showroom Location</h3>
-                      <p className="font-body text-xs text-slate-300 mt-1">વરાછા રોડ, સુરત, ગુજરાત - 395006</p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-start gap-3 bg-white/5 backdrop-blur-md p-4 rounded-2xl border border-white/10">
-                    <Clock className="w-5 h-5 text-brand-orange shrink-0 mt-0.5" />
-                    <div>
-                      <h3 className="font-heading font-bold text-sm text-white">સમય · Working Hours</h3>
-                      <p className="font-body text-xs text-slate-300 mt-1">સવારે 9:30 થી રાત્રે 8:30 (દરરોજ ખુલ્લું)</p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Direct Action Buttons */}
-                <div className="flex flex-wrap items-center gap-3 sm:gap-4">
-                  <a
-                    href="https://maps.google.com/?q=Sadguru+Car+Melo+Surat"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl bg-brand-orange hover:bg-orange-600 text-white font-heading font-bold text-sm shadow-[0_10px_25px_rgba(245,148,35,0.4)] transition-all cursor-pointer"
-                  >
-                    <MapPin className="w-4 h-4" />
-                    <span>ગૂગલ મેપ્સ લોકેશન (Get Directions)</span>
-                    <ArrowUpRight className="w-4 h-4" />
-                  </a>
-
-                  <a
-                    href="tel:+919913634447"
-                    className="inline-flex items-center gap-2 px-5 py-3.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-heading font-bold text-sm border border-white/15 transition-all cursor-pointer"
-                  >
-                    <Phone className="w-4 h-4 text-emerald-400" />
-                    <span>+91 99136 34447</span>
-                  </a>
-
-                  <a
-                    href="https://wa.me/919913634447?text=નમસ્તે,%20હું%20સદગુરુ%20કાર%20મેળામાંથી%20કાર%20વિશે%20માહિતી%20મેળવવા%20માગું%20છું."
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 px-5 py-3.5 rounded-xl bg-[#25D366] hover:bg-[#20bd5a] text-white font-heading font-bold text-sm shadow-md transition-all cursor-pointer"
-                  >
-                    <WhatsAppIcon className="w-4 h-4" />
-                    <span>WhatsApp</span>
-                  </a>
-                </div>
-              </div>
-
-              {/* Right Column: Visual Trust Card */}
-              <div className="lg:col-span-5">
-                <div className="relative rounded-3xl bg-white/5 border border-white/15 p-6 sm:p-8 backdrop-blur-xl shadow-2xl">
-                  <div className="flex items-center gap-3 mb-6">
-                    <div className="w-12 h-12 rounded-2xl bg-brand-orange/20 border border-brand-orange/30 flex items-center justify-center">
-                      <Award className="w-6 h-6 text-brand-orange" />
-                    </div>
-                    <div>
-                      <h4 className="font-heading font-bold text-lg text-white">સદગુરુ કાર મેળો</h4>
-                      <p className="text-xs text-slate-400">સુરતનો સૌથી વિશ્વાસપાત્ર વેરિફાઇડ કાર ડીલર (Trusted Dealer)</p>
-                    </div>
-                  </div>
-
-                  <div className="space-y-4 text-sm font-body text-slate-200">
-                    <div className="flex items-center justify-between pb-3 border-b border-white/10">
-                      <span className="text-slate-400">કુલ સર્ટિફાઈડ સ્ટોક</span>
-                      <span className="font-bold text-white">૧૫૦+ ઉપલબ્ધ કાર</span>
-                    </div>
-                    <div className="flex items-center justify-between pb-3 border-b border-white/10">
-                      <span className="text-slate-400">ગ્રાહક સંતોષ રેટિંગ</span>
-                      <span className="font-bold text-amber-400 flex items-center gap-1">4.8 / 5.0 (૫૦૦+ રિવ્યૂ)</span>
-                    </div>
-                    <div className="flex items-center justify-between pb-3 border-b border-white/10">
-                      <span className="text-slate-400">સ્થાપના વર્ષ</span>
-                      <span className="font-bold text-white">૨૦૧૧ (૧૪+ વર્ષ વિશ્વાસ)</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-slate-400">ફાઇનાન્સ સુવિધા</span>
-                      <span className="font-bold text-emerald-400">તમામ મુખ્ય બેંકો દ્વારા</span>
-                    </div>
-                  </div>
-
-                  <div className="mt-8 pt-6 border-t border-white/10 text-center">
-                    <button
-                      onClick={() => navigate('/contact')}
-                      className="w-full py-3.5 rounded-xl bg-white text-primary hover:bg-slate-100 font-heading font-black text-sm tracking-wide transition-all shadow-md cursor-pointer"
-                    >
-                      સંપર્ક પેજ જુઓ · Contact Us
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-            </div>
-          </div>
-        </section>
 
       </div>
     </div>
