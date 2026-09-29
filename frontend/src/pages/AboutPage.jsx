@@ -335,20 +335,6 @@ export default function AboutPage() {
                     </p>
                   </div>
                 </div>
-
-                {/* Floating Inset Real Showroom Thumbnail */}
-                <div className="absolute bottom-4 left-4 right-4 bg-slate-950/90 backdrop-blur-md p-3.5 rounded-2xl border border-white/15 flex items-center gap-3 text-white">
-                  <div className="w-14 h-12 rounded-xl overflow-hidden shrink-0 border border-slate-700">
-                    <img src="/about.png" alt="Team Sadguru Car Melo" className="w-full h-full object-cover" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-1.5 text-xs font-heading font-bold text-amber-300">
-                      <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0" />
-                      <span className="truncate">100% સર્ટિફાઇડ નોન-એક્સિડેન્ટલ</span>
-                    </div>
-                    <p className="text-[10px] text-slate-400 truncate">અમારું વરાછા ખાતેનું વિશાળ શોરૂમ કેમ્પસ</p>
-                  </div>
-                </div>
               </div>
             </div>
           </motion.div>
