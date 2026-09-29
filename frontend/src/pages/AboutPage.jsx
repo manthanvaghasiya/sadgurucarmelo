@@ -180,25 +180,23 @@ export default function AboutPage() {
 
           {/* Main Headline */}
           <motion.h1
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 22 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.1 }}
-            className="text-3xl sm:text-5xl md:text-6xl lg:text-[64px] font-black tracking-tight leading-[1.15] text-white font-heading"
+            transition={{ duration: 0.75, delay: 0.1 }}
+            className="text-3xl sm:text-5xl md:text-6xl lg:text-[70px] font-black tracking-tight leading-[1.12] max-w-4xl text-white font-heading"
           >
-            100% ભરોસા સાથે <br className="hidden sm:inline" />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-orange via-amber-400 to-yellow-400">
-              Verified Cars
-            </span> ખરીદો અને વેચો
+            સુરતમાં વેરિફાઇડ કાર માટેનું <br className="hidden sm:inline" />
+            સૌથી <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-orange via-amber-300 to-yellow-200">વિશ્વાસપાત્ર સરનામું</span>
           </motion.h1>
 
           {/* Editorial Subtitle */}
           <motion.p
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.2 }}
-            className="mt-5 text-base sm:text-xl text-slate-300 font-medium max-w-2xl mx-auto leading-relaxed px-2 font-body"
+            transition={{ duration: 0.75, delay: 0.2 }}
+            className="mt-6 text-base sm:text-xl text-slate-300 font-medium max-w-2xl mx-auto leading-relaxed px-2 font-body"
           >
-            સુરતનું સૌથી વિશ્વસનીય કાર શોરૂમ. 150+ સર્ટિફાઈડ કાર, 120+ પોઈન્ટ ટેકનિકલ ઈન્સ્પેક્શન અને સંપૂર્ણ પારદર્શક પ્રક્રિયા.
+            150+ વેરિફાઇડ કાર, 120+ પોઈન્ટ્સ ટેકનિકલ ઈન્સ્પેક્શન અને સંપૂર્ણ પારદર્શિતા સાથે સુરતના 5,000+ પરિવારોની પ્રથમ પસંદગી.
           </motion.p>
 
           {/* Action CTAs */}
