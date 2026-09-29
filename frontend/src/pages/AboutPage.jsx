@@ -320,21 +320,6 @@ export default function AboutPage() {
                   className="w-full h-full object-cover select-none hover:scale-105 transition-transform duration-700"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-950/20 to-transparent" />
-
-                {/* Floating Top Trust Badge */}
-                <div className="absolute top-4 left-4 right-4 bg-white/95 backdrop-blur-md p-4 rounded-2xl shadow-lg border border-white/80 flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-xl bg-orange-50 border border-brand-orange/30 flex items-center justify-center shrink-0">
-                    <Award className="w-6 h-6 text-brand-orange" />
-                  </div>
-                  <div>
-                    <h4 className="font-heading font-black text-sm text-slate-900 leading-tight">
-                      15+ વર્ષોનો અતૂટ વિશ્વાસ
-                    </h4>
-                    <p className="text-[11px] text-slate-500 font-medium">
-                      ત્રિલોક કાર બજાર, વરાછા, સુરત
-                    </p>
-                  </div>
-                </div>
               </div>
             </div>
           </motion.div>
