@@ -1,32 +1,35 @@
-import { useState, useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useSearchParams, useNavigate, Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ShieldCheck, FileText, Landmark, Tag, Star, Banknote, RefreshCw, CarFront, CheckCircle, Clock, SearchCheck, Award, MapPin, Zap, Handshake, ShieldAlert } from 'lucide-react';
+import {
+  ShieldCheck, FileText, Landmark, Tag, Star, Banknote, RefreshCw,
+  CarFront, CheckCircle, Clock, SearchCheck, Award, MapPin, Zap,
+  Handshake, ShieldAlert, ChevronRight, Phone, ArrowUpRight,
+  Sparkles, Check, X as LucideX, Gauge, Shield, Wrench, HeartHandshake,
+  Eye, Compass, Car, Building2, UserCheck, Flame
+} from 'lucide-react';
 import GoogleReviews from '../components/GoogleReviews';
 import HappyCustomers from '../components/HappyCustomers';
+import WhatsAppIcon from '../components/WhatsAppIcon';
 
-// Animation variants for Framer Motion
+// Animation presets
 const fadeInUp = {
-  hidden: { opacity: 0, y: 40 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" } }
+  hidden: { opacity: 0, y: 30 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] } }
 };
 
 const staggerContainer = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
-    transition: { staggerChildren: 0.15 }
+    transition: { staggerChildren: 0.1 }
   }
-};
-
-const scaleUp = {
-  hidden: { opacity: 0, scale: 0.95 },
-  visible: { opacity: 1, scale: 1, transition: { duration: 0.5 } }
 };
 
 export default function AboutPage() {
   const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
 
   // Read service from URL or default to 'buy'
   const initialService = searchParams.get('service') || 'buy';
@@ -38,7 +41,6 @@ export default function AboutPage() {
     if (serviceFromUrl && ['buy', 'sell', 'exchange'].includes(serviceFromUrl)) {
       setActiveTab(serviceFromUrl);
 
-      // Auto-scroll logic so users are instantly mapped to the matching content
       setTimeout(() => {
         const el = document.getElementById('core-services');
         if (el) {
@@ -55,610 +57,1006 @@ export default function AboutPage() {
   };
 
   const tabs = [
-    { id: 'buy', label: 'ખરીદો (Buy)' },
-    { id: 'sell', label: 'વેચો (Sell)' },
-    { id: 'exchange', label: 'બદલો (Exchange)' },
+    { id: 'buy', label: 'કાર ખરીદો · Buy Car', icon: CarFront, badge: '૧૫૦+ કાર' },
+    { id: 'sell', label: 'કાર વેચો · Sell Car', icon: Banknote, badge: 'ઇન્સ્ટન્ટ પેમેન્ટ' },
+    { id: 'exchange', label: 'એક્સચેન્જ · Exchange', icon: RefreshCw, badge: 'બેસ્ટ બોનસ' },
+  ];
+
+  // 120-Point Inspection Architecture categories
+  const [selectedProtocol, setSelectedProtocol] = useState(0);
+
+  const inspectionProtocols = [
+    {
+      id: 'powertrain',
+      title: 'એન્જિન & ટ્રાન્સમિશન',
+      engTitle: 'Engine & Powertrain Dynamics',
+      icon: Wrench,
+      accent: 'from-amber-500 to-orange-600',
+      badge: '૨૮ પોઈન્ટ્સ ચેક',
+      description: 'એન્જિન કમ્પ્રેશનથી લઈને ગિયરબોક્સના સ્મૂથ શિફ્ટિંગ સુધીની સચોટ યાંત્રિક ચકાસણી.',
+      points: [
+        'એન્જિન બ્લોક & સિલિન્ડર હેડ કમ્પ્રેશન ટેસ્ટિંગ',
+        'ઓટોમેટિક & મેન્યુઅલ ગિયરબોક્સ સ્મૂથ રિસ્પોન્સ',
+        'ઓઇલ, કુલન્ટ & ફ્લુઇડ લીકેજ ડિટેક્શન',
+        'ટર્બોચાર્જર, ઇન્ટેક & એક્ઝોસ્ટ એમિશન વેરીફિકેશન',
+        'બેટરી હેલ્થ & અલ્ટરનેટર ચાર્જિંગ આઉટપુટ',
+        'એન્જિન માઉન્ટિંગ & વાઇબ્રેશન હાર્મોનિક્સ ચેક'
+      ]
+    },
+    {
+      id: 'chassis',
+      title: 'ચેસીસ & બોડી ઇન્ટિગ્રિટી',
+      engTitle: '100% Non-Accidental Guarantee',
+      icon: ShieldCheck,
+      accent: 'from-emerald-500 to-teal-600',
+      badge: '૩૫ પોઈન્ટ્સ ચેક',
+      description: '૧૦૦% નોન-એક્સિડેન્ટલ ગેરંટી. એપ્રોન, પિલર્સ અને ઓરિજિનલ ફેક્ટરી પેઇન્ટનું ડિજિટલ સ્કેનિંગ.',
+      points: [
+        'એપ્રોન, ચેસીસ ફ્રેમ & રનિંગ બોર્ડનું ફેક્ટરી એલાઈનમેન્ટ',
+        'A, B, C પિલર્સનું ઓરિજિનલ સ્પોટ વેલ્ડિંગ ઈન્સ્પેક્શન',
+        'ડિજિટલ પેઇન્ટ ગેજ દ્વારા પેઇન્ટ ડેપ્થ માઇક્રોન ચેક',
+        'રૂફ, ફ્લોરબોર્ડ & ટ્રંક કમ્પાર્ટમેન્ટ સ્ટ્રક્ચરલ ટેસ્ટ',
+        'ફ્રન્ટ & રિયર બમ્પર ક્રોસમેમ્બર ઓરિજિનાલિટી',
+        'અંડરબોડી એન્ટી-રસ્ટ પ્રોટેક્શન & વોટર ડેમેજ ચેક'
+      ]
+    },
+    {
+      id: 'suspension',
+      title: 'સસ્પેન્શન, બ્રેક & સ્ટીયરીંગ',
+      engTitle: 'Suspension, Brakes & Dynamics',
+      icon: Gauge,
+      accent: 'from-blue-500 to-indigo-600',
+      badge: '૩૦ પોઈન્ટ્સ ચેક',
+      description: 'હાઇ-સ્પીડ સ્ટેબિલિટી, એબીએસ બ્રેકિંગ અને સુરત તેમજ હાઇવે રસ્તાઓ માટે આરામદાયક ડ્રાઇવિંગ.',
+      points: [
+        'ડિસ્ક & ડ્રમ બ્રેક્સ થિકનેસ તથા ABS કેલિબ્રેશન',
+        'શોક એબ્સોર્બર્સ, સ્ટ્રટ્સ & બુશિંગ્સ રિસ્પોન્સ ટેસ્ટ',
+        'પાવર સ્ટીયરીંગ રેક, કોલમ & ટાઈ-રોડ એન્ડ્સ ચેક',
+        'હાઇ-સ્પીડ વ્હીલ એલાઈનમેન્ટ & બેલેન્સિંગ સ્કેન',
+        'ટાયર્સ ટ્રેડ ડેપ્થ & ઇવન વેર-ટીયર ઓડિટ (>૭૦% ગેરંટી)',
+        'ડ્રાઇવશાફ્ટ & CV જોઈન્ટ્સ નોઈઝ-ફ્રી ઓપરેશન'
+      ]
+    },
+    {
+      id: 'electronics',
+      title: 'OBD-II સ્કેનર & લીગલ RTO',
+      engTitle: 'OBD-II Diagnostics & RTO Transfer',
+      icon: SearchCheck,
+      accent: 'from-purple-500 to-pink-600',
+      badge: '૨૭ પોઈન્ટ્સ ચેક',
+      description: 'કોમ્પ્યુટરાઈઝ્ડ ઓન-બોર્ડ ડાયગ્નોસ્ટિક્સ અને કાયદાકીય RTO ટાઇટલ ક્લીયરન્સ.',
+      points: [
+        'પ્રોફેશનલ OBD-II કમ્પ્યુટર સ્કેનર ફોલ્ટ-કોડ ઓડિટ',
+        'એરબેગ્સ, સેન્સર્સ & ઈસીયુ (ECU) ઓરિજિનાલિટી',
+        'ડ્યુઅલ-ઝોન ક્લાઇમેટ કંટ્રોલ & એસી કૂલિંગ થર્મો-ટેસ્ટ',
+        '૧૦૦% સચોટ ઓરિજિનલ કિલોમીટર (ઓબીડી & સર્વિસ રેકોર્ડ)',
+        '૧૦૦% ક્લીન ટાઇટલ, નો-હાઈપોથેકેશન & RTO NOC',
+        'ફ્રી & ૧૦૦% કાનૂની માલિકી ટ્રાન્સફર (RC Transfer Guarantee)'
+      ]
+    }
   ];
 
   return (
-    <div className="flex flex-col flex-grow min-h-screen bg-background overflow-x-hidden">
+    <div className="flex flex-col flex-grow min-h-screen bg-[#fafafa] text-slate-800 font-body overflow-x-hidden selection:bg-brand-orange selection:text-white">
       <Helmet>
-        <title>About Sadguru Car Surat — Surat's Trusted Car Dealership Since 2011</title>
-        <meta name="description" content="Learn about Sadguru Car Surat — Surat's most trusted pre-owned car dealership since 2011. Buy, sell, or exchange certified vehicles with 100% transparency." />
-        <meta property="og:title" content="About Sadguru Car Surat — Surat's Trusted Car Dealership" />
-        <meta property="og:description" content="Buy, sell, or exchange certified pre-owned cars. 500+ happy customers, 4.8 Google rating." />
+        <title>About Sadguru Car Surat — Surat's Premier Certified Pre-Owned Showroom Since 2011</title>
+        <meta name="description" content="Discover Sadguru Car Surat — Surat's most reputable certified pre-owned showroom since 2011. 15+ years of trust, 150+ inspected cars, 120-point quality check, and 5000+ happy families." />
+        <meta property="og:title" content="About Sadguru Car Surat — 15+ Years of Automotive Trust in Surat" />
+        <meta property="og:description" content="Surat's leading certified pre-owned car showroom. 150+ verified vehicles, 120-point inspection, zero hidden charges." />
       </Helmet>
 
-      {/* 1. Hero Section (Senior UI/UX Upgrade) */}
-      <section className="relative bg-slate-950 pt-28 pb-40 md:pt-32 md:pb-48 px-4 text-center overflow-hidden border-b border-slate-900">
-        {/* Dynamic Abstract Background Elements */}
-        <div className="absolute top-0 right-0 -translate-y-1/4 translate-x-1/4 w-[400px] md:w-[700px] h-[400px] md:h-[700px] bg-brand-orange/15 rounded-full blur-[100px] md:blur-[130px] pointer-events-none mix-blend-screen"></div>
-        <div className="absolute bottom-0 left-0 translate-y-1/3 -translate-x-1/4 w-[300px] md:w-[600px] h-[300px] md:h-[600px] bg-brand-orange/10 rounded-full blur-[90px] md:blur-[120px] pointer-events-none mix-blend-screen"></div>
+      {/* ═════════════════════════════════════════════════════════════════════
+          1. CINEMATIC LUXURY HERO SECTION (Agency-Grade Aesthetic)
+          ═════════════════════════════════════════════════════════════════════ */}
+      <section className="relative bg-gradient-to-b from-[#0B0F19] via-[#0E1424] to-[#0B0F19] text-white pt-24 pb-36 md:pt-32 md:pb-44 px-4 sm:px-6 lg:px-8 overflow-hidden border-b border-slate-800/80">
+        {/* Soft Ambient Radiance Orbs */}
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[700px] h-[450px] bg-gradient-to-b from-brand-orange/20 via-amber-500/10 to-transparent rounded-full blur-[140px] pointer-events-none" />
+        <div className="absolute top-1/3 -left-32 w-96 h-96 bg-sky-500/10 rounded-full blur-[130px] pointer-events-none" />
+        <div className="absolute bottom-10 -right-32 w-96 h-96 bg-amber-500/10 rounded-full blur-[130px] pointer-events-none" />
 
-        {/* High-End Technical CSS Grid Background with Fading Mask */}
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff0a_1px,transparent_1px),linear-gradient(to_bottom,#ffffff0a_1px,transparent_1px)] bg-[size:30px_30px] md:bg-[size:40px_40px] [mask-image:radial-gradient(ellipse_80%_60%_at_50%_0%,#000_60%,transparent_100%)] pointer-events-none"></div>
+        {/* Precision Architectural Grid Overlay */}
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff08_1px,transparent_1px),linear-gradient(to_bottom,#ffffff08_1px,transparent_1px)] bg-[size:36px_36px] [mask-image:radial-gradient(ellipse_75%_65%_at_50%_25%,#000_60%,transparent_100%)] pointer-events-none" />
 
-        <motion.div
-          className="max-w-4xl mx-auto relative z-10 flex flex-col items-center"
-          initial="hidden"
-          animate="visible"
-          variants={staggerContainer}
-        >
-          {/* Glassmorphic Minimal Trust Badge */}
-          <motion.div variants={fadeInUp} className="inline-flex items-center gap-3 px-6 py-2.5 rounded-full bg-slate-900/50 border border-slate-800 backdrop-blur-md mb-6 md:mb-8 shadow-2xl">
-            <span className="relative flex h-3 w-3">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-500 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
+        <div className="max-w-6xl mx-auto relative z-10 text-center flex flex-col items-center">
+          {/* Top Brand Heritage Badge */}
+          <motion.div
+            initial={{ opacity: 0, y: -15 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            className="inline-flex items-center gap-2.5 px-4 sm:px-5 py-2 rounded-full bg-slate-900/90 border border-brand-orange/30 shadow-[0_10px_30px_rgba(245,148,35,0.15)] backdrop-blur-xl mb-6"
+          >
+            <span className="relative flex h-2.5 w-2.5">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75" />
+              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-brand-orange" />
             </span>
-            <span className="font-heading font-bold text-xs sm:text-sm uppercase tracking-wider text-slate-200">
-              સુરતમાં 2011 થી કાર્યરત
+            <span className="font-heading font-black text-[11px] sm:text-xs uppercase tracking-[0.2em] text-amber-300">
+              સુરતમાં સ્થાપના ૨૦૧૧ · ૧૫+ વર્ષોનો અતૂટ વિશ્વાસ
             </span>
           </motion.div>
 
-          {/* Main Heading - Simple English */}
-          <motion.h1 variants={fadeInUp} className="font-heading font-bold text-4xl sm:text-5xl md:text-[72px] text-white leading-[1.15] md:leading-[1.1] mb-5 md:mb-6 tracking-tight">
-            100% ભરોસા સાથે <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-orange via-amber-400 to-yellow-500 block sm:inline">Verified Cars</span> ખરીદો અને વેચો
+          {/* Main Hero Headline */}
+          <motion.h1
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, delay: 0.1 }}
+            className="text-3xl sm:text-5xl md:text-6xl lg:text-[68px] font-black tracking-tight leading-[1.12] max-w-4xl text-white font-heading"
+          >
+            સુરતમાં વેરિફાઇડ કાર માટેનું <br className="hidden sm:inline" />
+            સૌથી <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-orange via-amber-400 to-yellow-400">વિશ્વાસપાત્ર સરનામું</span>
           </motion.h1>
 
-          {/* Basic Gujarati + English Mix Subtext */}
-          <motion.p variants={fadeInUp} className="font-body text-base md:text-[22px] text-slate-300 font-medium max-w-2xl mx-auto leading-relaxed px-2">
-            સુરતનું સૌથી ભરોસાપાત્ર Car Showroom. શ્રેષ્ઠ કિંમતે ખરીદો 100% <span className="text-white font-bold bg-white/10 px-2 py-0.5 rounded-md mx-0.5 border border-white/5 inline-block mt-1 sm:mt-0">Non-Accidental</span> અને <span className="text-white font-bold bg-white/10 px-2 py-0.5 rounded-md mx-0.5 border border-white/5 inline-block mt-1 sm:mt-0">Certified Used Cars</span>
+          {/* Editorial Tagline */}
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, delay: 0.2 }}
+            className="mt-5 sm:mt-6 text-base sm:text-xl text-slate-300 font-medium max-w-2xl mx-auto leading-relaxed px-2 font-body"
+          >
+            ૧૫૦+ વેરિફાઇડ કાર, ૧૨૦+ પોઈન્ટ્સ ટેકનિકલ ઈન્સ્પેક્શન અને સંપૂર્ણ પારદર્શિતા સાથે સુરતના ૫,૦૦૦+ પરિવારોની પ્રથમ પસંદગી.
           </motion.p>
-        </motion.div>
+
+          {/* Hero Action Buttons */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, delay: 0.3 }}
+            className="mt-8 sm:mt-10 flex flex-wrap items-center justify-center gap-3.5 sm:gap-5"
+          >
+            <Link
+              to="/inventory"
+              className="group relative inline-flex items-center gap-2.5 px-7 py-3.5 rounded-xl sm:rounded-2xl bg-gradient-to-r from-brand-orange via-[#f79e32] to-[#e68415] text-slate-950 font-heading font-black text-sm sm:text-base shadow-[0_10px_30px_rgba(245,148,35,0.4)] hover:shadow-[0_15px_40px_rgba(245,148,35,0.55)] hover:scale-105 active:scale-95 transition-all duration-300 cursor-pointer overflow-hidden border border-amber-300/40"
+            >
+              <Car className="w-4 h-4 sm:w-5 sm:h-5 text-slate-950" />
+              <span>સંપૂર્ણ સ્ટોક જુઓ · Browse 150+ Cars</span>
+              <ChevronRight className="w-4 h-4 text-slate-950 group-hover:translate-x-1 transition-transform" />
+            </Link>
+
+            <a
+              href="https://maps.google.com/?q=Sadguru+Car+Melo+Surat"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl sm:rounded-2xl bg-slate-900/80 hover:bg-slate-850 text-white font-heading font-bold text-sm sm:text-base border border-slate-700/80 shadow-md hover:border-brand-orange/40 hover:scale-105 active:scale-95 transition-all duration-300"
+            >
+              <MapPin className="w-4 h-4 text-brand-orange" />
+              <span>શોરૂમ લોકેશન · Showroom Visit</span>
+              <ArrowUpRight className="w-4 h-4 text-slate-400" />
+            </a>
+          </motion.div>
+        </div>
       </section>
 
-      {/* --- Seamless Wrapper for Stats, Legacy, Standard & Services Sections --- */}
-      <div className="bg-white relative">
+      {/* ═════════════════════════════════════════════════════════════════════
+          2. FLOATING STATS TELEMETRY BAR
+          ═════════════════════════════════════════════════════════════════════ */}
+      <div className="relative z-20 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 -mt-16 md:-mt-20">
+        <motion.div
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: "-40px" }}
+          variants={fadeInUp}
+          className="bg-white/95 backdrop-blur-xl rounded-3xl p-6 sm:p-8 shadow-[0_25px_60px_rgba(15,23,42,0.12)] border border-slate-200/80 grid grid-cols-2 md:grid-cols-5 gap-6 sm:gap-8 items-center justify-between text-center divide-y sm:divide-y-0 sm:divide-x divide-slate-100"
+        >
+          {/* Stat 1: Established */}
+          <div className="flex flex-col items-center justify-center p-2 group">
+            <span className="font-heading font-black text-3xl sm:text-4xl text-slate-900 mb-1 group-hover:scale-105 transition-transform flex items-center gap-1">
+              ૧૫<span className="text-brand-orange font-bold">+</span>
+            </span>
+            <span className="text-xs font-heading font-black uppercase tracking-wider text-slate-800">
+              વર્ષોનો અતૂટ વિશ્વાસ
+            </span>
+            <span className="text-[11px] text-slate-400 font-medium">Established in 2011</span>
+          </div>
 
-        {/* 2. Overlapping Stats Card (Premium Integration) */}
-        <section className="px-4 relative z-20 border-t border-transparent">
+          {/* Stat 2: Verified Stock */}
+          <div className="flex flex-col items-center justify-center p-2 pt-6 sm:pt-2 group">
+            <span className="font-heading font-black text-3xl sm:text-4xl text-slate-900 mb-1 group-hover:scale-105 transition-transform flex items-center gap-1">
+              ૧૫૦<span className="text-brand-orange font-bold">+</span>
+            </span>
+            <span className="text-xs font-heading font-black uppercase tracking-wider text-slate-800">
+              લાઇવ વેરિફાઇડ સ્ટોક
+            </span>
+            <span className="text-[11px] text-slate-400 font-medium">Ready in Showroom</span>
+          </div>
+
+          {/* Stat 3: Families */}
+          <div className="flex flex-col items-center justify-center p-2 pt-6 sm:pt-2 group">
+            <span className="font-heading font-black text-3xl sm:text-4xl text-slate-900 mb-1 group-hover:scale-105 transition-transform flex items-center gap-1">
+              ૫,૦૦૦<span className="text-brand-orange font-bold">+</span>
+            </span>
+            <span className="text-xs font-heading font-black uppercase tracking-wider text-slate-800">
+              સંતુષ્ટ પરિવારો
+            </span>
+            <span className="text-[11px] text-slate-400 font-medium">Happy Customer Base</span>
+          </div>
+
+          {/* Stat 4: Rating */}
+          <div className="flex flex-col items-center justify-center p-2 pt-6 sm:pt-2 group">
+            <div className="flex items-center gap-1.5 mb-1 group-hover:scale-105 transition-transform">
+              <Star className="w-5 h-5 fill-amber-400 text-amber-400" />
+              <span className="font-heading font-black text-3xl sm:text-4xl text-slate-900">૪.૮</span>
+            </div>
+            <span className="text-xs font-heading font-black uppercase tracking-wider text-slate-800">
+              ગૂગલ રેટિંગ
+            </span>
+            <span className="text-[11px] text-slate-400 font-medium">૫૦૦+ વાસ્તવિક રિવ્યૂ</span>
+          </div>
+
+          {/* Stat 5: Technical Check */}
+          <div className="col-span-2 md:col-span-1 flex flex-col items-center justify-center p-2 pt-6 sm:pt-2 group">
+            <span className="font-heading font-black text-3xl sm:text-4xl text-emerald-600 mb-1 group-hover:scale-105 transition-transform flex items-center gap-1">
+              ૧૨૦<span className="text-slate-900 font-bold">+</span>
+            </span>
+            <span className="text-xs font-heading font-black uppercase tracking-wider text-slate-800">
+              ટેકનિકલ ઈન્સ્પેક્શન
+            </span>
+            <span className="text-[11px] text-slate-400 font-medium">Rigorous Lab Checklist</span>
+          </div>
+        </motion.div>
+      </div>
+
+      {/* ═════════════════════════════════════════════════════════════════════
+          3. THE SADGURU STORY & FOUNDER VISION (Editorial Prestige)
+          ═════════════════════════════════════════════════════════════════════ */}
+      <section className="py-20 md:py-28 px-4 sm:px-6 lg:px-8 relative overflow-hidden bg-white">
+        {/* Soft background ambient gradient */}
+        <div className="absolute top-1/2 left-0 -translate-y-1/2 w-96 h-96 bg-brand-orange/[0.04] rounded-full blur-3xl pointer-events-none" />
+
+        <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center relative z-10">
+
+          {/* Left Column: Visual Showcase Frame */}
           <motion.div
-            className="-mt-20 md:-mt-24 max-w-4xl mx-auto bg-white rounded-[2rem] md:rounded-3xl shadow-[0_20px_40px_rgba(0,0,0,0.06)] ring-1 ring-slate-100 p-8 md:p-10 flex flex-col md:flex-row items-center justify-between divide-y md:divide-y-0 md:divide-x divide-slate-100 gap-8 md:gap-0 text-center relative z-20"
             initial="hidden"
             whileInView="visible"
-            viewport={{ once: true, margin: "-50px" }}
-            variants={scaleUp}
+            viewport={{ once: true, margin: "-40px" }}
+            variants={fadeInUp}
+            className="lg:col-span-5 relative"
           >
-            <div className="flex flex-col items-center justify-center w-full pb-8 md:pb-0 group">
-              <span className="font-heading font-bold text-4xl md:text-5xl text-slate-900 mb-2 group-hover:scale-105 transition-transform">5000<span className="text-brand-orange font-medium">+</span></span>
-              <span className="font-body text-[11px] font-bold text-slate-400 uppercase tracking-[0.2em]">Happy Customers</span>
-            </div>
-
-            <div className="flex flex-col items-center justify-center w-full py-8 md:py-0 group">
-              <div className="flex items-center gap-2 mb-2 group-hover:scale-105 transition-transform">
-                <Star className="w-6 h-6 md:w-7 md:h-7 fill-amber-400 text-amber-400" />
-                <span className="font-heading font-bold text-4xl md:text-5xl text-slate-900">4.8</span>
-              </div>
-              <span className="font-body text-[11px] font-bold text-slate-400 uppercase tracking-[0.2em]">Google Rating</span>
-            </div>
-
-            <div className="flex flex-col items-center justify-center w-full pt-8 md:pt-0 group">
-              <span className="font-heading font-bold text-4xl md:text-5xl text-slate-900 mb-2 group-hover:scale-105 transition-transform">50<span className="text-brand-orange font-medium">+</span></span>
-              <span className="font-body text-[11px] font-bold text-slate-400 uppercase tracking-[0.2em]">Verified Cars</span>
-            </div>
-          </motion.div>
-        </section>
-
-        {/* 3. More Than Just a Car Bazar Section (50x Premium Upgrade) */}
-        <section className="py-16 md:py-24 px-4 relative overflow-hidden">
-          {/* Dynamic Abstract Background Elements (Light Mode) */}
-          <div className="absolute top-1/2 left-0 -translate-y-1/2 -translate-x-1/3 w-[800px] h-[800px] bg-brand-orange/5 rounded-full blur-[150px] pointer-events-none mix-blend-multiply"></div>
-          <div className="absolute bottom-0 right-0 translate-y-1/4 translate-x-1/4 w-[600px] h-[600px] bg-blue-500/5 rounded-full blur-[120px] pointer-events-none mix-blend-multiply"></div>
-
-          {/* Architectural Grid Background with radial mask */}
-          <div className="absolute inset-0 bg-[linear-gradient(to_right,#00000005_1px,transparent_1px),linear-gradient(to_bottom,#00000005_1px,transparent_1px)] bg-[size:30px_30px] md:bg-[size:40px_40px] [mask-image:radial-gradient(ellipse_80%_80%_at_50%_50%,#000_30%,transparent_100%)] pointer-events-none"></div>
-
-          <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-24 items-center relative z-10">
-
-            {/* Image & Showcase - Takes up 5 columns */}
-            <motion.div
-              className="lg:col-span-5 relative group order-2 lg:order-1"
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true, margin: "-50px" }}
-              variants={fadeInUp}
-            >
-              {/* Glowing inner shadow effect */}
-              <div className="absolute -inset-2 bg-gradient-to-r from-brand-orange/20 via-amber-400/20 to-yellow-500/20 rounded-[2rem] md:rounded-[2.5rem] blur-xl opacity-0 group-hover:opacity-100 transition duration-700"></div>
-
-              <div className="relative rounded-[2rem] md:rounded-[2.5rem] overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.1)] ring-1 ring-slate-100 h-[350px] sm:h-[450px] lg:h-[600px] bg-slate-100">
+            <div className="relative rounded-3xl p-3 bg-gradient-to-b from-amber-400/30 via-slate-200/50 to-amber-500/20 shadow-2xl">
+              <div className="relative rounded-2xl overflow-hidden bg-slate-900 h-[380px] sm:h-[460px] md:h-[500px]">
                 <img
                   src="/about.png"
-                  alt="Premium Car Showcase"
-                  loading="lazy"
-                  className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105"
+                  alt="Sadguru Car Surat Showroom Experience"
+                  className="w-full h-full object-cover select-none hover:scale-105 transition-transform duration-700"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-slate-900/10 to-transparent"></div>
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-950/85 via-slate-950/20 to-transparent" />
 
-                {/* Floating Legacy Badge */}
-                <div className="absolute top-4 left-4 right-4 md:top-8 md:left-8 md:right-8 bg-white/95 backdrop-blur-md p-5 md:p-6 rounded-2xl md:rounded-3xl flex items-center gap-4 md:gap-5 shadow-2xl transform md:-translate-y-2 md:group-hover:translate-y-0 transition-all duration-500 ring-1 ring-slate-200/50">
-                  <div className="font-heading font-black text-4xl md:text-5xl text-brand-orange">13+</div>
+                {/* Floating Top Trust Badge */}
+                <div className="absolute top-4 left-4 right-4 bg-white/95 backdrop-blur-md p-4 rounded-2xl shadow-xl border border-white/60 flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-xl bg-orange-50 border border-brand-orange/30 flex items-center justify-center shrink-0">
+                    <Award className="w-6 h-6 text-brand-orange" />
+                  </div>
                   <div>
-                    <div className="font-heading font-bold text-base md:text-lg text-slate-900 mb-0.5">વર્ષોનો અતૂટ વિશ્વાસ</div>
-                    <div className="font-body text-xs md:text-sm text-slate-500 font-medium leading-tight line-clamp-2 md:line-clamp-none">2011 થી પ્રીમિયમ કાર્સ માટેનું સૌથી પ્રતિષ્ઠિત અને ભરોસાપાત્ર સરનામું</div>
+                    <h4 className="font-heading font-black text-sm text-slate-900 leading-tight">
+                      ૧૫+ વર્ષોનો અતૂટ વિશ્વાસ
+                    </h4>
+                    <p className="text-[11px] text-slate-500 font-medium">
+                      ત્રિલોક કાર બજાર, વરાછા, સુરત
+                    </p>
+                  </div>
+                </div>
+
+                {/* Floating Bottom Quality Stamp */}
+                <div className="absolute bottom-4 left-4 right-4 bg-slate-950/90 backdrop-blur-md p-3.5 rounded-2xl border border-white/10 flex items-center justify-between text-white">
+                  <div className="flex items-center gap-2">
+                    <ShieldCheck className="w-5 h-5 text-emerald-400 shrink-0" />
+                    <span className="text-xs font-heading font-bold text-slate-200">
+                      ૧૦૦% સર્ટિફાઇડ નોન-એક્સિડેન્ટલ
+                    </span>
+                  </div>
+                  <span className="px-2 py-0.5 rounded-md bg-emerald-500/20 text-emerald-300 text-[10px] font-black uppercase">
+                    PASS
+                  </span>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+
+          {/* Right Column: Editorial Narrative & Values */}
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-40px" }}
+            variants={staggerContainer}
+            className="lg:col-span-7 flex flex-col justify-center"
+          >
+            <motion.div variants={fadeInUp} className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-brand-orange/10 border border-brand-orange/20 text-brand-orange font-heading font-bold text-xs uppercase tracking-widest w-fit mb-4">
+              <Sparkles className="w-3.5 h-3.5 text-brand-orange" /> અમારો વારસો · OUR HERITAGE
+            </motion.div>
+
+            <motion.h2 variants={fadeInUp} className="text-2xl sm:text-4xl md:text-5xl font-black text-slate-900 leading-[1.18] font-heading tracking-tight mb-5">
+              માત્ર એક કાર મેળો નહીં, સુરતના પરિવારોનો <br className="hidden sm:inline" />
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-orange via-amber-500 to-yellow-500">
+                દાયકાઓ જૂનો ભરોસો
+              </span>
+            </motion.h2>
+
+            <motion.div variants={fadeInUp} className="space-y-4 text-slate-600 text-sm sm:text-base leading-relaxed font-body">
+              <p>
+                વર્ષ <b>૨૦૧૧</b> માં વરાછા, સુરત ખાતે જ્યારે સદગુરુ કાર મેળોની સ્થાપના થઈ, ત્યારે અમારો એક જ દ્રઢ સંકલ્પ હતો: <span className="text-slate-900 font-semibold">"પ્રી-ઓન્ડ કાર ખરીદવી એ નવી કાર ખરીદવા જેટલું જ ગૌરવપૂર્ણ, સુરક્ષિત અને પારદર્શક હોવું જોઈએ."</span>
+              </p>
+              <p>
+                સામાન્ય બ્રોકરો કે અનઓર્ગેનાઈઝ્ડ બજારથી વિપરીત, અમે સુરતમાં એક એવું મોડેલ ઊભું કર્યું જ્યાં દરેક કાર <b>૧૨૦+ પોઈન્ટ ટેકનિકલ ઈન્સ્પેક્શન</b> પાસ કર્યા પછી જ ડિસ્પ્લે થાય છે. કોઈ મીટર ટેમ્પરિંગ નહીં, કોઈ છૂપા ખર્ચા નહીં અને કોઈ અનિશ્ચિતતા નહીં.
+              </p>
+            </motion.div>
+
+            {/* Founder Quote Card */}
+            <motion.div variants={fadeInUp} className="mt-6 p-5 sm:p-6 rounded-2xl bg-gradient-to-r from-slate-900 to-slate-950 text-white border border-slate-800 shadow-xl relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-brand-orange/10 rounded-full blur-2xl pointer-events-none" />
+              <div className="flex items-start gap-4">
+                <span className="text-3xl text-brand-orange font-serif leading-none select-none">“</span>
+                <div>
+                  <p className="text-xs sm:text-sm text-slate-200 font-heading font-medium italic leading-relaxed">
+                    જ્યારે કોઈ પરિવાર પોતાની બચતમાંથી કાર ખરીદે છે, ત્યારે એ માત્ર કાર નથી હોતી, એમના સપના હોય છે. અમે એ સપનાને ૧૦૦% સાચો, સુરક્ષિત અને પ્રમાણિક ઓટોમોટિવ સપોર્ટ આપવા માટે બંધાયેલા છીએ.
+                  </p>
+                  <div className="mt-3 flex items-center justify-between border-t border-slate-800 pt-2.5">
+                    <div>
+                      <p className="text-xs font-heading font-bold text-white">સદગુરુ કાર મેળો ટીમ</p>
+                      <p className="text-[10px] text-slate-400">ત્રિલોક કાર બજાર, વરાછા, સુરત</p>
+                    </div>
+                    <span className="text-[10px] font-bold text-amber-400 bg-amber-400/10 px-2.5 py-1 rounded-full border border-amber-400/20">
+                      Trusted Dealership
+                    </span>
                   </div>
                 </div>
               </div>
             </motion.div>
 
-            {/* Typography & Text Content - Takes up 7 columns */}
-            <motion.div
-              className="flex flex-col lg:col-span-7 order-1 lg:order-2"
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true, margin: "-50px" }}
-              variants={staggerContainer}
-            >
-              <motion.div variants={fadeInUp} className="inline-flex items-center gap-2 md:gap-3 px-4 md:px-5 py-2 md:py-2.5 rounded-full bg-brand-orange/10 border border-brand-orange/20 w-max mb-6 md:mb-8 shadow-sm hover:bg-brand-orange/15 transition-colors cursor-default">
-                <Star className="w-3 h-3 md:w-4 md:h-4 text-brand-orange" />
-                <span className="font-heading font-bold text-xs md:text-sm tracking-widest text-brand-orange uppercase">Our Heritage</span>
-              </motion.div>
+            {/* 3 Core Trust Badges */}
+            <motion.div variants={fadeInUp} className="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div className="flex items-center gap-2.5 p-3 rounded-xl bg-slate-50 border border-slate-200/80">
+                <ShieldCheck className="w-5 h-5 text-emerald-600 shrink-0" />
+                <span className="text-xs font-heading font-black text-slate-800">૧૦૦% નોન-એક્સિડેન્ટલ</span>
+              </div>
+              <div className="flex items-center gap-2.5 p-3 rounded-xl bg-slate-50 border border-slate-200/80">
+                <Gauge className="w-5 h-5 text-brand-orange shrink-0" />
+                <span className="text-xs font-heading font-black text-slate-800">ઓરિજિનલ કિલોમીટર</span>
+              </div>
+              <div className="flex items-center gap-2.5 p-3 rounded-xl bg-slate-50 border border-slate-200/80">
+                <FileText className="w-5 h-5 text-blue-600 shrink-0" />
+                <span className="text-xs font-heading font-black text-slate-800">૧૦૦% ફ્રી RTO ટ્રાન્સફર</span>
+              </div>
+            </motion.div>
+          </motion.div>
 
-              <motion.h2 variants={fadeInUp} className="font-heading font-bold text-3xl sm:text-4xl md:text-5xl lg:text-6xl text-slate-900 mb-6 md:mb-8 leading-[1.2] md:leading-[1.15] tracking-tight">
-                માત્ર એક કાર કલેક્શનથી <br className="hidden lg:block" />
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-orange to-amber-500">ઘણું વિશેષ</span>
-              </motion.h2>
+        </div>
+      </section>
 
-              <motion.div variants={fadeInUp} className="font-body text-base md:text-lg text-slate-600 space-y-5 md:space-y-6 leading-relaxed mb-8 md:mb-12 relative">
-                <div className="absolute left-0 top-2 bottom-2 w-1 md:w-1.5 bg-gradient-to-b from-brand-orange to-yellow-400 rounded-full"></div>
-                <p className="pl-6 md:pl-8 text-lg md:text-xl font-medium text-slate-800">
-                  સદગુરુ કાર મેળો ખાતે, અમારું માનવું છે કે પ્રી-ઓન્ડ વાહન ખરીદવું એ નવી કાર ખરીદવા જેટલું જ ગૌરવપૂર્ણ હોવું જોઈએ. 2011 માં સ્થપાયેલ, અમે પારદર્શિતા અને શ્રેષ્ઠ ગુણવત્તાના સ્તંભો પર અમારી પ્રતિષ્ઠાનું નિર્માણ કર્યું છે.
-                </p>
-                <p className="pl-6 md:pl-8">
-                  અમારા શોરૂમમાં રહેલું દરેક વાહન કડક ચકાસણી પ્રક્રિયામાંથી પસાર થાય છે. અમારું ધ્યાન સંપૂર્ણપણે <span className="font-bold">નોન-એક્સિડેન્ટલ અને RTO-પ્રમાણિત</span> વાહનો પર જ કેન્દ્રિત રહે છે. અમે 'ત્રિલોક Car Showroom'ના ગૌરવપૂર્ણ ભાગીદાર છીએ, જે વિશ્વાસનો એવો વારસો સુનિશ્ચિત કરે છે જેના પર વરાછાના લોકોએ એક દાયકાથી વધુ સમયથી ભરોસો મૂક્યો છે.
-                </p>
-              </motion.div>
+      {/* ═════════════════════════════════════════════════════════════════════
+          4. THE 120-POINT INSPECTION ARCHITECTURE (The Engineering Depth)
+          ═════════════════════════════════════════════════════════════════════ */}
+      <section className="py-20 md:py-28 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-[#0B0F19] via-[#0E1526] to-[#0B0F19] text-white relative overflow-hidden">
+        {/* Ambient Top Glow */}
+        <div className="absolute top-0 right-1/4 w-[500px] h-[300px] bg-brand-orange/10 rounded-full blur-[130px] pointer-events-none" />
 
-              <motion.div variants={fadeInUp} className="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-4 md:gap-10">
-                <button className="group relative inline-flex items-center justify-center gap-3 bg-slate-900 text-white font-heading font-bold text-sm md:text-base px-6 py-4 md:px-8 md:py-4 rounded-xl md:rounded-2xl shadow-[0_10px_20px_rgba(15,23,42,0.15)] hover:shadow-[0_15px_30px_rgba(15,23,42,0.25)] transition-all hover:-translate-y-1 overflow-hidden min-h-[50px] w-full sm:w-auto">
-                  <span className="relative z-10 flex items-center gap-2">
-                    Discover Our Legacy
-                    <Award className="w-4 h-4 md:w-5 md:h-5 text-brand-orange group-hover:rotate-12 transition-transform duration-300" />
-                  </span>
-                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full duration-1000 transition-transform"></div>
+        <div className="max-w-7xl mx-auto relative z-10">
+          {/* Section Header */}
+          <div className="text-center max-w-3xl mx-auto mb-12 sm:mb-16">
+            <span className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-800/80 border border-brand-orange/30 text-amber-400 font-heading font-bold text-xs uppercase tracking-widest mb-3.5 shadow-sm">
+              <Shield className="w-3.5 h-3.5 text-brand-orange" /> ટેકનિકલ પ્રોટોકોલ · THE 120-POINT QUALITY STANDARD
+            </span>
+            <h2 className="text-2xl sm:text-4xl md:text-5xl font-black text-white font-heading tracking-tight leading-tight">
+              અમારું ૧૨૦+ પોઈન્ટ્સ <br className="hidden sm:inline" />
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-orange via-amber-400 to-yellow-400">
+                સઘન ટેકનિકલ ઈન્સ્પેક્શન
+              </span>
+            </h2>
+            <p className="mt-3.5 text-sm sm:text-base text-slate-400 font-medium leading-relaxed">
+              અમે ફક્ત કાર વેચતા નથી; એન્જિન બ્લોકથી લઈને RTO કાનૂની દસ્તાવેજો સુધી દરેક બાબતની સંપૂર્ણ લેબોરેટરી અને રોડ ટેસ્ટિંગ બાદ જ કાર શોરૂમમાં પ્રદર્શિત કરીએ છીએ.
+            </p>
+          </div>
+
+          {/* Interactive 4-Pillar Tabs */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 mb-8">
+            {inspectionProtocols.map((protocol, idx) => {
+              const IconComp = protocol.icon;
+              const isSelected = selectedProtocol === idx;
+              return (
+                <button
+                  key={protocol.id}
+                  onClick={() => setSelectedProtocol(idx)}
+                  className={`p-4 sm:p-5 rounded-2xl border transition-all text-left relative overflow-hidden cursor-pointer flex flex-col justify-between ${
+                    isSelected
+                      ? 'bg-slate-800/95 border-amber-500/60 shadow-[0_10px_30px_rgba(245,148,35,0.2)]'
+                      : 'bg-slate-900/60 border-slate-800/80 hover:bg-slate-850 hover:border-slate-700'
+                  }`}
+                >
+                  {isSelected && (
+                    <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-brand-orange to-amber-400" />
+                  )}
+                  <div className="flex items-center justify-between mb-3">
+                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${isSelected ? 'bg-brand-orange text-slate-950 font-bold' : 'bg-slate-800 text-slate-400'}`}>
+                      <IconComp className="w-5 h-5" />
+                    </div>
+                    <span className="text-[10px] font-heading font-black px-2 py-0.5 rounded-md bg-white/10 text-amber-300">
+                      {protocol.badge}
+                    </span>
+                  </div>
+                  <div>
+                    <h3 className={`font-heading font-bold text-sm sm:text-base leading-tight ${isSelected ? 'text-white' : 'text-slate-300'}`}>
+                      {protocol.title}
+                    </h3>
+                    <p className="text-[11px] text-slate-400 mt-1 line-clamp-1">
+                      {protocol.engTitle}
+                    </p>
+                  </div>
                 </button>
-
-                <div className="flex items-center justify-center sm:justify-start gap-3 md:gap-4 bg-slate-50 px-4 py-3 md:px-5 md:py-3 rounded-xl md:rounded-2xl border border-slate-100 shadow-sm w-full sm:w-auto">
-                  <div className="flex -space-x-2 md:-space-x-3">
-                    <div className="w-8 h-8 md:w-10 md:h-10 rounded-full border-2 border-white bg-emerald-50 flex items-center justify-center shadow-sm relative z-30">
-                      <ShieldCheck className="w-4 h-4 md:w-5 md:h-5 text-emerald-600" />
-                    </div>
-                    <div className="w-8 h-8 md:w-10 md:h-10 rounded-full border-2 border-white bg-blue-50 flex items-center justify-center shadow-sm relative z-20">
-                      <Landmark className="w-4 h-4 md:w-5 md:h-5 text-blue-600" />
-                    </div>
-                    <div className="w-8 h-8 md:w-10 md:h-10 rounded-full border-2 border-white bg-orange-50 flex items-center justify-center shadow-sm relative z-10">
-                      <CheckCircle className="w-4 h-4 md:w-5 md:h-5 text-brand-orange" />
-                    </div>
-                  </div>
-                  <div className="text-xs md:text-sm font-heading font-bold text-slate-500">
-                    <span className="block text-slate-900 text-sm md:text-base">100% Certified</span>
-                    Trust & Security
-                  </div>
-                </div>
-              </motion.div>
-
-            </motion.div>
+              );
+            })}
           </div>
-        </section>
 
-        {/* 4. The Sadguru Standard (Premium 10x UI) */}
-        <section className="py-16 md:py-24 px-4 relative overflow-hidden bg-slate-50/50">
-          <div className="max-w-7xl mx-auto relative z-10">
+          {/* Active Protocol Deep-Dive Card */}
+          <AnimatePresence mode="wait">
             <motion.div
-              className="text-center mb-12 md:mb-20 flex flex-col items-center"
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true, margin: "-50px" }}
-              variants={fadeInUp}
+              key={selectedProtocol}
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -15 }}
+              transition={{ duration: 0.35 }}
+              className="p-6 sm:p-8 rounded-3xl bg-slate-900/90 border border-slate-800 shadow-2xl backdrop-blur-xl"
             >
-              <span className="font-heading font-bold text-xs md:text-sm uppercase tracking-[0.3em] text-brand-orange mb-3">અમારું Promise</span>
-              <h2 className="font-heading font-bold text-3xl sm:text-4xl md:text-5xl text-slate-900 mb-5 md:mb-6 tracking-tight">
-                અમારું <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-orange to-amber-500">સદગુરુ Standard</span>
-              </h2>
-              <div className="w-16 md:w-24 h-1.5 bg-gradient-to-r from-brand-orange to-yellow-400 rounded-full"></div>
-              <p className="mt-5 md:mt-6 font-body text-slate-500 max-w-2xl mx-auto text-base md:text-lg leading-relaxed px-2">
-                અમે ફક્ત કાર નથી વેચતા. કડક <span className="font-bold text-slate-800">Quality Control</span>, પારદર્શક પ્રક્રિયા અને અજોડ <span className="font-bold text-slate-800">Customer Support</span> દ્વારા અમે તમને માનસિક શાંતિ (Peace of Mind) આપીએ છીએ.
-              </p>
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-6 border-b border-slate-800 gap-4">
+                <div>
+                  <div className="flex items-center gap-2 mb-1.5">
+                    <span className="px-2.5 py-0.5 rounded-full bg-brand-orange/20 text-brand-orange text-[10px] font-heading font-black uppercase tracking-wider">
+                      {inspectionProtocols[selectedProtocol].badge}
+                    </span>
+                    <span className="text-xs text-slate-400 font-medium">
+                      {inspectionProtocols[selectedProtocol].engTitle}
+                    </span>
+                  </div>
+                  <h3 className="text-xl sm:text-3xl font-heading font-black text-white">
+                    {inspectionProtocols[selectedProtocol].title}
+                  </h3>
+                </div>
+                <p className="text-xs sm:text-sm text-slate-400 max-w-md sm:text-right">
+                  {inspectionProtocols[selectedProtocol].description}
+                </p>
+              </div>
+
+              {/* Inspection Checklist Grid */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 pt-6">
+                {inspectionProtocols[selectedProtocol].points.map((pt, i) => (
+                  <div
+                    key={i}
+                    className="flex items-start gap-3 p-3.5 rounded-xl bg-slate-950/60 border border-slate-800/80 hover:border-slate-700 transition-colors"
+                  >
+                    <CheckCircle className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                    <span className="text-xs sm:text-sm text-slate-200 font-medium leading-relaxed">
+                      {pt}
+                    </span>
+                  </div>
+                ))}
+              </div>
             </motion.div>
+          </AnimatePresence>
+        </div>
+      </section>
 
-            <motion.div
-              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8 xl:gap-10"
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true, margin: "-50px" }}
-              variants={staggerContainer}
-            >
-              {/* Card 1 */}
-              <motion.div variants={fadeInUp} className="group relative bg-white p-6 md:p-8 rounded-[2rem] shadow-[0_2px_10px_rgba(0,0,0,0.02)] border border-slate-100 hover:shadow-[0_20px_40px_rgba(0,0,0,0.08)] hover:border-primary/20 transition-all duration-300 md:hover:-translate-y-2 overflow-hidden flex flex-col h-full">
-                <div className="absolute -right-6 -top-10 font-heading font-black text-[100px] md:text-[120px] text-slate-50 group-hover:text-primary/5 transition-colors duration-300 pointer-events-none select-none">01</div>
-                <div className="w-14 h-14 md:w-16 md:h-16 rounded-xl md:rounded-2xl bg-gradient-to-br from-blue-50 to-indigo-50 flex items-center justify-center mb-6 md:mb-8 group-hover:scale-110 transition-transform duration-300 shadow-inner border border-white relative z-10">
-                  <ShieldCheck className="w-7 h-7 md:w-8 md:h-8 text-primary stroke-[1.5]" />
-                </div>
-                <h3 className="inline-flex items-center w-fit font-heading font-bold text-[15px] md:text-[17px] text-slate-800 mb-4 md:mb-5 relative z-10 px-3 py-2 md:px-4 border border-slate-200 bg-slate-50 rounded-xl shadow-[0_2px_4px_rgba(0,0,0,0.02)] group-hover:border-primary/40 group-hover:bg-primary/10 group-hover:text-primary transition-all duration-300">
-                  100% Inspection Guarantee
-                </h3>
-                <p className="font-body text-slate-600 leading-relaxed text-sm relative z-10">
-                  દરેક કારને નિષ્ણાતો દ્વારા ચેક કરવામાં આવે છે જેથી તમને 100% Mechanical પરફેક્શન મળે.
-                </p>
-              </motion.div>
-
-              {/* Card 2 */}
-              <motion.div variants={fadeInUp} className="group relative bg-white p-6 md:p-8 rounded-[2rem] shadow-[0_2px_10px_rgba(0,0,0,0.02)] border border-slate-100 hover:shadow-[0_20px_40px_rgba(0,0,0,0.08)] hover:border-emerald-500/20 transition-all duration-300 md:hover:-translate-y-2 overflow-hidden flex flex-col h-full">
-                <div className="absolute -right-6 -top-10 font-heading font-black text-[100px] md:text-[120px] text-slate-50 group-hover:text-emerald-500/5 transition-colors duration-300 pointer-events-none select-none">02</div>
-                <div className="w-14 h-14 md:w-16 md:h-16 rounded-xl md:rounded-2xl bg-gradient-to-br from-emerald-50 to-teal-50 flex items-center justify-center mb-6 md:mb-8 group-hover:scale-110 transition-transform duration-300 shadow-inner border border-white relative z-10">
-                  <FileText className="w-7 h-7 md:w-8 md:h-8 text-emerald-600 stroke-[1.5]" />
-                </div>
-                <h3 className="inline-flex items-center w-fit font-heading font-bold text-[15px] md:text-[17px] text-slate-800 mb-4 md:mb-5 relative z-10 px-3 py-2 md:px-4 border border-slate-200 bg-slate-50 rounded-xl shadow-[0_2px_4px_rgba(0,0,0,0.02)] group-hover:border-emerald-500/40 group-hover:bg-emerald-50 group-hover:text-emerald-700 transition-all duration-300">
-                  ઝડપી RC Transfer
-                </h3>
-                <p className="font-body text-slate-600 leading-relaxed text-sm relative z-10">
-                  કાગળની કાર્યવાહીની ઝંઝટમાંથી મુક્તિ. અમે તમામ Documentation ઝડપથી અને સંપૂર્ણ પારદર્શક રીતે પૂર્ણ કરીએ છીએ.
-                </p>
-              </motion.div>
-
-              {/* Card 3 */}
-              <motion.div variants={fadeInUp} className="group relative bg-white p-6 md:p-8 rounded-[2rem] shadow-[0_2px_10px_rgba(0,0,0,0.02)] border border-slate-100 hover:shadow-[0_20px_40px_rgba(0,0,0,0.08)] hover:border-purple-500/20 transition-all duration-300 md:hover:-translate-y-2 overflow-hidden flex flex-col h-full">
-                <div className="absolute -right-6 -top-10 font-heading font-black text-[100px] md:text-[120px] text-slate-50 group-hover:text-purple-500/5 transition-colors duration-300 pointer-events-none select-none">03</div>
-                <div className="w-14 h-14 md:w-16 md:h-16 rounded-xl md:rounded-2xl bg-gradient-to-br from-purple-50 to-fuchsia-50 flex items-center justify-center mb-6 md:mb-8 group-hover:scale-110 transition-transform duration-300 shadow-inner border border-white relative z-10">
-                  <Landmark className="w-7 h-7 md:w-8 md:h-8 text-purple-600 stroke-[1.5]" />
-                </div>
-                <h3 className="inline-flex items-center w-fit font-heading font-bold text-[15px] md:text-[17px] text-slate-800 mb-4 md:mb-5 relative z-10 px-3 py-2 md:px-4 border border-slate-200 bg-slate-50 rounded-xl shadow-[0_2px_4px_rgba(0,0,0,0.02)] group-hover:border-purple-500/40 group-hover:bg-purple-50 group-hover:text-purple-700 transition-all duration-300">
-                  સરળ Loan Approvals
-                </h3>
-                <p className="font-body text-slate-600 leading-relaxed text-sm relative z-10">
-                  Top Banks સાથેના જોડાણને કારણે અમે તમને સૌથી ઓછા Interest Rates અને ઝડપી Loan ની સુવિધા આપીએ છીએ.
-                </p>
-              </motion.div>
-
-              {/* Card 4 */}
-              <motion.div variants={fadeInUp} className="group relative bg-white p-6 md:p-8 rounded-[2rem] shadow-[0_2px_10px_rgba(0,0,0,0.02)] border border-slate-100 hover:shadow-[0_20px_40px_rgba(0,0,0,0.08)] hover:border-brand-orange/20 transition-all duration-300 md:hover:-translate-y-2 overflow-hidden flex flex-col h-full">
-                <div className="absolute -right-6 -top-10 font-heading font-black text-[100px] md:text-[120px] text-slate-50 group-hover:text-brand-orange/5 transition-colors duration-300 pointer-events-none select-none">04</div>
-                <div className="w-14 h-14 md:w-16 md:h-16 rounded-xl md:rounded-2xl bg-gradient-to-br from-orange-50 to-amber-50 flex items-center justify-center mb-6 md:mb-8 group-hover:scale-110 transition-transform duration-300 shadow-inner border border-white relative z-10">
-                  <Tag className="w-7 h-7 md:w-8 md:h-8 text-brand-orange stroke-[1.5]" />
-                </div>
-                <h3 className="inline-flex items-center w-fit font-heading font-bold text-[15px] md:text-[17px] text-slate-800 mb-4 md:mb-5 relative z-10 px-3 py-2 md:px-4 border border-slate-200 bg-slate-50 rounded-xl shadow-[0_2px_4px_rgba(0,0,0,0.02)] group-hover:border-brand-orange/40 group-hover:bg-orange-50 group-hover:text-orange-700 transition-all duration-300">
-                  100% Transparent Pricing
-                </h3>
-                <p className="font-body text-slate-600 leading-relaxed text-sm relative z-10">
-                  કોઈ Hidden Fees નહીં. તમે જે જુઓ છો તે જ તમારે ચૂકવવાનું રહે છે, સંપૂર્ણ પારદર્શિતા (Transparency) સાથે.
-                </p>
-              </motion.div>
-            </motion.div>
+      {/* ═════════════════════════════════════════════════════════════════════
+          5. THE SADGURU DIFFERENCE: Traditional Broker vs Sadguru Verified
+          ═════════════════════════════════════════════════════════════════════ */}
+      <section className="py-20 md:py-28 px-4 sm:px-6 lg:px-8 bg-slate-50 relative overflow-hidden">
+        <div className="max-w-6xl mx-auto">
+          {/* Section Header */}
+          <div className="text-center max-w-3xl mx-auto mb-12 sm:mb-16">
+            <span className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-brand-orange/10 border border-brand-orange/20 text-brand-orange font-heading font-bold text-xs uppercase tracking-widest mb-3.5">
+              <Compass className="w-3.5 h-3.5 text-brand-orange" /> શા માટે સદગુરુ કાર મેળો? · THE UNFAIR ADVANTAGE
+            </span>
+            <h2 className="text-2xl sm:text-4xl md:text-5xl font-black text-slate-900 font-heading tracking-tight leading-tight">
+              સામાન્ય બ્રોકર vs <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-orange via-amber-500 to-yellow-500">સદગુરુ વેરિફાઇડ કાર</span>
+            </h2>
+            <p className="mt-3.5 text-sm sm:text-base text-slate-600 font-medium leading-relaxed">
+              સુરતમાં વપરાયેલી કાર લેતી વખતે ગ્રાહકો સાથે થતી સામાન્ય છેતરપિંડીઓથી બચો. જુઓ અમારો સ્પષ્ટ તફાવત:
+            </p>
           </div>
-        </section>
 
-        {/* 50x Premium Core Services Section - LIGHT MODE UPGRADE */}
-        <section id="core-services" className="py-16 md:py-24 px-4 relative z-10 scroll-mt-24 overflow-hidden">
-          {/* Dynamic Abstract Background Elements (Light Mode) */}
-          <div className="absolute top-1/4 right-0 w-[400px] md:w-[600px] h-[400px] md:h-[600px] bg-brand-orange/5 rounded-full blur-[100px] md:blur-[120px] pointer-events-none"></div>
-          <div className="absolute bottom-0 left-1/4 w-[400px] md:w-[600px] h-[400px] md:h-[600px] bg-primary/5 rounded-full blur-[100px] md:blur-[120px] pointer-events-none"></div>
+          {/* Comparison Matrix */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8 items-stretch">
+            {/* Card 1: Traditional Broker */}
+            <div className="bg-white p-6 sm:p-8 rounded-3xl border border-red-200/70 shadow-sm relative overflow-hidden flex flex-col justify-between">
+              <div className="absolute top-0 inset-x-0 h-1.5 bg-red-400" />
+              <div>
+                <div className="flex items-center justify-between mb-4">
+                  <span className="text-xs font-heading font-black text-red-600 uppercase tracking-wider bg-red-50 px-3 py-1 rounded-full border border-red-200">
+                    સામાન્ય બજાર / લોકલ બ્રોકર
+                  </span>
+                  <span className="text-xs text-slate-400 font-bold">Unorganized Broker</span>
+                </div>
+                <h3 className="text-lg sm:text-xl font-heading font-black text-slate-800 mb-5">
+                  અનિશ્ચિતતા અને ઊંચા જોખમો
+                </h3>
 
-          <div className="max-w-7xl mx-auto relative z-20">
-            <motion.div
-              className="text-center mb-12 md:mb-20 flex flex-col items-center"
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true, margin: "-50px" }}
-              variants={fadeInUp}
-            >
-              <span className="font-heading font-bold text-xs md:text-sm uppercase tracking-[0.3em] text-brand-orange mb-3 md:mb-4">અમારી વિશેષતા</span>
-              <h2 className="font-heading font-bold text-3xl sm:text-4xl md:text-6xl text-slate-900 mb-5 md:mb-6 tracking-tight">
-                કારને લગતી <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-orange to-amber-500">દરેક સુવિધા</span> એક જ જગ્યાએ
-              </h2>
-              <div className="w-16 md:w-24 h-1.5 bg-gradient-to-r from-brand-orange to-yellow-400 rounded-full mb-6 md:mb-8 shadow-sm"></div>
-              <p className="font-body text-base md:text-xl text-slate-600 max-w-3xl px-2">
-                Pre-owned કલેક્શનનો સૌથી શ્રેષ્ઠ અનુભવ. 100% <span className="font-bold text-slate-800">Quality Inspection</span> થી લઈને <span className="font-bold text-slate-800"> Instant Payment</span> સુધીની તમામ સુવિધાઓ.
-              </p>
-            </motion.div>
+                <ul className="space-y-3.5 text-xs sm:text-sm text-slate-600">
+                  <li className="flex items-start gap-2.5">
+                    <LucideX className="w-4 h-4 text-red-500 shrink-0 mt-0.5" />
+                    <span><b>કોઈ ટેકનિકલ ગેરંટી નહીં:</b> કારમાં રહેલા છૂપા યાંત્રિક ફોલ્ટની કોઈ જવાબદારી હોતી નથી.</span>
+                  </li>
+                  <li className="flex items-start gap-2.5">
+                    <LucideX className="w-4 h-4 text-red-500 shrink-0 mt-0.5" />
+                    <span><b>મીટર ટેમ્પરિંગનું ઊંચું જોખમ:</b> કિલોમીટર ઓછા બતાવીને ગેરમાર્ગે દોરવાની શક્યતા.</span>
+                  </li>
+                  <li className="flex items-start gap-2.5">
+                    <LucideX className="w-4 h-4 text-red-500 shrink-0 mt-0.5" />
+                    <span><b>કાગળિયાં અને RTO ટ્રાન્સફરમાં વિલંબ:</b> મહિનાઓ સુધી આરસી બુક ટ્રાન્સફર થતી નથી.</span>
+                  </li>
+                  <li className="flex items-start gap-2.5">
+                    <LucideX className="w-4 h-4 text-red-500 shrink-0 mt-0.5" />
+                    <span><b>અનિશ્ચિત કમિશન &amp; છૂપા ચાર્જીસ:</b> ખરીદનાર અને વેચનાર બંને પાસેથી છૂપા પૈસા લેવાય છે.</span>
+                  </li>
+                  <li className="flex items-start gap-2.5">
+                    <LucideX className="w-4 h-4 text-red-500 shrink-0 mt-0.5" />
+                    <span><b>વેચાણ પછી કોઈ સર્વિસ નહીં:</b> ડીલ પત્યા પછી કોઈ પ્રકારનો સંપર્ક કે સહાય મળતી નથી.</span>
+                  </li>
+                </ul>
+              </div>
 
-            {/* Premium Tab Navigation (Light Mode) */}
-            <motion.div
-              className="grid grid-cols-3 sm:flex sm:flex-row sm:justify-center gap-2 sm:gap-3 md:gap-4 mb-10 md:mb-12"
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true }}
-              variants={scaleUp}
-            >
-              {tabs.map((tab) => (
+              <div className="mt-8 pt-4 border-t border-slate-100 text-center">
+                <span className="text-xs font-semibold text-red-500">❌ ગ્રાહક માટે માનસિક તણાવ અને નાણાકીય જોખમ</span>
+              </div>
+            </div>
+
+            {/* Card 2: Sadguru Verified Experience */}
+            <div className="bg-gradient-to-b from-slate-900 to-slate-950 text-white p-6 sm:p-8 rounded-3xl border-2 border-brand-orange/60 shadow-[0_20px_50px_rgba(245,148,35,0.2)] relative overflow-hidden flex flex-col justify-between">
+              <div className="absolute top-0 inset-x-0 h-2 bg-gradient-to-r from-brand-orange via-amber-400 to-yellow-400" />
+              <div className="absolute -top-12 -right-12 w-40 h-40 bg-brand-orange/15 rounded-full blur-2xl pointer-events-none" />
+
+              <div>
+                <div className="flex items-center justify-between mb-4">
+                  <span className="text-xs font-heading font-black text-slate-950 uppercase tracking-wider bg-gradient-to-r from-brand-orange to-amber-400 px-3 py-1 rounded-full shadow-md">
+                    સદગુરુ કાર મેળો (Sadguru Verified)
+                  </span>
+                  <span className="text-xs text-amber-300 font-bold">100% Certified</span>
+                </div>
+                <h3 className="text-lg sm:text-xl font-heading font-black text-white mb-5">
+                  સંપૂર્ણ સુરક્ષા, ગેરંટી અને શાંતિ (Peace of Mind)
+                </h3>
+
+                <ul className="space-y-3.5 text-xs sm:text-sm text-slate-200">
+                  <li className="flex items-start gap-2.5">
+                    <CheckCircle className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                    <span><b>૧૨૦+ પોઈન્ટ ટેકનિકલ ઈન્સ્પેક્શન:</b> દરેક કાર નિષ્ણાતો દ્વારા સંપૂર્ણ ટેસ્ટ પાસ કરેલી હોય છે.</span>
+                  </li>
+                  <li className="flex items-start gap-2.5">
+                    <CheckCircle className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                    <span><b>૧૦૦% જેન્યુઇન ઓરિજિનલ કિલોમીટર:</b> OBD સ્કેન અને ડીલર સર્વિસ હિસ્ટ્રી સાથે સચોટ ખાતરી.</span>
+                  </li>
+                  <li className="flex items-start gap-2.5">
+                    <CheckCircle className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                    <span><b>૧૦૦% ફ્રી &amp; ઝડપી RTO ટ્રાન્સફર:</b> કાનૂની માલિકી ફેરબદલની સંપૂર્ણ જવાબદારી અમારી.</span>
+                  </li>
+                  <li className="flex items-start gap-2.5">
+                    <CheckCircle className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                    <span><b>ઝીરો હિડન ચાર્જ &amp; ફિક્સ્ડ વાજબી ભાવ:</b> કોઈ બ્રોકરેજ કે કમિશન નહીં, ૧૦૦% પારદર્શક વ્યવહાર.</span>
+                  </li>
+                  <li className="flex items-start gap-2.5">
+                    <CheckCircle className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                    <span><b>તમામ બેંકો દ્વારા ૦ ડાઉન પેમેન્ટ લોન:</b> એક્સચેન્જ બોનસ અને સેમ-ડે ડિલિવરી સુવિધા.</span>
+                  </li>
+                </ul>
+              </div>
+
+              <div className="mt-8 pt-4 border-t border-slate-800 text-center">
+                <span className="text-xs font-bold text-amber-300">✅ ૧૦૦% સેફ ડીલિંગ અને સુરતના ૫,૦૦૦+ પરિવારોનો વિશ્વાસ</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ═════════════════════════════════════════════════════════════════════
+          6. CORE DEALERSHIP SERVICES (BUY · SELL · EXCHANGE)
+          ═════════════════════════════════════════════════════════════════════ */}
+      <section id="core-services" className="py-20 md:py-28 px-4 sm:px-6 lg:px-8 bg-white relative scroll-mt-20">
+        <div className="max-w-7xl mx-auto">
+          {/* Section Header */}
+          <div className="text-center max-w-3xl mx-auto mb-10 sm:mb-14">
+            <span className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-brand-orange/10 border border-brand-orange/20 text-brand-orange font-heading font-bold text-xs uppercase tracking-widest mb-3.5">
+              <Zap className="w-3.5 h-3.5 text-brand-orange" /> અમારી મુખ્ય સેવાઓ · CORE SERVICES
+            </span>
+            <h2 className="text-2xl sm:text-4xl md:text-5xl font-black text-slate-900 font-heading tracking-tight leading-tight">
+              કારને લગતી દરેક સેવા <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-orange via-amber-500 to-yellow-500">એક જ છત નીચે</span>
+            </h2>
+            <p className="mt-3.5 text-sm sm:text-base text-slate-600 font-medium leading-relaxed">
+              ખરીદીથી લઈને વેચાણ અને એક્સચેન્જ સુધીની સંપૂર્ણ આધુનિક ઓટોમોટિવ સર્વિસિસ.
+            </p>
+          </div>
+
+          {/* Service Switcher Tabs */}
+          <div className="flex items-center justify-center gap-2 sm:gap-4 mb-10 max-w-2xl mx-auto p-1.5 bg-slate-100 rounded-2xl border border-slate-200">
+            {tabs.map((tab) => {
+              const TabIcon = tab.icon;
+              const isSelected = activeTab === tab.id;
+              return (
                 <button
                   key={tab.id}
                   onClick={() => handleTabClick(tab.id)}
-                  className={`group relative px-1 py-3 sm:px-6 sm:py-3 md:px-12 md:py-4 rounded-xl md:rounded-2xl font-heading font-bold transition-all duration-500 overflow-hidden shadow-sm flex items-center justify-center w-full sm:w-auto sm:min-w-[200px] md:min-w-[250px] min-h-[60px] sm:min-h-[48px] md:min-h-[56px] ${activeTab === tab.id
-                    ? 'text-white scale-[1.02] sm:scale-105 ring-1 ring-primary/20 shadow-[0_10px_20px_rgba(37,99,235,0.2)] z-10'
-                    : 'text-slate-600 hover:text-slate-900 bg-white border border-slate-200 hover:border-slate-300 hover:shadow-md'
-                    }`}
+                  className={`relative flex-1 py-3 px-3 rounded-xl font-heading font-bold text-xs sm:text-sm transition-all cursor-pointer flex items-center justify-center gap-2 ${
+                    isSelected ? 'text-white shadow-md' : 'text-slate-600 hover:text-slate-900'
+                  }`}
                 >
-                  {activeTab === tab.id && (
-                    <motion.div layoutId="activeTabBackground" className="absolute inset-0 bg-primary opacity-100"></motion.div>
+                  {isSelected && (
+                    <motion.div
+                      layoutId="activeAboutServiceTab"
+                      className="absolute inset-0 bg-slate-900 rounded-xl"
+                      transition={{ type: 'spring', stiffness: 400, damping: 32 }}
+                    />
                   )}
-                  {/* Hover gradient effect for inactive */}
-                  {activeTab !== tab.id && (
-                    <div className="absolute inset-0 bg-slate-50 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                  )}
-                  <span className="relative z-10 flex flex-col sm:flex-row items-center gap-1.5 sm:gap-2 md:gap-3 text-center whitespace-nowrap">
-                    {tab.id === 'buy' && <CarFront className={`w-4 h-4 md:w-6 md:h-6 ${activeTab === tab.id ? 'text-white' : 'text-primary transition-colors group-hover:text-blue-700'}`} />}
-                    {tab.id === 'sell' && <Banknote className={`w-4 h-4 md:w-6 md:h-6 ${activeTab === tab.id ? 'text-white' : 'text-emerald-600 transition-colors group-hover:text-emerald-700'}`} />}
-                    {tab.id === 'exchange' && <RefreshCw className={`w-4 h-4 md:w-6 md:h-6 ${activeTab === tab.id ? 'text-white' : 'text-brand-orange transition-colors group-hover:text-orange-700'}`} />}
-                    <span className="text-[10px] sm:text-sm md:text-lg tracking-tight sm:tracking-normal">{tab.label}</span>
+                  <span className="relative z-10 flex items-center gap-1.5 sm:gap-2">
+                    <TabIcon className={`w-4 h-4 ${isSelected ? 'text-brand-orange' : 'text-slate-500'}`} />
+                    <span className="whitespace-nowrap">{tab.label}</span>
                   </span>
                 </button>
-              ))}
-            </motion.div>
+              );
+            })}
+          </div>
 
-            {/* Dynamic Light Mode Content Area */}
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16 ring-1 ring-slate-100 rounded-[2rem] md:rounded-[3rem] p-6 sm:p-8 md:p-14 bg-white relative overflow-hidden min-h-[500px] shadow-[0_20px_60px_rgba(0,0,0,0.06)]">
-              {/* Inner aesthetic glow */}
-              <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full sm:w-3/4 h-1/2 bg-slate-50/50 rounded-full blur-[60px] sm:blur-[100px] pointer-events-none"></div>
-
-              <AnimatePresence mode="wait">
+          {/* Active Tab Service Display */}
+          <div className="rounded-3xl border border-slate-200 bg-slate-50/60 p-6 sm:p-10 md:p-12 shadow-sm">
+            <AnimatePresence mode="wait">
+              {activeTab === 'buy' && (
                 <motion.div
-                  key={activeTab}
-                  initial={{ opacity: 0, y: 20 }}
+                  key="buy"
+                  initial={{ opacity: 0, y: 15 }}
                   animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -20 }}
-                  transition={{ duration: 0.4 }}
-                  className="col-span-1 lg:col-span-12 flex flex-col lg:flex-row gap-10 lg:gap-16 relative z-10 w-full items-center"
+                  exit={{ opacity: 0, y: -15 }}
+                  transition={{ duration: 0.3 }}
+                  className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center"
                 >
-                  {/* TAB CONTENT: BUY */}
-                  {activeTab === 'buy' && (
-                    <>
-                      <div className="flex-1 w-full order-2 lg:order-1">
-                        <h3 className="font-heading font-bold text-2xl sm:text-3xl md:text-4xl text-slate-900 mb-4 md:mb-5 tracking-tight">100% ભરોસા સાથે <span className="text-brand-orange">Dream Car</span> ખરીદો</h3>
-                        <p className="font-body text-slate-600 text-base md:text-lg leading-relaxed mb-8 md:mb-10">
-                          Pre-owned ખરીદવી હવે ચિંતાનો વિષય નથી. અમે તમને સંપૂર્ણ પારદર્શક અને <span className="font-semibold text-slate-800">Premium Buying Experience</span> આપીએ છીએ.
-                        </p>
+                  <div className="lg:col-span-7">
+                    <span className="text-xs font-heading font-black text-brand-orange uppercase tracking-wider bg-orange-50 border border-brand-orange/20 px-3 py-1 rounded-full">
+                      પ્રીમિયમ વેરિફાઇડ કાર ખરીદો
+                    </span>
+                    <h3 className="text-2xl sm:text-3xl font-black text-slate-900 font-heading mt-3 mb-4">
+                      ૧૦૦% ભરોસા સાથે તમારા પરિવાર માટે <br className="hidden sm:inline" />
+                      <span className="text-brand-orange">Dream Car</span> પસંદ કરો
+                    </h3>
+                    <p className="text-sm sm:text-base text-slate-600 leading-relaxed mb-6 font-body">
+                      સુરતનું સૌથી મોટું ૧૫૦+ વેરિફાઇડ કાર કલેક્શન. દરેક કાર ૧૨૦+ પોઈન્ટ ટેકનિકલ ઈન્સ્પેક્શન પાસ કરેલી છે અને તમામ ટોપ બેંકો દ્વારા સરળ લોન સુવિધા ઉપલબ્ધ છે.
+                    </p>
 
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-6 md:gap-y-8">
-                          {/* Items ... */}
-                          <div className="flex items-start gap-3 md:gap-4 group">
-                            <div className="w-12 h-12 md:w-14 md:h-14 rounded-xl md:rounded-2xl bg-blue-50 border border-blue-100 flex items-center justify-center shrink-0 mt-1 md:group-hover:bg-blue-100 md:group-hover:scale-110 transition-all duration-300 shadow-sm">
-                              <SearchCheck className="w-5 h-5 md:w-6 md:h-6 text-brand-orange" />
-                            </div>
-                            <div>
-                              <span className="block font-heading font-bold text-slate-900 text-base md:text-lg group-hover:text-blue-700 transition-colors">110-Point Inspection</span>
-                              <span className="font-body text-slate-600 text-xs md:text-sm mt-1 block leading-relaxed">બમ્પરથી બમ્પર સુધી Mechanical પરફેક્શન માટે કડક ટેસ્ટિંગ.</span>
-                            </div>
-                          </div>
-
-                          <div className="flex items-start gap-3 md:gap-4 group">
-                            <div className="w-12 h-12 md:w-14 md:h-14 rounded-xl md:rounded-2xl bg-emerald-50 border border-emerald-100 flex items-center justify-center shrink-0 mt-1 md:group-hover:bg-emerald-100 md:group-hover:scale-110 transition-all duration-300 shadow-sm">
-                              <ShieldCheck className="w-5 h-5 md:w-6 md:h-6 text-emerald-600" />
-                            </div>
-                            <div>
-                              <span className="block font-heading font-bold text-slate-900 text-base md:text-lg group-hover:text-emerald-700 transition-colors">Non-Accidental</span>
-                              <span className="font-body text-slate-600 text-xs md:text-sm mt-1 block leading-relaxed">સ્ટ્રક્ચરલ મજબૂતાઈ અને 100% Genuine હિસ્ટ્રીની ખાતરી.</span>
-                            </div>
-                          </div>
-
-                          <div className="flex items-start gap-3 md:gap-4 group">
-                            <div className="w-12 h-12 md:w-14 md:h-14 rounded-xl md:rounded-2xl bg-purple-50 border border-purple-100 flex items-center justify-center shrink-0 mt-1 md:group-hover:bg-purple-100 md:group-hover:scale-110 transition-all duration-300 shadow-sm">
-                              <Landmark className="w-5 h-5 md:w-6 md:h-6 text-purple-600" />
-                            </div>
-                            <div>
-                              <span className="block font-heading font-bold text-slate-900 text-base md:text-lg group-hover:text-purple-700 transition-colors">Zero Downpayment</span>
-                              <span className="font-body text-slate-600 text-xs md:text-sm mt-1 block leading-relaxed">100% સુધી સરળ અને Fast-track ફાઇનાન્સિંગ ઓપ્શન્સ.</span>
-                            </div>
-                          </div>
-
-                          <div className="flex items-start gap-3 md:gap-4 group">
-                            <div className="w-12 h-12 md:w-14 md:h-14 rounded-xl md:rounded-2xl bg-orange-50 border border-orange-100 flex items-center justify-center shrink-0 mt-1 md:group-hover:bg-orange-100 md:group-hover:scale-110 transition-all duration-300 shadow-sm">
-                              <CarFront className="w-5 h-5 md:w-6 md:h-6 text-brand-orange" />
-                            </div>
-                            <div>
-                              <span className="block font-heading font-bold text-slate-900 text-base md:text-lg group-hover:text-orange-700 transition-colors">150+ Premium Cars</span>
-                              <span className="font-body text-slate-600 text-xs md:text-sm mt-1 block leading-relaxed">સુરતમાં સૌથી મોટું અને શ્રેષ્ઠ Premium કાર્સનું કલેક્શન.</span>
-                            </div>
-                          </div>
-
-                          <div className="flex items-start gap-3 md:gap-4 group">
-                            <div className="w-12 h-12 md:w-14 md:h-14 rounded-xl md:rounded-2xl bg-teal-50 border border-teal-100 flex items-center justify-center shrink-0 mt-1 md:group-hover:bg-teal-100 md:group-hover:scale-110 transition-all duration-300 shadow-sm">
-                              <FileText className="w-5 h-5 md:w-6 md:h-6 text-teal-600" />
-                            </div>
-                            <div>
-                              <span className="block font-heading font-bold text-slate-900 text-base md:text-lg group-hover:text-teal-700 transition-colors">Hassle-Free RC Transfer</span>
-                              <span className="font-body text-slate-600 text-xs md:text-sm mt-1 block leading-relaxed">કાગળની કાર્યવાહીની સંપૂર્ણ જવાબદારી અમારી, જેથી તમને મળે Peace of Mind.</span>
-                            </div>
-                          </div>
-
-                          <div className="flex items-start gap-3 md:gap-4 group">
-                            <div className="w-12 h-12 md:w-14 md:h-14 rounded-xl md:rounded-2xl bg-rose-50 border border-rose-100 flex items-center justify-center shrink-0 mt-1 md:group-hover:bg-rose-100 md:group-hover:scale-110 transition-all duration-300 shadow-sm">
-                              <Handshake className="w-5 h-5 md:w-6 md:h-6 text-rose-600" />
-                            </div>
-                            <div>
-                              <span className="block font-heading font-bold text-slate-900 text-base md:text-lg group-hover:text-rose-700 transition-colors">After-Sales Support</span>
-                              <span className="font-body text-slate-600 text-xs md:text-sm mt-1 block leading-relaxed">કાર ખરીદ્યા પછી પણ સર્વિસ અને કોઈપણ સહાયતા માટે અમારી ટીમ હંમેશા તૈયાર.</span>
-                            </div>
-                          </div>
-
-                        </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 mb-8">
+                      <div className="flex items-center gap-2.5 p-3 rounded-xl bg-white border border-slate-200">
+                        <CheckCircle className="w-4 h-4 text-emerald-600 shrink-0" />
+                        <span className="text-xs font-bold text-slate-800">૧૨૦+ પોઈન્ટ સર્ટિફિકેશન</span>
                       </div>
-
-                      <div className="w-full lg:w-5/12 flex items-center justify-center relative order-1 lg:order-2">
-                        <div className="relative w-full aspect-[4/3] sm:aspect-square lg:aspect-[4/5] rounded-[2rem] md:rounded-[2.5rem] overflow-hidden shadow-[0_20px_40px_rgba(0,0,0,0.1)] group">
-                          <img src="https://images.unsplash.com/photo-1550355291-bbee04a92027?q=80&w=1000&auto=format&fit=crop" alt="Buy a Premium Car" loading="lazy" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
-                          <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/20 to-transparent"></div>
-                        </div>
+                      <div className="flex items-center gap-2.5 p-3 rounded-xl bg-white border border-slate-200">
+                        <CheckCircle className="w-4 h-4 text-emerald-600 shrink-0" />
+                        <span className="text-xs font-bold text-slate-800">૦ ડાઉન પેમેન્ટ બેંક લોન</span>
                       </div>
-                    </>
-                  )}
-
-                  {/* TAB CONTENT: SELL */}
-                  {activeTab === 'sell' && (
-                    <>
-                      <div className="flex-1 w-full order-2 lg:order-1">
-                        <h3 className="font-heading font-bold text-2xl sm:text-3xl md:text-4xl text-slate-900 mb-4 md:mb-5 tracking-tight">શ્રેષ્ઠ કિંમતે કાર વેચો અને <span className="text-emerald-600 block sm:inline">Instant Payment</span> મેળવો</h3>
-                        <p className="font-body text-slate-600 text-base md:text-lg leading-relaxed mb-8 md:mb-10">
-                          ભાવતાલની કોઈ ઝંઝટ નહીં. સૌથી સાચો ભાવ મેળવો અને કોઈ પણ રિસ્ક વગર સીધા તમારા બેંક ખાતામાં <span className="font-semibold text-slate-800">Instant Payment</span> મેળવો.
-                        </p>
-
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-6 md:gap-y-8">
-                          <div className="flex items-start gap-3 md:gap-4 group">
-                            <div className="w-12 h-12 md:w-14 md:h-14 rounded-xl md:rounded-2xl bg-emerald-50 border border-emerald-100 flex items-center justify-center shrink-0 mt-1 md:group-hover:bg-emerald-100 md:group-hover:scale-110 transition-all duration-300 shadow-sm">
-                              <CheckCircle className="w-5 h-5 md:w-6 md:h-6 text-emerald-600" />
-                            </div>
-                            <div>
-                              <span className="block font-heading font-bold text-slate-900 text-base md:text-lg group-hover:text-emerald-700 transition-colors">Instant Fair Valuation</span>
-                              <span className="font-body text-slate-600 text-xs md:text-sm mt-1 block leading-relaxed">માર્કેટ મુજબ સાચી કિંમતનું ડેટાબેઝ્ડ અને નિષ્ણાતો દ્વારા વેરિફિકેશન.</span>
-                            </div>
-                          </div>
-
-                          <div className="flex items-start gap-3 md:gap-4 group">
-                            <div className="w-12 h-12 md:w-14 md:h-14 rounded-xl md:rounded-2xl bg-green-50 border border-green-100 flex items-center justify-center shrink-0 mt-1 md:group-hover:bg-green-100 md:group-hover:scale-110 transition-all duration-300 shadow-sm">
-                              <Clock className="w-5 h-5 md:w-6 md:h-6 text-green-600" />
-                            </div>
-                            <div>
-                              <span className="block font-heading font-bold text-slate-900 text-base md:text-lg group-hover:text-green-700 transition-colors">15 મિનિટમાં Payment</span>
-                              <span className="font-body text-slate-600 text-xs md:text-sm mt-1 block leading-relaxed">ડીલ ફાઇનલ થતાં જ સીધા બેંક એકાઉન્ટમાં Immediate Transfer.</span>
-                            </div>
-                          </div>
-
-                          <div className="flex items-start gap-3 md:gap-4 group">
-                            <div className="w-12 h-12 md:w-14 md:h-14 rounded-xl md:rounded-2xl bg-blue-50 border border-blue-100 flex items-center justify-center shrink-0 mt-1 md:group-hover:bg-blue-100 md:group-hover:scale-110 transition-all duration-300 shadow-sm">
-                              <FileText className="w-5 h-5 md:w-6 md:h-6 text-brand-orange" />
-                            </div>
-                            <div>
-                              <span className="block font-heading font-bold text-slate-900 text-base md:text-lg group-hover:text-blue-700 transition-colors">Free RC Transfer</span>
-                              <span className="font-body text-slate-600 text-xs md:text-sm mt-1 block leading-relaxed">કોઈપણ ખર્ચ વગર RTO ની તમામ કાયદાકીય કામગીરીની ખાતરી.</span>
-                            </div>
-                          </div>
-
-                          <div className="flex items-start gap-3 md:gap-4 group">
-                            <div className="w-12 h-12 md:w-14 md:h-14 rounded-xl md:rounded-2xl bg-orange-50 border border-orange-100 flex items-center justify-center shrink-0 mt-1 md:group-hover:bg-orange-100 md:group-hover:scale-110 transition-all duration-300 shadow-sm">
-                              <MapPin className="w-5 h-5 md:w-6 md:h-6 text-orange-600" />
-                            </div>
-                            <div>
-                              <span className="block font-heading font-bold text-slate-900 text-base md:text-lg group-hover:text-orange-700 transition-colors">Doorstep Evaluation</span>
-                              <span className="font-body text-slate-600 text-xs md:text-sm mt-1 block leading-relaxed">ઝડપી અને ફ્રી કાર ચેકિંગ માટે અમે તમારા લોકેશન પર આવીશું.</span>
-                            </div>
-                          </div>
-
-                          <div className="flex items-start gap-3 md:gap-4 group">
-                            <div className="w-12 h-12 md:w-14 md:h-14 rounded-xl md:rounded-2xl bg-red-50 border border-red-100 flex items-center justify-center shrink-0 mt-1 md:group-hover:bg-red-100 md:group-hover:scale-110 transition-all duration-300 shadow-sm">
-                              <Tag className="w-5 h-5 md:w-6 md:h-6 text-red-600" />
-                            </div>
-                            <div>
-                              <span className="block font-heading font-bold text-slate-900 text-base md:text-lg group-hover:text-red-700 transition-colors">No Hidden Charges</span>
-                              <span className="font-body text-slate-600 text-xs md:text-sm mt-1 block leading-relaxed">કાર વેચવાની પ્રક્રિયા સંપૂર્ણપણે ફ્રી છે, કોઈ કમિશન કે હિડન ચાર્જ વસૂલવામાં આવતો નથી.</span>
-                            </div>
-                          </div>
-
-                          <div className="flex items-start gap-3 md:gap-4 group">
-                            <div className="w-12 h-12 md:w-14 md:h-14 rounded-xl md:rounded-2xl bg-indigo-50 border border-indigo-100 flex items-center justify-center shrink-0 mt-1 md:group-hover:bg-indigo-100 md:group-hover:scale-110 transition-all duration-300 shadow-sm">
-                              <Landmark className="w-5 h-5 md:w-6 md:h-6 text-indigo-600" />
-                            </div>
-                            <div>
-                              <span className="block font-heading font-bold text-slate-900 text-base md:text-lg group-hover:text-indigo-700 transition-colors">Loan Settlement</span>
-                              <span className="font-body text-slate-600 text-xs md:text-sm mt-1 block leading-relaxed">જો તમારી કાર પર લોન ચાલુ હોય, તો અમે તેનું સીધું બેંક સેટલમેન્ટ કરી આપીએ છીએ.</span>
-                            </div>
-                          </div>
-                        </div>
+                      <div className="flex items-center gap-2.5 p-3 rounded-xl bg-white border border-slate-200">
+                        <CheckCircle className="w-4 h-4 text-emerald-600 shrink-0" />
+                        <span className="text-xs font-bold text-slate-800">૧૦૦% મફત RTO ટ્રાન્સફર</span>
                       </div>
-
-                      <div className="w-full lg:w-5/12 flex items-center justify-center relative order-1 lg:order-2">
-                        <div className="relative w-full aspect-[4/3] sm:aspect-square lg:aspect-[4/5] rounded-[2rem] md:rounded-[2.5rem] overflow-hidden shadow-[0_20px_40px_rgba(0,0,0,0.1)] group">
-                          <img src="https://images.unsplash.com/photo-1600880292203-757bb62b4baf?q=80&w=1000&auto=format&fit=crop" alt="Sell Your Car" loading="lazy" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
-                          <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/20 to-transparent"></div>
-                        </div>
+                      <div className="flex items-center gap-2.5 p-3 rounded-xl bg-white border border-slate-200">
+                        <CheckCircle className="w-4 h-4 text-emerald-600 shrink-0" />
+                        <span className="text-xs font-bold text-slate-800">૧૫૦+ લાઈવ સ્ટોક વરાછા</span>
                       </div>
-                    </>
-                  )}
+                    </div>
 
-                  {/* TAB CONTENT: EXCHANGE */}
-                  {activeTab === 'exchange' && (
-                    <>
-                      <div className="flex-1 w-full order-2 lg:order-1">
-                        <h3 className="font-heading font-bold text-2xl sm:text-3xl md:text-4xl text-slate-900 mb-4 md:mb-5 tracking-tight">જૂની કાર આપી નવી <span className="text-brand-orange block sm:inline">Dream Car</span> ઘરે લાવો</h3>
-                        <p className="font-body text-slate-600 text-base md:text-lg leading-relaxed mb-8 md:mb-10">
-                          શું તમે નવી કાર લેવાનું વિચારી રહ્યા છો? તમારી જૂની કારની સાચી કિંમત મેળવો અને તે જ દિવસે તમારી પસંદગીની નવી <span className="font-semibold text-slate-800">Premium Car</span> ઘરે લઈ જાવ.
-                        </p>
+                    <Link
+                      to="/inventory"
+                      className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-heading font-black text-sm shadow-md transition-all hover:scale-105 active:scale-95"
+                    >
+                      <Car className="w-4 h-4 text-brand-orange" />
+                      <span>સંપૂર્ણ ઇન્વેન્ટરી જુઓ · View All 150+ Cars</span>
+                      <ChevronRight className="w-4 h-4" />
+                    </Link>
+                  </div>
 
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-6 md:gap-y-8">
-                          <div className="flex items-start gap-3 md:gap-4 group">
-                            <div className="w-12 h-12 md:w-14 md:h-14 rounded-xl md:rounded-2xl bg-orange-50 border border-orange-100 flex items-center justify-center shrink-0 mt-1 md:group-hover:bg-orange-100 md:group-hover:scale-110 transition-all duration-300 shadow-sm">
-                              <RefreshCw className="w-5 h-5 md:w-6 md:h-6 text-brand-orange" />
-                            </div>
-                            <div>
-                              <span className="block font-heading font-bold text-slate-900 text-base md:text-lg group-hover:text-orange-700 transition-colors">The Seamless Process</span>
-                              <span className="font-body text-slate-600 text-xs md:text-sm mt-1 block leading-relaxed">તમારી જૂની કાર લાવો અને નવી પસંદ કરો, કિંમત તરત Adjust કરવામાં આવશે.</span>
-                            </div>
-                          </div>
-
-                          <div className="flex items-start gap-3 md:gap-4 group">
-                            <div className="w-12 h-12 md:w-14 md:h-14 rounded-xl md:rounded-2xl bg-yellow-50 border border-yellow-100 flex items-center justify-center shrink-0 mt-1 md:group-hover:bg-yellow-100 md:group-hover:scale-110 transition-all duration-300 shadow-sm">
-                              <Banknote className="w-5 h-5 md:w-6 md:h-6 text-yellow-600" />
-                            </div>
-                            <div>
-                              <span className="block font-heading font-bold text-slate-900 text-base md:text-lg group-hover:text-yellow-700 transition-colors">Exchange Bonus</span>
-                              <span className="font-body text-slate-600 text-xs md:text-sm mt-1 block leading-relaxed">માત્ર એક્સચેન્જ પર મળતા Special Price બેનિફિટ્સનો લાભ લો.</span>
-                            </div>
-                          </div>
-
-                          <div className="flex items-start gap-3 md:gap-4 group">
-                            <div className="w-12 h-12 md:w-14 md:h-14 rounded-xl md:rounded-2xl bg-blue-50 border border-blue-100 flex items-center justify-center shrink-0 mt-1 md:group-hover:bg-blue-100 md:group-hover:scale-110 transition-all duration-300 shadow-sm">
-                              <CarFront className="w-5 h-5 md:w-6 md:h-6 text-brand-orange" />
-                            </div>
-                            <div>
-                              <span className="block font-heading font-bold text-slate-900 text-base md:text-lg group-hover:text-blue-700 transition-colors">Drive Out Same Day</span>
-                              <span className="font-body text-slate-600 text-xs md:text-sm mt-1 block leading-relaxed">ઝડપી પેપરવર્કને કારણે તે જ દિવસે તમારી નવી કાર સાથે ઘરે જાવ.</span>
-                            </div>
-                          </div>
-
-                          <div className="flex items-start gap-3 md:gap-4 group">
-                            <div className="w-12 h-12 md:w-14 md:h-14 rounded-xl md:rounded-2xl bg-emerald-50 border border-emerald-100 flex items-center justify-center shrink-0 mt-1 md:group-hover:bg-emerald-100 md:group-hover:scale-110 transition-all duration-300 shadow-sm">
-                              <Zap className="w-5 h-5 md:w-6 md:h-6 text-emerald-600" />
-                            </div>
-                            <div>
-                              <span className="block font-heading font-bold text-slate-900 text-base md:text-lg group-hover:text-emerald-700 transition-colors">Top Market Value</span>
-                              <span className="font-body text-slate-600 text-xs md:text-sm mt-1 block leading-relaxed">અમારા ફેલાયેલા નેટવર્ક દ્વારા તમને સૌથી ઊંચી કિંમત મળે તેની ખાતરી.</span>
-                            </div>
-                          </div>
-
-                          <div className="flex items-start gap-3 md:gap-4 group">
-                            <div className="w-12 h-12 md:w-14 md:h-14 rounded-xl md:rounded-2xl bg-cyan-50 border border-cyan-100 flex items-center justify-center shrink-0 mt-1 md:group-hover:bg-cyan-100 md:group-hover:scale-110 transition-all duration-300 shadow-sm">
-                              <CheckCircle className="w-5 h-5 md:w-6 md:h-6 text-cyan-600" />
-                            </div>
-                            <div>
-                              <span className="block font-heading font-bold text-slate-900 text-base md:text-lg group-hover:text-cyan-700 transition-colors">Any Car, Any Condition</span>
-                              <span className="font-body text-slate-600 text-xs md:text-sm mt-1 block leading-relaxed">તમારી જૂની કાર કોઈપણ કંપની કે મોડલની હોય, અમે તેને બેસ્ટ વેલ્યુ સાથે એક્સચેન્જ કરીશું.</span>
-                            </div>
-                          </div>
-
-                          <div className="flex items-start gap-3 md:gap-4 group">
-                            <div className="w-12 h-12 md:w-14 md:h-14 rounded-xl md:rounded-2xl bg-fuchsia-50 border border-fuchsia-100 flex items-center justify-center shrink-0 mt-1 md:group-hover:bg-fuchsia-100 md:group-hover:scale-110 transition-all duration-300 shadow-sm">
-                              <ShieldCheck className="w-5 h-5 md:w-6 md:h-6 text-fuchsia-600" />
-                            </div>
-                            <div>
-                              <span className="block font-heading font-bold text-slate-900 text-base md:text-lg group-hover:text-fuchsia-700 transition-colors">Transparent Upgrade</span>
-                              <span className="font-body text-slate-600 text-xs md:text-sm mt-1 block leading-relaxed">જૂની કારની સાચી કિંમત અને નવી કારનો બેસ્ટ ભાવ – 100% પારદર્શિતા સાથે.</span>
-                            </div>
-                          </div>
-                        </div>
+                  <div className="lg:col-span-5">
+                    <div className="relative rounded-2xl overflow-hidden shadow-xl aspect-video sm:aspect-[4/3] bg-slate-900 group">
+                      <img
+                        src="https://images.unsplash.com/photo-1550355291-bbee04a92027?q=80&w=1000&auto=format&fit=crop"
+                        alt="Buy Verified Car in Surat"
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent" />
+                      <div className="absolute bottom-4 left-4 right-4 text-white">
+                        <span className="text-[10px] uppercase font-heading font-black text-amber-300">Live Inventory</span>
+                        <h4 className="text-sm font-bold">સુરતનું સૌથી વિશ્વસનીય વેરિફાઇડ શોરૂમ</h4>
                       </div>
-
-                      <div className="w-full lg:w-5/12 flex items-center justify-center relative order-1 lg:order-2">
-                        <div className="relative w-full aspect-[4/3] sm:aspect-square lg:aspect-[4/5] rounded-[2rem] md:rounded-[2.5rem] overflow-hidden shadow-[0_20px_40px_rgba(0,0,0,0.1)] group">
-                          <img src="https://images.unsplash.com/photo-1542282088-fe8426682b8f?q=80&w=1000&auto=format&fit=crop" alt="Exchange Your Car" loading="lazy" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
-                          <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/20 to-transparent"></div>
-                        </div>
-                      </div>
-                    </>
-                  )}
+                    </div>
+                  </div>
                 </motion.div>
-              </AnimatePresence>
+              )}
+
+              {activeTab === 'sell' && (
+                <motion.div
+                  key="sell"
+                  initial={{ opacity: 0, y: 15 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -15 }}
+                  transition={{ duration: 0.3 }}
+                  className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center"
+                >
+                  <div className="lg:col-span-7">
+                    <span className="text-xs font-heading font-black text-emerald-600 uppercase tracking-wider bg-emerald-50 border border-emerald-200 px-3 py-1 rounded-full">
+                      તમારી કાર તરત જ વેચો
+                    </span>
+                    <h3 className="text-2xl sm:text-3xl font-black text-slate-900 font-heading mt-3 mb-4">
+                      શ્રેષ્ઠ બજાર કિંમત અને <span className="text-emerald-600">ઇન્સ્ટન્ટ બેંક ટ્રાન્સફર</span>
+                    </h3>
+                    <p className="text-sm sm:text-base text-slate-600 leading-relaxed mb-6 font-body">
+                      કોઈ બ્રોકરેજ નહીં, કોઈ છૂપા ચાર્જીસ નહીં. માત્ર ૩૦ મિનિટમાં ઓનલાઇન કે રૂબરૂ વેલ્યુએશન કરાવો અને તે જ દિવસે સીધા તમારા ખાતામાં પૈસા મેળવો.
+                    </p>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 mb-8">
+                      <div className="flex items-center gap-2.5 p-3 rounded-xl bg-white border border-slate-200">
+                        <CheckCircle className="w-4 h-4 text-emerald-600 shrink-0" />
+                        <span className="text-xs font-bold text-slate-800">૩૦ મિનિટમાં ફેર વેલ્યુએશન</span>
+                      </div>
+                      <div className="flex items-center gap-2.5 p-3 rounded-xl bg-white border border-slate-200">
+                        <CheckCircle className="w-4 h-4 text-emerald-600 shrink-0" />
+                        <span className="text-xs font-bold text-slate-800">સીધું ઇન્સ્ટન્ટ બેંક પેમેન્ટ</span>
+                      </div>
+                      <div className="flex items-center gap-2.5 p-3 rounded-xl bg-white border border-slate-200">
+                        <CheckCircle className="w-4 h-4 text-emerald-600 shrink-0" />
+                        <span className="text-xs font-bold text-slate-800">૧૦૦% ફ્રી RTO ટ્રાન્સફર</span>
+                      </div>
+                      <div className="flex items-center gap-2.5 p-3 rounded-xl bg-white border border-slate-200">
+                        <CheckCircle className="w-4 h-4 text-emerald-600 shrink-0" />
+                        <span className="text-xs font-bold text-slate-800">ચાલુ લોન સીધું બેંક સેટલમેન્ટ</span>
+                      </div>
+                    </div>
+
+                    <Link
+                      to="/sell-your-car"
+                      className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-heading font-black text-sm shadow-md transition-all hover:scale-105 active:scale-95"
+                    >
+                      <Banknote className="w-4 h-4" />
+                      <span>ઓનલાઇન કાર વેલ્યુએશન મેળવો · Sell Car Online</span>
+                      <ChevronRight className="w-4 h-4" />
+                    </Link>
+                  </div>
+
+                  <div className="lg:col-span-5">
+                    <div className="relative rounded-2xl overflow-hidden shadow-xl aspect-video sm:aspect-[4/3] bg-slate-900 group">
+                      <img
+                        src="https://images.unsplash.com/photo-1600880292203-757bb62b4baf?q=80&w=1000&auto=format&fit=crop"
+                        alt="Sell Car with Instant Payment"
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent" />
+                      <div className="absolute bottom-4 left-4 right-4 text-white">
+                        <span className="text-[10px] uppercase font-heading font-black text-emerald-400">Instant Payment</span>
+                        <h4 className="text-sm font-bold">તમારી જૂની કારની મેળવો શ્રેષ્ઠ બજાર કિંમત</h4>
+                      </div>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+
+              {activeTab === 'exchange' && (
+                <motion.div
+                  key="exchange"
+                  initial={{ opacity: 0, y: 15 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -15 }}
+                  transition={{ duration: 0.3 }}
+                  className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center"
+                >
+                  <div className="lg:col-span-7">
+                    <span className="text-xs font-heading font-black text-brand-orange uppercase tracking-wider bg-orange-50 border border-brand-orange/20 px-3 py-1 rounded-full">
+                      જૂની કાર આપો, નવી કાર ઘરે લાવો
+                    </span>
+                    <h3 className="text-2xl sm:text-3xl font-black text-slate-900 font-heading mt-3 mb-4">
+                      સ્પેશિયલ એક્સચેન્જ બોનસ સાથે <span className="text-brand-orange">Same-Day Upgrade</span>
+                    </h3>
+                    <p className="text-sm sm:text-base text-slate-600 leading-relaxed mb-6 font-body">
+                      તમારી કોઈપણ કંપની કે મોડલની જૂની કાર લાવો અને તે જ દિવસે અમારા ૧૫૦+ વેરિફાઇડ કલેક્શનમાંથી તમારી મનપસંદ અપગ્રેડેડ કાર લઈ જાવ.
+                    </p>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 mb-8">
+                      <div className="flex items-center gap-2.5 p-3 rounded-xl bg-white border border-slate-200">
+                        <CheckCircle className="w-4 h-4 text-emerald-600 shrink-0" />
+                        <span className="text-xs font-bold text-slate-800">કોઈપણ કંપનીની કાર સ્વીકાર્ય</span>
+                      </div>
+                      <div className="flex items-center gap-2.5 p-3 rounded-xl bg-white border border-slate-200">
+                        <CheckCircle className="w-4 h-4 text-emerald-600 shrink-0" />
+                        <span className="text-xs font-bold text-slate-800">સ્પેશિયલ એક્સચેન્જ બોનસ</span>
+                      </div>
+                      <div className="flex items-center gap-2.5 p-3 rounded-xl bg-white border border-slate-200">
+                        <CheckCircle className="w-4 h-4 text-emerald-600 shrink-0" />
+                        <span className="text-xs font-bold text-slate-800">સેમ-ડે હેન્ડઓવર ડિલિવરી</span>
+                      </div>
+                      <div className="flex items-center gap-2.5 p-3 rounded-xl bg-white border border-slate-200">
+                        <CheckCircle className="w-4 h-4 text-emerald-600 shrink-0" />
+                        <span className="text-xs font-bold text-slate-800">સરળ ડિફરન્સ ફાઇનાન્સ</span>
+                      </div>
+                    </div>
+
+                    <a
+                      href="https://wa.me/919913634447?text=નમસ્તે,%20હું%20મારી%20જૂની%20કાર%20એક્સચેન્જ%20કરીને%20નવી%20કાર%20લેવા%20માટે%20ઓફર%20જાણવા%20માગું%20છું."
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-[#25D366] hover:bg-[#20bd5a] text-white font-heading font-black text-sm shadow-md transition-all hover:scale-105 active:scale-95"
+                    >
+                      <WhatsAppIcon className="w-4 h-4" />
+                      <span>એક્સચેન્જ ઓફર્સ પૂછો · WhatsApp Exchange</span>
+                      <ChevronRight className="w-4 h-4" />
+                    </a>
+                  </div>
+
+                  <div className="lg:col-span-5">
+                    <div className="relative rounded-2xl overflow-hidden shadow-xl aspect-video sm:aspect-[4/3] bg-slate-900 group">
+                      <img
+                        src="https://images.unsplash.com/photo-1542282088-fe8426682b8f?q=80&w=1000&auto=format&fit=crop"
+                        alt="Exchange Old Car for Verified Pre-Owned"
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent" />
+                      <div className="absolute bottom-4 left-4 right-4 text-white">
+                        <span className="text-[10px] uppercase font-heading font-black text-amber-300">Hassle-Free Exchange</span>
+                        <h4 className="text-sm font-bold">સરળ પ્રક્રિયા સાથે સેમ-ડે કાર અપગ્રેડ</h4>
+                      </div>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        </div>
+      </section>
+
+      {/* ═════════════════════════════════════════════════════════════════════
+          7. SHOWROOM FACILITY & INFRASTRUCTURE (Trilok Car Bazar, Varachha)
+          ═════════════════════════════════════════════════════════════════════ */}
+      <section className="py-20 md:py-28 px-4 sm:px-6 lg:px-8 bg-slate-50 border-t border-slate-200/80 relative">
+        <div className="max-w-7xl mx-auto">
+          {/* Section Header */}
+          <div className="text-center max-w-3xl mx-auto mb-12 sm:mb-16">
+            <span className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-brand-orange/10 border border-brand-orange/20 text-brand-orange font-heading font-bold text-xs uppercase tracking-widest mb-3.5">
+              <Building2 className="w-3.5 h-3.5 text-brand-orange" /> શોરૂમ કેમ્પસ · WORLD-CLASS FACILITY
+            </span>
+            <h2 className="text-2xl sm:text-4xl md:text-5xl font-black text-slate-900 font-heading tracking-tight leading-tight">
+              ત્રિલોક કાર બજાર, વરાછા ખાતેનું અમારું <br className="hidden sm:inline" />
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-orange via-amber-500 to-yellow-500">
+                પ્રીમિયમ શોરૂમ ઈન્ફ્રાસ્ટ્રક્ચર
+              </span>
+            </h2>
+            <p className="mt-3.5 text-sm sm:text-base text-slate-600 font-medium leading-relaxed">
+              ગ્રાહકોને કાર પસંદગી, ઈન્સ્પેક્શન અને પારદર્શક પેપરવર્કનો બેસ્ટ અનુભવ આપવા માટે સુસજ્જ આધુનિક સુવિધાઓ:
+            </p>
+          </div>
+
+          {/* Facility Highlights Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="p-6 rounded-3xl bg-white border border-slate-200/80 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between">
+              <div>
+                <div className="w-12 h-12 rounded-2xl bg-orange-50 border border-brand-orange/30 flex items-center justify-center text-brand-orange mb-4 shadow-sm">
+                  <CarFront className="w-6 h-6" />
+                </div>
+                <h3 className="font-heading font-black text-lg text-slate-900 mb-2">
+                  વિશાળ ડિસ્પ્લે એરેના
+                </h3>
+                <p className="text-xs sm:text-sm text-slate-600 leading-relaxed font-body">
+                  ૧૫૦+ કાર એક જ સ્થળે લાઇવ ઉપલબ્ધ. SUV, Sedan, Hatchback કે લક્ઝરી – દરેક સેગમેન્ટની પસંદગી.
+                </p>
+              </div>
+              <div className="mt-4 pt-3 border-t border-slate-100 text-[11px] font-bold text-brand-orange">
+                ૧૫૦+ કાર કેમ્પસ
+              </div>
+            </div>
+
+            <div className="p-6 rounded-3xl bg-white border border-slate-200/80 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between">
+              <div>
+                <div className="w-12 h-12 rounded-2xl bg-emerald-50 border border-emerald-200 flex items-center justify-center text-emerald-600 mb-4 shadow-sm">
+                  <Wrench className="w-6 h-6" />
+                </div>
+                <h3 className="font-heading font-black text-lg text-slate-900 mb-2">
+                  ઓન-સાઇટ ઈન્સ્પેક્શન બે
+                </h3>
+                <p className="text-xs sm:text-sm text-slate-600 leading-relaxed font-body">
+                  દરેક કારની અંડરબોડી, એન્જિન અને ઓબીડી કોમ્પ્યુટર ચકાસણી માટે સમર્પિત ટેકનિકલ સ્ટેશન.
+                </p>
+              </div>
+              <div className="mt-4 pt-3 border-t border-slate-100 text-[11px] font-bold text-emerald-600">
+                ૧૨૦+ પોઈન્ટ ટેસ્ટિંગ
+              </div>
+            </div>
+
+            <div className="p-6 rounded-3xl bg-white border border-slate-200/80 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between">
+              <div>
+                <div className="w-12 h-12 rounded-2xl bg-blue-50 border border-blue-200 flex items-center justify-center text-blue-600 mb-4 shadow-sm">
+                  <HeartHandshake className="w-6 h-6" />
+                </div>
+                <h3 className="font-heading font-black text-lg text-slate-900 mb-2">
+                  વીઆઈપી કસ્ટમર લાઉન્જ
+                </h3>
+                <p className="text-xs sm:text-sm text-slate-600 leading-relaxed font-body">
+                  તમારા પરિવાર સાથે આરામદાયક વાતાવરણમાં બેસી પારદર્શક પેપરવર્ક અને બેંક લોનની ચર્ચા માટે સ્પેશિયલ સુવિધા.
+                </p>
+              </div>
+              <div className="mt-4 pt-3 border-t border-slate-100 text-[11px] font-bold text-blue-600">
+                ફેમિલી ફ્રેન્ડલી એમ્બિયન્સ
+              </div>
+            </div>
+
+            <div className="p-6 rounded-3xl bg-white border border-slate-200/80 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between">
+              <div>
+                <div className="w-12 h-12 rounded-2xl bg-purple-50 border border-purple-200 flex items-center justify-center text-purple-600 mb-4 shadow-sm">
+                  <MapPin className="w-6 h-6" />
+                </div>
+                <h3 className="font-heading font-black text-lg text-slate-900 mb-2">
+                  પ્રાઇમ વરાછા લોકેશન
+                </h3>
+                <p className="text-xs sm:text-sm text-slate-600 leading-relaxed font-body">
+                  સુરતમાં સૌથી પ્રખ્યાત ત્રિલોક કાર બજાર ખાતે મુખ્ય રોડ પર સરળ પહોંચ અને વિશાળ પાર્કિંગ વ્યવસ્થા.
+                </p>
+              </div>
+              <div className="mt-4 pt-3 border-t border-slate-100 text-[11px] font-bold text-purple-600">
+                સરળ એક્સેસ &amp; પાર્કિંગ
+              </div>
             </div>
           </div>
-        </section>
-
-        {/* 5. Google Reviews Section */}
-        <div className="bg-slate-50/50 border-t border-slate-100">
-          <GoogleReviews />
         </div>
+      </section>
 
-        {/* 6. Happy Customers Section */}
-        <div className="bg-white border-t border-slate-100 pb-16">
-          <HappyCustomers />
-        </div>
+      {/* ═════════════════════════════════════════════════════════════════════
+          8. SOCIAL PROOF (Google Reviews & Happy Customers)
+          ═════════════════════════════════════════════ */}
+      <div className="bg-white border-t border-slate-200/80">
+        <GoogleReviews />
       </div>
+
+      <div className="bg-[#fafafa] border-t border-slate-200/80 pb-16">
+        <HappyCustomers />
+      </div>
+
+      {/* ═════════════════════════════════════════════════════════════════════
+          9. VIP SHOWROOM INVITATION CTA BANNER
+          ═════════════════════════════════════════════ */}
+      <section className="py-16 md:py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-r from-slate-950 via-slate-900 to-slate-950 text-white relative overflow-hidden border-t border-slate-800">
+        <div className="absolute top-0 right-1/3 w-96 h-96 bg-brand-orange/15 rounded-full blur-[120px] pointer-events-none" />
+
+        <div className="max-w-5xl mx-auto relative z-10 text-center">
+          <span className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 border border-white/15 text-amber-300 font-heading font-bold text-xs uppercase tracking-widest mb-4">
+            <Sparkles className="w-3.5 h-3.5 text-brand-orange" /> સુરતમાં આજે જ મુલાકાત લો · VISIT OUR SHOWROOM
+          </span>
+
+          <h2 className="text-2xl sm:text-4xl md:text-5xl font-black text-white font-heading tracking-tight leading-tight">
+            તમારા પરિવાર માટે શ્રેષ્ઠ કાર શોધવા માટે <br className="hidden sm:inline" />
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-orange via-amber-400 to-yellow-400">
+              સદગુરુ કાર મેળોની મુલાકાત લો
+            </span>
+          </h2>
+
+          <p className="mt-4 text-sm sm:text-base text-slate-300 font-medium max-w-xl mx-auto leading-relaxed">
+            વરાછા, સુરત ખાતે અમારા અનુભવી સ્ટાફ તમારી સેવામાં સવારે 9:30 થી રાત્રે 8:30 સુધી હાજર છે.
+          </p>
+
+          <div className="mt-8 flex flex-wrap items-center justify-center gap-3.5 sm:gap-4">
+            <a
+              href="tel:+919913634447"
+              className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl sm:rounded-2xl bg-brand-orange hover:bg-orange-600 text-slate-950 font-heading font-black text-sm shadow-[0_10px_25px_rgba(245,148,35,0.4)] transition-all hover:scale-105 active:scale-95"
+            >
+              <Phone className="w-4 h-4 text-slate-950" />
+              <span>કોલ કરો: +91 99136 34447</span>
+            </a>
+
+            <a
+              href="https://wa.me/919913634447?text=નમસ્તે,%20હું%20સદગુરુ%20કાર%20મેળામાંથી%20વેરિફાઇડ%20કાર%20વિશે%20માહિતી%20મેળવવા%20માગું%20છું."
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl sm:rounded-2xl bg-[#25D366] hover:bg-[#20bd5a] text-white font-heading font-black text-sm shadow-md transition-all hover:scale-105 active:scale-95"
+            >
+              <WhatsAppIcon className="w-4 h-4" />
+              <span>WhatsApp પર વાત કરો</span>
+            </a>
+
+            <a
+              href="https://maps.google.com/?q=Sadguru+Car+Melo+Surat"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl sm:rounded-2xl bg-white/10 hover:bg-white/20 text-white font-heading font-bold text-sm border border-white/20 transition-all hover:scale-105 active:scale-95"
+            >
+              <MapPin className="w-4 h-4 text-brand-orange" />
+              <span>ગૂગલ મેપ્સ ડિરેક્શન્સ</span>
+              <ArrowUpRight className="w-4 h-4 text-slate-400" />
+            </a>
+          </div>
+        </div>
+      </section>
     </div>
   );
 }
