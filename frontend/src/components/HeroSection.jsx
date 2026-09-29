@@ -83,6 +83,9 @@ const renderBrandLogo = (make = '') => {
   return <Car className="w-5 h-5 text-current" />;
 };
 
+// Feature Flag: Toggle between "Explore Cars" CTA (default) and "Book Test Drive" CTA (for future re-activation)
+const SHOW_TEST_DRIVE_CTA = false;
+
 export default function HeroSection() {
   const navigate = useNavigate();
   const { cars } = useCars();
@@ -244,49 +247,84 @@ export default function HeroSection() {
             ૧૫૦+ વેરિફાઇડ કાર, ૧૨૦+ પોઈન્ટ ટેકનિકલ ઈન્સ્પેક્શન અને સંપૂર્ણ ભરોસા સાથે તમારા પરિવાર માટે શ્રેષ્ઠ કાર.
           </motion.p>
 
-          {/* Action CTA: Book Test Drive in Rich Brand Orange */}
+          {/* Action CTA: Explore Cars (or Book Test Drive when enabled) */}
           <motion.div
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 0.25 }}
             className="relative mt-5 sm:mt-6 flex items-center justify-center"
           >
-            <div className="relative inline-block">
-              {/* Floating Live Indicator Badge */}
-              <div className="absolute -top-2.5 right-4 z-10 pointer-events-none">
-                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-slate-900 text-white text-[9px] font-black uppercase tracking-wider shadow-sm border border-brand-orange/40">
-                  <span className="relative flex h-1.5 w-1.5">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75" />
-                    <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-brand-orange" />
+            {SHOW_TEST_DRIVE_CTA ? (
+              /* Preserved: Book Test Drive CTA (Ready for future activation) */
+              <div className="relative inline-block">
+                {/* Floating Live Indicator Badge */}
+                <div className="absolute -top-2.5 right-4 z-10 pointer-events-none">
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-slate-900 text-white text-[9px] font-black uppercase tracking-wider shadow-sm border border-brand-orange/40">
+                    <span className="relative flex h-1.5 w-1.5">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75" />
+                      <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-brand-orange" />
+                    </span>
+                    ⚡ Takes 30 Sec
                   </span>
-                  ⚡ Takes 30 Sec
-                </span>
-              </div>
-
-              <button
-                onClick={() => setShowModal(true)}
-                className="group relative inline-flex items-center gap-2.5 sm:gap-3 px-6 sm:px-8 py-2 sm:py-2.5 rounded-xl sm:rounded-2xl bg-gradient-to-r from-brand-orange via-[#f79e32] to-[#e68415] text-white font-heading shadow-[0_8px_22px_rgba(245,148,35,0.35)] hover:shadow-[0_12px_28px_rgba(245,148,35,0.5)] hover:-translate-y-0.5 active:translate-y-0 transition-all duration-300 cursor-pointer overflow-hidden border border-amber-300/50"
-              >
-                <div className="absolute inset-0 bg-white/20 -translate-x-full group-hover:translate-x-full transition-transform duration-700 pointer-events-none" />
-
-                {/* Impressive Automotive Steering Wheel Icon with Interactive Turn on Hover */}
-                <div className="flex items-center justify-center w-7 h-7 sm:w-7.5 sm:h-7.5 rounded-lg sm:rounded-xl bg-white/25 backdrop-blur-md text-white group-hover:scale-110 group-hover:rotate-12 transition-all duration-300 shadow-[inset_0_1px_2px_rgba(255,255,255,0.4)] border border-white/25 shrink-0">
-                  <svg viewBox="0 0 24 24" className="w-4 h-4 sm:w-4.5 sm:h-4.5 fill-none stroke-current" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                    <circle cx="12" cy="12" r="9.5" />
-                    <circle cx="12" cy="12" r="2.8" className="fill-white/35" />
-                    <path d="M12 2.5v6.7" />
-                    <path d="M5.2 16.7l5.2-3" />
-                    <path d="M18.8 16.7l-5.2-3" />
-                  </svg>
                 </div>
 
-                <span className="font-heading font-black text-white text-sm sm:text-base leading-none tracking-tight drop-shadow-2xs">
-                  ટેસ્ટ ડ્રાઈવ બુક કરો · Book Test Drive
-                </span>
+                <button
+                  onClick={() => setShowModal(true)}
+                  className="group relative inline-flex items-center gap-2.5 sm:gap-3 px-6 sm:px-8 py-2 sm:py-2.5 rounded-xl sm:rounded-2xl bg-gradient-to-r from-brand-orange via-[#f79e32] to-[#e68415] text-white font-heading shadow-[0_8px_22px_rgba(245,148,35,0.35)] hover:shadow-[0_12px_28px_rgba(245,148,35,0.5)] hover:-translate-y-0.5 active:translate-y-0 transition-all duration-300 cursor-pointer overflow-hidden border border-amber-300/50"
+                >
+                  <div className="absolute inset-0 bg-white/20 -translate-x-full group-hover:translate-x-full transition-transform duration-700 pointer-events-none" />
 
-                <ChevronRight className="w-4 h-4 text-white group-hover:translate-x-1 transition-transform ml-0.5" />
-              </button>
-            </div>
+                  {/* Steering Wheel Icon with Interactive Turn on Hover */}
+                  <div className="flex items-center justify-center w-7 h-7 sm:w-7.5 sm:h-7.5 rounded-lg sm:rounded-xl bg-white/25 backdrop-blur-md text-white group-hover:scale-110 group-hover:rotate-12 transition-all duration-300 shadow-[inset_0_1px_2px_rgba(255,255,255,0.4)] border border-white/25 shrink-0">
+                    <svg viewBox="0 0 24 24" className="w-4 h-4 sm:w-4.5 sm:h-4.5 fill-none stroke-current" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                      <circle cx="12" cy="12" r="9.5" />
+                      <circle cx="12" cy="12" r="2.8" className="fill-white/35" />
+                      <path d="M12 2.5v6.7" />
+                      <path d="M5.2 16.7l5.2-3" />
+                      <path d="M18.8 16.7l-5.2-3" />
+                    </svg>
+                  </div>
+
+                  <span className="font-heading font-black text-white text-sm sm:text-base leading-none tracking-tight drop-shadow-2xs">
+                    ટેસ્ટ ડ્રાઈવ બુક કરો · Book Test Drive
+                  </span>
+
+                  <ChevronRight className="w-4 h-4 text-white group-hover:translate-x-1 transition-transform ml-0.5" />
+                </button>
+              </div>
+            ) : (
+              /* Active CTA: Explore Cars -> Opens Catalog (/inventory) */
+              <div className="relative inline-block">
+                {/* Floating Live Badge */}
+                <div className="absolute -top-2.5 right-4 z-10 pointer-events-none">
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-slate-900 text-white text-[9px] font-black uppercase tracking-wider shadow-sm border border-brand-orange/40">
+                    <span className="relative flex h-1.5 w-1.5">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75" />
+                      <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-brand-orange" />
+                    </span>
+                    ⚡ ૧૫૦+ લાઈવ સ્ટોક · Surat
+                  </span>
+                </div>
+
+                <button
+                  onClick={() => navigate('/inventory')}
+                  className="group relative inline-flex items-center gap-2.5 sm:gap-3 px-6 sm:px-8 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl bg-gradient-to-r from-brand-orange via-[#f79e32] to-[#e68415] text-white font-heading shadow-[0_8px_24px_rgba(245,148,35,0.4)] hover:shadow-[0_12px_32px_rgba(245,148,35,0.55)] hover:-translate-y-0.5 active:translate-y-0 transition-all duration-300 cursor-pointer overflow-hidden border border-amber-300/50"
+                >
+                  <div className="absolute inset-0 bg-white/20 -translate-x-full group-hover:translate-x-full transition-transform duration-700 pointer-events-none" />
+
+                  {/* Impressive Automotive Car Silhouette Icon */}
+                  <div className="flex items-center justify-center w-7 h-7 sm:w-7.5 sm:h-7.5 rounded-lg sm:rounded-xl bg-white/25 backdrop-blur-md text-white group-hover:scale-110 transition-all duration-300 shadow-[inset_0_1px_2px_rgba(255,255,255,0.4)] border border-white/25 shrink-0">
+                    <Car className="w-4 h-4 sm:w-4.5 sm:h-4.5 text-white" />
+                  </div>
+
+                  <span className="font-heading font-black text-white text-sm sm:text-base leading-none tracking-tight drop-shadow-2xs">
+                    કાર એક્સપ્લોર કરો · Explore Cars
+                  </span>
+
+                  <ChevronRight className="w-4 h-4 text-white group-hover:translate-x-1.5 transition-transform ml-0.5" />
+                </button>
+              </div>
+            )}
           </motion.div>
         </div>
 
