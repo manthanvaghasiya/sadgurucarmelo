@@ -553,18 +553,6 @@ export function getAutomotiveSpecs(make, model, variant, fuelType) {
   };
 }
 
-// ── Smart Ownership Normalizer ──
-export function normalizeOwnership(val) {
-  if (!val) return '1st Owner';
-  const s = String(val).toLowerCase();
-  if (s.includes('1') || s.includes('first')) return '1st Owner';
-  if (s.includes('2') || s.includes('second')) return '2nd Owner';
-  if (s.includes('3') || s.includes('third')) return '3rd Owner';
-  if (s.includes('4') || s.includes('fourth')) return '4th Owner+';
-  if (s.includes('unreg')) return 'Unregistered';
-  return '1st Owner';
-}
-
 // ── Smart Regex / Heuristic Fallback Parser ──
 // Extracts dealer WhatsApp message patterns instantly if no Gemini key or offline
 export function heuristicParseCar(rawText) {
