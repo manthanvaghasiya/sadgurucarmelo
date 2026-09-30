@@ -50,10 +50,10 @@ export default function Footer() {
             <ul className="space-y-4 font-body text-sm">
               {[
                 { name: 'Browse Inventory', path: '/inventory' },
+                { name: 'Sell Your Car', path: '/sell-your-car' },
+                { name: 'Compare Cars', path: '/compare' },
                 { name: 'About Our Mission', path: '/about' },
-                { name: 'Core Services', path: '/about?service=buy' },
-                { name: 'Contact Support', path: '/contact' },
-                { name: 'Admin Login', path: '/login' }
+                { name: 'Contact Support', path: '/contact' }
               ].map((link) => (
                 <li key={link.name}>
                   <Link
