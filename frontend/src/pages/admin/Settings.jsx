@@ -51,13 +51,20 @@ export default function AdminSettings() {
     try {
       const validKeys = geminiKeys.filter((k) => k && k.trim().length > 0);
       const res = await axiosInstance.put('/ai/settings', { geminiApiKeys: validKeys });
-      if (res.data.success) {
-        toast.success('Gemini API keys saved successfully!');
+      if (res.data?.success) {
+        toast.success(res.data.message || 'Gemini API keys saved successfully!');
         setGeminiKeys(validKeys.length > 0 ? validKeys : ['']);
         fetchAiSettings();
+      } else {
+        toast.error(res.data?.message || 'Failed to update Gemini API keys');
       }
     } catch (err) {
-      toast.error('Failed to update Gemini API keys');
+      console.error('Failed to update Gemini keys:', err);
+      const errorMsg =
+        err.response?.data?.message ||
+        err.message ||
+        'Failed to update Gemini API keys. Please check your admin session.';
+      toast.error(errorMsg);
     } finally {
       setAiSaving(false);
     }

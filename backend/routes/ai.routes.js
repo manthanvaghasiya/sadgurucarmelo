@@ -149,10 +149,9 @@ router.post('/parse-car', protect, async (req, res) => {
 // @access  Protected (Admin only)
 router.get('/settings', protect, admin, async (req, res) => {
   try {
-    let settings = await Settings.findOne();
+    let settings = await Settings.findOne().lean();
     if (!settings) {
-      settings = new Settings({ geminiApiKeys: [], geminiKeyStates: [] });
-      await settings.save();
+      settings = await Settings.create({ geminiApiKeys: [], geminiKeyStates: [] });
     }
 
     const maskedKeys = (settings.geminiApiKeys || []).map((k) => {
@@ -171,7 +170,7 @@ router.get('/settings', protect, admin, async (req, res) => {
     });
   } catch (err) {
     console.error('Failed to get AI settings:', err);
-    res.status(500).json({ success: false, message: 'Failed to retrieve AI settings' });
+    res.status(500).json({ success: false, message: err.message || 'Failed to retrieve AI settings' });
   }
 });
 
@@ -180,30 +179,48 @@ router.get('/settings', protect, admin, async (req, res) => {
 // @access  Protected (Admin only)
 router.put('/settings', protect, admin, async (req, res) => {
   try {
-    const { geminiApiKeys } = req.body;
+    const rawKeys = req.body.geminiApiKeys ?? req.body.keys ?? req.body;
+    const cleanKeys = (Array.isArray(rawKeys) ? rawKeys : [rawKeys])
+      .map((k) => (typeof k === 'string' ? k.trim() : ''))
+      .filter(Boolean);
 
-    let settings = await Settings.findOne();
-    if (!settings) {
-      settings = new Settings({ geminiApiKeys: [], geminiKeyStates: [] });
-    }
+    // Retrieve existing key states safely as plain objects
+    const current = await Settings.findOne().lean();
+    const currentStates = Array.isArray(current?.geminiKeyStates) ? current.geminiKeyStates : [];
 
-    if (Array.isArray(geminiApiKeys)) {
-      const cleanKeys = geminiApiKeys.map((k) => (k || '').trim()).filter(Boolean);
-      settings.geminiApiKeys = cleanKeys;
+    // Map clean keys to key state records without Mongoose subdoc prototype pollution
+    const newKeyStates = cleanKeys.map((key) => {
+      const found = currentStates.find((s) => s.key === key);
+      return {
+        key,
+        isInvalid: found?.isInvalid ?? false,
+        exhaustedUntil: found?.exhaustedUntil ?? null,
+        lastUsed: found?.lastUsed ?? null,
+      };
+    });
 
-      // Reset invalid / exhausted states for modified keys
-      settings.geminiKeyStates = cleanKeys.map((key) => {
-        const existing = (settings.geminiKeyStates || []).find((s) => s.key === key);
-        return existing || { key, isInvalid: false, exhaustedUntil: null, lastUsed: null };
-      });
+    const updated = await Settings.findOneAndUpdate(
+      {},
+      {
+        $set: {
+          geminiApiKeys: cleanKeys,
+          geminiKeyStates: newKeyStates,
+        },
+      },
+      { upsert: true, new: true, lean: true }
+    );
 
-      await settings.save();
-    }
-
-    res.json({ success: true, message: 'Gemini API keys updated successfully', data: settings.geminiApiKeys });
+    res.json({
+      success: true,
+      message: 'Gemini API keys updated successfully',
+      data: updated.geminiApiKeys || [],
+    });
   } catch (err) {
     console.error('Failed to update AI settings:', err);
-    res.status(500).json({ success: false, message: 'Failed to update AI settings' });
+    res.status(500).json({
+      success: false,
+      message: err.message || 'Failed to update AI settings',
+    });
   }
 });
 
