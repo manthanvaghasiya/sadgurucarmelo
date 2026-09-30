@@ -505,8 +505,8 @@ export default function CarDetails() {
                     </h1>
                 </div>
 
-                {/* ════ Main Layout (Spacious 3-Column Grid) ════ */}
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                {/* ════ Main Layout (Tightly Integrated Grid) ════ */}
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-x-5 lg:gap-x-6 gap-y-3">
 
                     {/* 1. Media Gallery — Always first (Left 2 cols on laptop) */}
                     <div className="lg:col-span-2 order-1">
@@ -718,11 +718,11 @@ export default function CarDetails() {
 
                     {/* 2. Pricing & Core Overview Card — Right Column on Desktop, Sticky */}
                     <div className="order-2">
-                        <div className="sticky top-24 flex flex-col gap-6">
+                        <div className="sticky top-24 flex flex-col gap-4">
 
                             {/* Pricing Card */}
-                            <div className="bg-surface rounded-2xl shadow-sm border border-gray-100 p-6">
-                                <div className="flex justify-between items-start mb-4">
+                            <div className="bg-surface rounded-2xl shadow-sm border border-gray-100 p-5 sm:p-6">
+                                <div className="flex justify-between items-start mb-3">
                                     <span className="font-heading font-bold text-[11px] text-text-muted tracking-widest uppercase">{car.registration || 'UNREGISTERED'}</span>
                                     {(car.badges || []).map((b) => (
                                         <span key={b} className="bg-[#10b981]/10 text-[#10b981] px-2.5 py-1 rounded text-[10px] font-heading font-bold uppercase tracking-widest flex items-center gap-1">
@@ -731,22 +731,22 @@ export default function CarDetails() {
                                     ))}
                                 </div>
 
-                                <h2 className="font-heading font-bold text-[36px] text-accent mb-1 leading-none">
+                                <h2 className="font-heading font-bold text-[34px] sm:text-[36px] text-accent mb-1 leading-none">
                                     {typeof car.price === 'number' ? `₹${car.price.toLocaleString('en-IN')}` : (car.price ? `₹${car.price}` : 'કિંમત માટે સંપર્ક કરો')}
                                 </h2>
-                                <p className="font-body text-xs text-text-muted mb-4">Last updated: {car.updatedAt && !isNaN(new Date(car.updatedAt).getTime()) ? new Date(car.updatedAt).toLocaleDateString() : new Date().toLocaleDateString()}</p>
+                                <p className="font-body text-xs text-text-muted mb-3">Last updated: {car.updatedAt && !isNaN(new Date(car.updatedAt).getTime()) ? new Date(car.updatedAt).toLocaleDateString() : new Date().toLocaleDateString()}</p>
 
                                 {car.loanAvailable && (
-                                    <div className="flex items-center gap-2 mb-6 px-3 py-3 bg-blue-50/50 border border-blue-100 rounded-xl text-blue-700">
-                                        <ShieldCheck className="w-5 h-5" />
+                                    <div className="flex items-center gap-2 mb-4 px-3 py-2.5 bg-blue-50/50 border border-blue-100 rounded-xl text-blue-700">
+                                        <ShieldCheck className="w-4 h-4 shrink-0" />
                                         <div className="flex flex-col">
-                                            <span className="font-heading text-[10px] font-bold uppercase tracking-widest text-/70 mb-0.5">Financing Support</span>
-                                            <span className="font-body text-sm font-bold leading-none">Car Loan / EMI Available</span>
+                                            <span className="font-heading text-[9px] font-bold uppercase tracking-widest text-/70 mb-0.5">Financing Support</span>
+                                            <span className="font-body text-xs sm:text-sm font-bold leading-none">Car Loan / EMI Available</span>
                                         </div>
                                     </div>
                                 )}
 
-                                <div className="grid grid-cols-2 gap-4 mb-8">
+                                <div className="grid grid-cols-2 gap-3 mb-5">
                                     <div className="flex items-center gap-3">
                                         <div className="w-10 h-10 shrink-0 rounded-lg bg-[#f1f5f9] flex items-center justify-center">
                                             <Fuel className="w-5 h-5 text-primary stroke-[2]" />
@@ -890,14 +890,14 @@ export default function CarDetails() {
 
                     {/* 3. Detailed Specs — Below gallery on desktop, 3rd on mobile */}
                     <div className="lg:col-span-2 order-3">
-                        <div className="flex flex-col gap-8 bg-surface p-6 sm:p-8 rounded-2xl shadow-sm border border-gray-100">
+                        <div className="flex flex-col gap-5 sm:gap-6 bg-surface p-5 sm:p-6 rounded-2xl shadow-sm border border-gray-100">
                             {/* Comfort Features */}
                             {(car.airConditioner || car.powerWindows || car.sunroof || car.parkingSensors) && (
                                 <div>
-                                    <h3 className="font-heading font-bold text-xl text-text mb-6 border-l-4 border-primary pl-3">Comfort Features</h3>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-4 font-body text-sm">
+                                    <h3 className="font-heading font-bold text-lg sm:text-xl text-text mb-3.5 border-l-4 border-primary pl-3">Comfort Features</h3>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-3 font-body text-sm">
                                         {car.airConditioner && (
-                                            <div className="flex justify-between items-center border-b border-gray-100 pb-3">
+                                            <div className="flex justify-between items-center border-b border-gray-100 pb-2">
                                                 <span className="text-text-muted">Air Conditioner</span>
                                                 <span className="font-semibold text-text">{car.airConditioner}</span>
                                             </div>

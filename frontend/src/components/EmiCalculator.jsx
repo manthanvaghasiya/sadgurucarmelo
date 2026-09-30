@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Calculator, ShieldCheck, Info } from 'lucide-react';
+import { Calculator, ShieldCheck } from 'lucide-react';
 import WhatsAppIcon from './WhatsAppIcon';
 import { buildWhatsAppUrl } from '../utils/whatsapp';
 
@@ -67,48 +67,42 @@ Please guide me with the loan approval process.`
   );
 
   return (
-    <div className="bg-surface rounded-3xl p-6 sm:p-8 shadow-sm border border-slate-100 mt-8">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-6 mb-8 pb-6 border-b border-slate-100">
-        <div>
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand-orange/10 text-brand-orange text-xs font-bold uppercase tracking-wider mb-2">
-            <Calculator className="w-3.5 h-3.5" />
+    <div className="bg-surface rounded-2xl p-4 sm:p-5 shadow-sm border border-slate-200/80 mt-3 sm:mt-4">
+      {/* ── Header Row (Compact & Clean) ── */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 mb-3 pb-2.5 border-b border-slate-100">
+        <div className="flex items-center gap-2 flex-wrap">
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-brand-orange/10 text-brand-orange text-[10px] font-bold uppercase tracking-wider">
+            <Calculator className="w-3 h-3" />
             સરળ કાર ફાઇનાન્સ · Easy Car Finance
-          </div>
-          <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 font-heading">
-            EMI લોન કેલ્ક્યુલેટર <span className="text-brand-orange font-normal text-xl sm:text-2xl">· EMI Calculator</span>
-          </h2>
-          <p className="text-slate-600 text-xs sm:text-sm font-body mt-1">
-            તમારી મનપસંદ કાર માટે માસિક હપ્તા અને ડાઉન પેમેન્ટની સરળ ગણતરી કરો.
-          </p>
+          </span>
+          <h3 className="text-sm sm:text-base font-bold text-slate-900 font-heading">
+            EMI લોન કેલ્ક્યુલેટર
+          </h3>
         </div>
 
-        {/* Big EMI Highlight Card */}
-        <div className="bg-gradient-to-br from-amber-500/10 via-amber-400/5 to-transparent border border-amber-500/20 p-5 rounded-2xl text-left sm:text-right shrink-0 min-w-[200px]">
-          <span className="text-[11px] font-bold text-brand-orange uppercase tracking-wider block mb-1">
-            અંદાજિત માસિક હપ્તો · Monthly EMI
+        {/* Compact EMI Highlight Pill */}
+        <div className="inline-flex items-center gap-2 bg-gradient-to-r from-amber-500/10 via-orange-500/10 to-amber-500/5 border border-amber-500/25 px-3 py-1.5 rounded-xl shrink-0 self-start sm:self-auto shadow-2xs">
+          <span className="text-[10px] font-bold text-brand-orange uppercase tracking-wider">
+            અંદાજિત EMI:
           </span>
-          <div className="flex items-baseline sm:justify-end gap-1">
-            <span className="text-3xl sm:text-4xl font-black text-slate-900 font-heading">
+          <div className="flex items-baseline gap-0.5">
+            <span className="text-xl sm:text-2xl font-black text-slate-900 font-heading leading-none">
               {formatRupee(emi)}
             </span>
-            <span className="text-xs font-bold text-slate-500">/મહિનો</span>
+            <span className="text-[10px] font-bold text-slate-500">/mo*</span>
           </div>
-          <span className="text-[10px] text-slate-400 block mt-1">
-            મુદત: {tenureYears * 12} મહિના ({tenureYears} વર્ષ)
-          </span>
         </div>
       </div>
 
-      {/* Sliders Grid */}
-      <div className="space-y-6">
+      {/* ── 3 Sliders in a Compact Single Row ── */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4">
         {/* 1. Down Payment Slider */}
-        <div>
-          <div className="flex justify-between items-center mb-2">
-            <label className="text-xs font-bold uppercase tracking-wider text-slate-700">
-              ડાઉન પેમેન્ટ (Down Payment): <span className="text-brand-orange">{downPaymentPercent}%</span>
+        <div className="p-2.5 bg-slate-50/70 rounded-xl border border-slate-100">
+          <div className="flex justify-between items-center mb-1.5">
+            <label className="text-[11px] font-bold uppercase tracking-wider text-slate-700">
+              ડાઉન પેમેન્ટ: <span className="text-brand-orange">{downPaymentPercent}%</span>
             </label>
-            <span className="text-sm font-bold text-slate-900">
+            <span className="text-xs font-bold text-slate-900">
               {formatRupee(downPaymentAmount)}
             </span>
           </div>
@@ -119,104 +113,100 @@ Please guide me with the loan approval process.`
             step="5"
             value={downPaymentPercent}
             onChange={(e) => setDownPaymentPercent(Number(e.target.value))}
-            className="w-full h-2.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-brand-orange"
+            className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-brand-orange"
           />
-          <div className="flex justify-between text-[10px] text-slate-400 font-semibold mt-1">
+          <div className="flex justify-between text-[9px] text-slate-400 font-semibold mt-1">
             <span>0% (₹0)</span>
-            <span>40%</span>
             <span>80% ({formatRupee((safeCarPrice * 80) / 100)})</span>
           </div>
         </div>
 
-        {/* 2. Sliders row: Interest Rate & Loan Tenure */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-2">
-          {/* Interest Rate */}
-          <div>
-            <div className="flex justify-between items-center mb-2">
-              <label className="text-xs font-bold uppercase tracking-wider text-slate-700">
-                વાર્ષિક વ્યાજ દર (Interest Rate p.a.)
-              </label>
-              <span className="text-sm font-bold text-slate-900">
-                {interestRate.toFixed(1)}%
-              </span>
-            </div>
-            <input
-              type="range"
-              min="8.5"
-              max="18"
-              step="0.1"
-              value={interestRate}
-              onChange={(e) => setInterestRate(Number(e.target.value))}
-              className="w-full h-2.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-brand-orange"
-            />
-            <div className="flex justify-between text-[10px] text-slate-400 font-semibold mt-1">
-              <span>8.5% (પ્રાઇમ બેંક)</span>
-              <span>18%</span>
-            </div>
+        {/* 2. Interest Rate Slider */}
+        <div className="p-2.5 bg-slate-50/70 rounded-xl border border-slate-100">
+          <div className="flex justify-between items-center mb-1.5">
+            <label className="text-[11px] font-bold uppercase tracking-wider text-slate-700">
+              વ્યાજ દર (Rate p.a.)
+            </label>
+            <span className="text-xs font-bold text-slate-900">
+              {interestRate.toFixed(1)}%
+            </span>
           </div>
+          <input
+            type="range"
+            min="8.5"
+            max="18"
+            step="0.1"
+            value={interestRate}
+            onChange={(e) => setInterestRate(Number(e.target.value))}
+            className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-brand-orange"
+          />
+          <div className="flex justify-between text-[9px] text-slate-400 font-semibold mt-1">
+            <span>8.5% (પ્રાઇમ બેંક)</span>
+            <span>18%</span>
+          </div>
+        </div>
 
-          {/* Loan Tenure */}
-          <div>
-            <div className="flex justify-between items-center mb-2">
-              <label className="text-xs font-bold uppercase tracking-wider text-slate-700">
-                લોન મુદત (Loan Tenure)
-              </label>
-              <span className="text-sm font-bold text-slate-900">
-                {tenureYears} વર્ષ ({tenureYears * 12} મહિના)
-              </span>
-            </div>
-            <input
-              type="range"
-              min="1"
-              max="7"
-              step="1"
-              value={tenureYears}
-              onChange={(e) => setTenureYears(Number(e.target.value))}
-              className="w-full h-2.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-brand-orange"
-            />
-            <div className="flex justify-between text-[10px] text-slate-400 font-semibold mt-1">
-              <span>1 વર્ષ</span>
-              <span>4 વર્ષ</span>
-              <span>7 વર્ષ</span>
-            </div>
+        {/* 3. Loan Tenure Slider */}
+        <div className="p-2.5 bg-slate-50/70 rounded-xl border border-slate-100">
+          <div className="flex justify-between items-center mb-1.5">
+            <label className="text-[11px] font-bold uppercase tracking-wider text-slate-700">
+              લોન મુદત (Tenure)
+            </label>
+            <span className="text-xs font-bold text-slate-900">
+              {tenureYears} વર્ષ ({tenureYears * 12} mo)
+            </span>
+          </div>
+          <input
+            type="range"
+            min="1"
+            max="7"
+            step="1"
+            value={tenureYears}
+            onChange={(e) => setTenureYears(Number(e.target.value))}
+            className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-brand-orange"
+          />
+          <div className="flex justify-between text-[9px] text-slate-400 font-semibold mt-1">
+            <span>1 વર્ષ</span>
+            <span>4 વર્ષ</span>
+            <span>7 વર્ષ</span>
           </div>
         </div>
       </div>
 
-      {/* Breakdown Bar & Details */}
-      <div className="mt-8 pt-6 border-t border-slate-100">
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
-          <div className="p-3 bg-slate-50 rounded-xl">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">
-              મૂળ લોન રકમ (Principal Amount)
+      {/* ── Breakdown Stats & Progress Bar ── */}
+      <div className="mt-3 pt-2.5 border-t border-slate-100">
+        <div className="grid grid-cols-3 gap-2 mb-2.5 text-center">
+          <div className="p-2 bg-slate-50 rounded-lg border border-slate-100/80">
+            <span className="text-[9px] font-bold uppercase tracking-wider text-slate-400 block leading-tight">
+              મૂળ રકમ (Principal)
             </span>
-            <span className="text-base font-bold text-slate-800">
+            <span className="text-xs sm:text-sm font-bold text-slate-800">
               {formatRupee(loanPrincipal)}
             </span>
           </div>
 
-          <div className="p-3 bg-slate-50 rounded-xl">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">
-              કુલ વ્યાજ (Total Interest)
+          <div className="p-2 bg-slate-50 rounded-lg border border-slate-100/80">
+            <span className="text-[9px] font-bold uppercase tracking-wider text-slate-400 block leading-tight">
+              કુલ વ્યાજ (Interest)
             </span>
-            <span className="text-base font-bold text-amber-600">
+            <span className="text-xs sm:text-sm font-bold text-amber-600">
               {formatRupee(totalInterest)}
             </span>
           </div>
 
-          <div className="p-3 bg-slate-50 rounded-xl">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">
-              કુલ ચૂકવણી (Total Payable)
+          <div className="p-2 bg-slate-50 rounded-lg border border-slate-100/80">
+            <span className="text-[9px] font-bold uppercase tracking-wider text-slate-400 block leading-tight">
+              કુલ ચૂકવણી (Total)
             </span>
-            <span className="text-base font-bold text-slate-900">
+            <span className="text-xs sm:text-sm font-bold text-slate-900">
               {formatRupee(totalPayment)}
             </span>
           </div>
         </div>
 
         {/* Visual Progress Ratio Bar */}
-        <div className="space-y-1.5 mb-6">
-          <div className="h-3 w-full bg-slate-100 rounded-full overflow-hidden flex">
+        <div className="space-y-1 mb-3">
+          <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden flex">
             <div
               style={{ width: `${principalPercent}%` }}
               className="bg-slate-800 transition-all duration-300"
@@ -228,42 +218,37 @@ Please guide me with the loan approval process.`
               title={`Interest: ${interestPercent}%`}
             />
           </div>
-          <div className="flex justify-between text-[11px] font-semibold text-slate-500">
-            <span className="flex items-center gap-1.5">
-              <span className="w-2.5 h-2.5 rounded-full bg-slate-800 inline-block" />
-              મૂળ રકમ Principal ({principalPercent}%)
+          <div className="flex justify-between text-[10px] font-semibold text-slate-500">
+            <span className="flex items-center gap-1">
+              <span className="w-2 h-2 rounded-full bg-slate-800 inline-block" />
+              મૂળ રકમ ({principalPercent}%)
             </span>
-            <span className="flex items-center gap-1.5">
-              <span className="w-2.5 h-2.5 rounded-full bg-brand-orange inline-block" />
-              વ્યાજ Interest ({interestPercent}%)
+            <span className="flex items-center gap-1">
+              <span className="w-2 h-2 rounded-full bg-brand-orange inline-block" />
+              વ્યાજ ({interestPercent}%)
             </span>
           </div>
         </div>
 
-        {/* Bottom Action: WhatsApp Loan Assistance */}
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 bg-amber-500/10 border border-amber-500/20 rounded-2xl">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-amber-500 text-white flex items-center justify-center shrink-0">
-              <ShieldCheck className="w-5 h-5" />
+        {/* Bottom Compact Action: WhatsApp Loan Assistance */}
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-2.5 p-2.5 sm:px-3.5 bg-amber-500/10 border border-amber-500/20 rounded-xl">
+          <div className="flex items-center gap-2 min-w-0">
+            <div className="w-7 h-7 rounded-lg bg-amber-500 text-white flex items-center justify-center shrink-0">
+              <ShieldCheck className="w-4 h-4" />
             </div>
-            <div>
-              <p className="font-bold text-slate-900 text-xs sm:text-sm">
-                સરળ બેંક લોન સહાય અને ઝડપી મંજૂરી · Quick Loan Approval
-              </p>
-              <p className="text-slate-600 text-[11px]">
-                HDFC, ICICI, SBI, Axis, Kotak, IDFC બેંકો સાથે ટાઇ-અપ — સૌથી ઓછું વ્યાજ અને ઓછામાં ઓછું કાગળકામ.
-              </p>
-            </div>
+            <p className="font-bold text-slate-900 text-xs truncate">
+              ઝડપી બેંક લોન સહાય (HDFC, ICICI, SBI, Axis, Kotak, IDFC)
+            </p>
           </div>
 
           <a
             href={buildWhatsAppUrl(whatsappMessage)}
             target="_blank"
             rel="noopener noreferrer"
-            className="w-full sm:w-auto px-6 py-3 rounded-xl bg-[#25D366] hover:bg-[#20bd5a] text-white font-bold text-xs flex items-center justify-center gap-2 transition-all shadow-md shrink-0"
+            className="w-full sm:w-auto px-3.5 py-1.5 rounded-lg bg-[#25D366] hover:bg-[#20bd5a] text-white font-bold text-xs flex items-center justify-center gap-1.5 transition-all shadow-xs shrink-0"
           >
-            <WhatsAppIcon className="w-4 h-4" />
-            લોન માટે WhatsApp કરો
+            <WhatsAppIcon className="w-3.5 h-3.5" />
+            <span>લોન માટે WhatsApp કરો</span>
           </a>
         </div>
       </div>
