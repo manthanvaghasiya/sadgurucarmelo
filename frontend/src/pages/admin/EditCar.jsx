@@ -483,7 +483,7 @@ export default function EditCar() {
       features: [{ key: '', value: '' }],
       airConditioner: '', powerWindows: '', sunroof: '', parkingSensors: '',
       displacement: '', maxPower: '', driveType: '', cylinders: '',
-      isCertified: false, isPetipack: false, validVimo: false, loanAvailable: false, isKmGenuine: false,
+      isCertified: false, validVimo: false, loanAvailable: false, isKmGenuine: false,
       spinImages: []
     }
   });
@@ -542,7 +542,6 @@ export default function EditCar() {
           driveType: car.driveType || '',
           cylinders: car.cylinders || '',
           isCertified: badges.includes('Certified'),
-          isPetipack: badges.includes('Peti-pack'),
           validVimo: badges.includes('Valid Vimo'),
           loanAvailable: Boolean(car.loanAvailable),
           isKmGenuine: Boolean(car.isKmGenuine),
@@ -558,7 +557,6 @@ export default function EditCar() {
   }, [id, reset, navigate]);
 
   const isCertified = watch('isCertified');
-  const isPetipack = watch('isPetipack');
   const validVimo = watch('validVimo');
   const loanAvailable = watch('loanAvailable');
 
@@ -618,7 +616,6 @@ export default function EditCar() {
         if (p.parkingSensors) setValue('parkingSensors', p.parkingSensors);
 
         if (p.isCertified !== undefined) setValue('isCertified', Boolean(p.isCertified));
-        if (p.isPetipack !== undefined) setValue('isPetipack', Boolean(p.isPetipack));
         if (p.validVimo !== undefined) setValue('validVimo', Boolean(p.validVimo));
         if (p.loanAvailable !== undefined) setValue('loanAvailable', Boolean(p.loanAvailable));
         if (p.isKmGenuine !== undefined) setValue('isKmGenuine', Boolean(p.isKmGenuine));
@@ -707,7 +704,6 @@ export default function EditCar() {
       }
 
       if (data.isCertified) formData.append('badges', 'Certified');
-      if (data.isPetipack) formData.append('badges', 'Peti-pack');
       if (data.validVimo) formData.append('badges', 'Valid Vimo');
       formData.append('loanAvailable', String(data.loanAvailable));
       formData.append('isKmGenuine', String(data.isKmGenuine));
@@ -1103,12 +1099,6 @@ export default function EditCar() {
               onChange={(val) => setValue('isCertified', val)}
             />
             <ToggleSwitch
-              label="Is Peti-pack?"
-              description="All body panels are original with no dent or paint"
-              checked={isPetipack}
-              onChange={(val) => setValue('isPetipack', val)}
-            />
-            <ToggleSwitch
               label="Valid Vimo?"
               description="Vehicle has valid insurance coverage"
               checked={validVimo}
@@ -1123,7 +1113,7 @@ export default function EditCar() {
           </div>
 
           {/* Active Badges Preview */}
-          {(isCertified || isPetipack || validVimo) && (
+          {(isCertified || validVimo) && (
             <div className="flex flex-wrap gap-2 mt-5 pt-5 border-t border-gray-100">
               <span className="font-body text-xs text-text-muted font-semibold mr-2 self-center">
                 Active badges:
@@ -1131,11 +1121,6 @@ export default function EditCar() {
               {isCertified && (
                 <span className="flex items-center gap-1 px-3 py-1.5 bg-[#10b981]/10 text-[#059669] rounded-full font-body text-xs font-bold ring-1 ring-[#10b981]/20">
                   <CheckCircle2 className="w-3 h-3" /> Certified
-                </span>
-              )}
-              {isPetipack && (
-                <span className="flex items-center gap-1 px-3 py-1.5 bg-primary/10 text-primary rounded-full font-body text-xs font-bold ring-1 ring-primary/20">
-                  <CheckCircle2 className="w-3 h-3" /> Peti-pack
                 </span>
               )}
               {validVimo && (

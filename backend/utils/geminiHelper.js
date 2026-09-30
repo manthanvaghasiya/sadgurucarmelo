@@ -587,7 +587,6 @@ export function heuristicParseCar(rawText) {
     sunroof: 'No',
     parkingSensors: 'Rear Parking Sensors',
     isCertified: true,
-    isPetipack: false,
     validVimo: false,
     loanAvailable: true,
     isKmGenuine: true,
