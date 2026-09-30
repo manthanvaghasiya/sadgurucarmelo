@@ -7,11 +7,11 @@ export default function ContactShowroomHub() {
   const { phone, address, getWhatsAppLink } = useDealershipContact();
 
   return (
-    <div className="w-full">
+    <div className="w-full h-full flex flex-col">
       {/* ── Interactive Google Map & Direction Card ── */}
-      <div className="bg-white rounded-3xl overflow-hidden border border-slate-200/80 shadow-xl shadow-slate-200/40 relative">
+      <div className="bg-white rounded-3xl overflow-hidden border border-slate-200/80 shadow-xl shadow-slate-200/40 relative flex flex-col flex-1 h-full">
         {/* Map Header */}
-        <div className="p-5 sm:p-6 bg-slate-900 text-white flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="p-5 sm:p-6 bg-slate-900 text-white flex flex-col sm:flex-row sm:items-center justify-between gap-4 shrink-0">
           <div className="flex items-start gap-3">
             <div className="w-10 h-10 rounded-xl bg-brand-orange text-white flex items-center justify-center shrink-0 shadow-md shadow-brand-orange/30">
               <MapPin className="w-5 h-5" />
@@ -42,14 +42,14 @@ export default function ContactShowroomHub() {
           </a>
         </div>
 
-        {/* Map Iframe with Overlays */}
-        <div className="relative h-[380px] sm:h-[460px] lg:h-[500px] w-full bg-slate-100">
+        {/* Map Iframe with Overlays - dynamically fills remaining height with zero gap */}
+        <div className="relative flex-1 min-h-[360px] sm:min-h-[420px] lg:min-h-[480px] w-full bg-slate-100 overflow-hidden">
           <iframe
             title="Sadguru Car Surat Showroom Map"
             src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3719.5210617841512!2d72.89515417470535!3d21.211176681489203!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3be04fdde8bfb4e5%3A0x834add64072864dc!2sSadguru%20Car%20Melo!5e0!3m2!1sen!2sin!4v1775327556300!5m2!1sen!2sin"
             width="100%"
             height="100%"
-            className="w-full h-full border-0"
+            className="w-full h-full border-0 absolute inset-0"
             allowFullScreen=""
             loading="lazy"
             referrerPolicy="no-referrer-when-downgrade"
@@ -84,7 +84,7 @@ export default function ContactShowroomHub() {
         </div>
 
         {/* Showroom Landmark & Parking Ribbon */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-slate-100 bg-slate-50 p-4 border-t border-slate-200/80 text-xs font-body">
+        <div className="grid grid-cols-1 sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-slate-100 bg-slate-50 p-4 border-t border-slate-200/80 text-xs font-body shrink-0">
           <div className="flex items-center gap-2.5 p-2">
             <div className="w-7 h-7 rounded-lg bg-orange-100 text-brand-orange flex items-center justify-center shrink-0">
               <Building2 className="w-4 h-4" />

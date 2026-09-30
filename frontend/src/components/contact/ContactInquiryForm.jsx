@@ -43,7 +43,7 @@ export default function ContactInquiryForm() {
   };
 
   return (
-    <div className="bg-white rounded-3xl p-6 sm:p-8 lg:p-10 border border-slate-100 shadow-xl shadow-slate-200/50 relative overflow-hidden">
+    <div className="bg-white rounded-3xl p-6 sm:p-8 lg:p-9 border border-slate-100 shadow-xl shadow-slate-200/50 relative overflow-hidden h-full flex flex-col justify-between">
       {/* Ambient decorative glow */}
       <div className="absolute top-0 right-0 w-64 h-64 bg-brand-orange/5 rounded-full blur-3xl pointer-events-none" />
 

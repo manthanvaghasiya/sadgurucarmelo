@@ -81,14 +81,14 @@ export default function Contact() {
         </motion.div>
 
         {/* ── 3. Main Split Grid (Inquiry Form + Live Map & Facilities Hub) ── */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-stretch">
           {/* Left Column (5 Cols on LG): Send Inquiry Form */}
-          <div className="lg:col-span-5 w-full">
+          <div className="lg:col-span-5 w-full flex flex-col">
             <ContactInquiryForm />
           </div>
 
           {/* Right Column (7 Cols on LG): Live Map, Facilities & Navigation */}
-          <div className="lg:col-span-7 w-full">
+          <div className="lg:col-span-7 w-full flex flex-col">
             <ContactShowroomHub />
           </div>
         </div>
