@@ -402,43 +402,80 @@ export default function CarDetails() {
     // ── Intelligent Suggested Related Cars Recommendation Engine ──
     const suggestedCars = useMemo(() => {
         if (!car) return [];
-        const currentId = String(car._id || car.id || '');
+        const currentId = String(car._id || car.id || '').trim();
         const currentMake = (car.make || '').trim().toLowerCase();
+        const currentModel = (car.model || '').trim().toLowerCase();
         const currentBody = (car.bodyType || '').trim().toLowerCase();
         const currentPrice = Number(car.price) || 0;
 
-        // Aggregate candidates from database inventory & fallback showcase
-        const pool = [...(cars || []), ...FALLBACK_SHOWCASE];
+        // Use strictly real database inventory cars to ensure all recommended cars are genuinely present in the showroom
+        // Filter out any mock/showcase dummy data (showcase-*) so non-existent cars are NEVER shown
+        const realCars = Array.isArray(cars) ? cars : [];
+        const pool = realCars.filter((item) => {
+            if (!item) return false;
+            const cId = String(item._id || item.id || '').trim();
+            if (!cId) return false;
 
-        // Deduplicate by ID and exclude the active car
-        const seenIds = new Set([currentId]);
+            // 1. Exclude the vehicle currently being viewed
+            if (cId === currentId) return false;
+
+            // 2. Exclude dummy showcase cars (showcase-*) which are not present in the showroom
+            if (cId.startsWith('showcase-')) return false;
+
+            // 3. Exclude the same car model (recommend genuine alternative models, not the identical car being viewed)
+            const cMake = (item.make || '').trim().toLowerCase();
+            const cModel = (item.model || '').trim().toLowerCase();
+            if (
+                currentMake && currentModel &&
+                cMake === currentMake &&
+                (cModel === currentModel || cModel.includes(currentModel) || currentModel.includes(cModel))
+            ) {
+                return false;
+            }
+
+            return true;
+        });
+
+        // Deduplicate pool by ID
+        const seenIds = new Set();
         const uniquePool = [];
         for (const item of pool) {
-            const cId = String(item._id || item.id || '');
-            if (cId && !seenIds.has(cId)) {
+            const cId = String(item._id || item.id || '').trim();
+            if (!seenIds.has(cId)) {
                 seenIds.add(cId);
                 uniquePool.push(item);
             }
         }
 
-        // Rank by multi-factor relevance (Brand match, Body type, Price bracket)
+        // Rank candidates by multi-factor relevance:
+        // 1. Same body type (SUV to SUV, Sedan to Sedan) -> top similarity factor for buyers
+        // 2. Price proximity bracket (closest budget first)
+        // 3. Same brand (if another model from the brand exists)
+        // 4. Status = Available or Featured
         const ranked = uniquePool.map((c) => {
             let score = 0;
             const cMake = (c.make || '').trim().toLowerCase();
             const cBody = (c.bodyType || '').trim().toLowerCase();
             const cPrice = Number(c.price) || 0;
 
-            if (currentMake && (cMake === currentMake || cMake.includes(currentMake) || currentMake.includes(cMake))) {
-                score += 5;
+            // Same body type match (e.g. SUV -> SUV)
+            if (currentBody && cBody && cBody === currentBody) {
+                score += 8;
             }
-            if (currentBody && cBody === currentBody) {
-                score += 3;
+
+            // Same brand if different model exists
+            if (currentMake && cMake === currentMake) {
+                score += 4;
             }
+
+            // Price range proximity
             if (currentPrice > 0 && cPrice > 0) {
                 const diffRatio = Math.abs(currentPrice - cPrice) / currentPrice;
-                if (diffRatio < 0.25) score += 4;
-                else if (diffRatio < 0.45) score += 2;
+                if (diffRatio < 0.25) score += 6;
+                else if (diffRatio < 0.50) score += 3;
             }
+
+            // Prioritize active available cars
             if (c.status === 'Available') score += 2;
             if (c.isFeaturedOnHome) score += 1;
 
@@ -447,6 +484,14 @@ export default function CarDetails() {
 
         ranked.sort((a, b) => b.score - a.score);
         return ranked.slice(0, 4).map((r) => r.item);
+    }, [car, cars]);
+
+    // Check if showroom has other cars from the same manufacturer
+    const hasMoreFromMake = useMemo(() => {
+        if (!car?.make || !Array.isArray(cars)) return false;
+        const make = car.make.trim().toLowerCase();
+        const count = cars.filter(c => (c.make || '').trim().toLowerCase() === make).length;
+        return count > 1;
     }, [car, cars]);
 
     if (loading) {
@@ -1179,10 +1224,10 @@ export default function CarDetails() {
                             </div>
 
                             <Link
-                                to={`/inventory?make=${encodeURIComponent(car.make || '')}`}
+                                to={hasMoreFromMake ? `/inventory?make=${encodeURIComponent(car.make || '')}` : '/inventory'}
                                 className="font-body text-xs sm:text-sm font-bold text-brand-orange hover:text-orange-600 transition-colors inline-flex items-center gap-1 self-start sm:self-auto group"
                             >
-                                <span>બધી {car.make} કાર જુઓ · View All</span>
+                                <span>{hasMoreFromMake ? `બધી ${car.make} કાર જુઓ · View All` : 'બધી કાર જુઓ · Browse All'}</span>
                                 <ArrowRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-1" />
                             </Link>
                         </div>
