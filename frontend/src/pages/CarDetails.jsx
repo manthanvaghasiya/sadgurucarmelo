@@ -1,10 +1,12 @@
 import { useParams, Link } from 'react-router-dom';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import SEO from '../components/SEO';
 import {
     Fuel, Settings2, User, Gauge, MapPin, Star, Tag, Check,
     ShieldCheck, Palette, RotateCw, CheckCircle2, ChevronLeft, ChevronRight,
-    ArrowLeftRight, Download, Maximize2, Share2, X, ArrowLeft, Send, Loader2, Phone
+    ArrowLeftRight, Download, Maximize2, Share2, X, ArrowLeft, Send, Loader2, Phone,
+    Sparkles, ArrowRight, Shield, Award, Wrench
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import axiosInstance from '../api/axiosConfig';
@@ -33,6 +35,7 @@ export default function CarDetails() {
     const { cars } = useCars();
     const { telPhone } = useDealershipContact();
     const { addToCompare, removeFromCompare, toggleCompare, isInCompare, compareCount, compareCars } = useCompare();
+
     const [car, setCar] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
@@ -42,17 +45,26 @@ export default function CarDetails() {
     const [isLightboxOpen, setIsLightboxOpen] = useState(false);
     const [touchStart, setTouchStart] = useState(null);
     const [touchEnd, setTouchEnd] = useState(null);
-    const [relatedCars, setRelatedCars] = useState([]);
     const [viewMode, setViewMode] = useState('standard'); // 'standard' or '360'
     const [isSendingImages, setIsSendingImages] = useState(false);
 
     const whatsappUrl = car ? getCarWhatsAppLink(car) : '#';
 
     // Normalized list of gallery images (always strings, includes generated Car Details Summary Card)
-    const rawImages = car?.images && Array.isArray(car.images) && car.images.length > 0
-        ? car.images.map(getSafeImageUrl).filter(Boolean)
-        : (car?.image ? [getSafeImageUrl(car.image)].filter(Boolean) : []);
-    const images = detailCardUrl ? [...rawImages, detailCardUrl] : rawImages;
+    const rawImages = useMemo(() => {
+        if (!car) return [];
+        if (car.images && Array.isArray(car.images) && car.images.length > 0) {
+            return car.images.map(getSafeImageUrl).filter(Boolean);
+        }
+        if (car.image) {
+            return [getSafeImageUrl(car.image)].filter(Boolean);
+        }
+        return [];
+    }, [car]);
+
+    const images = useMemo(() => {
+        return detailCardUrl ? [...rawImages, detailCardUrl] : rawImages;
+    }, [rawImages, detailCardUrl]);
 
     // Generate branded Car Details Card whenever car data loads
     useEffect(() => {
@@ -74,7 +86,7 @@ export default function CarDetails() {
         if (images.length > 0) {
             setActiveImage(images[activeImageIdx] || images[0]);
         }
-    }, [activeImageIdx, images.length, car]);
+    }, [activeImageIdx, images]);
 
     // Keyboard navigation for Lightbox
     useEffect(() => {
@@ -111,22 +123,20 @@ export default function CarDetails() {
         if (!touchStart || !touchEnd) return;
         const distance = touchStart - touchEnd;
         if (distance > minSwipeDistance && images.length > 1) {
-            // Swiped left -> next
             setActiveImageIdx((prev) => (prev === images.length - 1 ? 0 : prev + 1));
         } else if (distance < -minSwipeDistance && images.length > 1) {
-            // Swiped right -> prev
             setActiveImageIdx((prev) => (prev === 0 ? images.length - 1 : prev - 1));
         }
     };
 
     const handleShare = async () => {
         const shareUrl = window.location.href;
-        const shareTitle = `${car?.make || 'Sadguru'} ${car?.model || 'Car'} (${car?.year || ''}) | Sadguru Car Melo`;
+        const shareTitle = `${car?.make || 'Sadguru'} ${car?.model || 'Car'} (${car?.year || ''}) | Sadguru Car Surat`;
         if (navigator.share) {
             try {
                 await navigator.share({
                     title: shareTitle,
-                    text: `Check out this ${car?.make} ${car?.model} at Sadguru Car Melo, Surat!`,
+                    text: `Check out this ${car?.make} ${car?.model} at Sadguru Car Surat!`,
                     url: shareUrl,
                 });
             } catch {
@@ -145,7 +155,6 @@ export default function CarDetails() {
             return;
         }
 
-        // 1. Ensure Details Card is available
         let cardUrl = detailCardUrl;
         if (!cardUrl && car) {
             try {
@@ -189,7 +198,7 @@ export default function CarDetails() {
                     link.click();
                     document.body.removeChild(link);
                 }
-            }, (i + 1) * 400);
+            }, (i + 1) * 350);
         });
     };
 
@@ -199,7 +208,6 @@ export default function CarDetails() {
         toast.loading('ફોટા તૈયાર થઈ રહ્યા છે... / Preparing images to send...', { id: 'send-images' });
 
         try {
-            // 1. Ensure Details Card is generated
             let cardUrl = detailCardUrl;
             if (!cardUrl) {
                 try {
@@ -354,21 +362,6 @@ export default function CarDetails() {
                         if ((fetchedCar.spinImages || []).length > 0) {
                             setViewMode('360');
                         }
-
-                        // Fetch Similar Cars
-                        try {
-                            const makeQuery = encodeURIComponent(fetchedCar.make || '');
-                            const relatedRes = await axiosInstance.get(`/cars?make=${makeQuery}&limit=5&status=Available`);
-                            if (isMounted && (relatedRes.data?.success || relatedRes.data?.data)) {
-                                const relatedArray = Array.isArray(relatedRes.data.data) ? relatedRes.data.data : [];
-                                const filteredRelated = relatedArray
-                                    .filter(c => (c._id || c.id) !== id)
-                                    .slice(0, 3);
-                                setRelatedCars(filteredRelated);
-                            }
-                        } catch (relatedErr) {
-                            console.warn('Failed to fetch related cars', relatedErr);
-                        }
                         setLoading(false);
                         return;
                     }
@@ -385,7 +378,6 @@ export default function CarDetails() {
                     }
                 }
             } else {
-                // Non-ObjectId fallback
                 if (!localMatch && isMounted) {
                     const fallbackMatch = FALLBACK_SHOWCASE.find((c) => String(c._id || c.id) === String(id));
                     if (fallbackMatch) {
@@ -406,6 +398,56 @@ export default function CarDetails() {
         fetchCarData();
         return () => { isMounted = false; };
     }, [id, cars]);
+
+    // ── Intelligent Suggested Related Cars Recommendation Engine ──
+    const suggestedCars = useMemo(() => {
+        if (!car) return [];
+        const currentId = String(car._id || car.id || '');
+        const currentMake = (car.make || '').trim().toLowerCase();
+        const currentBody = (car.bodyType || '').trim().toLowerCase();
+        const currentPrice = Number(car.price) || 0;
+
+        // Aggregate candidates from database inventory & fallback showcase
+        const pool = [...(cars || []), ...FALLBACK_SHOWCASE];
+
+        // Deduplicate by ID and exclude the active car
+        const seenIds = new Set([currentId]);
+        const uniquePool = [];
+        for (const item of pool) {
+            const cId = String(item._id || item.id || '');
+            if (cId && !seenIds.has(cId)) {
+                seenIds.add(cId);
+                uniquePool.push(item);
+            }
+        }
+
+        // Rank by multi-factor relevance (Brand match, Body type, Price bracket)
+        const ranked = uniquePool.map((c) => {
+            let score = 0;
+            const cMake = (c.make || '').trim().toLowerCase();
+            const cBody = (c.bodyType || '').trim().toLowerCase();
+            const cPrice = Number(c.price) || 0;
+
+            if (currentMake && (cMake === currentMake || cMake.includes(currentMake) || currentMake.includes(cMake))) {
+                score += 5;
+            }
+            if (currentBody && cBody === currentBody) {
+                score += 3;
+            }
+            if (currentPrice > 0 && cPrice > 0) {
+                const diffRatio = Math.abs(currentPrice - cPrice) / currentPrice;
+                if (diffRatio < 0.25) score += 4;
+                else if (diffRatio < 0.45) score += 2;
+            }
+            if (c.status === 'Available') score += 2;
+            if (c.isFeaturedOnHome) score += 1;
+
+            return { item: c, score };
+        });
+
+        ranked.sort((a, b) => b.score - a.score);
+        return ranked.slice(0, 4).map((r) => r.item);
+    }, [car, cars]);
 
     if (loading) {
         return (
@@ -435,96 +477,131 @@ export default function CarDetails() {
         );
     }
 
+    // SEO / AEO / GEO Schema Variables
+    const pageTitle = `Used ${car.make || 'Certified'} ${car.model || 'Car'} ${car.year ? car.year : ''} for Sale in Surat | Sadguru Car Surat`;
+    const priceFormatted = typeof car.price === 'number' ? `₹${car.price.toLocaleString('en-IN')}` : (car.price || 'Best Price');
+    const pageDescription = `Certified pre-owned ${car.make || ''} ${car.model || ''} (${car.year || ''}) available for sale at Sadguru Car Surat. Price: ${priceFormatted}. ${car.fuelType || ''}, ${car.transmission || ''}, ${typeof car.kms === 'number' ? `${car.kms.toLocaleString('en-IN')} KM` : (car.kms || '')}. Verified with 120-point inspection, loan/EMI available. Visit Varachha, Surat, Gujarat.`;
+
     return (
-        <div className="bg-background min-h-screen py-6 sm:py-8 px-4 sm:px-6 lg:px-8 pb-20 lg:pb-8">
+        <div className="relative bg-gradient-to-b from-slate-50/70 via-white to-slate-50/50 min-h-screen py-5 sm:py-7 px-3.5 sm:px-6 lg:px-8 pb-24 lg:pb-12 overflow-hidden">
+            {/* ── SEO, AEO (Answer Engine), and GEO (Generative Engine Optimization) Structured Metadata ── */}
             <SEO
-                title={`Used ${car.make || 'Certified'} ${car.model || 'Car'} ${car.year ? car.year : ''} for Sale in Surat | Sadguru Car Surat`}
-                description={`Buy ${car.make || ''} ${car.model || ''} ${car.year ? `(${car.year})` : ''} at ${typeof car.price === 'number' ? `₹${car.price.toLocaleString('en-IN')}` : (car.price || 'Best Price')}. ${car.fuelType || ''}, ${car.transmission || ''}, ${typeof car.kms === 'number' ? `${car.kms.toLocaleString('en-IN')} KM` : (car.kms || '')}. Certified pre-owned at Sadguru Car Surat, Surat.`}
+                title={pageTitle}
+                description={pageDescription}
                 image={getSafeImageUrl(car.image) || (images[0] || '')}
                 url={`https://sadgurucarsurat.com/car-details/${car._id || car.id || ''}`}
                 schema={{
                     "@context": "https://schema.org",
                     "@type": "Vehicle",
-                    "name": `${car.make || ''} ${car.model || ''} ${car.year || ''}`.trim(),
+                    "name": `${car.make || ''} ${car.model || ''} ${car.year ? `(${car.year})` : ''}`.trim(),
                     "image": getSafeImageUrl(car.image) || (images[0] || ''),
-                    "description": car.description || `Certified pre-owned ${car.make || ''} ${car.model || ''} (${car.year || ''}) available at Sadguru Car Surat.`,
+                    "description": car.description || pageDescription,
                     "brand": {
                         "@type": "Brand",
                         "name": car.make || 'Sadguru Car Surat'
                     },
                     "model": car.model || 'Car',
-                    "vehicleModelDate": car.year,
+                    "vehicleModelDate": car.year || '2022',
                     "mileageFromOdometer": {
                         "@type": "QuantitativeValue",
-                        "value": car.kms,
+                        "value": car.kms || 0,
                         "unitCode": "KMT"
                     },
-                    "fuelType": car.fuelType,
-                    "vehicleTransmission": car.transmission,
+                    "fuelType": car.fuelType || 'Petrol',
+                    "vehicleTransmission": car.transmission || 'Manual',
+                    "color": car.color || 'White',
+                    "bodyType": car.bodyType || 'SUV',
+                    "itemCondition": "https://schema.org/UsedCondition",
                     "offers": {
                         "@type": "Offer",
-                        "price": car.price,
+                        "price": typeof car.price === 'number' ? car.price : 500000,
                         "priceCurrency": "INR",
+                        "itemCondition": "https://schema.org/UsedCondition",
                         "availability": car.status === 'Sold' ? "https://schema.org/SoldOut" : "https://schema.org/InStock",
+                        "url": `https://sadgurucarsurat.com/car-details/${car._id || car.id || ''}`,
                         "seller": {
                             "@type": "AutoDealer",
                             "name": "Sadguru Car Surat",
+                            "url": "https://sadgurucarsurat.com",
+                            "telephone": telPhone || "+919913634447",
                             "address": {
                                 "@type": "PostalAddress",
                                 "streetAddress": "Trilok Car Bazar, Simada Canal BRTS Rd, Canal Chokdi, Varachha",
                                 "addressLocality": "Surat",
+                                "addressRegion": "Gujarat",
                                 "postalCode": "395013",
-                                "addressRegion": "GJ",
                                 "addressCountry": "IN"
                             },
-                            "telephone": telPhone || "+919913634447"
+                            "geo": {
+                                "@type": "GeoCoordinates",
+                                "latitude": 21.2266,
+                                "longitude": 72.8712
+                            }
                         }
                     }
                 }}
             />
+
+            {/* ── Ambient Radial Showroom Lighting Accent ── */}
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-96 bg-gradient-to-b from-amber-400/5 via-orange-500/5 to-transparent blur-3xl pointer-events-none -z-10" />
+
             <div className="max-w-7xl mx-auto">
 
-                {/* ════ Page Header (Original Spacious Breadcrumbs & Title) ════ */}
-                <div className="mb-8">
-                    <nav className="flex mb-4" aria-label="Breadcrumb">
-                        <ol className="flex items-center space-x-2 font-body text-xs font-semibold text-text-muted">
-                            <li><Link to="/" className="hover:text-primary transition-colors">Used Cars</Link></li>
-                            <li><span className="text-gray-400">{'>'}</span></li>
-                            <li><span className="text-text">{car.make || 'Cars'}</span></li>
-                            <li><span className="text-gray-400">{'>'}</span></li>
-                            <li aria-current="page" className="text-text">{car.model || 'Model'}</li>
+                {/* ════ Page Header (Clean Breadcrumbs & Showroom Title) ════ */}
+                <div className="mb-4 sm:mb-6">
+                    <nav className="flex mb-2" aria-label="Breadcrumb">
+                        <ol className="flex items-center space-x-1.5 font-body text-xs font-semibold text-slate-500">
+                            <li><Link to="/" className="hover:text-brand-orange transition-colors">Used Cars</Link></li>
+                            <li><span className="text-slate-300">/</span></li>
+                            <li><Link to="/inventory" className="hover:text-brand-orange transition-colors">{car.make || 'Cars'}</Link></li>
+                            <li><span className="text-slate-300">/</span></li>
+                            <li aria-current="page" className="text-slate-900 font-bold truncate max-w-[200px] sm:max-w-none">{car.model || 'Model'}</li>
                         </ol>
                     </nav>
-                    <h1 className="font-heading font-bold text-3xl sm:text-4xl text-text leading-tight tracking-tight flex flex-wrap items-center gap-3">
-                        {car.make || ''} {car.model || 'Vehicle'} {car.year ? `(${car.year})` : ''}
-                        {car.variantTier && (
-                            <span className="text-lg sm:text-xl font-body font-bold text-text-muted bg-gray-100 px-3 py-1 rounded-lg">
-                                {car.variantTier} Variant
+
+                    <div className="flex flex-wrap items-center justify-between gap-3">
+                        <h1 className="font-heading font-black text-2xl sm:text-3xl lg:text-4xl text-slate-900 leading-tight tracking-tight flex flex-wrap items-center gap-2.5">
+                            <span>{car.make || ''} {car.model || 'Vehicle'}</span>
+                            {car.year && <span className="text-brand-orange font-bold">({car.year})</span>}
+                            {car.variantTier && (
+                                <span className="text-xs sm:text-sm font-heading font-bold text-slate-600 bg-slate-100 px-2.5 py-0.5 rounded-lg border border-slate-200">
+                                    {car.variantTier}
+                                </span>
+                            )}
+                        </h1>
+
+                        <div className="hidden sm:flex items-center gap-2">
+                            <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-heading font-bold uppercase tracking-wider">
+                                <ShieldCheck className="w-3.5 h-3.5" /> 120-Point Inspected
                             </span>
-                        )}
-                    </h1>
+                            <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-blue-50 text-blue-700 border border-blue-200 text-xs font-heading font-bold uppercase tracking-wider">
+                                <Award className="w-3.5 h-3.5" /> Surat Verified
+                            </span>
+                        </div>
+                    </div>
                 </div>
 
-                {/* ════ Main Layout (Tightly Integrated Grid) ════ */}
+                {/* ════ Main Layout Grid (Tight Gap Between Image & Specs) ════ */}
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-x-5 lg:gap-x-6 gap-y-3">
 
-                    {/* 1. Media Gallery — Always first (Left 2 cols on laptop) */}
+                    {/* ── 1. Media Gallery (Left 2 cols on laptop) ── */}
                     <div className="lg:col-span-2 order-1">
-                        {/* Top Quick Actions Bar (Back, Share, Send Images, Save All) */}
-                        <div className="flex items-center justify-between gap-3 mb-4">
+                        {/* Top Quick Actions Bar (Back, Share, Send Photos, Save All) */}
+                        <div className="flex items-center justify-between gap-2 sm:gap-3 mb-2.5 sm:mb-3">
                             <Link
                                 to="/inventory"
-                                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white border border-slate-200 text-slate-700 hover:text-brand-orange hover:border-brand-orange text-xs font-bold transition-all shadow-xs"
+                                className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-white border border-slate-200 text-slate-700 hover:text-brand-orange hover:border-brand-orange text-xs font-bold transition-all shadow-2xs shrink-0"
                             >
                                 <ArrowLeft className="w-3.5 h-3.5" />
-                                <span>બધી કાર જુઓ · Back to Inventory</span>
+                                <span className="sm:hidden">Back</span>
+                                <span className="hidden sm:inline">બધી કાર જુઓ · Back to Inventory</span>
                             </Link>
 
-                            <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-1.5 sm:gap-2">
                                 <button
                                     type="button"
                                     onClick={handleShare}
-                                    className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white border border-slate-200 text-slate-700 hover:text-brand-orange hover:bg-brand-orange/5 text-xs font-bold transition-all shadow-xs active:scale-95"
+                                    className="inline-flex items-center gap-1 px-2.5 sm:px-3 py-1.5 rounded-full bg-white border border-slate-200 text-slate-700 hover:text-brand-orange hover:bg-orange-50/50 text-xs font-bold transition-all shadow-2xs active:scale-95"
                                     title="Share Car Details"
                                 >
                                     <Share2 className="w-3.5 h-3.5" />
@@ -535,7 +612,7 @@ export default function CarDetails() {
                                     type="button"
                                     onClick={handleSendImages}
                                     disabled={isSendingImages}
-                                    className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-600 hover:bg-emerald-500/20 text-xs font-bold transition-all shadow-xs active:scale-95 disabled:opacity-50"
+                                    className="inline-flex items-center gap-1 px-2.5 sm:px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-600 hover:bg-emerald-500/20 text-xs font-bold transition-all shadow-2xs active:scale-95 disabled:opacity-50"
                                     title="Send Car Images & Details Card"
                                 >
                                     {isSendingImages ? (
@@ -543,27 +620,28 @@ export default function CarDetails() {
                                     ) : (
                                         <Send className="w-3.5 h-3.5" />
                                     )}
-                                    <span>ફોટો મોકલો · Send Images</span>
+                                    <span className="hidden sm:inline">ફોટો મોકલો · </span>
+                                    <span>Send</span>
                                 </button>
 
                                 <button
                                     type="button"
                                     onClick={handleDownloadAllImages}
-                                    className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white border border-slate-200 text-slate-700 hover:text-brand-orange hover:bg-brand-orange/5 text-xs font-bold transition-all shadow-xs active:scale-95"
+                                    className="inline-flex items-center gap-1 px-2.5 sm:px-3 py-1.5 rounded-full bg-white border border-slate-200 text-slate-700 hover:text-brand-orange hover:bg-orange-50/50 text-xs font-bold transition-all shadow-2xs active:scale-95"
                                     title="Download All Photos & Details Card"
                                 >
                                     <Download className="w-3.5 h-3.5" />
-                                    <span className="hidden sm:inline">સેવ કરો · Save All & Card</span>
-                                    <span className="sm:hidden">સેવ કરો · Save</span>
+                                    <span className="hidden sm:inline">સેવ કરો · Save All</span>
+                                    <span className="sm:hidden">Save</span>
                                 </button>
                             </div>
                         </div>
 
-                        <div className="bg-surface p-3 sm:p-4 rounded-2xl sm:rounded-3xl shadow-sm border border-gray-100">
+                        <div className="bg-surface p-2.5 sm:p-3.5 rounded-2xl shadow-sm border border-slate-200/80">
 
-                            {/* Main Big Screen Viewer (Spacious Aspect Ratio, No Height Squish) */}
+                            {/* Main Big Screen Viewer (Spacious Proportions, No Height Squish) */}
                             <div
-                                className={`relative w-full bg-white rounded-2xl sm:rounded-3xl overflow-hidden mb-4 shadow-sm border border-slate-200/80 group flex items-center justify-center cursor-pointer select-none ${
+                                className={`relative w-full bg-white rounded-xl sm:rounded-2xl overflow-hidden mb-3 shadow-xs border border-slate-200/70 group flex items-center justify-center cursor-pointer select-none ${
                                     viewMode === '360' && (car.spinImages || []).length > 0
                                         ? 'aspect-[4/3] lg:aspect-video'
                                         : 'aspect-[4/3] sm:aspect-[16/10]'
@@ -581,27 +659,33 @@ export default function CarDetails() {
                                     <Car360Viewer images={car.spinImages || []} title="360° EXTERIOR SPIN" />
                                 ) : (
                                     <>
-                                        <img
-                                            src={getOptimizedUrl(images[activeImageIdx] || activeImage || car.image, 1200) || 'https://placehold.co/1200x800/e2e8f0/64748b?text=Sadguru+Car+Surat'}
-                                            alt={`${car.make || ''} ${car.model || 'Car'} Photo ${activeImageIdx + 1}`}
-                                            loading="eager"
-                                            className="w-full h-full object-contain transition-transform duration-500 group-hover:scale-[1.02]"
-                                        />
+                                        <AnimatePresence mode="wait">
+                                            <motion.img
+                                                key={activeImageIdx}
+                                                initial={{ opacity: 0.7 }}
+                                                animate={{ opacity: 1 }}
+                                                transition={{ duration: 0.25 }}
+                                                src={getOptimizedUrl(images[activeImageIdx] || activeImage || car.image, 1200) || 'https://placehold.co/1200x800/e2e8f0/64748b?text=Sadguru+Car+Surat'}
+                                                alt={`${car.make || ''} ${car.model || 'Car'} Photo ${activeImageIdx + 1}`}
+                                                loading="eager"
+                                                className="w-full h-full object-contain transition-transform duration-500 group-hover:scale-[1.01]"
+                                            />
+                                        </AnimatePresence>
 
                                         {/* Top Badges */}
-                                        <div className="absolute top-3.5 left-3.5 flex items-center gap-2 z-20 pointer-events-none">
+                                        <div className="absolute top-3 left-3 flex items-center gap-1.5 z-20 pointer-events-none">
                                             {images.length > 1 && (
-                                                <span className="px-3 py-1 rounded-full bg-slate-900/80 backdrop-blur-md text-white font-heading font-bold text-xs border border-white/15 shadow-md">
+                                                <span className="px-2.5 py-0.5 rounded-full bg-slate-900/80 backdrop-blur-md text-white font-heading font-bold text-[11px] sm:text-xs border border-white/15 shadow-md">
                                                     {activeImageIdx + 1} / {images.length}
                                                 </span>
                                             )}
                                             {car.status === 'Coming Soon' && (
-                                                <span className="px-2.5 py-1 rounded-md bg-amber-500 text-white font-black text-[10px] uppercase tracking-wider shadow">
+                                                <span className="px-2 py-0.5 rounded-md bg-amber-500 text-white font-black text-[9px] sm:text-[10px] uppercase tracking-wider shadow">
                                                     Coming Soon
                                                 </span>
                                             )}
                                             {car.status === 'Sold' && (
-                                                <span className="px-3 py-1 rounded-md bg-red-600 text-white font-black text-xs uppercase tracking-wider shadow-lg">
+                                                <span className="px-2.5 py-0.5 rounded-md bg-red-600 text-white font-black text-xs uppercase tracking-wider shadow-lg">
                                                     SOLD OUT
                                                 </span>
                                             )}
@@ -614,7 +698,7 @@ export default function CarDetails() {
                                                 e.stopPropagation();
                                                 setIsLightboxOpen(true);
                                             }}
-                                            className="absolute bottom-3.5 right-3.5 z-20 w-10 h-10 rounded-full bg-slate-900/80 hover:bg-slate-900 text-white backdrop-blur-md border border-white/20 flex items-center justify-center shadow-lg transition-transform hover:scale-110 active:scale-95"
+                                            className="absolute bottom-3 right-3 z-20 w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-slate-900/80 hover:bg-slate-900 text-white backdrop-blur-md border border-white/20 flex items-center justify-center shadow-md transition-transform hover:scale-110 active:scale-95"
                                             title="મોટો ફોટો જુઓ · Open Fullscreen View"
                                         >
                                             <Maximize2 className="w-4 h-4" />
@@ -629,10 +713,10 @@ export default function CarDetails() {
                                                         e.stopPropagation();
                                                         setActiveImageIdx((prev) => (prev === 0 ? images.length - 1 : prev - 1));
                                                     }}
-                                                    className="absolute left-3 top-1/2 -translate-y-1/2 z-20 w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-slate-900/70 hover:bg-slate-900 text-white backdrop-blur-md border border-white/20 flex items-center justify-center shadow-lg opacity-90 sm:opacity-0 sm:group-hover:opacity-100 transition-all hover:scale-110 active:scale-95"
+                                                    className="absolute left-2.5 top-1/2 -translate-y-1/2 z-20 w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-slate-900/70 hover:bg-slate-900 text-white backdrop-blur-md border border-white/20 flex items-center justify-center shadow-lg opacity-90 sm:opacity-0 sm:group-hover:opacity-100 transition-all hover:scale-110 active:scale-95"
                                                     title="Previous Image"
                                                 >
-                                                    <ChevronLeft className="w-6 h-6" />
+                                                    <ChevronLeft className="w-5 h-5 sm:w-6 sm:h-6" />
                                                 </button>
                                                 <button
                                                     type="button"
@@ -640,10 +724,10 @@ export default function CarDetails() {
                                                         e.stopPropagation();
                                                         setActiveImageIdx((prev) => (prev === images.length - 1 ? 0 : prev + 1));
                                                     }}
-                                                    className="absolute right-3 top-1/2 -translate-y-1/2 z-20 w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-slate-900/70 hover:bg-slate-900 text-white backdrop-blur-md border border-white/20 flex items-center justify-center shadow-lg opacity-90 sm:opacity-0 sm:group-hover:opacity-100 transition-all hover:scale-110 active:scale-95"
+                                                    className="absolute right-2.5 top-1/2 -translate-y-1/2 z-20 w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-slate-900/70 hover:bg-slate-900 text-white backdrop-blur-md border border-white/20 flex items-center justify-center shadow-lg opacity-90 sm:opacity-0 sm:group-hover:opacity-100 transition-all hover:scale-110 active:scale-95"
                                                     title="Next Image"
                                                 >
-                                                    <ChevronRight className="w-6 h-6" />
+                                                    <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6" />
                                                 </button>
                                             </>
                                         )}
@@ -652,14 +736,14 @@ export default function CarDetails() {
                             </div>
 
                             {/* Thumbnail Strip */}
-                            <div className="flex items-center gap-2.5 overflow-x-auto pb-2 scrollbar-none snap-x">
+                            <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none snap-x">
                                 {(car.spinImages || []).length > 0 && (
                                     <button
                                         type="button"
                                         onClick={() => setViewMode('360')}
-                                        className={`relative shrink-0 w-24 sm:w-32 aspect-[16/10] bg-slate-950 rounded-xl overflow-hidden cursor-pointer transition-all duration-300 snap-start border-2 ${
+                                        className={`relative shrink-0 w-20 sm:w-28 aspect-[16/10] bg-slate-950 rounded-xl overflow-hidden cursor-pointer transition-all duration-200 snap-start border-2 ${
                                             viewMode === '360'
-                                                ? 'border-brand-orange ring-2 ring-brand-orange/40 scale-[0.98] shadow-md'
+                                                ? 'border-brand-orange ring-2 ring-brand-orange/40 scale-[0.98] shadow-xs'
                                                 : 'border-transparent opacity-75 hover:opacity-100'
                                         }`}
                                     >
@@ -670,8 +754,8 @@ export default function CarDetails() {
                                             loading="lazy"
                                         />
                                         <div className="absolute inset-0 flex flex-col items-center justify-center text-white">
-                                            <RotateCw className="w-5 h-5 mb-1 text-brand-orange" />
-                                            <span className="font-heading font-black text-[9px] tracking-wider uppercase text-amber-300">
+                                            <RotateCw className="w-4 h-4 mb-0.5 text-brand-orange" />
+                                            <span className="font-heading font-black text-[8px] tracking-wider uppercase text-amber-300">
                                                 360° Spin
                                             </span>
                                         </div>
@@ -689,12 +773,12 @@ export default function CarDetails() {
                                                 setActiveImageIdx(i);
                                                 setViewMode('standard');
                                             }}
-                                            className={`relative shrink-0 w-20 sm:w-28 aspect-[16/10] rounded-xl overflow-hidden cursor-pointer transition-all duration-300 snap-start bg-gray-50 border-2 ${
+                                            className={`relative shrink-0 w-18 sm:w-24 aspect-[16/10] rounded-xl overflow-hidden cursor-pointer transition-all duration-200 snap-start bg-gray-50 border-2 ${
                                                 isActive
-                                                    ? 'border-primary ring-2 ring-primary/30 scale-[0.98] shadow-md'
+                                                    ? 'border-primary ring-2 ring-primary/30 scale-[0.98] shadow-xs'
                                                     : isDetailCard
                                                         ? 'border-amber-400 ring-1 ring-amber-300 opacity-90 hover:opacity-100'
-                                                        : 'border-transparent opacity-75 hover:opacity-100'
+                                                        : 'border-transparent opacity-70 hover:opacity-100'
                                             }`}
                                         >
                                             <img
@@ -704,7 +788,7 @@ export default function CarDetails() {
                                                 loading="lazy"
                                             />
                                             {isDetailCard && (
-                                                <div className="absolute bottom-0 inset-x-0 bg-amber-500/90 text-white text-[8px] font-black uppercase text-center py-0.5 tracking-wider">
+                                                <div className="absolute bottom-0 inset-x-0 bg-amber-500/90 text-white text-[7px] font-black uppercase text-center py-0.5 tracking-wider">
                                                     SPEC CARD
                                                 </div>
                                             )}
@@ -716,170 +800,192 @@ export default function CarDetails() {
                         </div>
                     </div>
 
-                    {/* 2. Pricing & Core Overview Card — Right Column on Desktop, Sticky */}
+                    {/* ── 2. Pricing & Core Overview Card (Right Column on Desktop, Sticky) ── */}
                     <div className="order-2">
-                        <div className="sticky top-24 flex flex-col gap-4">
+                        <div className="sticky top-20 flex flex-col gap-3.5">
 
-                            {/* Pricing Card */}
-                            <div className="bg-surface rounded-2xl shadow-sm border border-gray-100 p-5 sm:p-6">
-                                <div className="flex justify-between items-start mb-3">
-                                    <span className="font-heading font-bold text-[11px] text-text-muted tracking-widest uppercase">{car.registration || 'UNREGISTERED'}</span>
-                                    {(car.badges || []).map((b) => (
-                                        <span key={b} className="bg-[#10b981]/10 text-[#10b981] px-2.5 py-1 rounded text-[10px] font-heading font-bold uppercase tracking-widest flex items-center gap-1">
-                                            {typeof b === 'string' ? b.toUpperCase() : b}
-                                        </span>
-                                    ))}
+                            {/* Main Pricing HUD Card */}
+                            <div className="bg-surface rounded-2xl shadow-sm border border-slate-200/80 p-4 sm:p-5">
+                                <div className="flex justify-between items-start mb-2.5">
+                                    <span className="font-heading font-bold text-[10px] sm:text-[11px] text-slate-400 tracking-widest uppercase">{car.registration || 'UNREGISTERED'}</span>
+                                    <div className="flex items-center gap-1">
+                                        {(car.badges || ['CERTIFIED']).map((b) => (
+                                            <span key={b} className="bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-0.5 rounded text-[9px] font-heading font-bold uppercase tracking-wider flex items-center gap-0.5">
+                                                <CheckCircle2 className="w-2.5 h-2.5 text-emerald-600" />
+                                                {typeof b === 'string' ? b.toUpperCase() : b}
+                                            </span>
+                                        ))}
+                                    </div>
                                 </div>
 
-                                <h2 className="font-heading font-bold text-[34px] sm:text-[36px] text-accent mb-1 leading-none">
-                                    {typeof car.price === 'number' ? `₹${car.price.toLocaleString('en-IN')}` : (car.price ? `₹${car.price}` : 'કિંમત માટે સંપર્ક કરો')}
-                                </h2>
-                                <p className="font-body text-xs text-text-muted mb-3">Last updated: {car.updatedAt && !isNaN(new Date(car.updatedAt).getTime()) ? new Date(car.updatedAt).toLocaleDateString() : new Date().toLocaleDateString()}</p>
+                                <div className="mb-2">
+                                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Special Offer Price</span>
+                                    <h2 className="font-heading font-black text-3xl sm:text-4xl text-brand-orange leading-none tracking-tight">
+                                        {typeof car.price === 'number' ? `₹${car.price.toLocaleString('en-IN')}` : (car.price ? `₹${car.price}` : 'કિંમત માટે સંપર્ક કરો')}
+                                    </h2>
+                                </div>
+
+                                <p className="font-body text-[11px] text-slate-400 mb-3">
+                                    Last verified: {car.updatedAt && !isNaN(new Date(car.updatedAt).getTime()) ? new Date(car.updatedAt).toLocaleDateString() : new Date().toLocaleDateString()} · Surat Dealership
+                                </p>
 
                                 {car.loanAvailable && (
-                                    <div className="flex items-center gap-2 mb-4 px-3 py-2.5 bg-blue-50/50 border border-blue-100 rounded-xl text-blue-700">
-                                        <ShieldCheck className="w-4 h-4 shrink-0" />
-                                        <div className="flex flex-col">
-                                            <span className="font-heading text-[9px] font-bold uppercase tracking-widest text-/70 mb-0.5">Financing Support</span>
-                                            <span className="font-body text-xs sm:text-sm font-bold leading-none">Car Loan / EMI Available</span>
+                                    <div className="flex items-center gap-2 mb-3.5 px-3 py-2 bg-blue-50/70 border border-blue-100 rounded-xl text-blue-700">
+                                        <ShieldCheck className="w-4 h-4 text-blue-600 shrink-0" />
+                                        <div className="flex flex-col min-w-0">
+                                            <span className="font-heading text-[9px] font-bold uppercase tracking-widest text-blue-500 leading-tight">Financing Support</span>
+                                            <span className="font-body text-xs font-bold leading-tight truncate">Car Loan / Easy EMI Available</span>
                                         </div>
                                     </div>
                                 )}
 
-                                <div className="grid grid-cols-2 gap-3 mb-5">
-                                    <div className="flex items-center gap-3">
-                                        <div className="w-10 h-10 shrink-0 rounded-lg bg-[#f1f5f9] flex items-center justify-center">
-                                            <Fuel className="w-5 h-5 text-primary stroke-[2]" />
-                                        </div>
-                                        <div className="flex flex-col">
-                                            <span className="font-heading text-[10px] uppercase tracking-widest text-text-muted">Fuel</span>
-                                            <span className="font-body font-bold text-[13px] text-text">{car.fuelType || 'N/A'}</span>
-                                        </div>
-                                    </div>
-                                    <div className="flex items-center gap-3">
-                                        <div className="w-10 h-10 shrink-0 rounded-lg bg-[#f1f5f9] flex items-center justify-center">
-                                            <Settings2 className="w-5 h-5 text-primary stroke-[2]" />
-                                        </div>
-                                        <div className="flex flex-col">
-                                            <span className="font-heading text-[10px] uppercase tracking-widest text-text-muted">Transmission</span>
-                                            <span className="font-body font-bold text-[13px] text-text">{car.transmission || 'N/A'}</span>
-                                        </div>
-                                    </div>
-                                    <div className="flex items-center gap-3">
-                                        <div className="w-10 h-10 shrink-0 rounded-lg bg-[#f1f5f9] flex items-center justify-center">
-                                            <User className="w-5 h-5 text-primary stroke-[2]" />
-                                        </div>
-                                        <div className="flex flex-col">
-                                            <span className="font-heading text-[10px] uppercase tracking-widest text-text-muted">Owner</span>
-                                            <span className="font-body font-bold text-[13px] text-text">{car.owner || '1st Owner'}</span>
-                                        </div>
-                                    </div>
-                                    <div className="flex items-center gap-3">
-                                        <div className="w-10 h-10 shrink-0 rounded-lg bg-[#f1f5f9] flex items-center justify-center">
-                                            <Gauge className="w-5 h-5 text-primary stroke-[2]" />
+                                {/* Core 6 Specs Grid */}
+                                <div className="grid grid-cols-2 gap-2.5 mb-4">
+                                    <div className="flex items-center gap-2.5 p-2 bg-slate-50/80 rounded-xl border border-slate-100">
+                                        <div className="w-8 h-8 shrink-0 rounded-lg bg-white shadow-2xs flex items-center justify-center text-primary">
+                                            <Fuel className="w-4 h-4 stroke-[2]" />
                                         </div>
                                         <div className="flex flex-col min-w-0">
-                                            <div className="flex flex-wrap items-center gap-1 sm:gap-1.5 mb-0.5">
-                                                <span className="font-heading text-[10px] uppercase tracking-widest text-text-muted">Mileage</span>
+                                            <span className="font-heading text-[9px] uppercase tracking-wider text-slate-400">Fuel</span>
+                                            <span className="font-body font-bold text-xs text-slate-800 truncate">{car.fuelType || 'N/A'}</span>
+                                        </div>
+                                    </div>
+
+                                    <div className="flex items-center gap-2.5 p-2 bg-slate-50/80 rounded-xl border border-slate-100">
+                                        <div className="w-8 h-8 shrink-0 rounded-lg bg-white shadow-2xs flex items-center justify-center text-primary">
+                                            <Settings2 className="w-4 h-4 stroke-[2]" />
+                                        </div>
+                                        <div className="flex flex-col min-w-0">
+                                            <span className="font-heading text-[9px] uppercase tracking-wider text-slate-400">Transmission</span>
+                                            <span className="font-body font-bold text-xs text-slate-800 truncate">{car.transmission || 'N/A'}</span>
+                                        </div>
+                                    </div>
+
+                                    <div className="flex items-center gap-2.5 p-2 bg-slate-50/80 rounded-xl border border-slate-100">
+                                        <div className="w-8 h-8 shrink-0 rounded-lg bg-white shadow-2xs flex items-center justify-center text-primary">
+                                            <User className="w-4 h-4 stroke-[2]" />
+                                        </div>
+                                        <div className="flex flex-col min-w-0">
+                                            <span className="font-heading text-[9px] uppercase tracking-wider text-slate-400">Owner</span>
+                                            <span className="font-body font-bold text-xs text-slate-800 truncate">{car.owner || '1st Owner'}</span>
+                                        </div>
+                                    </div>
+
+                                    <div className="flex items-center gap-2.5 p-2 bg-slate-50/80 rounded-xl border border-slate-100">
+                                        <div className="w-8 h-8 shrink-0 rounded-lg bg-white shadow-2xs flex items-center justify-center text-primary">
+                                            <Gauge className="w-4 h-4 stroke-[2]" />
+                                        </div>
+                                        <div className="flex flex-col min-w-0">
+                                            <div className="flex items-center gap-1">
+                                                <span className="font-heading text-[9px] uppercase tracking-wider text-slate-400">KMs</span>
                                                 {car.isKmGenuine && (
-                                                    <span className="text-[#10b981] flex items-center bg-[#10b981]/10 px-1 sm:px-1.5 py-0.5 rounded text-[7px] sm:text-[8px] font-bold uppercase tracking-wider leading-none shrink-0 whitespace-nowrap">
-                                                        <CheckCircle2 className="w-2 h-2 sm:w-2.5 sm:h-2.5 mr-0.5" /> Genuine
+                                                    <span className="text-emerald-700 bg-emerald-100 px-1 py-0.2 rounded text-[7px] font-bold uppercase leading-none">
+                                                        Genuine
                                                     </span>
                                                 )}
                                             </div>
-                                            <span className="font-body font-bold text-[12px] sm:text-[13px] text-text truncate">
+                                            <span className="font-body font-bold text-xs text-slate-800 truncate">
                                                 {typeof car.kms === 'number' ? `${car.kms.toLocaleString('en-IN')} KM` : (car.kms ? `${car.kms} KM` : 'N/A')}
                                             </span>
                                         </div>
                                     </div>
-                                    <div className="flex items-center gap-3">
-                                        <div className="w-10 h-10 shrink-0 rounded-lg bg-[#f1f5f9] flex items-center justify-center">
-                                            <Tag className="w-5 h-5 text-primary stroke-[2]" />
+
+                                    <div className="flex items-center gap-2.5 p-2 bg-slate-50/80 rounded-xl border border-slate-100">
+                                        <div className="w-8 h-8 shrink-0 rounded-lg bg-white shadow-2xs flex items-center justify-center text-primary">
+                                            <Tag className="w-4 h-4 stroke-[2]" />
                                         </div>
-                                        <div className="flex flex-col">
-                                            <span className="font-heading text-[10px] uppercase tracking-widest text-text-muted">Body</span>
-                                            <span className="font-body font-bold text-[13px] text-text">{car.bodyType || 'N/A'}</span>
+                                        <div className="flex flex-col min-w-0">
+                                            <span className="font-heading text-[9px] uppercase tracking-wider text-slate-400">Body</span>
+                                            <span className="font-body font-bold text-xs text-slate-800 truncate">{car.bodyType || 'N/A'}</span>
                                         </div>
                                     </div>
-                                    <div className="flex items-center gap-3">
-                                        <div className="w-10 h-10 shrink-0 rounded-lg bg-[#f1f5f9] flex items-center justify-center">
-                                            <Palette className="w-5 h-5 text-primary stroke-[2]" />
+
+                                    <div className="flex items-center gap-2.5 p-2 bg-slate-50/80 rounded-xl border border-slate-100">
+                                        <div className="w-8 h-8 shrink-0 rounded-lg bg-white shadow-2xs flex items-center justify-center text-primary">
+                                            <Palette className="w-4 h-4 stroke-[2]" />
                                         </div>
-                                        <div className="flex flex-col">
-                                            <span className="font-heading text-[10px] uppercase tracking-widest text-text-muted">Color</span>
-                                            <span className="font-body font-bold text-[13px] text-text">{car.color || 'N/A'}</span>
+                                        <div className="flex flex-col min-w-0">
+                                            <span className="font-heading text-[9px] uppercase tracking-wider text-slate-400">Color</span>
+                                            <span className="font-body font-bold text-xs text-slate-800 truncate">{car.color || 'N/A'}</span>
                                         </div>
                                     </div>
                                 </div>
 
-                                <div className="flex flex-col gap-3">
+                                {/* Primary CTAs */}
+                                <div className="flex flex-col gap-2.5">
                                     <a
                                         href={whatsappUrl}
                                         target="_blank"
                                         rel="noopener noreferrer"
-                                        className="w-full flex items-center justify-center gap-2 bg-[#25D366] hover:bg-[#20bd5a] text-white py-3.5 px-6 rounded-xl font-body font-bold text-sm shadow-lg shadow-green-500/20 active:scale-98 transition-all"
+                                        className="w-full flex items-center justify-center gap-2 bg-[#25D366] hover:bg-[#20bd5a] text-white py-3 px-5 rounded-xl font-body font-bold text-sm shadow-md shadow-green-500/20 active:scale-98 transition-all"
                                     >
-                                        <WhatsAppIcon className="w-5 h-5" /> WhatsApp પર વાત કરો · Chat
+                                        <WhatsAppIcon className="w-4 h-4" />
+                                        <span>WhatsApp પર વાત કરો · Chat</span>
                                     </a>
 
                                     <button
                                         type="button"
                                         id="btn-car-detail-add-compare"
                                         onClick={() => toggleCompare(car)}
-                                        className={`w-full flex items-center justify-center gap-2 py-3 px-6 rounded-xl font-body font-bold text-xs border transition-all active:scale-98 ${
+                                        className={`w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl font-body font-bold text-xs border transition-all active:scale-98 ${
                                             isInCompare(car._id || car.id)
-                                                ? 'bg-brand-orange text-white border-brand-orange shadow-md'
+                                                ? 'bg-brand-orange text-white border-brand-orange shadow-xs'
                                                 : 'bg-white hover:bg-slate-50 text-slate-800 border-slate-200 shadow-2xs'
                                         }`}
                                     >
-                                        <ArrowLeftRight className="w-4 h-4" />
-                                        {isInCompare(car._id || car.id)
-                                            ? `✓ સરખામણીમાં ઉમેરેલ છે · In Compare (Click to Remove)`
-                                            : `બીજી કાર સાથે સરખાવો · Add to Compare (${compareCount}/3)`}
+                                        <ArrowLeftRight className="w-3.5 h-3.5" />
+                                        <span>
+                                            {isInCompare(car._id || car.id)
+                                                ? `✓ સરખામણીમાં ઉમેરેલ છે · In Compare`
+                                                : `બીજી કાર સાથે સરખાવો · Add to Compare (${compareCount}/3)`}
+                                        </span>
                                     </button>
 
                                     {isInCompare(car._id || car.id) && (
                                         <Link
                                             to="/compare"
                                             id="link-car-detail-view-compare"
-                                            className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl font-body font-bold text-xs bg-slate-900 text-white hover:bg-slate-800 transition-all shadow-sm"
+                                            className="w-full flex items-center justify-center gap-2 py-2 rounded-xl font-body font-bold text-xs bg-slate-900 text-white hover:bg-slate-800 transition-all shadow-xs"
                                         >
                                             <ArrowLeftRight className="w-3.5 h-3.5 text-amber-400" />
-                                            <span>સરખામણી જુઓ · View Comparison ({compareCount} cars) →</span>
+                                            <span>સરખામણી જુઓ · View Compare ({compareCount} cars) →</span>
                                         </Link>
                                     )}
 
                                     <button
                                         type="button"
                                         onClick={handleDownloadAllImages}
-                                        className="w-full flex items-center justify-center gap-2 py-3 rounded-xl font-body font-bold text-xs bg-slate-900 hover:bg-slate-800 text-white shadow-md active:scale-98 transition-all"
+                                        className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl font-body font-bold text-xs bg-slate-900 hover:bg-slate-800 text-white shadow-xs active:scale-98 transition-all"
                                     >
-                                        <Download className="w-4 h-4 text-amber-400" />
-                                        <span>બધા ફોટા ડાઉનલોડ કરો · Download All Photos ({rawImages.length > 0 ? rawImages.length : 1})</span>
+                                        <Download className="w-3.5 h-3.5 text-amber-400" />
+                                        <span>બધા ફોટા ડાઉનલોડ કરો · Save All Photos ({rawImages.length > 0 ? rawImages.length : 1})</span>
                                     </button>
                                 </div>
                             </div>
 
-                            {/* Dealer Info Box (Desktop Only) */}
-                            <div className="hidden lg:flex bg-gray-50 rounded-2xl p-6 border border-gray-100 items-start gap-4">
-                                <div className="w-12 h-12 bg-white rounded-xl shadow-sm border border-gray-100 flex items-center justify-center font-heading font-black text-xl text-primary shrink-0">
+                            {/* Dealership Trust & Rating Box (Desktop Only) */}
+                            <div className="hidden lg:flex bg-slate-50/90 rounded-2xl p-4 border border-slate-200/80 items-start gap-3 shadow-2xs">
+                                <div className="w-10 h-10 bg-white rounded-xl shadow-xs border border-slate-200 flex items-center justify-center font-heading font-black text-lg text-primary shrink-0">
                                     S
                                 </div>
-                                <div className="flex flex-col">
-                                    <h4 className="font-heading font-bold text-text text-sm mb-1">Sadguru Car Surat</h4>
-                                    <p className="font-body text-xs text-text-muted mb-2">Trimruti Compound, Opp. Yoginagar BRTS, Varachha Road, Surat</p>
-                                    <div className="flex items-center gap-1 mb-3">
-                                        <span className="font-heading font-bold text-xs text-text">4.9</span>
+                                <div className="flex flex-col min-w-0">
+                                    <h4 className="font-heading font-bold text-slate-900 text-xs mb-0.5">Sadguru Car Surat</h4>
+                                    <p className="font-body text-[11px] text-slate-500 mb-1.5 leading-tight">Trimruti Compound, Opp. Yoginagar BRTS, Varachha Road, Surat</p>
+                                    <div className="flex items-center gap-1.5 mb-2">
+                                        <span className="font-heading font-bold text-xs text-slate-900">4.9</span>
                                         <div className="flex">
-                                            <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
-                                            <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
-                                            <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
-                                            <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
-                                            <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
+                                            {[...Array(5)].map((_, idx) => (
+                                                <Star key={idx} className="w-3 h-3 fill-amber-400 text-amber-400" />
+                                            ))}
                                         </div>
-                                        <span className="font-body text-[10px] text-text-muted ml-1">Google Reviews</span>
+                                        <span className="font-body text-[10px] text-slate-400">Google Reviews</span>
                                     </div>
-                                    <a href="https://www.google.com/maps/place/Sadguru+Car+Melo/" target="_blank" rel="noopener noreferrer" className="font-body text-[11px] font-bold text-primary flex items-center gap-1 hover:underline tracking-wide uppercase">
+                                    <a
+                                        href="https://www.google.com/maps/place/Sadguru+Car+Melo/"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="font-body text-[10px] font-bold text-brand-orange flex items-center gap-1 hover:underline tracking-wide uppercase"
+                                    >
                                         <MapPin className="w-3 h-3" /> Get Directions
                                     </a>
                                 </div>
@@ -888,36 +994,38 @@ export default function CarDetails() {
                         </div>
                     </div>
 
-                    {/* 3. Detailed Specs — Below gallery on desktop, 3rd on mobile */}
+                    {/* ── 3. Detailed Specifications (Below Gallery on Desktop, Order 3) ── */}
                     <div className="lg:col-span-2 order-3">
-                        <div className="flex flex-col gap-5 sm:gap-6 bg-surface p-5 sm:p-6 rounded-2xl shadow-sm border border-gray-100">
+                        <div className="flex flex-col gap-4 sm:gap-5 bg-surface p-4 sm:p-5 rounded-2xl shadow-sm border border-slate-200/80">
                             {/* Comfort Features */}
                             {(car.airConditioner || car.powerWindows || car.sunroof || car.parkingSensors) && (
                                 <div>
-                                    <h3 className="font-heading font-bold text-lg sm:text-xl text-text mb-3.5 border-l-4 border-primary pl-3">Comfort Features</h3>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-3 font-body text-sm">
+                                    <h3 className="font-heading font-bold text-base sm:text-lg text-slate-900 mb-2.5 border-l-3 border-primary pl-2.5">
+                                        Comfort & Convenience Features
+                                    </h3>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-2 font-body text-xs sm:text-sm">
                                         {car.airConditioner && (
-                                            <div className="flex justify-between items-center border-b border-gray-100 pb-2">
-                                                <span className="text-text-muted">Air Conditioner</span>
-                                                <span className="font-semibold text-text">{car.airConditioner}</span>
+                                            <div className="flex justify-between items-center border-b border-slate-100 pb-1.5">
+                                                <span className="text-slate-500">Air Conditioner</span>
+                                                <span className="font-semibold text-slate-900">{car.airConditioner}</span>
                                             </div>
                                         )}
                                         {car.powerWindows && (
-                                            <div className="flex justify-between items-center border-b border-gray-100 pb-3">
-                                                <span className="text-text-muted">Power Windows</span>
-                                                <span className="font-semibold text-text">{car.powerWindows}</span>
+                                            <div className="flex justify-between items-center border-b border-slate-100 pb-1.5">
+                                                <span className="text-slate-500">Power Windows</span>
+                                                <span className="font-semibold text-slate-900">{car.powerWindows}</span>
                                             </div>
                                         )}
                                         {car.sunroof && (
-                                            <div className="flex justify-between items-center border-b border-gray-100 pb-3">
-                                                <span className="text-text-muted">Sunroof</span>
-                                                <span className="font-semibold text-text">{car.sunroof}</span>
+                                            <div className="flex justify-between items-center border-b border-slate-100 pb-1.5">
+                                                <span className="text-slate-500">Sunroof</span>
+                                                <span className="font-semibold text-slate-900">{car.sunroof}</span>
                                             </div>
                                         )}
                                         {car.parkingSensors && (
-                                            <div className="flex justify-between items-center border-b border-gray-100 pb-3">
-                                                <span className="text-text-muted">Parking Sensors</span>
-                                                <span className="font-semibold text-text">{car.parkingSensors}</span>
+                                            <div className="flex justify-between items-center border-b border-slate-100 pb-1.5">
+                                                <span className="text-slate-500">Parking Sensors</span>
+                                                <span className="font-semibold text-slate-900">{car.parkingSensors}</span>
                                             </div>
                                         )}
                                     </div>
@@ -927,30 +1035,32 @@ export default function CarDetails() {
                             {/* Engine & Performance */}
                             {(car.displacement || car.maxPower || car.driveType || car.cylinders) && (
                                 <div>
-                                    <h3 className="font-heading font-bold text-xl text-text mb-6 border-l-4 border-primary pl-3">Engine & Performance</h3>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-4 font-body text-sm">
+                                    <h3 className="font-heading font-bold text-base sm:text-lg text-slate-900 mb-2.5 border-l-3 border-primary pl-2.5">
+                                        Engine & Performance Specs
+                                    </h3>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-2 font-body text-xs sm:text-sm">
                                         {car.displacement && (
-                                            <div className="flex justify-between items-center border-b border-gray-100 pb-3">
-                                                <span className="text-text-muted">Displacement</span>
-                                                <span className="font-semibold text-text">{car.displacement}</span>
+                                            <div className="flex justify-between items-center border-b border-slate-100 pb-1.5">
+                                                <span className="text-slate-500">Displacement</span>
+                                                <span className="font-semibold text-slate-900">{car.displacement}</span>
                                             </div>
                                         )}
                                         {car.maxPower && (
-                                            <div className="flex justify-between items-center border-b border-gray-100 pb-3">
-                                                <span className="text-text-muted">Max Power</span>
-                                                <span className="font-semibold text-text">{car.maxPower}</span>
+                                            <div className="flex justify-between items-center border-b border-slate-100 pb-1.5">
+                                                <span className="text-slate-500">Max Power</span>
+                                                <span className="font-semibold text-slate-900">{car.maxPower}</span>
                                             </div>
                                         )}
                                         {car.driveType && (
-                                            <div className="flex justify-between items-center border-b border-gray-100 pb-3">
-                                                <span className="text-text-muted">Drive Type</span>
-                                                <span className="font-semibold text-text">{car.driveType}</span>
+                                            <div className="flex justify-between items-center border-b border-slate-100 pb-1.5">
+                                                <span className="text-slate-500">Drive Type</span>
+                                                <span className="font-semibold text-slate-900">{car.driveType}</span>
                                             </div>
                                         )}
                                         {car.cylinders && (
-                                            <div className="flex justify-between items-center border-b border-gray-100 pb-3">
-                                                <span className="text-text-muted">Cylinders</span>
-                                                <span className="font-semibold text-text">{car.cylinders}</span>
+                                            <div className="flex justify-between items-center border-b border-slate-100 pb-1.5">
+                                                <span className="text-slate-500">Cylinders</span>
+                                                <span className="font-semibold text-slate-900">{car.cylinders}</span>
                                             </div>
                                         )}
                                     </div>
@@ -960,24 +1070,30 @@ export default function CarDetails() {
                             {/* Description */}
                             {car.description && (
                                 <div>
-                                    <h3 className="font-heading font-bold text-xl text-text mb-4 border-l-4 border-primary pl-3">About this Vehicle</h3>
-                                    <p className="font-body text-sm text-text whitespace-pre-line leading-relaxed">{car.description}</p>
+                                    <h3 className="font-heading font-bold text-base sm:text-lg text-slate-900 mb-2 border-l-3 border-primary pl-2.5">
+                                        About this Vehicle
+                                    </h3>
+                                    <p className="font-body text-xs sm:text-sm text-slate-700 whitespace-pre-line leading-relaxed">
+                                        {car.description}
+                                    </p>
                                 </div>
                             )}
 
                             {/* Key Features */}
                             {(car.features || []).length > 0 && (
-                                <div className={car.description ? 'mt-8' : ''}>
-                                    <h3 className="font-heading font-bold text-xl text-text mb-6 border-l-4 border-primary pl-3">Key Features</h3>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-4 font-body text-sm">
+                                <div>
+                                    <h3 className="font-heading font-bold text-base sm:text-lg text-slate-900 mb-2.5 border-l-3 border-primary pl-2.5">
+                                        Key Highlights & Features
+                                    </h3>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-2 font-body text-xs sm:text-sm">
                                         {(car.features || []).map((f, i) => {
                                             const featureStr = String(f || '');
                                             const hasColon = featureStr.includes(':');
 
                                             let key = featureStr.trim();
                                             let value = (
-                                                <span className="inline-flex items-center gap-1 text-[#10b981]">
-                                                    <Check className="w-4 h-4 stroke-[3]" /> Yes
+                                                <span className="inline-flex items-center gap-1 text-emerald-600 font-bold">
+                                                    <Check className="w-3.5 h-3.5 stroke-[3]" /> Yes
                                                 </span>
                                             );
 
@@ -991,9 +1107,9 @@ export default function CarDetails() {
                                             }
 
                                             return (
-                                                <div key={i} className="flex justify-between items-center border-b border-gray-100 pb-3">
-                                                    <span className="text-text-muted capitalize">{key}</span>
-                                                    <span className="font-semibold text-text text-right">{value}</span>
+                                                <div key={i} className="flex justify-between items-center border-b border-slate-100 pb-1.5">
+                                                    <span className="text-slate-500 capitalize">{key}</span>
+                                                    <span className="font-semibold text-slate-900 text-right">{value}</span>
                                                 </div>
                                             );
                                         })}
@@ -1002,35 +1118,41 @@ export default function CarDetails() {
                             )}
 
                             {(!car.description && (car.features || []).length === 0 && !car.airConditioner && !car.powerWindows && !car.sunroof && !car.parkingSensors && !car.displacement && !car.maxPower && !car.driveType && !car.cylinders) && (
-                                <div className="py-6 text-center text-text-muted font-body text-sm">
-                                    No description or features provided for this vehicle.
+                                <div className="py-4 text-center text-slate-400 font-body text-xs">
+                                    No additional features listed for this vehicle.
                                 </div>
                             )}
                         </div>
 
-                        {/* Interactive EMI Loan Calculator */}
-                        <EmiCalculator carPrice={typeof car.price === 'number' ? car.price : (Number(car.price) || 500000)} carTitle={`${car.make || ''} ${car.model || 'Car'} (${car.year || ''})`} />
+                        {/* Interactive Compact EMI Loan Calculator */}
+                        <EmiCalculator
+                            carPrice={typeof car.price === 'number' ? car.price : (Number(car.price) || 500000)}
+                            carTitle={`${car.make || ''} ${car.model || 'Car'} (${car.year || ''})`}
+                        />
 
                         {/* Dealer Info Box (Mobile Only) */}
-                        <div className="flex lg:hidden bg-gray-50 rounded-2xl p-6 border border-gray-100 items-start gap-4 mt-6">
-                            <div className="w-12 h-12 bg-white rounded-xl shadow-sm border border-gray-100 flex items-center justify-center font-heading font-black text-xl text-primary shrink-0">
+                        <div className="flex lg:hidden bg-slate-50 rounded-2xl p-4 border border-slate-200/80 items-start gap-3 mt-3.5 shadow-2xs">
+                            <div className="w-10 h-10 bg-white rounded-xl shadow-xs border border-slate-200 flex items-center justify-center font-heading font-black text-lg text-primary shrink-0">
                                 S
                             </div>
-                            <div className="flex flex-col">
-                                <h4 className="font-heading font-bold text-text text-sm mb-1">Sadguru Car Surat</h4>
-                                <p className="font-body text-xs text-text-muted mb-2">Trimruti Compound, Opp. Yoginagar BRTS, Varachha Road, Surat</p>
-                                <div className="flex items-center gap-1 mb-3">
-                                    <span className="font-heading font-bold text-xs text-text">4.9</span>
+                            <div className="flex flex-col min-w-0">
+                                <h4 className="font-heading font-bold text-slate-900 text-xs mb-0.5">Sadguru Car Surat</h4>
+                                <p className="font-body text-[11px] text-slate-500 mb-1.5">Trimruti Compound, Opp. Yoginagar BRTS, Varachha Road, Surat</p>
+                                <div className="flex items-center gap-1.5 mb-2">
+                                    <span className="font-heading font-bold text-xs text-slate-900">4.9</span>
                                     <div className="flex">
-                                        <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
-                                        <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
-                                        <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
-                                        <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
-                                        <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
+                                        {[...Array(5)].map((_, idx) => (
+                                            <Star key={idx} className="w-3 h-3 fill-amber-400 text-amber-400" />
+                                        ))}
                                     </div>
-                                    <span className="font-body text-[10px] text-text-muted ml-1">Google Reviews</span>
+                                    <span className="font-body text-[10px] text-slate-400">Google Reviews</span>
                                 </div>
-                                <a href="https://www.google.com/maps/place/Sadguru+Car+Melo/" target="_blank" rel="noopener noreferrer" className="font-body text-[11px] font-bold text-primary flex items-center gap-1 hover:underline tracking-wide uppercase">
+                                <a
+                                    href="https://www.google.com/maps/place/Sadguru+Car+Melo/"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="font-body text-[10px] font-bold text-brand-orange flex items-center gap-1 hover:underline tracking-wide uppercase"
+                                >
                                     <MapPin className="w-3 h-3" /> Get Directions
                                 </a>
                             </div>
@@ -1039,28 +1161,53 @@ export default function CarDetails() {
 
                 </div>
 
-                {/* ════ Similar Cars Section ════ */}
-                {relatedCars.length > 0 && (
-                    <div className="mt-20 md:mt-28 pt-12 border-t border-gray-100 pb-8">
-                        <div className="flex items-center justify-between mb-8">
-                            <h2 className="font-heading font-bold text-2xl text-slate-900 tracking-tight">Similar Cars You Might Like</h2>
-                            <Link to={`/inventory?make=${encodeURIComponent(car.make || '')}`} className="font-body text-sm font-bold text-primary hover:text-primary-hover transition-colors hidden sm:block">View all {car.make} models →</Link>
+                {/* ════ SUGGESTED RELATED CARS SECTION (Guaranteed & Multi-Factor Ranked) ════ */}
+                {suggestedCars.length > 0 && (
+                    <div className="mt-12 sm:mt-16 pt-8 sm:pt-10 border-t border-slate-200/80">
+                        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-2.5 mb-5 sm:mb-6">
+                            <div>
+                                <span className="inline-flex items-center gap-1.5 text-xs font-heading font-bold uppercase tracking-wider text-brand-orange mb-1">
+                                    <Sparkles className="w-3.5 h-3.5" />
+                                    તમારા માટે ભલામણ કરેલ કાર્સ · Recommended Similar Cars
+                                </span>
+                                <h2 className="font-heading font-black text-xl sm:text-2xl text-slate-900 tracking-tight">
+                                    આ કાર જેવી અન્ય ઉત્તમ કાર્સ
+                                </h2>
+                                <p className="font-body text-xs text-slate-500 mt-0.5">
+                                    તમારી પસંદગી અને બજેટને અનુરૂપ સર્ટિફાઈડ પ્રી-ઓન્ડ કાર્સ
+                                </p>
+                            </div>
+
+                            <Link
+                                to={`/inventory?make=${encodeURIComponent(car.make || '')}`}
+                                className="font-body text-xs sm:text-sm font-bold text-brand-orange hover:text-orange-600 transition-colors inline-flex items-center gap-1 self-start sm:self-auto group"
+                            >
+                                <span>બધી {car.make} કાર જુઓ · View All</span>
+                                <ArrowRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-1" />
+                            </Link>
                         </div>
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                            {relatedCars.map((relatedCar) => (
-                                <CarCard
+
+                        {/* Mobile Swipeable Snap Carousel + Desktop 4-Col Grid */}
+                        <div className="flex sm:grid sm:grid-cols-2 lg:grid-cols-4 gap-4 overflow-x-auto pb-3 sm:pb-0 snap-x scrollbar-none sm:overflow-visible">
+                            {suggestedCars.map((relatedCar) => (
+                                <div
                                     key={relatedCar._id || relatedCar.id}
-                                    id={relatedCar._id || relatedCar.id}
-                                    image={getSafeImageUrl(relatedCar.image) || (Array.isArray(relatedCar.images) && getSafeImageUrl(relatedCar.images[0]))}
-                                    title={`${relatedCar.make || ''} ${relatedCar.model || 'Car'} ${relatedCar.year ? `(${relatedCar.year})` : ''}`}
-                                    price={typeof relatedCar.price === 'number' ? `₹${relatedCar.price.toLocaleString('en-IN')}` : (relatedCar.price ? `₹${relatedCar.price}` : 'Call for Price')}
-                                    fuel={relatedCar.fuelType || relatedCar.fuel || 'N/A'}
-                                    transmission={relatedCar.transmission || 'N/A'}
-                                    owner={relatedCar.owner || '1st Owner'}
-                                    kms={typeof relatedCar.kms === 'number' ? `${relatedCar.kms.toLocaleString('en-IN')} KM` : (relatedCar.kms ? `${relatedCar.kms} KM` : 'N/A')}
-                                    isKmGenuine={relatedCar.isKmGenuine}
-                                    badges={relatedCar.badges || []}
-                                />
+                                    className="w-[78vw] max-w-[280px] sm:w-auto sm:max-w-none shrink-0 snap-start flex flex-col"
+                                >
+                                    <CarCard
+                                        id={relatedCar._id || relatedCar.id}
+                                        image={getSafeImageUrl(relatedCar.image) || (Array.isArray(relatedCar.images) && getSafeImageUrl(relatedCar.images[0]))}
+                                        title={`${relatedCar.make || ''} ${relatedCar.model || 'Car'} ${relatedCar.year ? `(${relatedCar.year})` : ''}`}
+                                        price={typeof relatedCar.price === 'number' ? (relatedCar.price >= 100000 ? `₹${(relatedCar.price / 100000).toFixed(2)} Lakhs` : `₹${relatedCar.price.toLocaleString('en-IN')}`) : (relatedCar.price || 'Call for Price')}
+                                        fuel={relatedCar.fuelType || relatedCar.fuel || 'N/A'}
+                                        transmission={relatedCar.transmission || 'N/A'}
+                                        owner={relatedCar.owner || '1st Owner'}
+                                        kms={typeof relatedCar.kms === 'number' ? `${relatedCar.kms.toLocaleString('en-IN')} KM` : (relatedCar.kms ? `${relatedCar.kms} KM` : 'N/A')}
+                                        isKmGenuine={relatedCar.isKmGenuine}
+                                        badges={relatedCar.badges || ['CERTIFIED']}
+                                        status={relatedCar.status || 'Available'}
+                                    />
+                                </div>
                             ))}
                         </div>
                     </div>
