@@ -7,8 +7,10 @@ const router = express.Router();
 
 // ── Helper: Generate JWT ──
 const generateToken = (userId, role) => {
-  return jwt.sign({ id: userId, role }, process.env.JWT_SECRET, {
-    expiresIn: process.env.JWT_EXPIRE || '7d',
+  const secret = (process.env.JWT_SECRET || 'sadguru_super_secret_key_change_in_production').trim();
+  const expire = (process.env.JWT_EXPIRE || '7d').trim();
+  return jwt.sign({ id: userId, role }, secret, {
+    expiresIn: expire,
   });
 };
 
@@ -54,20 +56,25 @@ router.post('/login', async (req, res) => {
     const token = generateToken(user._id, user.role);
 
     // Set cookie
-    res.cookie('token', token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict', // Cross-site required if API and Frontend domain differ in Vercel
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-    });
+    try {
+      res.cookie('token', token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        path: '/',
+        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      });
+    } catch {}
 
     res.json({
       success: true,
+      token, // Dual authentication: token returned in JSON body for Authorization header
       data: {
         _id: user._id,
         name: user.name,
         email: user.email,
         role: user.role,
+        token,
       },
     });
   } catch (error) {

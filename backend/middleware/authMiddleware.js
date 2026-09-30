@@ -3,30 +3,28 @@ import jwt from 'jsonwebtoken';
 export const protect = async (req, res, next) => {
   let token;
 
-  // First try to read token from cookies (Primary method for web clients)
-  if (req.cookies && req.cookies.token) {
-    token = req.cookies.token;
-  } 
-  // Fallback support if API is ever accessed by mobile apps via headers
-  else if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
+  // 1. Check Authorization header first (Bearer token — primary for SPAs & mobile)
+  if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
     token = req.headers.authorization.split(' ')[1];
+  } 
+  // 2. Fallback to cookies
+  else if (req.cookies && req.cookies.token) {
+    token = req.cookies.token;
   }
 
   if (token) {
     try {
-      // Verify token
-      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      const secret = (process.env.JWT_SECRET || 'sadguru_super_secret_key_change_in_production').trim();
+      const decoded = jwt.verify(token, secret);
       req.user = decoded;
       return next();
     } catch (error) {
-      console.error('Not authorized, token failed:', error);
-      return res.status(401).json({ message: 'Not Authorized, token failed' });
+      console.error('Not authorized, token failed:', error.message);
+      return res.status(401).json({ success: false, message: 'Not Authorized, token expired or invalid' });
     }
   }
 
-  if (!token) {
-    return res.status(401).json({ message: 'Not Authorized, no token' });
-  }
+  return res.status(401).json({ success: false, message: 'Not Authorized, no token' });
 };
 
 export const admin = (req, res, next) => {

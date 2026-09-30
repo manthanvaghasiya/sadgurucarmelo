@@ -14,9 +14,9 @@ let cachedImageKitUsage = null;
 let lastImageKitFetch = 0;
 
 async function getImageKitUsage(totalImages = 0, forceRefresh = false) {
-  const privateKey = process.env.IMAGEKIT_PRIVATE_KEY;
-  const publicKey = process.env.IMAGEKIT_PUBLIC_KEY;
-  const urlEndpoint = process.env.IMAGEKIT_URL_ENDPOINT;
+  const privateKey = process.env.IMAGEKIT_PRIVATE_KEY?.trim();
+  const publicKey = process.env.IMAGEKIT_PUBLIC_KEY?.trim();
+  const urlEndpoint = process.env.IMAGEKIT_URL_ENDPOINT?.trim();
   const isConfigured = Boolean(publicKey && privateKey && urlEndpoint);
 
   const defaultQuotaBytes = 20 * 1024 * 1024 * 1024; // 20 GB free tier

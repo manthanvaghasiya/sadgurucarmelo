@@ -19,6 +19,13 @@ axiosInstance.interceptors.request.use(
     if (config.url && config.url.startsWith('/')) {
       config.url = config.url.substring(1);
     }
+    // Automatically attach Bearer token from localStorage (resilient against browser cookie blocking)
+    try {
+      const token = localStorage.getItem('token');
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
+    } catch {}
     return config;
   },
   (error) => {
@@ -32,7 +39,8 @@ axiosInstance.interceptors.response.use(
   (error) => {
     if (error.response && error.response.status === 401) {
       const isLoginRequest = error.config?.url?.includes('auth/login');
-      if (!isLoginRequest) {
+      const isMeRequest = error.config?.url?.includes('auth/me');
+      if (!isLoginRequest && !isMeRequest) {
         localStorage.removeItem('token');
         localStorage.removeItem('user');
         if (window.location.pathname.startsWith('/admin')) {

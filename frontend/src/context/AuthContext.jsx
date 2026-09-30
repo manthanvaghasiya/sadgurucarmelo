@@ -24,12 +24,18 @@ export const AuthProvider = ({ children }) => {
 
   const login = (userData) => {
     setUser(userData);
+    if (userData?.token) {
+      localStorage.setItem('token', userData.token);
+    }
     localStorage.setItem('user', JSON.stringify(userData));
   };
 
   const updateUser = (userData) => {
     setUser((prev) => {
       const updated = { ...prev, ...userData };
+      if (updated.token) {
+        localStorage.setItem('token', updated.token);
+      }
       localStorage.setItem('user', JSON.stringify(updated));
       return updated;
     });

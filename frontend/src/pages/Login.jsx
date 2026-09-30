@@ -20,8 +20,11 @@ export default function Login() {
         password: data.password
       });
 
-      const userData = response.data.data;
-      // Properly hydrate the Context API (token is now automated securely via HttpOnly cookies)
+      const token = response.data.token || response.data.data?.token;
+      if (token) {
+        localStorage.setItem('token', token);
+      }
+      const userData = { ...(response.data.data || {}), token };
       login(userData);
       toast.success('Welcome to the Dashboard!');
       navigate('/admin');
