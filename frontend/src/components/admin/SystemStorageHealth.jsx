@@ -13,7 +13,6 @@ import {
   ArrowRight,
   X,
   Info,
-  Beaker,
 } from 'lucide-react';
 import axiosInstance from '../../api/axiosConfig';
 
@@ -22,7 +21,6 @@ export default function SystemStorageHealth() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [showDetails, setShowDetails] = useState(false);
-  const [simulateWarning, setSimulateWarning] = useState(false);
   const [modalDismissed, setModalDismissed] = useState(() => {
     try {
       return sessionStorage.getItem('imagekit_alert_dismissed') === 'true';
@@ -61,40 +59,33 @@ export default function SystemStorageHealth() {
   const imagekit = health?.imagekit || health?.media;
   const services = health?.services;
 
-  // Real or simulated metrics
-  const isLiveWarning80 = Boolean(imagekit?.isWarning80);
-  const isWarningActive = isLiveWarning80 || simulateWarning;
+  // 80% quota warning state (live from ImageKit API)
+  const isWarningActive = Boolean(imagekit?.isWarning80);
 
-  // Storage metrics
+  // Storage metrics (live from ImageKit API)
   const storageQuotaGB = imagekit?.storage?.quotaGB || 20;
-  const storageUsedGB = simulateWarning ? 16.4 : (imagekit?.storage?.usedGB ?? 0.03);
-  const storagePercent = simulateWarning
-    ? 82.0
-    : Number(imagekit?.storage?.percentUsed ?? 0.2);
+  const storageUsedGB = imagekit?.storage?.usedGB ?? 0;
+  const storagePercent = Number(imagekit?.storage?.percentUsed ?? 0);
   const storageUsedFormatted =
     storageUsedGB >= 1
       ? `${storageUsedGB.toFixed(2)} GB`
       : `${(storageUsedGB * 1024).toFixed(1)} MB`;
 
-  // Bandwidth metrics
+  // Bandwidth metrics (live from ImageKit API)
   const bandwidthQuotaGB = imagekit?.bandwidth?.quotaGB || 20;
-  const bandwidthUsedGB = simulateWarning ? 17.2 : (imagekit?.bandwidth?.usedGB ?? 0.09);
-  const bandwidthPercent = simulateWarning
-    ? 86.0
-    : Number(imagekit?.bandwidth?.percentUsed ?? 0.4);
+  const bandwidthUsedGB = imagekit?.bandwidth?.usedGB ?? 0;
+  const bandwidthPercent = Number(imagekit?.bandwidth?.percentUsed ?? 0);
   const bandwidthUsedFormatted =
     bandwidthUsedGB >= 1
       ? `${bandwidthUsedGB.toFixed(2)} GB`
       : `${(bandwidthUsedGB * 1024).toFixed(1)} MB`;
 
-  // Big modal open condition
-  const isModalOpen =
-    (isLiveWarning80 && !modalDismissed) || simulateWarning || showModalManual;
+  // Big modal open condition (automatic when live 80% is hit and not dismissed, or manual click)
+  const isModalOpen = (isWarningActive && !modalDismissed) || showModalManual;
 
   const handleDismissModal = () => {
     setModalDismissed(true);
     setShowModalManual(false);
-    setSimulateWarning(false);
     try {
       sessionStorage.setItem('imagekit_alert_dismissed', 'true');
     } catch { }
@@ -126,11 +117,6 @@ export default function SystemStorageHealth() {
                 <p className="font-heading font-bold text-sm text-red-700">
                   ImageKit 80%+ Quota Threshold Triggered
                 </p>
-                {simulateWarning && (
-                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-purple-100 text-purple-700 ring-1 ring-purple-300">
-                    Simulation Mode Active
-                  </span>
-                )}
               </div>
               <p className="font-body text-xs text-red-600/90 mt-0.5">
                 Storage ({storagePercent}%) or Bandwidth ({bandwidthPercent}%) has reached the critical 80% mark. Review developer action options to avoid image interruption.
@@ -172,26 +158,6 @@ export default function SystemStorageHealth() {
 
         {/* Action Buttons */}
         <div className="flex items-center gap-2 w-full sm:w-auto flex-wrap">
-          {/* Developer 80% Alert Modal Simulator Button */}
-          <button
-            onClick={() => {
-              if (simulateWarning) {
-                setSimulateWarning(false);
-                setShowModalManual(false);
-              } else {
-                setSimulateWarning(true);
-                setShowModalManual(true);
-              }
-            }}
-            className={`flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 px-3 py-2 min-h-[38px] rounded-xl font-body text-xs font-semibold border transition-all active:scale-95 ${simulateWarning
-                ? 'bg-red-50 text-red-700 border-red-200 ring-2 ring-red-400/30'
-                : 'bg-background hover:bg-gray-50 text-text-muted hover:text-text border-gray-200'
-              }`}
-            title="Toggle 80% Warning Modal to inspect developer client preview"
-          >
-            <Beaker className={`w-3.5 h-3.5 ${simulateWarning ? 'text-red-500' : 'text-primary'}`} />
-            <span>{simulateWarning ? 'Stop 80% Test' : 'Test 80% Alert Modal'}</span>
-          </button>
 
           <button
             onClick={() => setShowDetails((v) => !v)}
@@ -469,11 +435,6 @@ export default function SystemStorageHealth() {
                   <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-red-500/10 text-red-600 ring-1 ring-red-500/20 uppercase tracking-wider">
                     High Capacity Warning (80%+)
                   </span>
-                  {simulateWarning && (
-                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-purple-100 text-purple-700 ring-1 ring-purple-300">
-                      Developer Test Preview
-                    </span>
-                  )}
                 </div>
                 <h3 className="font-heading font-black text-xl sm:text-2xl text-text mt-1.5 leading-tight">
                   ImageKit Storage or Bandwidth Near Capacity
@@ -601,17 +562,6 @@ export default function SystemStorageHealth() {
                 <span>Alert triggers automatically on any session crossing 80% quota.</span>
               </div>
               <div className="flex items-center gap-2 w-full sm:w-auto">
-                {simulateWarning && (
-                  <button
-                    onClick={() => {
-                      setSimulateWarning(false);
-                      setShowModalManual(false);
-                    }}
-                    className="flex-1 sm:flex-initial px-4 py-2 rounded-xl bg-gray-100 hover:bg-gray-200 text-text font-body text-xs font-semibold transition-colors"
-                  >
-                    Close Test
-                  </button>
-                )}
                 <button
                   onClick={handleDismissModal}
                   className="flex-1 sm:flex-initial px-5 py-2.5 rounded-xl bg-accent hover:bg-accent-hover text-white font-body text-xs font-bold transition-all active:scale-95 shadow-md shadow-accent/20"
