@@ -1036,6 +1036,15 @@ export default function CarDetails() {
                                 </div>
                             </div>
 
+                            {/* ── Laptop / Desktop View: Easy Car Finance EMI Loan Calculator (Placed below Dealership Box) ── */}
+                            <div className="hidden lg:block">
+                                <EmiCalculator
+                                    carPrice={typeof car.price === 'number' ? car.price : (Number(car.price) || 500000)}
+                                    carTitle={`${car.make || ''} ${car.model || 'Car'} (${car.year || ''})`}
+                                    isSidebar={true}
+                                />
+                            </div>
+
                         </div>
                     </div>
 
@@ -1169,11 +1178,14 @@ export default function CarDetails() {
                             )}
                         </div>
 
-                        {/* Interactive Compact EMI Loan Calculator */}
-                        <EmiCalculator
-                            carPrice={typeof car.price === 'number' ? car.price : (Number(car.price) || 500000)}
-                            carTitle={`${car.make || ''} ${car.model || 'Car'} (${car.year || ''})`}
-                        />
+                        {/* ── Mobile View Only: Easy Car Finance EMI Loan Calculator (Maintained in mobile flow below specifications) ── */}
+                        <div className="block lg:hidden">
+                            <EmiCalculator
+                                carPrice={typeof car.price === 'number' ? car.price : (Number(car.price) || 500000)}
+                                carTitle={`${car.make || ''} ${car.model || 'Car'} (${car.year || ''})`}
+                                isSidebar={false}
+                            />
+                        </div>
 
                         {/* Dealer Info Box (Mobile Only) */}
                         <div className="flex lg:hidden bg-slate-50 rounded-2xl p-4 border border-slate-200/80 items-start gap-3 mt-3.5 shadow-2xs">

@@ -3,7 +3,7 @@ import { Calculator, ShieldCheck } from 'lucide-react';
 import WhatsAppIcon from './WhatsAppIcon';
 import { buildWhatsAppUrl } from '../utils/whatsapp';
 
-export default function EmiCalculator({ carPrice = 500000, carTitle = 'this vehicle' }) {
+export default function EmiCalculator({ carPrice = 500000, carTitle = 'this vehicle', isSidebar = false }) {
   const [downPaymentPercent, setDownPaymentPercent] = useState(20);
   const [interestRate, setInterestRate] = useState(10.5);
   const [tenureYears, setTenureYears] = useState(5);
@@ -67,35 +67,56 @@ Please guide me with the loan approval process.`
   );
 
   return (
-    <div className="bg-surface rounded-2xl p-4 sm:p-5 shadow-sm border border-slate-200/80 mt-3 sm:mt-4">
-      {/* ── Header Row (Compact & Clean) ── */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 mb-3 pb-2.5 border-b border-slate-100">
-        <div className="flex items-center gap-2 flex-wrap">
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-brand-orange/10 text-brand-orange text-[10px] font-bold uppercase tracking-wider">
-            <Calculator className="w-3 h-3" />
-            સરળ કાર ફાઇનાન્સ · Easy Car Finance
-          </span>
-          <h3 className="text-sm sm:text-base font-bold text-slate-900 font-heading">
-            EMI લોન કેલ્ક્યુલેટર
+    <div className={`bg-surface rounded-2xl p-4 sm:p-5 shadow-sm border border-slate-200/80 ${isSidebar ? 'mt-0' : 'mt-3 sm:mt-4'}`}>
+      {/* ── Header Row ── */}
+      {isSidebar ? (
+        <div className="flex flex-col gap-2 mb-3 pb-2.5 border-b border-slate-100">
+          <div className="flex items-center justify-between gap-2">
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-brand-orange/10 text-brand-orange text-[10px] font-bold uppercase tracking-wider">
+              <Calculator className="w-3 h-3" />
+              સરળ કાર ફાઇનાન્સ
+            </span>
+            <div className="inline-flex items-center gap-1 bg-gradient-to-r from-amber-500/10 via-orange-500/10 to-amber-500/5 border border-amber-500/25 px-2.5 py-1 rounded-xl shadow-2xs">
+              <span className="text-[10px] font-bold text-brand-orange">EMI:</span>
+              <span className="text-base sm:text-lg font-black text-slate-900 font-heading leading-none">
+                {formatRupee(emi)}
+              </span>
+              <span className="text-[9px] font-bold text-slate-500">/mo*</span>
+            </div>
+          </div>
+          <h3 className="text-xs sm:text-sm font-bold text-slate-900 font-heading">
+            EMI લોન કેલ્ક્યુલેટર · Loan Calculator
           </h3>
         </div>
-
-        {/* Compact EMI Highlight Pill */}
-        <div className="inline-flex items-center gap-2 bg-gradient-to-r from-amber-500/10 via-orange-500/10 to-amber-500/5 border border-amber-500/25 px-3 py-1.5 rounded-xl shrink-0 self-start sm:self-auto shadow-2xs">
-          <span className="text-[10px] font-bold text-brand-orange uppercase tracking-wider">
-            અંદાજિત EMI:
-          </span>
-          <div className="flex items-baseline gap-0.5">
-            <span className="text-xl sm:text-2xl font-black text-slate-900 font-heading leading-none">
-              {formatRupee(emi)}
+      ) : (
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 mb-3 pb-2.5 border-b border-slate-100">
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-brand-orange/10 text-brand-orange text-[10px] font-bold uppercase tracking-wider">
+              <Calculator className="w-3 h-3" />
+              સરળ કાર ફાઇનાન્સ · Easy Car Finance
             </span>
-            <span className="text-[10px] font-bold text-slate-500">/mo*</span>
+            <h3 className="text-sm sm:text-base font-bold text-slate-900 font-heading">
+              EMI લોન કેલ્ક્યુલેટર
+            </h3>
+          </div>
+
+          {/* Compact EMI Highlight Pill */}
+          <div className="inline-flex items-center gap-2 bg-gradient-to-r from-amber-500/10 via-orange-500/10 to-amber-500/5 border border-amber-500/25 px-3 py-1.5 rounded-xl shrink-0 self-start sm:self-auto shadow-2xs">
+            <span className="text-[10px] font-bold text-brand-orange uppercase tracking-wider">
+              અંદાજિત EMI:
+            </span>
+            <div className="flex items-baseline gap-0.5">
+              <span className="text-xl sm:text-2xl font-black text-slate-900 font-heading leading-none">
+                {formatRupee(emi)}
+              </span>
+              <span className="text-[10px] font-bold text-slate-500">/mo*</span>
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
-      {/* ── 3 Sliders in a Compact Single Row ── */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4">
+      {/* ── 3 Sliders (Stacked in Sidebar, 3-Col in Full Width) ── */}
+      <div className={`grid gap-3 ${isSidebar ? 'grid-cols-1' : 'grid-cols-1 md:grid-cols-3 sm:gap-4'}`}>
         {/* 1. Down Payment Slider */}
         <div className="p-2.5 bg-slate-50/70 rounded-xl border border-slate-100">
           <div className="flex justify-between items-center mb-1.5">
@@ -231,12 +252,12 @@ Please guide me with the loan approval process.`
         </div>
 
         {/* Bottom Compact Action: WhatsApp Loan Assistance */}
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-2.5 p-2.5 sm:px-3.5 bg-amber-500/10 border border-amber-500/20 rounded-xl">
+        <div className={`p-2.5 sm:px-3.5 bg-amber-500/10 border border-amber-500/20 rounded-xl flex ${isSidebar ? 'flex-col gap-2.5' : 'flex-col sm:flex-row items-center justify-between gap-2.5'}`}>
           <div className="flex items-center gap-2 min-w-0">
-            <div className="w-7 h-7 rounded-lg bg-amber-500 text-white flex items-center justify-center shrink-0">
-              <ShieldCheck className="w-4 h-4" />
+            <div className="w-6 h-6 rounded-lg bg-amber-500 text-white flex items-center justify-center shrink-0">
+              <ShieldCheck className="w-3.5 h-3.5" />
             </div>
-            <p className="font-bold text-slate-900 text-xs truncate">
+            <p className="font-bold text-slate-900 text-xs leading-snug">
               ઝડપી બેંક લોન સહાય (HDFC, ICICI, SBI, Axis, Kotak, IDFC)
             </p>
           </div>
@@ -245,7 +266,7 @@ Please guide me with the loan approval process.`
             href={buildWhatsAppUrl(whatsappMessage)}
             target="_blank"
             rel="noopener noreferrer"
-            className="w-full sm:w-auto px-3.5 py-1.5 rounded-lg bg-[#25D366] hover:bg-[#20bd5a] text-white font-bold text-xs flex items-center justify-center gap-1.5 transition-all shadow-xs shrink-0"
+            className={`px-3.5 py-2 rounded-lg bg-[#25D366] hover:bg-[#20bd5a] text-white font-bold text-xs flex items-center justify-center gap-1.5 transition-all shadow-xs shrink-0 ${isSidebar ? 'w-full' : 'w-full sm:w-auto'}`}
           >
             <WhatsAppIcon className="w-3.5 h-3.5" />
             <span>લોન માટે WhatsApp કરો</span>
