@@ -1,11 +1,8 @@
 import React, { useState } from 'react';
-import axios from 'axios';
+import axiosInstance from '../../api/axiosConfig';
 import { UploadCloud, CheckCircle, AlertCircle, Loader2, X } from 'lucide-react';
 import toast from 'react-hot-toast';
 import imageCompression from 'browser-image-compression';
-
-const CLOUDINARY_UPLOAD_PRESET = 'car_360_uploads';
-const CLOUDINARY_CLOUD_NAME = 'dijf9umhc';
 
 const VR360Uploader = ({ onUploadComplete, initialImages = [] }) => {
   const [selectedFiles, setSelectedFiles] = useState([]);
@@ -44,16 +41,14 @@ const VR360Uploader = ({ onUploadComplete, initialImages = [] }) => {
     const totalFiles = selectedFiles.length;
     let completedFiles = 0;
 
-    const cloudinaryUrl = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`;
-
     try {
       // Sequential upload with client-side compression to drastically reduce bandwidth & storage
       for (const file of selectedFiles) {
         let fileToUpload = file;
         try {
           fileToUpload = await imageCompression(file, {
-            maxSizeMB: 0.08,
-            maxWidthOrHeight: 800,
+            maxSizeMB: 0.15,
+            maxWidthOrHeight: 1280,
             useWebWorker: true,
           });
         } catch (compErr) {
@@ -61,20 +56,22 @@ const VR360Uploader = ({ onUploadComplete, initialImages = [] }) => {
         }
 
         const formData = new FormData();
-        formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
-        formData.append('file', fileToUpload);
+        formData.append('image', fileToUpload);
 
-        console.log(`Uploading ${file.name} (${Math.round(fileToUpload.size / 1024)} KB) to Cloudinary...`);
+        console.log(`Uploading ${file.name} (${Math.round(fileToUpload.size / 1024)} KB) to ImageKit CDN...`);
 
-        const response = await axios.post(cloudinaryUrl, formData, {
+        const response = await axiosInstance.post('/upload', formData, {
+          headers: { 'Content-Type': 'multipart/form-data' },
           onUploadProgress: (progressEvent) => {
-            const fileProgress = progressEvent.loaded / progressEvent.total;
+            const fileProgress = progressEvent.total ? progressEvent.loaded / progressEvent.total : 0.5;
             const totalProgress = Math.round(((completedFiles + fileProgress) / totalFiles) * 100);
             setOverallProgress(totalProgress);
           }
         });
 
-        currentUrls.push(response.data.secure_url);
+        if (response.data?.url) {
+          currentUrls.push(response.data.url);
+        }
         completedFiles++;
         setOverallProgress(Math.round((completedFiles / totalFiles) * 100));
       }
@@ -84,12 +81,12 @@ const VR360Uploader = ({ onUploadComplete, initialImages = [] }) => {
       onUploadComplete(currentUrls);
       setIsUploading(false);
       setSelectedFiles([]); // Clear queue after success
-      toast.success('360° Sequence Uploaded Successfully!');
+      toast.success('360° Sequence Uploaded to ImageKit Successfully!');
 
     } catch (err) {
-      console.error("Cloudinary Error Details:", err.response?.data);
-      const errorMessage = err.response?.data?.error?.message || 'Upload failed. Please check your internet connection.';
-      setError(`Cloudinary Error: ${errorMessage}`);
+      console.error("ImageKit Upload Error:", err.response?.data);
+      const errorMessage = err.response?.data?.message || err.message || 'Upload failed. Please check your connection.';
+      setError(`Upload Error: ${errorMessage}`);
       setIsUploading(false);
       toast.error(`Error: ${errorMessage}`);
     }

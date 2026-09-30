@@ -1,7 +1,5 @@
 import multer from 'multer';
 import crypto from 'crypto';
-import { v2 as cloudinary } from 'cloudinary';
-import { CloudinaryStorage } from 'multer-storage-cloudinary';
 
 // ── ImageKit Configuration Check ──
 export const isImageKitConfigured = Boolean(
@@ -329,41 +327,31 @@ export async function deleteMedia(urlOrKeyOrId) {
     return await deleteFromR2(urlOrKeyOrId);
   }
 
-  // 3. Cloudinary fallback
-  if (urlOrKeyOrId.includes('cloudinary.com')) {
+  // 3. Legacy Cloudinary deletion (Dynamic cleanup for existing cars)
+  if (urlOrKeyOrId.includes('cloudinary.com') && process.env.CLOUDINARY_API_KEY) {
     try {
+      const { v2: cloudinary } = await import('cloudinary');
+      cloudinary.config({
+        cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+        api_key: process.env.CLOUDINARY_API_KEY,
+        api_secret: process.env.CLOUDINARY_API_SECRET,
+      });
       const publicId = urlOrKeyOrId.split('/').slice(-1)[0].split('.')[0];
       await cloudinary.uploader.destroy(`sadguru_cars/${publicId}`);
-      console.log(`🗑️ Deleted Cloudinary object: ${publicId}`);
+      console.log(`🗑️ Deleted Legacy Cloudinary object: ${publicId}`);
     } catch (err) {
       console.warn(`⚠️ Cloudinary delete failed:`, err.message);
     }
     return;
   }
 
-  // If unknown, try ImageKit first, then R2
+  // If unknown, delete from ImageKit
   if (isImageKitConfigured) {
     await deleteFromImageKit(urlOrKeyOrId);
   } else if (isR2Configured) {
     await deleteFromR2(urlOrKeyOrId);
   }
 }
-
-// ── Cloudinary Fallback Storage ──
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
-});
-
-const cloudinaryStorage = new CloudinaryStorage({
-  cloudinary: cloudinary,
-  params: {
-    folder: 'sadguru_cars',
-    allowedFormats: ['jpeg', 'png', 'jpg', 'webp', 'avif'],
-    transformation: [{ quality: 'auto', fetch_format: 'auto' }],
-  },
-});
 
 const allowedMimes = [
   'image/jpeg', 'image/jpg', 'image/png',
@@ -390,23 +378,10 @@ const memoryMulter = multer({
   fileFilter,
 });
 
-const cloudinaryMulter = multer({
-  storage: cloudinaryStorage,
-  limits: {
-    fileSize: 25 * 1024 * 1024,
-    files: 25,
-  },
-  fileFilter,
-});
-
-const isManagedStorageActive = isImageKitConfigured || isR2Configured;
-
 /**
- * Sequential processor for memory files to protect RAM during large uploads.
+ * Sequential processor for memory files to compress and upload to ImageKit.
  */
 const processMemoryFiles = async (req, res, next) => {
-  if (!isManagedStorageActive) return next();
-
   try {
     // 1. Single file upload
     if (req.file && req.file.buffer) {
@@ -451,47 +426,37 @@ const processMemoryFiles = async (req, res, next) => {
 };
 
 /**
- * Unified Multer uploader that automatically routes to ImageKit / Cloudflare R2
- * with Sharp compression, or falls back gracefully to Cloudinary.
+ * Primary Multer uploader routing to ImageKit with Sharp compression (or R2 fallback)
  */
 export const upload = {
   single: (fieldName) => {
-    if (isManagedStorageActive) {
-      const memHandler = memoryMulter.single(fieldName);
-      return (req, res, next) => {
-        memHandler(req, res, (err) => {
-          if (err) return next(err);
-          processMemoryFiles(req, res, next);
-        });
-      };
-    }
-    return cloudinaryMulter.single(fieldName);
+    const memHandler = memoryMulter.single(fieldName);
+    return (req, res, next) => {
+      memHandler(req, res, (err) => {
+        if (err) return next(err);
+        processMemoryFiles(req, res, next);
+      });
+    };
   },
 
   array: (fieldName, maxCount = 25) => {
-    if (isManagedStorageActive) {
-      const memHandler = memoryMulter.array(fieldName, maxCount);
-      return (req, res, next) => {
-        memHandler(req, res, (err) => {
-          if (err) return next(err);
-          processMemoryFiles(req, res, next);
-        });
-      };
-    }
-    return cloudinaryMulter.array(fieldName, maxCount);
+    const memHandler = memoryMulter.array(fieldName, maxCount);
+    return (req, res, next) => {
+      memHandler(req, res, (err) => {
+        if (err) return next(err);
+        processMemoryFiles(req, res, next);
+      });
+    };
   },
 
   fields: (fieldsArray) => {
-    if (isManagedStorageActive) {
-      const memHandler = memoryMulter.fields(fieldsArray);
-      return (req, res, next) => {
-        memHandler(req, res, (err) => {
-          if (err) return next(err);
-          processMemoryFiles(req, res, next);
-        });
-      };
-    }
-    return cloudinaryMulter.fields(fieldsArray);
+    const memHandler = memoryMulter.fields(fieldsArray);
+    return (req, res, next) => {
+      memHandler(req, res, (err) => {
+        if (err) return next(err);
+        processMemoryFiles(req, res, next);
+      });
+    };
   },
 };
 

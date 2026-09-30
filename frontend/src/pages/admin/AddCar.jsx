@@ -1113,7 +1113,7 @@ export default function AddCar() {
                 
                 <div className="mt-4 p-4 bg-background/50 rounded-xl border border-[#10b981]/10">
                   <p className="font-body text-xs text-text-muted leading-relaxed">
-                    <span className="font-bold text-[#10b981]">Pro-Tip:</span> To ensure the best 360° spin experience, upload between 24 and 36 photos taken at equal intervals around the car. These images will be optimized automatically by Cloudinary.
+                    <span className="font-bold text-[#10b981]">Pro-Tip:</span> To ensure the best 360° spin experience, upload between 24 and 36 photos taken at equal intervals around the car. These images will be optimized automatically by ImageKit CDN.
                   </p>
                 </div>
               </div>

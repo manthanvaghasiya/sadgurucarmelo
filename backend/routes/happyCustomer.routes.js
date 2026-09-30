@@ -1,6 +1,6 @@
 import express from 'express';
 import HappyCustomer from '../models/HappyCustomer.js';
-import { upload } from '../config/cloudinary.js';
+import { upload, deleteMedia } from '../config/storage.js';
 import { protect, admin } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
@@ -49,6 +49,9 @@ router.delete('/admin/:id', protect, admin, async (req, res) => {
     const record = await HappyCustomer.findByIdAndDelete(req.params.id);
     if (!record) {
       return res.status(404).json({ success: false, message: 'Customer record not found' });
+    }
+    if (record.photo) {
+      await deleteMedia(record.photo).catch(() => {});
     }
     res.json({ success: true, message: 'Record successfully deleted.' });
   } catch (error) {

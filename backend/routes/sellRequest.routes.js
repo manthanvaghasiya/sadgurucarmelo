@@ -1,7 +1,6 @@
 import express from 'express';
 import SellRequest from '../models/SellRequest.js';
-import { upload } from '../config/cloudinary.js';
-import { v2 as cloudinary } from 'cloudinary';
+import { upload, deleteMedia } from '../config/storage.js';
 import { protect, admin } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
@@ -165,14 +164,15 @@ router.delete('/:id', protect, admin, async (req, res) => {
       });
     }
 
-    // Delete photos from Cloudinary
+    // Delete photos from cloud storage (ImageKit / R2 / Cloudinary)
     if (request.photos && request.photos.length > 0) {
       for (const photo of request.photos) {
-        if (photo.publicId) {
+        const target = photo.url || photo.publicId;
+        if (target) {
           try {
-            await cloudinary.uploader.destroy(photo.publicId);
+            await deleteMedia(target);
           } catch (delErr) {
-            console.warn('Failed to delete Cloudinary photo:', photo.publicId, delErr);
+            console.warn('Failed to delete sell request photo:', target, delErr.message);
           }
         }
       }

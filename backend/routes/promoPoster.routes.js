@@ -1,6 +1,6 @@
 import express from 'express';
 import PromoPoster from '../models/PromoPoster.js';
-import { upload } from '../config/cloudinary.js';
+import { upload, deleteMedia } from '../config/storage.js';
 import { protect, admin } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
@@ -104,6 +104,8 @@ router.delete('/admin/:id', protect, admin, async (req, res) => {
     if (!poster) {
       return res.status(404).json({ success: false, message: 'Banner not found' });
     }
+    if (poster.desktopImageUrl) await deleteMedia(poster.desktopImageUrl).catch(() => {});
+    if (poster.mobileImageUrl) await deleteMedia(poster.mobileImageUrl).catch(() => {});
     res.json({ success: true, message: 'Banner successfully deleted.' });
   } catch (error) {
     console.error('Delete poster error:', error);
