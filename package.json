@@ -1,5 +1,8 @@
 {
   "type": "module",
+  "scripts": {
+    "build": "npm --prefix frontend install && npm --prefix frontend run build"
+  },
   "dependencies": {
     "react-hook-form": "^7.72.0",
     "react-hot-toast": "^2.6.0",
