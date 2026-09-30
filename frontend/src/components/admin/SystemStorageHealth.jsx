@@ -45,7 +45,8 @@ export default function SystemStorageHealth() {
     else setLoading(true);
 
     try {
-      const res = await axiosInstance.get('/system/health');
+      const endpoint = isManual ? '/system/health?refresh=true' : '/system/health';
+      const res = await axiosInstance.get(endpoint);
       if (res.data?.success) {
         setHealth(res.data);
       }

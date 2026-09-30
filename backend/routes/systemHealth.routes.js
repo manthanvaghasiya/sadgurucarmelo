@@ -13,7 +13,7 @@ const router = express.Router();
 let cachedImageKitUsage = null;
 let lastImageKitFetch = 0;
 
-async function getImageKitUsage(totalImages = 0) {
+async function getImageKitUsage(totalImages = 0, forceRefresh = false) {
   const privateKey = process.env.IMAGEKIT_PRIVATE_KEY;
   const publicKey = process.env.IMAGEKIT_PUBLIC_KEY;
   const urlEndpoint = process.env.IMAGEKIT_URL_ENDPOINT;
@@ -22,7 +22,7 @@ async function getImageKitUsage(totalImages = 0) {
   const defaultQuotaBytes = 20 * 1024 * 1024 * 1024; // 20 GB free tier
 
   const now = Date.now();
-  if (cachedImageKitUsage && (now - lastImageKitFetch) < 10 * 60 * 1000) {
+  if (!forceRefresh && cachedImageKitUsage && cachedImageKitUsage.configured === isConfigured && (now - lastImageKitFetch) < 3 * 60 * 1000) {
     return { ...cachedImageKitUsage, totalImages };
   }
 
@@ -171,7 +171,8 @@ router.get('/health', async (req, res) => {
     totalImages += customersCount;
 
     // 4. Fetch live / estimated ImageKit storage & bandwidth metrics
-    const imagekit = await getImageKitUsage(totalImages);
+    const forceRefresh = req.query.refresh === 'true';
+    const imagekit = await getImageKitUsage(totalImages, forceRefresh);
 
     // DB Storage in MB (Atlas M0 limit: 512 MB)
     const dbDataSizeMB = Number(((dbStats.dataSize || 0) / (1024 * 1024)).toFixed(2));
