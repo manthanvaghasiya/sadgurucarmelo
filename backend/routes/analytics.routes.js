@@ -37,7 +37,7 @@ router.post('/app-install', async (req, res) => {
     await Analytics.findOneAndUpdate(
       { date: today },
       { $inc: { appInstalls: 1 } },
-      { upsert: true, new: true, setDefaultsOnInsert: true }
+      { upsert: true, returnDocument: 'after', setDefaultsOnInsert: true }
     );
     res.status(200).json({ success: true });
   } catch (err) {
@@ -61,7 +61,7 @@ router.post('/track', async (req, res) => {
     const doc = await Analytics.findOneAndUpdate(
       { date: today },
       { $inc: { pageViews: 1 } },
-      { upsert: true, new: true, setDefaultsOnInsert: true }
+      { upsert: true, returnDocument: 'after', setDefaultsOnInsert: true }
     );
 
     // Check if this visitor is unique for today

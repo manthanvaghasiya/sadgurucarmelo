@@ -493,7 +493,7 @@ router.put('/:id', protect, admin, handleUpload, async (req, res) => {
 
     const cleanUpdateData = normalizeCarPayload(updateData);
     const car = await Car.findByIdAndUpdate(req.params.id, cleanUpdateData, {
-      new: true,
+      returnDocument: 'after',
       runValidators: true,
     });
     

@@ -130,7 +130,7 @@ router.patch('/:id/status', protect, admin, async (req, res) => {
     const updated = await SellRequest.findByIdAndUpdate(
       req.params.id,
       { status },
-      { new: true }
+      { returnDocument: 'after' }
     );
 
     if (!updated) {

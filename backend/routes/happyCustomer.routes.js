@@ -75,7 +75,7 @@ router.put('/admin/:id', protect, admin, upload.single('photo'), async (req, res
     const updatedCustomer = await HappyCustomer.findByIdAndUpdate(
       req.params.id,
       updateData,
-      { new: true }
+      { returnDocument: 'after' }
     );
 
     if (!updatedCustomer) {
