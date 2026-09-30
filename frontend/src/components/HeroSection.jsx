@@ -218,7 +218,7 @@ export default function HeroSection() {
             className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-orange-50 border border-brand-orange/20 shadow-2xs mb-3"
           >
             <Sparkles className="w-3.5 h-3.5 text-brand-orange" />
-            <span className="text-[11px] font-black uppercase tracking-[0.14em] text-brand-orange">
+            <span className="text-[11px] font-bold uppercase tracking-[0.14em] text-brand-orange">
               સુરતનો #1 ભરોસાપાત્ર કાર મેળો · Trusted Car Partner
             </span>
           </motion.div>
@@ -228,11 +228,12 @@ export default function HeroSection() {
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.1 }}
-            className="text-2xl sm:text-4xl lg:text-[2.85rem] font-black text-slate-900 tracking-tight leading-[1.15]"
+            className="text-2xl sm:text-4xl lg:text-[2.85rem] font-bold text-slate-900 tracking-tight leading-[1.2]"
           >
-            સુરતનો સૌથી વિશ્વાસપાત્ર &amp; <br className="hidden sm:inline" />
-            <span className="text-slate-900">Certified Used Car </span>
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-orange via-amber-500 to-yellow-500">
+            <span className="font-semibold text-slate-800">સુરતનો સૌથી વિશ્વાસપાત્ર &amp;</span>{' '}
+            <br className="hidden sm:inline" />
+            <span className="text-slate-900 font-bold tracking-tight">Certified Used Car </span>
+            <span className="font-bold text-transparent bg-clip-text bg-gradient-to-r from-brand-orange to-amber-600">
               Showroom
             </span>
           </motion.h1>
