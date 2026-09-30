@@ -2,16 +2,9 @@ import { useState, useEffect } from 'react';
 import {
   Database,
   HardDrive,
-  Cpu,
-  ShieldCheck,
   RotateCw,
-  Server,
-  Cloud,
   Layers,
-  CheckCircle2,
   AlertTriangle,
-  AlertCircle,
-  Clock,
   Sparkles,
   ChevronDown,
   ChevronUp,
@@ -19,7 +12,6 @@ import {
   ExternalLink,
   ArrowRight,
   X,
-  Gauge,
   Info,
   Beaker,
 } from 'lucide-react';
@@ -67,7 +59,6 @@ export default function SystemStorageHealth() {
 
   const db = health?.database;
   const imagekit = health?.imagekit || health?.media;
-  const server = health?.server;
   const services = health?.services;
 
   // Real or simulated metrics
@@ -175,7 +166,7 @@ export default function SystemStorageHealth() {
             )}
           </div>
           <p className="font-body text-xs sm:text-sm text-text-muted mt-1">
-            Real-time MongoDB Atlas database, ImageKit.io CDN storage & bandwidth, and server telemetry.
+            Real-time MongoDB Atlas database storage and ImageKit.io media & bandwidth telemetry.
           </p>
         </div>
 
@@ -224,8 +215,8 @@ export default function SystemStorageHealth() {
         </div>
       </div>
 
-      {/* ── 4 Main Health Cards ── */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 my-4 sm:my-5">
+      {/* ── 3 Main Health Cards ── */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4 my-4 sm:my-5">
         {/* 1. Database Storage (MongoDB Atlas) */}
         <div className="bg-background/60 rounded-xl p-3.5 sm:p-4 border border-gray-100/80 flex flex-col justify-between">
           <div>
@@ -392,59 +383,6 @@ export default function SystemStorageHealth() {
             </div>
           </div>
         </div>
-
-        {/* 4. Engine & Cloudflare R2 Standby */}
-        <div className="bg-background/60 rounded-xl p-4 border border-gray-100/80 flex flex-col justify-between">
-          <div>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-lg bg-purple-500/10 text-purple-600 flex items-center justify-center">
-                  <Cloud className="w-4 h-4" />
-                </div>
-                <div>
-                  <h3 className="font-heading font-bold text-sm text-text">Backup & Engine</h3>
-                  <p className="font-body text-[11px] text-text-muted">Cloudflare R2 + Node.js</p>
-                </div>
-              </div>
-              <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-blue-50 text-blue-600 ring-1 ring-blue-500/20">
-                {services?.cloudflareR2 || 'Ready Standby'}
-              </span>
-            </div>
-
-            {/* Heap Memory Metric */}
-            <div className="mt-4">
-              <div className="flex items-baseline justify-between text-xs mb-1.5">
-                <span className="font-body text-text-muted">Heap Memory</span>
-                <span className="font-heading font-bold text-text">
-                  {loading ? '—' : `${server?.heapUsedMB || 0} MB / ${server?.heapTotalMB || 0} MB`}
-                </span>
-              </div>
-
-              {/* Progress Bar */}
-              <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
-                <div
-                  className="h-full bg-purple-500 rounded-full transition-all duration-500"
-                  style={{
-                    width: `${Math.max(
-                      5,
-                      Math.min(100, ((server?.heapUsedMB || 1) / (server?.heapTotalMB || 10)) * 100)
-                    )}%`,
-                  }}
-                />
-              </div>
-
-              <div className="flex items-center justify-between text-[11px] text-text-muted mt-1.5">
-                <span className="flex items-center gap-1">
-                  <Clock className="w-3 h-3 text-text-muted" />
-                  <span>{loading ? '—' : server?.uptimeFormatted || '0m'}</span>
-                </span>
-                <span className="text-purple-600 font-semibold font-mono">
-                  {server?.nodeVersion || 'v24'}
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
       </div>
 
       {/* ── Services Integration Matrix ── */}
@@ -457,11 +395,7 @@ export default function SystemStorageHealth() {
           </span>
           <span className="inline-flex items-center gap-1.5 text-text">
             <span className={`w-2 h-2 rounded-full ${imagekit?.configured ? 'bg-emerald-500' : 'bg-amber-500'}`} />
-            ImageKit.io CDN (Primary)
-          </span>
-          <span className="inline-flex items-center gap-1.5 text-text">
-            <span className="w-2 h-2 rounded-full bg-blue-500" />
-            Cloudflare R2 (Standby Backup)
+            ImageKit.io CDN
           </span>
           <span className="inline-flex items-center gap-1.5 text-text">
             <span className="w-2 h-2 rounded-full bg-emerald-500" />
@@ -643,32 +577,7 @@ export default function SystemStorageHealth() {
                 </a>
               </div>
 
-              {/* Option 2: Switch to Cloudflare R2 Standby */}
-              <div className="p-3.5 sm:p-4 rounded-2xl bg-surface border border-gray-100 hover:border-blue-300 transition-colors flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                <div className="flex items-start gap-3">
-                  <div className="w-8 h-8 rounded-xl bg-blue-500/10 text-blue-600 flex items-center justify-center shrink-0 mt-0.5">
-                    <Cloud className="w-4 h-4" />
-                  </div>
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <h4 className="font-heading font-bold text-sm text-text">
-                        Option 2: Activate Cloudflare R2 Standby (Zero Egress Cost)
-                      </h4>
-                      <span className="text-[10px] font-bold px-2 py-0.2 rounded-full bg-blue-50 text-blue-700 ring-1 ring-blue-300">
-                        Code Ready
-                      </span>
-                    </div>
-                    <p className="font-body text-xs text-text-muted mt-0.5">
-                      Cloudflare R2 provides 10 GB free and zero bandwidth fees. The backend storage driver is already integrated in <code className="bg-background px-1 py-0.5 rounded text-[11px]">storage.js</code>. Add R2 keys to your <code className="bg-background px-1 py-0.5 rounded text-[11px]">.env</code> to activate.
-                    </p>
-                  </div>
-                </div>
-                <span className="text-xs font-semibold text-blue-600 shrink-0 bg-blue-50 px-3 py-1.5 rounded-xl border border-blue-100">
-                  Standby Driver Ready
-                </span>
-              </div>
-
-              {/* Option 3: Clean Up Sold Vehicle Photos */}
+              {/* Option 2: Clean Up Sold Vehicle Photos */}
               <div className="p-3.5 sm:p-4 rounded-2xl bg-surface border border-gray-100 hover:border-amber-300 transition-colors flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div className="flex items-start gap-3">
                   <div className="w-8 h-8 rounded-xl bg-amber-500/10 text-amber-600 flex items-center justify-center shrink-0 mt-0.5">
@@ -676,7 +585,7 @@ export default function SystemStorageHealth() {
                   </div>
                   <div>
                     <h4 className="font-heading font-bold text-sm text-text">
-                      Option 3: Clean Up Sold Vehicle Photos
+                      Option 2: Clean Up Sold Vehicle Photos
                     </h4>
                     <p className="font-body text-xs text-text-muted mt-0.5">
                       Delete media for vehicles that are already marked as "Sold" to immediately free up space below 80%.

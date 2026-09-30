@@ -103,7 +103,6 @@ async function getImageKitUsage(totalImages = 0, forceRefresh = false) {
     },
     isWarning80,
     warningType,
-    r2Ready: Boolean(process.env.R2_ACCOUNT_ID && process.env.R2_BUCKET_NAME),
   };
 
   cachedImageKitUsage = result;
@@ -251,7 +250,6 @@ router.get('/health', async (req, res) => {
       services: {
         mongodb: mongoose.connection.readyState === 1 ? 'Operational' : 'Degraded',
         imagekit: imagekit.configured ? 'Operational' : 'Setup Required',
-        cloudflareR2: Boolean(process.env.R2_ACCOUNT_ID && process.env.R2_BUCKET_NAME) ? 'Operational' : 'Ready on Standby',
         geminiAI: hasAiKey ? 'Ready' : 'Heuristic Fallback Active',
         pwaCache: 'Operational',
       },
