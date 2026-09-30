@@ -8,7 +8,17 @@
 //
 // ═══════════════════════════════════════════════════════
 
-import 'dotenv/config';
+import dotenv from 'dotenv';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import fs from 'fs';
+
+dotenv.config();
+if (!process.env.MONGO_URI) {
+  const currentDir = path.dirname(fileURLToPath(import.meta.url));
+  dotenv.config({ path: path.join(currentDir, '.env') });
+}
+
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
@@ -16,8 +26,6 @@ import cookieParser from 'cookie-parser';
 import rateLimit from 'express-rate-limit';
 import compression from 'compression';
 import connectDB from './config/db.js';
-import fs from 'fs';
-import path from 'path';
 
 // ── Custom Mongo Sanitizer (Express 5 compatible) ──
 // express-mongo-sanitize v2 is incompatible with Express 5 (req.query is read-only).
@@ -60,14 +68,24 @@ import uploadRoutes from './routes/upload.routes.js';
 // (done automatically via 'dotenv/config' at top)
 
 // ── Connect to MongoDB ──
-connectDB();
+connectDB().catch((err) => console.error('Initial DB connection attempt:', err.message));
 
 // ── Initialize Express ──
 const app = express();
 
-// ── Render Reverse Proxy Configuration ──
+// ── Render / Vercel Reverse Proxy Configuration ──
 // REQUIRED for express-rate-limit to work securely on Render/Vercel
 app.set('trust proxy', 1);
+
+// ── Ensure DB Connection for Serverless Invocations ──
+app.use(async (_req, _res, next) => {
+  try {
+    await connectDB();
+  } catch (err) {
+    console.error('Database connection middleware error:', err.message);
+  }
+  next();
+});
 
 // ── Security Middleware ──
 app.use(helmet());
@@ -84,7 +102,7 @@ const apiLimiter = rateLimit({
 });
 const loginLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: process.env.NODE_ENV === 'production' ? 15 : 100,
+  max: process.env.NODE_ENV === 'production' ? 30 : 100,
   message: { success: false, message: 'Too many login attempts. Try again in 15 minutes.' },
   skip: () => process.env.NODE_ENV !== 'production',
 });
@@ -99,26 +117,31 @@ app.use(cors({
   origin: function (origin, callback) {
     if (!origin) return callback(null, true); // Allow non-browser requests
     
-    if (process.env.NODE_ENV !== 'production') {
-      return callback(null, true);
-    }
-
-    const allowedStr = process.env.FRONTEND_URL || 'https://sadgurucarsurat.com';
-    
-    // Clean target configurations
-    const allowedOrigins = allowedStr.split(',').map(s => {
-      let cleaned = s.trim().replace(/\/$/, '');
-      return cleaned.replace('https://www.', 'https://'); // Normalize inner string
-    });
-    
     // Clean incoming browser origin
     let cleanOrigin = origin.trim().replace(/\/$/, '');
     cleanOrigin = cleanOrigin.replace('https://www.', 'https://'); 
     
-    if (allowedOrigins.includes(cleanOrigin) || allowedOrigins.includes('*')) {
+    const allowed = [
+      'https://sadgurucarsurat.com',
+      'https://sadgurucarmelo.com',
+      'http://localhost:5173',
+      'http://localhost:5000',
+      'http://localhost:3000',
+      'http://127.0.0.1:5173',
+      'http://127.0.0.1:5000',
+    ];
+
+    if (process.env.FRONTEND_URL) {
+      process.env.FRONTEND_URL.split(',').forEach((s) => {
+        let c = s.trim().replace(/\/$/, '').replace('https://www.', 'https://');
+        if (c && !allowed.includes(c)) allowed.push(c);
+      });
+    }
+
+    if (allowed.includes(cleanOrigin) || allowed.includes('*') || cleanOrigin.endsWith('.vercel.app')) {
       callback(null, true);
     } else {
-      console.warn(`🚨 CORS Blocked: Incoming request from [${origin}] is NOT in FRONTEND_URL list: [${allowedStr}]`);
+      console.warn(`🚨 CORS Blocked: Incoming request from [${origin}] is not allowed.`);
       callback(null, false); // Return false instead of Error to prevent 500s on preflight
     }
   },

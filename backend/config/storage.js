@@ -1,11 +1,7 @@
 import multer from 'multer';
 import crypto from 'crypto';
-import sharp from 'sharp';
-import heicConvert from 'heic-convert';
-import ImageKit from 'imagekit';
 import { v2 as cloudinary } from 'cloudinary';
 import { CloudinaryStorage } from 'multer-storage-cloudinary';
-import { S3Client, PutObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3';
 
 // ── ImageKit Configuration Check ──
 export const isImageKitConfigured = Boolean(
@@ -14,14 +10,25 @@ export const isImageKitConfigured = Boolean(
   process.env.IMAGEKIT_URL_ENDPOINT
 );
 
-// ── Initialize ImageKit Client ──
-export const imagekitClient = isImageKitConfigured
-  ? new ImageKit({
+// ── Initialize ImageKit Client (Lazy) ──
+let _imagekitInstance = null;
+export async function getImageKitClient() {
+  if (!isImageKitConfigured) return null;
+  if (_imagekitInstance) return _imagekitInstance;
+  try {
+    const { default: ImageKit } = await import('imagekit');
+    _imagekitInstance = new ImageKit({
       publicKey: process.env.IMAGEKIT_PUBLIC_KEY,
       privateKey: process.env.IMAGEKIT_PRIVATE_KEY,
       urlEndpoint: process.env.IMAGEKIT_URL_ENDPOINT,
-    })
-  : null;
+    });
+    return _imagekitInstance;
+  } catch (err) {
+    console.warn('⚠️ ImageKit module load failed:', err.message);
+    return null;
+  }
+}
+export const imagekitClient = null; // Backwards-compatible export
 
 // ── Cloudflare R2 Configuration Check ──
 export const isR2Configured = Boolean(
@@ -31,17 +38,28 @@ export const isR2Configured = Boolean(
   process.env.R2_BUCKET_NAME
 );
 
-// ── Initialize R2 S3 Client ──
-export const r2Client = isR2Configured
-  ? new S3Client({
+// ── Initialize R2 S3 Client (Lazy) ──
+let _r2Instance = null;
+export async function getR2Client() {
+  if (!isR2Configured) return null;
+  if (_r2Instance) return _r2Instance;
+  try {
+    const { S3Client } = await import('@aws-sdk/client-s3');
+    _r2Instance = new S3Client({
       region: 'auto',
       endpoint: `https://${process.env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
       credentials: {
         accessKeyId: process.env.R2_ACCESS_KEY_ID,
         secretAccessKey: process.env.R2_SECRET_ACCESS_KEY,
       },
-    })
-  : null;
+    });
+    return _r2Instance;
+  } catch (err) {
+    console.warn('⚠️ R2 S3Client load failed:', err.message);
+    return null;
+  }
+}
+export const r2Client = null; // Backwards-compatible export
 
 /**
  * Compresses and standardizes an image buffer via Sharp:
@@ -64,6 +82,7 @@ export async function optimizeImageBuffer(buffer, originalName = '') {
 
     if (isHeic) {
       try {
+        const { default: heicConvert } = await import('heic-convert');
         workingBuffer = await heicConvert({
           buffer: workingBuffer,
           format: 'JPEG',
@@ -74,16 +93,22 @@ export async function optimizeImageBuffer(buffer, originalName = '') {
       }
     }
 
-    return await sharp(workingBuffer, { failOn: 'none' })
-      .rotate() // Auto-orient smartphone photos based on EXIF
-      .resize({
-        width: 1920,
-        height: 1920,
-        fit: 'inside',
-        withoutEnlargement: true,
-      })
-      .webp({ quality: 80 })
-      .toBuffer();
+    try {
+      const { default: sharp } = await import('sharp');
+      return await sharp(workingBuffer, { failOn: 'none' })
+        .rotate() // Auto-orient smartphone photos based on EXIF
+        .resize({
+          width: 1920,
+          height: 1920,
+          fit: 'inside',
+          withoutEnlargement: true,
+        })
+        .webp({ quality: 80 })
+        .toBuffer();
+    } catch (sharpErr) {
+      console.warn('⚠️ Sharp optimization unavailable, returning buffer:', sharpErr.message);
+      return workingBuffer;
+    }
   } catch (err) {
     console.warn('⚠️ Sharp optimization failed, falling back to raw buffer:', err.message);
     return buffer;
@@ -99,7 +124,8 @@ export async function optimizeImageBuffer(buffer, originalName = '') {
  * @returns {Promise<{url: string, key: string, path: string, filename: string, thumbnail_url: string}>}
  */
 export async function uploadToImageKit(buffer, originalName = 'photo.jpg', folder = '/inventory') {
-  if (!imagekitClient) {
+  const client = await getImageKitClient();
+  if (!client) {
     throw new Error('ImageKit is not configured. Missing ImageKit environment variables.');
   }
 
@@ -116,7 +142,7 @@ export async function uploadToImageKit(buffer, originalName = 'photo.jpg', folde
   const fileName = `car-${uniqueSuffix}-${baseName}.webp`;
 
   // 3. Upload via ImageKit SDK
-  const response = await imagekitClient.upload({
+  const response = await client.upload({
     file: compressedBuffer,
     fileName,
     folder: folder.startsWith('/') ? folder : `/${folder}`,
@@ -138,7 +164,8 @@ export async function uploadToImageKit(buffer, originalName = 'photo.jpg', folde
  * @param {string} fileIdOrUrl
  */
 export async function deleteFromImageKit(fileIdOrUrl) {
-  if (!imagekitClient || !fileIdOrUrl || typeof fileIdOrUrl !== 'string') return;
+  const client = await getImageKitClient();
+  if (!client || !fileIdOrUrl || typeof fileIdOrUrl !== 'string') return;
 
   try {
     let fileId = fileIdOrUrl;
@@ -149,7 +176,7 @@ export async function deleteFromImageKit(fileIdOrUrl) {
         const parsed = new URL(fileIdOrUrl);
         const fileName = parsed.pathname.split('/').pop();
         if (fileName) {
-          const files = await imagekitClient.listFiles({
+          const files = await client.listFiles({
             name: fileName,
             limit: 1,
           });
@@ -168,7 +195,7 @@ export async function deleteFromImageKit(fileIdOrUrl) {
 
     if (!fileId) return;
 
-    await imagekitClient.deleteFile(fileId);
+    await client.deleteFile(fileId);
     console.log(`🗑️ Deleted ImageKit file: ${fileId}`);
   } catch (err) {
     if (err.message && err.message.includes('not found')) return;
@@ -185,7 +212,8 @@ export async function deleteFromImageKit(fileIdOrUrl) {
  * @returns {Promise<{url: string, key: string, path: string, filename: string}>}
  */
 export async function uploadBufferToR2(buffer, originalName = 'photo.jpg', folder = 'cars') {
-  if (!r2Client) {
+  const client = await getR2Client();
+  if (!client) {
     throw new Error('Cloudflare R2 is not configured. Missing R2 environment variables.');
   }
 
@@ -199,6 +227,7 @@ export async function uploadBufferToR2(buffer, originalName = 'photo.jpg', folde
   const uniqueSuffix = `${Date.now()}-${crypto.randomBytes(4).toString('hex')}`;
   const key = `${folder}/${uniqueSuffix}-${baseName}.webp`;
 
+  const { PutObjectCommand } = await import('@aws-sdk/client-s3');
   const command = new PutObjectCommand({
     Bucket: process.env.R2_BUCKET_NAME,
     Key: key,
@@ -207,7 +236,7 @@ export async function uploadBufferToR2(buffer, originalName = 'photo.jpg', folde
     CacheControl: 'public, max-age=31536000, immutable',
   });
 
-  await r2Client.send(command);
+  await client.send(command);
 
   const publicDomain = (
     process.env.R2_PUBLIC_DOMAIN ||
@@ -230,7 +259,8 @@ export async function uploadBufferToR2(buffer, originalName = 'photo.jpg', folde
  * @param {string} keyOrUrl
  */
 export async function deleteFromR2(keyOrUrl) {
-  if (!r2Client || !keyOrUrl || typeof keyOrUrl !== 'string') return;
+  const client = await getR2Client();
+  if (!client || !keyOrUrl || typeof keyOrUrl !== 'string') return;
 
   try {
     let key = keyOrUrl;
@@ -246,12 +276,13 @@ export async function deleteFromR2(keyOrUrl) {
 
     if (!key) return;
 
+    const { DeleteObjectCommand } = await import('@aws-sdk/client-s3');
     const command = new DeleteObjectCommand({
       Bucket: process.env.R2_BUCKET_NAME,
       Key: key,
     });
 
-    await r2Client.send(command);
+    await client.send(command);
     console.log(`🗑️ Deleted R2 object: ${key}`);
   } catch (err) {
     console.warn(`⚠️ Failed to delete object from R2 (${keyOrUrl}):`, err.message);
