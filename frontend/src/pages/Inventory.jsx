@@ -144,7 +144,7 @@ export default function Inventory() {
         {/* Page Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4 sm:mb-8">
           <div className="flex flex-col">
-            <h1 className="font-heading font-black text-2xl sm:text-[40px] text-primary leading-tight tracking-tight">
+            <h1 className="font-heading font-medium text-2xl sm:text-[38px] text-primary leading-tight tracking-tight">
               Explore Verified Cars
             </h1>
             <div className="flex items-center gap-3 mt-1.5 lg:hidden">
