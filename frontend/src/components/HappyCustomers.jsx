@@ -132,7 +132,7 @@ export default function HappyCustomers() {
   );
 
   return (
-    <section className="py-20 px-4 bg-slate-50 relative overflow-hidden">
+    <section className="py-12 sm:py-14 lg:py-16 px-4 bg-slate-50 relative overflow-hidden">
       <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-brand-orange/5 rounded-full blur-[100px] pointer-events-none" />
       <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-sky-200/20 rounded-full blur-[100px] pointer-events-none" />
 
@@ -149,8 +149,22 @@ export default function HappyCustomers() {
           </p>
         </div>
 
-        {/* 4 Items Carousel Grid */}
-        <div className="relative min-h-[300px] sm:min-h-[400px]">
+        {/* ── MOBILE HORIZONTAL SNAP REEL (Native App Story Format) ── */}
+        <div className="lg:hidden">
+          <div className="mobile-app-snap-reel flex gap-3 pb-3 px-4 -mx-4">
+            {customers.slice(0, 8).map((customer, index) => (
+              <div key={customer._id} className="w-[68vw] max-w-[250px] snap-center shrink-0">
+                <CustomerCard customer={customer} index={index} />
+              </div>
+            ))}
+          </div>
+          <p className="text-center text-[11px] font-semibold text-slate-400 mt-1 mb-2">
+            ← સ્વાઇપ કરો · Tap photo to read review quote →
+          </p>
+        </div>
+
+        {/* ── DESKTOP 4-ITEM CAROUSEL GRID (Unchanged on Desktop) ── */}
+        <div className="hidden lg:block relative min-h-[400px]">
           <AnimatePresence mode="wait">
             <motion.div
               key={currentIndex}
@@ -158,7 +172,7 @@ export default function HappyCustomers() {
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -30 }}
               transition={{ duration: 0.5, ease: "easeOut", staggerChildren: 0.1 }}
-              className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6"
+              className="grid grid-cols-4 gap-6"
             >
               {visibleCustomers.map((customer, index) => (
                 <CustomerCard key={customer._id} customer={customer} index={index} />
@@ -190,18 +204,22 @@ export default function HappyCustomers() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               className="fixed inset-0 z-[9999] flex flex-col bg-slate-50/95 backdrop-blur-xl overflow-hidden"
+              style={{
+                paddingTop: 'env(safe-area-inset-top, 0px)',
+                paddingBottom: 'env(safe-area-inset-bottom, 0px)',
+              }}
             >
               {/* Modal Header */}
-              <div className="bg-white/80 backdrop-blur-md px-4 sm:px-8 py-4 sm:py-5 border-b border-gray-200/50 flex items-center justify-center shadow-sm relative z-20 min-h-[80px]">
-                <h2 className="font-heading font-bold text-xl sm:text-3xl text-slate-800 flex items-center gap-2 sm:gap-3 text-center">
-                  <Sparkles className="w-5 h-5 sm:w-8 sm:h-8 text-brand-orange" /> The Sadguru Family
+              <div className="bg-white/90 backdrop-blur-md px-4 sm:px-8 py-3.5 sm:py-5 border-b border-gray-200/50 flex items-center justify-between shadow-xs relative z-20">
+                <h2 className="font-heading font-black text-lg sm:text-3xl text-slate-800 flex items-center gap-2 sm:gap-3">
+                  <Sparkles className="w-4 h-4 sm:w-7 sm:h-7 text-brand-orange" /> The Sadguru Family
                 </h2>
                 <button
                   onClick={handleCloseModal}
-                  className="absolute right-4 sm:right-8 group flex items-center gap-2 px-3 py-2 sm:px-5 sm:py-2.5 bg-slate-100 hover:bg-red-50 text-slate-700 hover:text-red-600 rounded-full transition-all duration-300 shadow-sm border border-transparent hover:border-red-200"
+                  className="group flex items-center gap-1.5 px-3 py-1.5 sm:px-5 sm:py-2.5 bg-slate-100 hover:bg-red-50 text-slate-700 hover:text-red-600 rounded-full transition-all shadow-xs border border-slate-200/80 active:scale-95 cursor-pointer"
                 >
-                  <span className="font-heading font-bold text-sm sm:text-base hidden sm:inline">Close</span>
-                  <X className="w-5 h-5 sm:w-6 sm:h-6 group-hover:rotate-90 transition-transform duration-300" />
+                  <span className="font-heading font-bold text-xs sm:text-base">Close</span>
+                  <X className="w-4 h-4 sm:w-5 sm:h-5 group-hover:rotate-90 transition-transform" />
                 </button>
               </div>
 

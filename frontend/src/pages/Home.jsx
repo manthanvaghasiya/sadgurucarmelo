@@ -5,7 +5,8 @@ import {
   CheckCircle, Banknote, ShieldCheck,
   Search, Star, RefreshCw,
   ArrowRight, Sparkles,
-  Car, ChevronRight, ChevronLeft
+  Car, ChevronRight, ChevronLeft,
+  LayoutGrid, Layers
 } from 'lucide-react';
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -87,6 +88,9 @@ export default function Home() {
 
   // Active service index for compact mobile view
   const [activeServiceIndex, setActiveServiceIndex] = useState(0);
+
+  // Mobile car view mode: 'reel' (horizontal app snap carousel) or 'grid' (2-column grid)
+  const [mobileCarView, setMobileCarView] = useState('reel');
 
   const handleServiceSwipe = (event, info) => {
     const threshold = 35;
@@ -172,7 +176,7 @@ export default function Home() {
         <LiveTicker />
 
         {/* 3. Inventory Grid Section — Premium Enhanced with Category Tabs */}
-        <section className="inventory-grid-section py-20 px-4 sm:px-6 lg:px-8 bg-transparent overflow-hidden">
+        <section className="inventory-grid-section pt-8 sm:pt-10 lg:pt-12 pb-12 sm:pb-14 lg:pb-16 px-4 sm:px-6 lg:px-8 bg-transparent overflow-hidden">
           {/* Decorative ambient orbs */}
           <div className="inventory-section-orb w-72 h-72 bg-brand-orange/10 -top-20 -left-36" />
           <div className="inventory-section-orb w-56 h-56 bg-amber-300/10 -bottom-16 -right-24" style={{ animationDelay: '3s' }} />
@@ -198,8 +202,155 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Car Cards Grid */}
-            <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+            {/* ── MOBILE VIEW SUB-HEADER: Segmented Mode Switcher (Reel vs Grid) ── */}
+            <div className="flex md:hidden items-center justify-between gap-2 mb-3 px-1">
+              <div className="flex items-center gap-2">
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+                </span>
+                <span className="text-xs font-heading font-black text-slate-800 uppercase tracking-wider">
+                  ટોપ પીક્સ · Top Picks ({displayedCars.length})
+                </span>
+              </div>
+
+              {/* Segmented Pill Toggle: Reel / Grid */}
+              <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl border border-slate-200/80 shadow-2xs">
+                <button
+                  type="button"
+                  onClick={() => setMobileCarView('reel')}
+                  className={`px-2.5 py-1 rounded-lg text-[11px] font-heading font-black flex items-center gap-1 transition-all ${
+                    mobileCarView === 'reel'
+                      ? 'bg-white text-brand-orange shadow-xs'
+                      : 'text-slate-500 hover:text-slate-800'
+                  }`}
+                  aria-label="Reel View"
+                >
+                  <Layers className="w-3.5 h-3.5" />
+                  <span>Reel</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setMobileCarView('grid')}
+                  className={`px-2.5 py-1 rounded-lg text-[11px] font-heading font-black flex items-center gap-1 transition-all ${
+                    mobileCarView === 'grid'
+                      ? 'bg-white text-brand-orange shadow-xs'
+                      : 'text-slate-500 hover:text-slate-800'
+                  }`}
+                  aria-label="Grid View"
+                >
+                  <LayoutGrid className="w-3.5 h-3.5" />
+                  <span>Grid</span>
+                </button>
+              </div>
+            </div>
+
+            {/* ── MOBILE HORIZONTAL SNAP REEL (Reduced 75% vertical space, Flutter-like feel) ── */}
+            {mobileCarView === 'reel' && (
+              <div className="md:hidden">
+                <div className="mobile-app-snap-reel flex gap-3.5 pb-4 pt-1 px-4 -mx-4">
+                  {isLoading ? (
+                    Array.from({ length: 3 }).map((_, index) => (
+                      <div key={index} className="w-[78vw] max-w-[285px] snap-start shrink-0">
+                        <SkeletonCarCard />
+                      </div>
+                    ))
+                  ) : displayedCars.length === 0 ? (
+                    <div className="w-[85vw] snap-start shrink-0 flex flex-col items-center justify-center py-12 text-center bg-white rounded-2xl border border-dashed border-gray-300 p-6">
+                      <Car className="w-10 h-10 text-slate-300 mb-2" />
+                      <p className="font-heading text-sm text-primary font-bold">હાલમાં કોઈ કાર ઉપલબ્ધ નથી</p>
+                    </div>
+                  ) : (
+                    <>
+                      {displayedCars.map((car) => (
+                        <div key={car._id} className="w-[78vw] max-w-[285px] snap-start shrink-0 flex flex-col">
+                          <CarCard
+                            id={car._id}
+                            image={car.image}
+                            title={`${car.make} ${car.model} (${car.year})`}
+                            price={car.price >= 100000 ? `₹${(car.price / 100000).toFixed(2)} Lakhs` : `₹${(car.price || 0).toLocaleString('en-IN')}`}
+                            badges={car.badges || []}
+                            fuel={car.fuelType}
+                            transmission={car.transmission}
+                            owner={car.owner || '1st Owner'}
+                            kms={`${(car.kms || 0).toLocaleString('en-IN')} KM`}
+                            isKmGenuine={car.isKmGenuine}
+                          />
+                        </div>
+                      ))}
+
+                      {/* Final Reel Card: Direct CTA to Full Inventory */}
+                      <div
+                        onClick={() => navigate('/inventory')}
+                        className="w-[66vw] max-w-[245px] snap-start shrink-0 rounded-2xl bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white p-5 border border-slate-700/80 shadow-md flex flex-col items-center justify-center text-center cursor-pointer active:scale-95 transition-transform"
+                      >
+                        <div className="w-12 h-12 rounded-2xl bg-brand-orange/20 text-brand-orange flex items-center justify-center mb-3 border border-brand-orange/30 shadow-inner">
+                          <Car className="w-6 h-6" />
+                        </div>
+                        <span className="text-[10px] font-heading font-black tracking-widest uppercase text-amber-300 mb-1">
+                          FULL LOT
+                        </span>
+                        <h4 className="font-heading font-black text-lg text-white mb-1.5 leading-tight">
+                          {availableCars.length}+ સર્ટિફાઈડ કાર્સ
+                        </h4>
+                        <p className="font-body text-xs text-slate-300 mb-4 leading-relaxed">
+                          બધા મોડેલ્સ અને પ્રાઈસ રેન્જ જુઓ.
+                        </p>
+                        <span className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-brand-orange text-white text-xs font-heading font-bold shadow-md">
+                          <span>બધી કાર જુઓ</span>
+                          <ArrowRight className="w-3.5 h-3.5" />
+                        </span>
+                      </div>
+                    </>
+                  )}
+                </div>
+
+                {/* Mobile Reel Helper / Navigation Note */}
+                <div className="flex items-center justify-between text-[11px] text-slate-400 font-semibold px-1 mt-1 mb-4">
+                  <span>← આંગળીથી સ્વાઇપ કરો · Swipe</span>
+                  <button
+                    onClick={() => navigate('/inventory')}
+                    className="text-brand-orange font-bold flex items-center gap-0.5 active:opacity-75"
+                  >
+                    <span>બધી કાર ({availableCars.length}+)</span>
+                    <ChevronRight className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* ── MOBILE GRID VIEW (When user clicks Grid view on mobile) ── */}
+            {mobileCarView === 'grid' && (
+              <div className="grid grid-cols-2 md:hidden gap-3 mb-6">
+                {isLoading ? (
+                  Array.from({ length: 4 }).map((_, index) => (
+                    <div key={index} className="car-card-premium">
+                      <SkeletonCarCard />
+                    </div>
+                  ))
+                ) : (
+                  displayedCars.map((car) => (
+                    <div key={car._id} className="car-card-premium">
+                      <CarCard
+                        id={car._id}
+                        image={car.image}
+                        title={`${car.make} ${car.model} (${car.year})`}
+                        price={car.price >= 100000 ? `₹${(car.price / 100000).toFixed(2)} Lakhs` : `₹${(car.price || 0).toLocaleString('en-IN')}`}
+                        badges={car.badges || []}
+                        fuel={car.fuelType}
+                        transmission={car.transmission}
+                        owner={car.owner || '1st Owner'}
+                        kms={`${(car.kms || 0).toLocaleString('en-IN')} KM`}
+                        isKmGenuine={car.isKmGenuine}
+                      />
+                    </div>
+                  ))
+                )}
+              </div>
+            )}
+
+            {/* ── DESKTOP GRID VIEW (100% UNTOUCHED & INTACT ON DESKTOP) ── */}
+            <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
               {isLoading ? (
                 <>
                   {Array.from({ length: 4 }).map((_, index) => (
@@ -266,7 +417,7 @@ export default function Home() {
         </section>
 
         {/* 4. Core Dealership Services Section */}
-        <section className="py-10 sm:py-16 md:py-20 px-4 sm:px-6 lg:px-8 bg-transparent relative">
+        <section className="pt-8 sm:pt-10 lg:pt-12 pb-12 sm:pb-14 lg:pb-16 px-4 sm:px-6 lg:px-8 bg-transparent relative">
           <div className="max-w-7xl mx-auto">
             {/* Heading */}
             <motion.div

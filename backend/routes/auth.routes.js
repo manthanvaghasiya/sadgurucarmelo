@@ -89,6 +89,43 @@ router.post('/logout', (req, res) => {
 });
 
 // ═══════════════════════════════════════════════
+//  GET /api/auth/contact-info — Public dealership contact info
+// ═══════════════════════════════════════════════
+router.get('/contact-info', async (req, res) => {
+  try {
+    const admin =
+      (await User.findOne({ role: 'admin', isActive: true })) ||
+      (await User.findOne({ role: 'admin' })) ||
+      (await User.findOne());
+
+    if (!admin) {
+      return res.json({
+        success: true,
+        data: {
+          name: 'Sadguru Admin',
+          email: 'sadgurucarsurat@gmail.com',
+          phone: '+91 98765 43210',
+          address: 'Trilok Car Bazar, Simada Canal Rd, Canal Chokdi, Varachha, Surat, Gujarat 395013',
+        },
+      });
+    }
+
+    res.json({
+      success: true,
+      data: {
+        name: admin.name || 'Sadguru Admin',
+        email: admin.email || 'sadgurucarsurat@gmail.com',
+        phone: admin.phone || '+91 98765 43210',
+        address: admin.address || 'Trilok Car Bazar, Simada Canal Rd, Canal Chokdi, Varachha, Surat, Gujarat 395013',
+      },
+    });
+  } catch (error) {
+    console.error('Get contact-info error:', error);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+});
+
+// ═══════════════════════════════════════════════
 //  POST /api/auth/register — Create Staff Account (Admin only)
 // ═══════════════════════════════════════════════
 router.post('/register', protect, strictAdmin, async (req, res) => {

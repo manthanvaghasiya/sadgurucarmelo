@@ -1,6 +1,7 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
+import { SlidersHorizontal, X } from 'lucide-react';
 import SidebarFilter from '../components/SidebarFilter';
 import InventoryGrid from '../components/InventoryGrid';
 import { useCars } from '../context/CarContext';
@@ -109,8 +110,18 @@ export default function Inventory() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  // Count active filter parameters
+  const activeFilterCount = useMemo(() => {
+    let count = 0;
+    if (filters.makes && filters.makes.length > 0) count += filters.makes.length;
+    if (filters.fuelType) count += 1;
+    if (filters.bodyType) count += 1;
+    if (filters.budget && (filters.budget[0] > 0 || filters.budget[1] < 5000000)) count += 1;
+    return count;
+  }, [filters]);
+
   return (
-    <div className="bg-background min-h-screen py-8">
+    <div className="bg-background min-h-screen py-6 sm:py-8">
       <Helmet>
         <title>Buy Certified Pre-Owned Cars in Surat — Sadguru Car Surat Inventory</title>
         <meta name="description" content="Browse 150+ certified pre-owned cars at Sadguru Car Surat, Surat. Filter by brand, fuel type, budget, and more. Transparent pricing, non-accidental vehicles." />
@@ -119,48 +130,113 @@ export default function Inventory() {
       </Helmet>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
-        {/* Mobile Filter Button - Fixed at top */}
-        <div className={`lg:hidden fixed top-[64px] left-0 right-0 z-[1000] px-4 pointer-events-none transition-all duration-300 ${isNearFooter ? 'opacity-0 -translate-y-4' : 'opacity-100 translate-y-0'}`}>
-          <button
-            onClick={() => setIsFilterOpen(true)}
-            className={`w-full flex items-center justify-center gap-2 bg-white/95 backdrop-blur-md text-primary border border-gray-100 py-3.5 rounded-2xl font-heading font-bold shadow-xl shadow-black/5 active:scale-[0.98] transition-all ${isNearFooter ? 'pointer-events-none' : 'pointer-events-auto'}`}
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-sliders-horizontal"><path d="m21 4h-7" /><path d="m14 4-3 3-3-3" /><path d="m21 12H11" /><path d="m11 12-3 3-3-3" /><path d="m21 20H7" /><path d="m7 20-3 3-3-3" /><path d="m11 4H3" /><path d="m7 12H3" /><path d="m3 20h0" /></svg>
-            Advanced Filters
-          </button>
-        </div>
-
         {/* Breadcrumbs */}
-        <nav className="flex mb-4" aria-label="Breadcrumb">
-          <ol className="flex items-center space-x-2 font-body text-[13px] font-medium text-text-muted">
+        <nav className="flex mb-3 sm:mb-4" aria-label="Breadcrumb">
+          <ol className="flex items-center space-x-2 font-body text-[12px] sm:text-[13px] font-medium text-text-muted">
             <li><a href="/" className="hover:text-primary transition-colors">Home</a></li>
             <li><span className="text-gray-300">/</span></li>
             <li><a href="/" className="hover:text-primary transition-colors">Surat</a></li>
             <li><span className="text-gray-300">/</span></li>
-            <li aria-current="page" className="text-text">Used Cars</li>
+            <li aria-current="page" className="text-text font-bold">Used Cars</li>
           </ol>
         </nav>
 
         {/* Page Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-6 sm:mb-10">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4 sm:mb-8">
           <div className="flex flex-col">
-            <h1 className="font-heading font-bold text-[36px] sm:text-[42px] text-primary leading-tight tracking-tight">
+            <h1 className="font-heading font-black text-2xl sm:text-[40px] text-primary leading-tight tracking-tight">
               Explore Verified Cars
             </h1>
-            <div className="flex items-center gap-3 mt-2 lg:hidden">
-              <div className="flex items-center gap-2 bg-red-50 px-3 py-1 rounded-full border border-red-100">
+            <div className="flex items-center gap-3 mt-1.5 lg:hidden">
+              <div className="flex items-center gap-1.5 bg-red-50 px-2.5 py-0.5 rounded-full border border-red-100">
                 <span className="relative flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-red-600"></span>
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75" />
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-red-600" />
                 </span>
-                <span className="text-[11px] font-bold text-red-600 uppercase tracking-wider leading-none">Live Inventory</span>
+                <span className="text-[10px] font-black text-red-600 uppercase tracking-wider leading-none">Live Lot</span>
               </div>
-              <span className="text-text-muted text-[13px] font-medium flex items-center gap-1.5">
-                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-primary/60"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" /><circle cx="12" cy="10" r="3" /></svg>
-                Available stock in Surat
+              <span className="text-text-muted text-xs font-medium">
+                150+ cars ready in Surat
               </span>
             </div>
           </div>
+        </div>
+
+        {/* ── MOBILE QUICK CATEGORY & FILTER DOCK (Native Flutter app feel) ── */}
+        <div className="lg:hidden mb-5 space-y-2.5">
+          <div className="flex items-center justify-between gap-2">
+            <button
+              onClick={() => setIsFilterOpen(true)}
+              className="flex-1 flex items-center justify-center gap-2 bg-white text-primary border border-slate-200/90 py-2.5 px-4 rounded-xl font-heading font-black text-xs shadow-xs active:scale-[0.98] transition-all"
+            >
+              <SlidersHorizontal className="w-3.5 h-3.5 text-brand-orange" />
+              <span>Filters &amp; Search</span>
+              {activeFilterCount > 0 && (
+                <span className="w-5 h-5 rounded-full bg-brand-orange text-white text-[10px] font-black flex items-center justify-center shadow-xs">
+                  {activeFilterCount}
+                </span>
+              )}
+            </button>
+
+            {activeFilterCount > 0 && (
+              <button
+                onClick={() => setFilters({ makes: [], fuelType: '', bodyType: '', budget: null })}
+                className="px-3 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-heading font-bold transition-all active:scale-95 shrink-0"
+              >
+                Clear ({activeFilterCount})
+              </button>
+            )}
+          </div>
+
+          {/* Quick Body Type Horizontal Snapping Chips */}
+          <div className="mobile-app-snap-reel flex gap-2 pb-1 -mx-1 px-1">
+            {['All', 'SUV', 'Sedan', 'Hatchback'].map((type) => {
+              const isSelected = type === 'All' ? !filters.bodyType : filters.bodyType === type;
+              return (
+                <button
+                  key={type}
+                  type="button"
+                  onClick={() => {
+                    if (type === 'All') {
+                      setFilters(prev => ({ ...prev, bodyType: '' }));
+                    } else {
+                      setFilters(prev => ({ ...prev, bodyType: prev.bodyType === type ? '' : type }));
+                    }
+                  }}
+                  className={`snap-start shrink-0 px-3.5 py-1.5 rounded-xl text-xs font-heading font-bold transition-all active:scale-95 flex items-center gap-1.5 shadow-2xs ${
+                    isSelected
+                      ? 'bg-slate-900 text-white shadow-xs'
+                      : 'bg-white text-slate-600 border border-slate-200/80 hover:bg-slate-50'
+                  }`}
+                >
+                  <span>{type}</span>
+                  {isSelected && type !== 'All' && (
+                    <span className="w-1.5 h-1.5 rounded-full bg-brand-orange" />
+                  )}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* ── FLOATING MOBILE FILTER PILL (Appears on scroll for 1-tap filtering) ── */}
+        <div
+          className={`lg:hidden fixed bottom-20 left-1/2 -translate-x-1/2 z-40 transition-all duration-300 pointer-events-auto ${
+            isNearFooter ? 'opacity-0 translate-y-6 pointer-events-none' : 'opacity-100 translate-y-0'
+          }`}
+        >
+          <button
+            onClick={() => setIsFilterOpen(true)}
+            className="flex items-center gap-2 bg-slate-900/95 backdrop-blur-xl text-white px-5 py-2.5 rounded-full shadow-[0_10px_25px_rgba(0,0,0,0.35)] font-heading font-black text-xs border border-white/20 active:scale-95 transition-transform"
+          >
+            <SlidersHorizontal className="w-3.5 h-3.5 text-brand-orange" />
+            <span>Filters</span>
+            {activeFilterCount > 0 && (
+              <span className="w-4 h-4 rounded-full bg-brand-orange text-white text-[9px] font-black flex items-center justify-center">
+                {activeFilterCount}
+              </span>
+            )}
+          </button>
         </div>
 
         {/* Main Content Layout */}
@@ -178,10 +254,15 @@ export default function Inventory() {
               onClick={() => setIsFilterOpen(false)}
             ></div>
 
-            <div className={`
-              absolute bottom-0 left-0 right-0 h-[85vh] lg:h-auto lg:relative lg:block bg-white rounded-t-[32px] lg:rounded-none overflow-hidden flex flex-col
-              transition-transform duration-300 ${isFilterOpen ? 'translate-y-0' : 'translate-y-full lg:translate-y-0'}
-            `}>
+            <div
+              className={`
+                absolute bottom-0 left-0 right-0 h-[88vh] lg:h-auto lg:relative lg:block bg-white rounded-t-[32px] lg:rounded-none overflow-hidden flex flex-col
+                transition-transform duration-300 ${isFilterOpen ? 'translate-y-0' : 'translate-y-full lg:translate-y-0'}
+              `}
+              style={{
+                paddingBottom: 'max(1rem, env(safe-area-inset-bottom, 0px))',
+              }}
+            >
               {/* Mobile Drawer Handle/Header */}
               <div className="lg:hidden flex items-center justify-between p-6 border-b border-gray-100 shrink-0">
                 <h2 className="font-heading font-bold text-xl text-primary">Filters</h2>

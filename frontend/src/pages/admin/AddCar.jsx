@@ -96,11 +96,7 @@ function FormTextarea({ label, placeholder, register, error, rows = 4 }) {
 }
 
 // Feature Manager Component for Key-Value pairs
-function FeatureManager({ control, register, errors }) {
-  const { fields, append, remove } = useFieldArray({
-    control,
-    name: "features"
-  });
+function FeatureManager({ fields, append, remove, replace, register, errors }) {
   const [isBulkPasteOpen, setIsBulkPasteOpen] = useState(false);
   const [bulkText, setBulkText] = useState('');
 
@@ -112,14 +108,17 @@ function FeatureManager({ control, register, errors }) {
     let i = 0;
     while (i < lines.length) {
       const line = lines[i];
-      if (line.includes(':')) {
-        const idx = line.indexOf(':');
-        newFeatures.push({ key: line.substring(0, idx).trim(), value: line.substring(idx + 1).trim() });
+      if (line.includes(':-') || line.includes(':') || line.includes('- ')) {
+        const delimiter = line.includes(':-') ? ':-' : (line.includes(':') ? ':' : '- ');
+        const idx = line.indexOf(delimiter);
+        const k = line.substring(0, idx).trim();
+        const v = line.substring(idx + delimiter.length).trim();
+        if (k) newFeatures.push({ key: k, value: v });
         i++;
       } else {
-        if (i + 1 < lines.length && !lines[i+1].includes(':')) {
+        if (i + 1 < lines.length && !lines[i+1].includes(':') && !lines[i+1].includes(':-')) {
           const next = lines[i+1];
-          if (next.toUpperCase() === 'YES' || next.toUpperCase() === 'NO' || next.toUpperCase() === 'STANDARD' || next.length < 80) {
+          if (next.length <= 100) {
             newFeatures.push({ key: line, value: next });
             i += 2;
             continue;
@@ -130,7 +129,13 @@ function FeatureManager({ control, register, errors }) {
       }
     }
     
-    append(newFeatures);
+    if (newFeatures.length > 0) {
+      if (fields.length === 1 && !fields[0].key && !fields[0].value && replace) {
+        replace(newFeatures);
+      } else {
+        append(newFeatures);
+      }
+    }
     setBulkText('');
     setIsBulkPasteOpen(false);
   };
@@ -464,6 +469,17 @@ export default function AddCar() {
     }
   });
 
+  // Lifted useFieldArray for real-time reactivity with AI quick-fill & bulk operations
+  const {
+    fields: featureFields,
+    append: appendFeature,
+    remove: removeFeature,
+    replace: replaceFeatures
+  } = useFieldArray({
+    control,
+    name: "features"
+  });
+
   // Watch elements specifically for interactive UI conditional checks
   const isCertified = watch('isCertified');
   const isPetipack = watch('isPetipack');
@@ -479,6 +495,18 @@ export default function AddCar() {
   const [aiPrompt, setAiPrompt] = useState('');
   const [isAiLoading, setIsAiLoading] = useState(false);
   const [isAiOpen, setIsAiOpen] = useState(true);
+
+  // Helper to ensure ownership perfectly matches select options
+  const normalizeOwner = (val) => {
+    if (!val) return '1st Owner';
+    const s = String(val).toLowerCase().trim();
+    if (s.includes('1') || s.includes('first') || s.includes('single') || s.includes('1st')) return '1st Owner';
+    if (s.includes('2') || s.includes('second') || s.includes('2nd')) return '2nd Owner';
+    if (s.includes('3') || s.includes('third') || s.includes('3rd')) return '3rd Owner';
+    if (s.includes('4') || s.includes('four') || s.includes('4th')) return '4th Owner+';
+    if (s.includes('unreg')) return 'Unregistered';
+    return '1st Owner';
+  };
 
   const handleAiParse = async () => {
     if (!aiPrompt.trim()) {
@@ -504,7 +532,7 @@ export default function AddCar() {
         if (p.kmDriven) setValue('kmDriven', String(p.kmDriven));
         if (p.fuelType) setValue('fuelType', p.fuelType);
         if (p.transmission) setValue('transmission', p.transmission);
-        if (p.ownership) setValue('ownership', p.ownership);
+        if (p.ownership) setValue('ownership', normalizeOwner(p.ownership));
         if (p.color) setValue('color', p.color);
         if (p.registration) setValue('registration', p.registration);
         if (p.bodyType) setValue('bodyType', p.bodyType);
@@ -514,7 +542,7 @@ export default function AddCar() {
         if (p.displacement) setValue('displacement', p.displacement);
         if (p.maxPower) setValue('maxPower', p.maxPower);
         if (p.driveType) setValue('driveType', p.driveType);
-        if (p.cylinders) setValue('cylinders', p.cylinders);
+        if (p.cylinders) setValue('cylinders', String(p.cylinders));
         if (p.airConditioner) setValue('airConditioner', p.airConditioner);
         if (p.powerWindows) setValue('powerWindows', p.powerWindows);
         if (p.sunroof) setValue('sunroof', p.sunroof);
@@ -527,9 +555,9 @@ export default function AddCar() {
         if (p.loanAvailable !== undefined) setValue('loanAvailable', Boolean(p.loanAvailable));
         if (p.isKmGenuine !== undefined) setValue('isKmGenuine', Boolean(p.isKmGenuine));
 
-        // Key Features & Equipment
+        // Key Features & Equipment - directly replace the field array for instant UI update
         if (p.features && Array.isArray(p.features) && p.features.length > 0) {
-          setValue('features', p.features);
+          replaceFeatures(p.features);
         }
 
         if (res.data.source === 'gemini') {
@@ -929,7 +957,10 @@ export default function AddCar() {
           
           <div className="grid grid-cols-1 gap-5 mt-5">
             <FeatureManager
-              control={control}
+              fields={featureFields}
+              append={appendFeature}
+              remove={removeFeature}
+              replace={replaceFeatures}
               register={register}
               errors={errors}
             />

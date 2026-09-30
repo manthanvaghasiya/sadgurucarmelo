@@ -283,7 +283,7 @@ export default function WhyChooseUs() {
     };
 
     return (
-        <section className="relative py-28 px-4 overflow-hidden bg-gradient-to-b from-slate-50 via-white to-slate-50 border-t border-gray-100">
+        <section className="relative py-12 sm:py-14 lg:py-16 px-4 overflow-hidden bg-gradient-to-b from-slate-50 via-white to-slate-50 border-t border-gray-100">
             {/* Decorative background */}
             <div className="absolute inset-0 pointer-events-none overflow-hidden">
                 {/* Central glow */}

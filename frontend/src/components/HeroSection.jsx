@@ -8,7 +8,7 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useCars } from '../context/CarContext';
-import { getCarWhatsAppLink } from '../utils/whatsapp';
+import { getCarWhatsAppLink, buildWhatsAppUrl } from '../utils/whatsapp';
 import { getOptimizedUrl } from '../utils/imageUtils';
 import WhatsAppIcon from './WhatsAppIcon';
 import axiosInstance from '../api/axiosConfig';
@@ -183,13 +183,13 @@ export default function HeroSection() {
   };
 
   const whatsappUrl = activeCar
-    ? `https://wa.me/919913634447?text=${encodeURIComponent(
+    ? buildWhatsAppUrl(
       `Hello Sadguru Car Surat, I am interested in the upcoming/coming soon ${activeCar.make} ${activeCar.model} (${activeCar.year}) priced at ${formatPrice(activeCar.price)}. Please share more details and arrival update!`
-    )}`
-    : 'https://wa.me/919913634447?text=Hello%20Sadguru%20Car%20Surat%2C%20I%20am%20interested%20in%20your%20upcoming%20verified%20cars.';
+    )
+    : buildWhatsAppUrl('Hello Sadguru Car Surat, I am interested in your upcoming verified cars.');
 
   return (
-    <section className="relative w-full bg-gradient-to-b from-[#f8fafc] via-[#ffffff] to-[#f8fafc] overflow-hidden pt-6 pb-12 lg:pt-8 lg:pb-16">
+    <section className="relative w-full bg-gradient-to-b from-[#f8fafc] via-[#ffffff] to-[#f8fafc] overflow-hidden pt-5 sm:pt-6 lg:pt-8 pb-8 sm:pb-10 lg:pb-12">
 
       {/* ═══════════════════════════════════════════════════════════════════
           BACKGROUND AMBIENT TEXTURE & GLOW
@@ -801,7 +801,7 @@ export default function HeroSection() {
                   value={formData.phone}
                   onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                   className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:border-brand-orange focus:ring-1 focus:ring-brand-orange outline-none transition-all text-slate-800 text-sm"
-                  placeholder="+91 99136 34447"
+                  placeholder="+91 98765 43210"
                   required
                 />
               </div>

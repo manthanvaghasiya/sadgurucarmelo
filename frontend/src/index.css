@@ -75,13 +75,45 @@
   background: var(--color-primary);
 }
 
-/* Hide scrollbar for review carousel */
-.scrollbar-none {
+/* Hide scrollbar for review carousel & mobile horizontal reels */
+.scrollbar-none,
+.no-scrollbar {
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
-.scrollbar-none::-webkit-scrollbar {
-  display: none;
+.scrollbar-none::-webkit-scrollbar,
+.no-scrollbar::-webkit-scrollbar {
+  display: none !important;
+}
+
+/* Mobile App PWA & Native Touch Ergonomics (iOS & Android) */
+*, *::before, *::after {
+  -webkit-tap-highlight-color: transparent;
+}
+
+@supports (-webkit-touch-callout: none) {
+  /* iOS Safari & PWA smooth momentum scroll */
+  body {
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+/* Flutter / iOS Native App style horizontal snap reel */
+.mobile-app-snap-reel {
+  display: flex;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+  scroll-padding-left: 1rem;
+  scrollbar-width: none;
+}
+.mobile-app-snap-reel::-webkit-scrollbar {
+  display: none !important;
+}
+.mobile-app-snap-reel > * {
+  scroll-snap-align: start;
+  flex-shrink: 0;
 }
 
 @keyframes slide-up {

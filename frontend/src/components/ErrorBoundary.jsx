@@ -210,12 +210,22 @@ class ErrorBoundary extends React.Component {
               color: '#64748b',
             }}>
               સદગુરુ કાર મેળો, વરાછા, સુરત • હેલ્પલાઇન:{' '}
-              <a
-                href="tel:+919913634447"
-                style={{ color: '#F59423', fontWeight: '700', textDecoration: 'none' }}
-              >
-                +91 99136 34447
-              </a>
+              {(() => {
+                let phone = '+91 98765 43210';
+                try {
+                  const s = localStorage.getItem('dealership_contact');
+                  if (s) phone = JSON.parse(s).phone || phone;
+                } catch {}
+                const tel = phone.replace(/[^\d+]/g, '');
+                return (
+                  <a
+                    href={`tel:${tel.startsWith('+') ? tel : `+${tel}`}`}
+                    style={{ color: '#F59423', fontWeight: '700', textDecoration: 'none' }}
+                  >
+                    {phone}
+                  </a>
+                );
+              })()}
             </div>
           </div>
         </div>

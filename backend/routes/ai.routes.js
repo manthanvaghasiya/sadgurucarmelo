@@ -1,5 +1,5 @@
 import express from 'express';
-import { callGeminiWithRetry, heuristicParseCar } from '../utils/geminiHelper.js';
+import { callGeminiWithRetry, heuristicParseCar, normalizeOwnership } from '../utils/geminiHelper.js';
 import Settings from '../models/Settings.js';
 import { protect, admin } from '../middleware/authMiddleware.js';
 
@@ -27,11 +27,11 @@ router.post('/parse-car', protect, async (req, res) => {
       });
 
       const prompt = `
-        You are an expert Indian automotive data analyst and pre-owned car dealership assistant for "Sadguru Car Melo", Gujarat, India.
+        You are an expert Indian automotive data analyst and pre-owned car dealership assistant for "Sadguru Car Melo", Surat, Gujarat, India.
         
         TASK:
         1. Parse the following raw text / dealer WhatsApp message into clean, structured car listing fields.
-        2. Based on the identified Make, Model, and Variant (e.g., KIA Seltos HTX Diesel 2019), LOOK UP and auto-generate the exact Indian automotive technical specifications and standard equipment/features list for this vehicle.
+        2. Based on the identified Make, Model, and Variant (e.g., KIA Seltos HTX Diesel 2019), LOOK UP and auto-generate the exact Indian automotive technical specifications and comprehensive equipment/features list for this vehicle.
         
         Raw Text from Dealer / Seller:
         """
@@ -40,24 +40,24 @@ router.post('/parse-car', protect, async (req, res) => {
 
         Return ONLY a valid JSON object matching this schema:
         {
-          "make": "Manufacturer name in Title Case, e.g. 'Kia', 'Hyundai', 'Maruti Suzuki', 'Tata', 'Toyota', 'Honda'",
-          "model": "Car model in Title Case, e.g. 'Seltos', 'Creta', 'Brezza', 'Harrier', 'City', 'Innova Crysta'",
+          "make": "Manufacturer name in Title Case, e.g. 'Kia', 'Hyundai', 'Maruti Suzuki', 'Tata', 'Toyota', 'Honda', 'Mahindra'",
+          "model": "Car model in Title Case, e.g. 'Seltos', 'Creta', 'Brezza', 'Harrier', 'City', 'Innova Crysta', 'Swift'",
           "variant": "Variant / trim level, e.g. 'HTX', 'SX (O)', 'ZXi+', 'XZ+', 'ZX'",
           "manufacturingYear": "Manufacturing year as 4-digit number string, e.g. '2019'",
           "registerYear": "Registration year/month, e.g. '2019-12' or '2019'",
           "price": "Price as pure numbers without commas or currency symbol, e.g. '1070000' (from 10,70,000/-)",
           "kmDriven": "Kilometers driven as pure numbers, e.g. '72000' (from 72,000)",
           "fuelType": "One of: 'Petrol', 'Diesel', 'CNG', 'Electric', 'Hybrid'",
-          "transmission": "One of: 'Manual', 'Automatic', 'IMT'",
-          "ownership": "One of: '1st', '2nd', '3rd', '4th+'",
-          "color": "Color in Title Case, e.g. 'White', 'Black', 'Silver', 'Grey', 'Red', 'Blue'",
-          "registration": "Registration state/city code, e.g. 'GJ', 'GJ-05', 'MH', etc.",
+          "transmission": "One of: 'Manual', 'Automatic'",
+          "ownership": "Must be EXACTLY one of: '1st Owner', '2nd Owner', '3rd Owner', '4th Owner+', 'Unregistered'",
+          "color": "Color in Title Case, e.g. 'White', 'Pearl White', 'Black', 'Silver', 'Grey', 'Red', 'Blue'",
+          "registration": "Registration state/city code, e.g. 'GJ', 'GJ-05', 'MH-02', etc.",
           "insurance": "Insurance validity text, e.g. 'FULL (26-11-26)' or 'Comprehensive' or 'Third Party'",
-          "bodyType": "One of: 'SUV', 'Sedan', 'Hatchback', 'MUV', 'Coupe', 'Luxury'",
+          "bodyType": "One of: 'SUV', 'Sedan', 'Hatchback', 'MUV', 'Coupe', 'Convertible'",
           "displacement": "Engine displacement with 'cc', e.g. '1493 cc'",
-          "maxPower": "Max power output with 'bhp', e.g. '113 bhp @ 4000 rpm'",
-          "driveType": "e.g. 'FWD', 'RWD', or 'AWD'",
-          "cylinders": "Number of cylinders, e.g. '4 Cylinders'",
+          "maxPower": "Max power output with 'bhp', e.g. '113 bhp'",
+          "driveType": "e.g. 'FWD', 'RWD', or '4WD'",
+          "cylinders": "Number of cylinders as string, e.g. '4'",
           "airConditioner": "e.g. 'Automatic Climate Control' or 'Manual AC'",
           "powerWindows": "e.g. 'All 4 Windows' or 'Front Only'",
           "sunroof": "e.g. 'Electric Sunroof' or 'Panoramic Sunroof' or 'No'",
@@ -68,17 +68,17 @@ router.post('/parse-car', protect, async (req, res) => {
           "loanAvailable": true,
           "isKmGenuine": true,
           "features": [
-            { "key": "Touchscreen", "value": "10.25-inch HD Display with Apple CarPlay & Android Auto" },
-            { "key": "Sunroof", "value": "Electric Sunroof" },
+            { "key": "Touchscreen", "value": "10.25-inch HD Display" },
             { "key": "Alloy Wheels", "value": "17-inch Diamond Cut" },
+            { "key": "Sunroof", "value": "Electric Sunroof" },
             { "key": "Cruise Control", "value": "Yes" },
+            { "key": "Rear AC Vents", "value": "Yes" },
             { "key": "Airbags", "value": "6 Airbags" },
-            { "key": "LED Headlamps", "value": "LED DRLs & Crown Jewel LED Headlamps" },
-            { "key": "Reverse Camera", "value": "Rear Camera with Dynamic Guidelines" },
-            { "key": "Keyless Entry", "value": "Smart Key with Push Button Start" },
-            { "key": "Rear AC Vents", "value": "Yes with USB Fast Charger" }
+            { "key": "LED Headlamps", "value": "LED DRLs & Projectors" },
+            { "key": "Reverse Camera", "value": "With Dynamic Guidelines" },
+            { "key": "Push Button Start", "value": "Smart Keyless Entry" }
           ],
-          "description": "2-3 sentence premium sales description highlighting the vehicle's pristine condition, certified status, single-owner history, and top-tier features."
+          "description": "Certified dealership description, e.g. 'KIA SELTOS HTX in excellent condition. Certified by Sadguru Car Melo.'"
         }
       `;
 
@@ -99,7 +99,7 @@ router.post('/parse-car', protect, async (req, res) => {
       kmDriven: parsed.kmDriven || fallback.kmDriven || '',
       fuelType: parsed.fuelType || fallback.fuelType || 'Petrol',
       transmission: parsed.transmission || fallback.transmission || 'Manual',
-      ownership: parsed.ownership || fallback.ownership || '1st',
+      ownership: normalizeOwnership(parsed.ownership || fallback.ownership),
       color: parsed.color || fallback.color || '',
       registration: parsed.registration || fallback.registration || 'GJ',
       insurance: parsed.insurance || fallback.insurance || '',
@@ -107,7 +107,7 @@ router.post('/parse-car', protect, async (req, res) => {
       displacement: parsed.displacement || fallback.displacement || '',
       maxPower: parsed.maxPower || fallback.maxPower || '',
       driveType: parsed.driveType || fallback.driveType || 'FWD',
-      cylinders: parsed.cylinders || fallback.cylinders || '4',
+      cylinders: String(parsed.cylinders || fallback.cylinders || '4'),
       airConditioner: parsed.airConditioner || fallback.airConditioner || 'Automatic Climate Control',
       powerWindows: parsed.powerWindows || fallback.powerWindows || 'All 4 Windows',
       sunroof: parsed.sunroof || fallback.sunroof || 'No',
@@ -118,7 +118,7 @@ router.post('/parse-car', protect, async (req, res) => {
       loanAvailable: parsed.loanAvailable !== undefined ? parsed.loanAvailable : true,
       isKmGenuine: parsed.isKmGenuine !== undefined ? parsed.isKmGenuine : true,
       features: Array.isArray(parsed.features) && parsed.features.length > 0 ? parsed.features : fallback.features,
-      description: parsed.description || `${parsed.make || fallback.make} ${parsed.model || fallback.model} ${parsed.variant || fallback.variant} in immaculate condition. Fully inspected and certified by Sadguru Car Melo.`,
+      description: parsed.description || fallback.description || `${parsed.make || fallback.make} ${parsed.model || fallback.model} ${parsed.variant || fallback.variant} in excellent condition. Certified by Sadguru Car Melo.`,
       source: 'gemini'
     };
 
@@ -131,7 +131,8 @@ router.post('/parse-car', protect, async (req, res) => {
       success: true,
       data: {
         ...fallback,
-        description: `${fallback.make} ${fallback.model} ${fallback.variant} in excellent condition. Certified by Sadguru Car Melo.`
+        ownership: normalizeOwnership(fallback.ownership),
+        description: fallback.description || `${fallback.make} ${fallback.model} ${fallback.variant} in excellent condition. Certified by Sadguru Car Melo.`
       },
       source: 'heuristic',
       warning: `AI quota or network limit reached (${error.message}). Filled via smart pattern parser.`

@@ -4,6 +4,7 @@ import { Toaster } from 'react-hot-toast';
 import { CarProvider } from './context/CarContext';
 import { AuthProvider } from './context/AuthContext';
 import { CompareProvider } from './context/CompareContext';
+import { DealershipContactProvider } from './context/DealershipContactContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import TopNavigation from './components/TopNavigation';
 import Footer from './components/Footer';
@@ -51,8 +52,9 @@ const PageLoader = () => (
 function App() {
   return (
     <AuthProvider>
-      <BrowserRouter>
-        <ScrollToTop />
+      <DealershipContactProvider>
+        <BrowserRouter>
+          <ScrollToTop />
         <AnalyticsTracker />
         <CarProvider>
           <CompareProvider>
@@ -121,7 +123,8 @@ function App() {
         </CompareProvider>
         </CarProvider>
       </BrowserRouter>
-    </AuthProvider>
+    </DealershipContactProvider>
+  </AuthProvider>
   );
 }
 

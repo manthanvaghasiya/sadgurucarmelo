@@ -3,9 +3,11 @@ import {
   ChevronRight, ArrowUpRight
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useDealershipContact } from '../context/DealershipContactContext';
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
+  const { phone, email, address, telLink, mailLink } = useDealershipContact();
 
   return (
     <footer className="bg-[#0A0A0A] text-gray-400 pt-20 pb-10 border-t border-white/5 selection:bg-primary/30">
@@ -16,11 +18,18 @@ export default function Footer() {
 
           {/* 1. Brand Identity */}
           <div className="space-y-6">
-            <Link to="/" className="inline-block group">
-              <h2 className="font-heading font-black text-2xl tracking-tighter text-white group-hover:text-accent transition-colors duration-500">
-                SADGURU <span className="text-accent group-hover:text-white">CAR MELO</span>
-              </h2>
-              <div className="h-0.5 w-0 group-hover:w-full bg-accent transition-all duration-500 mt-1 shadow-[0_0_8px_rgba(37,211,102,0.4)]"></div>
+            <Link to="/" className="inline-flex flex-col items-start gap-3 group">
+              <img
+                src="/logo-removebg-preview.png"
+                alt="Sadguru Car Melo Logo"
+                className="h-9 sm:h-10 w-auto object-contain transition-transform duration-500 group-hover:scale-105 filter drop-shadow-[0_4px_14px_rgba(249,115,22,0.3)]"
+              />
+              <div>
+                <h2 className="font-heading font-bold text-2xl tracking-tight text-white group-hover:text-accent transition-colors duration-500">
+                  SADGURU <span className="text-accent group-hover:text-white">CAR MELO</span>
+                </h2>
+                <div className="h-0.5 w-0 group-hover:w-full bg-accent transition-all duration-500 mt-1 shadow-[0_0_8px_rgba(37,211,102,0.4)]"></div>
+              </div>
             </Link>
             <p className="font-body text-sm leading-relaxed pr-4">
               Elevating Surat's pre-owned car experience since 2012.
@@ -82,26 +91,26 @@ export default function Footer() {
               </a>
 
               {/* Phone */}
-              <a href="tel:+919913634447" className="flex items-center gap-4 group">
+              <a href={telLink} className="flex items-center gap-4 group">
                 <div className="w-11 h-11 shrink-0 rounded-xl bg-white/[0.08] border border-white/10 flex items-center justify-center group-hover:bg-accent group-hover:border-accent transition-all duration-500 shadow-xl group-hover:shadow-accent/20">
                   <Phone className="w-5 h-5 text-white group-hover:text-black transition-colors duration-300" />
                 </div>
                 <div className="flex flex-col">
                   <span className="text-[10px] text-gray-500 font-bold uppercase tracking-wider mb-0.5 group-hover:text-accent transition-colors">Call Showroom</span>
                   <span className="font-heading font-bold text-lg text-white group-hover:text-accent transition-colors">
-                    +91 99136 34447
+                    {phone}
                   </span>
                 </div>
               </a>
 
               {/* Email */}
-              <a href="mailto:info@sadgurucarsurat.com" className="flex items-center gap-4 group">
+              <a href={mailLink} className="flex items-center gap-4 group">
                 <div className="w-11 h-11 shrink-0 rounded-xl bg-white/[0.08] border border-white/10 flex items-center justify-center group-hover:bg-accent group-hover:border-accent transition-all duration-500 shadow-xl group-hover:shadow-accent/20">
                   <Mail className="w-5 h-5 text-white group-hover:text-black transition-colors duration-300" />
                 </div>
                 <div className="flex flex-col">
                   <span className="text-[10px] text-gray-500 font-bold uppercase tracking-wider mb-0.5 group-hover:text-accent transition-colors">Email Us</span>
-                  <span className="text-gray-400 group-hover:text-white transition-colors">sadgurucarsurat@gmail.com</span>
+                  <span className="text-gray-400 group-hover:text-white transition-colors">{email}</span>
                 </div>
               </a>
             </div>

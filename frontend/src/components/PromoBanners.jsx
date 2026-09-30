@@ -47,7 +47,7 @@ export default function PromoBanners() {
   };
 
   return (
-    <section className="py-12 px-4 max-w-7xl mx-auto w-full">
+    <section className="py-8 sm:py-10 lg:py-12 px-4 max-w-7xl mx-auto w-full">
       {/* Section Header */}
       <div className="text-center mb-8">
         <span className="text-xs font-bold font-heading uppercase tracking-widest text-amber-500 bg-amber-500/10 px-3 py-1 rounded-full border border-amber-500/20 inline-block mb-2">

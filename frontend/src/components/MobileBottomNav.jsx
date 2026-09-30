@@ -5,8 +5,8 @@ import { Home, Car, Users, Phone, BadgeDollarSign } from 'lucide-react';
 
 const navItems = [
   { name: 'Home', path: '/', icon: Home },
-  { name: 'Catalog', path: '/inventory', icon: Car },
-  { name: 'Sell', path: '/sell-your-car', icon: BadgeDollarSign },
+  { name: 'Catalog', path: '/inventory', icon: Car, badge: 'Live' },
+  { name: 'Sell Car', path: '/sell-your-car', icon: BadgeDollarSign },
   { name: 'About', path: '/about', icon: Users },
   { name: 'Contact', path: '/contact', icon: Phone },
 ];
@@ -14,54 +14,85 @@ const navItems = [
 export default function MobileBottomNav() {
   const location = useLocation();
 
+  // Hide on Car Details (it has its own native sticky action bar), admin panel, and login
+  if (
+    location.pathname.startsWith('/car-details') ||
+    location.pathname.startsWith('/admin') ||
+    location.pathname.startsWith('/login')
+  ) {
+    return null;
+  }
+
   const isActive = (path) => {
     if (path === '/') return location.pathname === '/';
     return location.pathname.startsWith(path);
   };
 
   return (
-    <div className="md:hidden fixed bottom-6 left-1/2 -translate-x-1/2 z-[60] w-[90%] max-w-sm">
-      <div className="bg-white/90 backdrop-blur-xl border border-white/20 shadow-[0_20px_50px_rgba(0,0,0,0.15)] rounded-[2.5rem] p-2 flex items-center justify-around relative">
+    <div
+      className="md:hidden fixed bottom-2.5 inset-x-0 z-[60] flex justify-center pointer-events-none px-3"
+      style={{
+        paddingBottom: 'max(0.25rem, env(safe-area-inset-bottom, 0px))',
+      }}
+    >
+      <nav
+        aria-label="Mobile Bottom App Bar"
+        className="pointer-events-auto w-full max-w-[390px] bg-white/92 dark:bg-slate-900/92 backdrop-blur-2xl border border-slate-200/80 dark:border-white/10 shadow-[0_14px_38px_rgba(15,23,42,0.14)] rounded-[2rem] p-1.5 flex items-center justify-between relative select-none"
+      >
         {navItems.map((item) => {
           const active = isActive(item.path);
+          const Icon = item.icon;
+
           return (
             <Link
               key={item.name}
               to={item.path}
-              className="relative flex flex-col items-center justify-center w-16 h-14 group"
+              className={`relative flex-1 flex flex-col items-center justify-center py-2 px-1 rounded-2xl transition-all duration-200 active:scale-90 ${
+                active ? 'text-brand-orange' : 'text-slate-500 hover:text-slate-800'
+              }`}
             >
-              {/* Active Indicator Background */}
+              {/* Active Tab Liquid Pill Background (Flutter/iOS style) */}
               {active && (
                 <motion.div
-                  layoutId="activeTab"
-                  className="absolute -top-7 w-14 h-14 bg-white rounded-full shadow-[0_10px_20px_rgba(245,148,35,0.3)] flex items-center justify-center border-4 border-slate-50"
-                  transition={{ type: 'spring', stiffness: 380, damping: 30 }}
-                >
-                  <div className="w-full h-full rounded-full bg-brand-orange/5 flex items-center justify-center text-brand-orange">
-                    <item.icon className="w-6 h-6 stroke-[2.5]" />
-                  </div>
-                </motion.div>
-              )}
-
-              {/* Icon (for non-active tabs) */}
-              {!active && (
-                <item.icon
-                  className="w-5 h-5 text-slate-400 group-hover:text-brand-orange transition-colors duration-300"
+                  layoutId="mobileNavActivePill"
+                  className="absolute inset-0 bg-orange-50/90 dark:bg-brand-orange/15 rounded-2xl border border-brand-orange/25 -z-10 shadow-2xs"
+                  transition={{ type: 'spring', stiffness: 420, damping: 32 }}
                 />
               )}
 
+              {/* Icon Container with Badge */}
+              <div className="relative flex items-center justify-center">
+                <Icon
+                  className={`w-5 h-5 transition-transform duration-200 ${
+                    active ? 'scale-110 stroke-[2.4]' : 'stroke-[1.9]'
+                  }`}
+                />
+
+                {/* Micro live badge */}
+                {item.badge && !active && (
+                  <span className="absolute -top-1 -right-2 px-1 py-0.2 rounded-full bg-emerald-500 text-white text-[7px] font-black uppercase tracking-tight shadow-xs">
+                    {item.badge}
+                  </span>
+                )}
+              </div>
+
               {/* Label */}
               <span
-                className={`text-[10px] font-bold mt-1 tracking-wider uppercase transition-colors duration-300 ${
-                  active ? 'text-brand-orange mt-7' : 'text-slate-400'
+                className={`text-[10px] font-heading mt-1 leading-none tracking-tight transition-all duration-200 ${
+                  active ? 'font-black text-brand-orange scale-105' : 'font-semibold text-slate-500'
                 }`}
               >
                 {item.name}
               </span>
+
+              {/* Micro active dot */}
+              {active && (
+                <span className="w-1 h-1 rounded-full bg-brand-orange mt-0.5 shadow-xs" />
+              )}
             </Link>
           );
         })}
-      </div>
+      </nav>
     </div>
   );
 }

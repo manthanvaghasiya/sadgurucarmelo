@@ -4,7 +4,7 @@ import SEO from '../components/SEO';
 import {
     Fuel, Settings2, User, Gauge, MapPin, Star, Tag, Check,
     ShieldCheck, Palette, RotateCw, CheckCircle2, ChevronLeft, ChevronRight,
-    ArrowLeftRight, Download, Maximize2, Share2, X, ArrowLeft, Send, Loader2
+    ArrowLeftRight, Download, Maximize2, Share2, X, ArrowLeft, Send, Loader2, Phone
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import axiosInstance from '../api/axiosConfig';
@@ -15,11 +15,13 @@ import WhatsAppIcon from '../components/WhatsAppIcon';
 import { getCarWhatsAppLink } from '../utils/whatsapp';
 import { getOptimizedUrl } from '../utils/imageUtils';
 import { useCompare } from '../context/CompareContext';
+import { useDealershipContact } from '../context/DealershipContactContext';
 import { generateCarDetailCard } from '../utils/carDetailCardGenerator';
 import { FALLBACK_SHOWCASE } from '../data/showcaseData';
 
 export default function CarDetails() {
     const { id } = useParams();
+    const { telPhone } = useDealershipContact();
     const { addToCompare, removeFromCompare, toggleCompare, isInCompare, compareCount } = useCompare();
     const [car, setCar] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -415,7 +417,7 @@ export default function CarDetails() {
                                 "addressRegion": "GJ",
                                 "addressCountry": "IN"
                             },
-                            "telephone": "+919913634447"
+                            "telephone": telPhone || "+919876543210"
                         }
                     }
                 }}
@@ -1015,18 +1017,23 @@ export default function CarDetails() {
                 )}
             </div>
 
-            {/* ════ Mobile Sticky Bottom Action Bar ════ */}
-            <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200/90 px-4 py-2.5 shadow-[0_-4px_20px_rgba(0,0,0,0.08)] flex items-center justify-between gap-3">
+            {/* ════ Mobile Sticky Bottom Action Bar with iPhone/Android Safe-Area Support ════ */}
+            <div
+                className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-xl border-t border-slate-200/90 px-4 pt-2.5 shadow-[0_-6px_25px_rgba(0,0,0,0.08)] flex items-center justify-between gap-2.5"
+                style={{
+                    paddingBottom: 'max(0.625rem, env(safe-area-inset-bottom, 0px))',
+                }}
+            >
                 <div className="flex flex-col min-w-0 pr-1">
-                    <span className="text-[10px] font-heading font-bold text-slate-400 uppercase tracking-wider leading-none mb-0.5 truncate">
+                    <span className="text-[10px] font-heading font-bold text-slate-400 uppercase tracking-wider leading-none mb-1 truncate">
                         {car.make} {car.model}
                     </span>
-                    <span className="font-heading font-black text-base text-accent leading-none truncate">
+                    <span className="font-heading font-black text-lg text-accent leading-none truncate">
                         {typeof car.price === 'number' ? `₹${car.price.toLocaleString('en-IN')}` : (car.price ? `₹${car.price}` : 'કિંમત માટે સંપર્ક')}
                     </span>
                 </div>
 
-                <div className="flex items-center gap-2 shrink-0">
+                <div className="flex items-center gap-1.5 shrink-0">
                     <button
                         type="button"
                         onClick={() => toggleCompare(car)}
@@ -1036,17 +1043,30 @@ export default function CarDetails() {
                                 : 'bg-slate-100 hover:bg-slate-200 text-slate-700 border-slate-200'
                         }`}
                         title={isInCompare(car._id || car.id) ? 'સરખામણીમાંથી દૂર કરો' : 'સરખામણીમાં ઉમેરો'}
+                        aria-label="Compare Car"
                     >
                         <ArrowLeftRight className="w-4 h-4" />
                     </button>
+
+                    {telPhone && (
+                        <a
+                            href={`tel:${telPhone}`}
+                            className="h-9 w-9 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-body font-bold text-xs flex items-center justify-center shadow-md active:scale-95 transition-all"
+                            title="Call Dealership"
+                            aria-label="Call Dealership"
+                        >
+                            <Phone className="w-4 h-4 fill-current" />
+                        </a>
+                    )}
 
                     <a
                         href={whatsappUrl}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="h-9 px-3.5 rounded-xl bg-[#25D366] hover:bg-[#20bd5a] text-white font-body font-bold text-xs flex items-center justify-center gap-1.5 shadow-md shadow-green-500/25 active:scale-95 transition-all"
+                        aria-label="Chat on WhatsApp"
                     >
-                        <WhatsAppIcon className="w-4 h-4" />
+                        <WhatsAppIcon className="w-4 h-4 shrink-0" />
                         <span>WhatsApp</span>
                     </a>
                 </div>

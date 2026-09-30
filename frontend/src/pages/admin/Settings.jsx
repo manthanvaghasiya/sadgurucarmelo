@@ -1,107 +1,25 @@
-import { useState, useEffect, useCallback } from 'react';
-import { useForm } from 'react-hook-form';
+/**
+ * @file frontend/src/pages/admin/Settings.jsx
+ * @description Master Admin Settings orchestrator for credentials, security posture,
+ * and multi-key Gemini AI auto-fill engine configuration.
+ */
+
+import React, { useState, useEffect, useCallback } from 'react';
 import toast from 'react-hot-toast';
 import {
   Settings,
   Shield,
   Plus,
   Trash2,
-  Eye,
-  EyeOff,
   Loader2,
-  Lock,
-  Key,
-  Mail,
   Sparkles,
-  Save,
 } from 'lucide-react';
 import axiosInstance from '../../api/axiosConfig';
-import { useAuth } from '../../context/AuthContext';
+import SecurityCredentialsTab from '../../components/admin/settings/SecurityCredentialsTab';
 
 export default function AdminSettings() {
   // ── Tab Management ──
   const [activeTab, setActiveTab] = useState('security');
-
-  // ── Auth Context ──
-  const { user: authUser, updateUser } = useAuth();
-
-  // ── Credentials Form State ──
-  const [credentialsLoading, setCredentialsLoading] = useState(false);
-  const [showCurrent, setShowCurrent] = useState(false);
-  const [showNew, setShowNew] = useState(false);
-  const [showConfirm, setShowConfirm] = useState(false);
-
-  const {
-    register,
-    handleSubmit,
-    reset,
-    watch,
-    setValue,
-    formState: { errors, isSubmitting },
-  } = useForm();
-
-  const newPasswordValue = watch('newPassword');
-
-  // ── Fetch Current Admin Credentials ──
-  const fetchCredentials = useCallback(async () => {
-    setCredentialsLoading(true);
-    try {
-      const res = await axiosInstance.get('/auth/me');
-      if (res.data.success && res.data.data) {
-        const userData = res.data.data;
-        setValue('email', userData.email || '');
-        if (updateUser) updateUser(userData);
-      }
-    } catch (err) {
-      console.error('Failed to fetch credentials:', err);
-      if (authUser?.email) {
-        setValue('email', authUser.email);
-      }
-    } finally {
-      setCredentialsLoading(false);
-    }
-  }, [setValue, updateUser, authUser]);
-
-  useEffect(() => {
-    if (activeTab === 'security') {
-      fetchCredentials();
-    }
-  }, [activeTab, fetchCredentials]);
-
-  // ── Save Credentials (Email and/or Password) ──
-  const onSaveCredentials = async (data) => {
-    try {
-      const payload = {
-        email: data.email.trim().toLowerCase(),
-      };
-
-      if (data.newPassword && data.newPassword.trim()) {
-        if (!data.currentPassword || !data.currentPassword.trim()) {
-          toast.error('Current password is required to set a new password');
-          return;
-        }
-        payload.currentPassword = data.currentPassword;
-        payload.newPassword = data.newPassword.trim();
-      }
-
-      const res = await axiosInstance.put('/auth/profile', payload);
-      if (res.data.success) {
-        toast.success(res.data.message || 'Credentials updated successfully!');
-        if (res.data.data && updateUser) {
-          updateUser(res.data.data);
-        }
-        // Clear password fields
-        setValue('currentPassword', '');
-        setValue('newPassword', '');
-        setValue('confirmPassword', '');
-        setShowCurrent(false);
-        setShowNew(false);
-        setShowConfirm(false);
-      }
-    } catch (err) {
-      toast.error(err.response?.data?.message || 'Failed to update credentials');
-    }
-  };
 
   // ── AI Configuration State ──
   const [geminiKeys, setGeminiKeys] = useState(['']);
@@ -174,7 +92,9 @@ export default function AdminSettings() {
         </div>
         <div>
           <h1 className="font-heading font-bold text-2xl text-text">Settings</h1>
-          <p className="font-body text-sm text-text-muted">Manage your login credentials, account security, and AI configuration.</p>
+          <p className="font-body text-sm text-text-muted">
+            Manage your login credentials, account security, and AI configuration.
+          </p>
         </div>
       </div>
 
@@ -186,10 +106,11 @@ export default function AdminSettings() {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-body text-sm font-semibold transition-all duration-200 ${activeTab === tab.id
-                ? 'bg-primary text-white shadow-md shadow-primary/15'
-                : 'text-text-muted hover:text-text hover:bg-background'
-                }`}
+              className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-body text-sm font-semibold transition-all duration-200 cursor-pointer ${
+                activeTab === tab.id
+                  ? 'bg-primary text-white shadow-md shadow-primary/15'
+                  : 'text-text-muted hover:text-text hover:bg-background'
+              }`}
             >
               <Icon className="w-4 h-4" />
               {tab.label}
@@ -199,157 +120,7 @@ export default function AdminSettings() {
       </div>
 
       {/* ═══════════════════════ Security & Credentials Tab ═══════════════════════ */}
-      {activeTab === 'security' && (
-        <div className="max-w-2xl">
-          <div className="bg-surface rounded-2xl border border-gray-100 p-6 sm:p-8 space-y-6">
-            {/* Header */}
-            <div className="flex items-center gap-3 pb-5 border-b border-gray-100">
-              <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center">
-                <Shield className="w-5 h-5 text-primary" />
-              </div>
-              <div>
-                <h2 className="font-heading font-bold text-lg text-text">Security & Login Credentials</h2>
-                <p className="font-body text-sm text-text-muted">Update your admin login email address and password.</p>
-              </div>
-            </div>
-
-            {credentialsLoading ? (
-              <div className="py-12 flex flex-col items-center justify-center gap-2 font-body text-sm text-text-muted">
-                <Loader2 className="w-6 h-6 animate-spin text-primary" />
-                Loading credentials...
-              </div>
-            ) : (
-              <form onSubmit={handleSubmit(onSaveCredentials)} className="space-y-6">
-                {/* Email Address */}
-                <div>
-                  <label className="block font-body text-xs font-semibold text-text-muted mb-1.5 uppercase tracking-wide">
-                    Email Address *
-                  </label>
-                  <div className="relative">
-                    <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted/60" />
-                    <input
-                      type="email"
-                      {...register('email', { required: 'Email is required' })}
-                      className="w-full pl-11 pr-4 py-3 bg-background rounded-xl border border-gray-200 font-body text-sm text-text outline-none focus:border-primary/30 focus:ring-2 focus:ring-primary/10"
-                      placeholder="admin@example.com"
-                    />
-                  </div>
-                  {errors.email && <p className="text-red-500 text-xs font-body mt-1">{errors.email.message}</p>}
-                  <p className="font-body text-xs text-text-muted/60 mt-1">This is your username for logging into the admin portal.</p>
-                </div>
-
-                {/* Password Section */}
-                <div className="pt-4 border-t border-gray-100 space-y-4">
-                  <div className="flex items-center gap-2">
-                    <Key className="w-4 h-4 text-[#d97706]" />
-                    <h3 className="font-heading font-bold text-sm text-text">Change Password</h3>
-                    <span className="font-body text-xs text-text-muted">(Leave blank to keep current password)</span>
-                  </div>
-
-                  {/* Current Password */}
-                  <div>
-                    <label className="block font-body text-xs font-semibold text-text-muted mb-1.5 uppercase tracking-wide">
-                      Current Password {newPasswordValue ? '*' : ''}
-                    </label>
-                    <div className="relative">
-                      <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted/60" />
-                      <input
-                        type={showCurrent ? 'text' : 'password'}
-                        {...register('currentPassword', {
-                          validate: (val) => !newPasswordValue || !!val?.trim() || 'Current password is required to change password',
-                        })}
-                        placeholder="••••••••"
-                        className="w-full pl-11 pr-11 py-3 bg-background rounded-xl border border-gray-200 font-body text-sm text-text outline-none focus:border-primary/30 focus:ring-2 focus:ring-primary/10"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setShowCurrent(!showCurrent)}
-                        className="absolute right-4 top-1/2 -translate-y-1/2 text-text-muted hover:text-text transition-colors"
-                      >
-                        {showCurrent ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                      </button>
-                    </div>
-                    {errors.currentPassword && <p className="text-red-500 text-xs font-body mt-1">{errors.currentPassword.message}</p>}
-                  </div>
-
-                  {/* New Password */}
-                  <div>
-                    <label className="block font-body text-xs font-semibold text-text-muted mb-1.5 uppercase tracking-wide">
-                      New Password
-                    </label>
-                    <div className="relative">
-                      <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted/60" />
-                      <input
-                        type={showNew ? 'text' : 'password'}
-                        {...register('newPassword', {
-                          minLength: { value: 6, message: 'Min 6 characters' },
-                        })}
-                        placeholder="Min 6 characters"
-                        className="w-full pl-11 pr-11 py-3 bg-background rounded-xl border border-gray-200 font-body text-sm text-text outline-none focus:border-primary/30 focus:ring-2 focus:ring-primary/10"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setShowNew(!showNew)}
-                        className="absolute right-4 top-1/2 -translate-y-1/2 text-text-muted hover:text-text transition-colors"
-                      >
-                        {showNew ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                      </button>
-                    </div>
-                    {errors.newPassword && <p className="text-red-500 text-xs font-body mt-1">{errors.newPassword.message}</p>}
-                  </div>
-
-                  {/* Confirm New Password */}
-                  <div>
-                    <label className="block font-body text-xs font-semibold text-text-muted mb-1.5 uppercase tracking-wide">
-                      Confirm New Password
-                    </label>
-                    <div className="relative">
-                      <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted/60" />
-                      <input
-                        type={showConfirm ? 'text' : 'password'}
-                        {...register('confirmPassword', {
-                          validate: (val) => !newPasswordValue || val === newPasswordValue || 'Passwords do not match',
-                        })}
-                        placeholder="Repeat new password"
-                        className="w-full pl-11 pr-11 py-3 bg-background rounded-xl border border-gray-200 font-body text-sm text-text outline-none focus:border-primary/30 focus:ring-2 focus:ring-primary/10"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setShowConfirm(!showConfirm)}
-                        className="absolute right-4 top-1/2 -translate-y-1/2 text-text-muted hover:text-text transition-colors"
-                      >
-                        {showConfirm ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                      </button>
-                    </div>
-                    {errors.confirmPassword && <p className="text-red-500 text-xs font-body mt-1">{errors.confirmPassword.message}</p>}
-                  </div>
-                </div>
-
-                {/* Submit Button */}
-                <div className="pt-4 border-t border-gray-100 flex justify-end">
-                  <button
-                    type="submit"
-                    disabled={isSubmitting || credentialsLoading}
-                    className="px-6 py-3 bg-primary hover:bg-primary-hover text-white rounded-xl font-body text-sm font-bold transition-colors shadow-sm shadow-primary/20 disabled:opacity-50 flex items-center gap-2"
-                  >
-                    {isSubmitting ? (
-                      <>
-                        <Loader2 className="w-4 h-4 animate-spin" />
-                        Saving Changes...
-                      </>
-                    ) : (
-                      <>
-                        <Save className="w-4 h-4" />
-                        Save Changes
-                      </>
-                    )}
-                  </button>
-                </div>
-              </form>
-            )}
-          </div>
-        </div>
-      )}
+      {activeTab === 'security' && <SecurityCredentialsTab />}
 
       {/* ═══════════════════════ AI Configuration Tab ═══════════════════════ */}
       {activeTab === 'ai' && (
@@ -382,7 +153,10 @@ export default function AdminSettings() {
               <Sparkles className="w-5 h-5 text-brand-orange shrink-0 mt-0.5" />
               <div className="font-body text-xs text-text-muted leading-relaxed">
                 <strong className="text-text">How Multi-Key Rotation Works: </strong>
-                You can configure multiple free Gemini API keys. When adding a car or pasting a dealer WhatsApp message, the system uses the first active key. If a key hits Google's free-tier rate limit (429) or quota exhaustion, it automatically penalties that key for 60 seconds and instantly rotates to your next key. If all keys are exhausted or offline, the smart regex pattern parser takes over with zero downtime.
+                You can configure multiple free Gemini API keys. When adding a car or pasting a dealer WhatsApp message,
+                the system uses the first active key. If a key hits Google's free-tier rate limit (429) or quota
+                exhaustion, it automatically penalties that key for 60 seconds and instantly rotates to your next key.
+                If all keys are exhausted or offline, the smart regex pattern parser takes over with zero downtime.
               </div>
             </div>
 
@@ -436,7 +210,7 @@ export default function AdminSettings() {
                           <button
                             type="button"
                             onClick={() => removeGeminiKey(index)}
-                            className="p-3 text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-xl transition-colors shrink-0"
+                            className="p-3 text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-xl transition-colors shrink-0 cursor-pointer"
                             title="Remove Key"
                           >
                             <Trash2 className="w-4 h-4" />
@@ -451,7 +225,7 @@ export default function AdminSettings() {
                   <button
                     type="button"
                     onClick={addGeminiKey}
-                    className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-surface border border-gray-200 dark:border-white/10 font-body text-xs font-semibold text-text hover:bg-white/5 transition-colors"
+                    className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-surface border border-gray-200 dark:border-white/10 font-body text-xs font-semibold text-text hover:bg-white/5 transition-colors cursor-pointer"
                   >
                     <Plus className="w-4 h-4 text-brand-orange" />
                     Add Another Gemini Key
@@ -461,7 +235,7 @@ export default function AdminSettings() {
                     type="button"
                     disabled={aiSaving}
                     onClick={onSaveAiSettings}
-                    className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-primary hover:bg-primary-hover text-white font-body text-xs font-bold shadow-md shadow-primary/20 disabled:opacity-50 transition-all"
+                    className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-primary hover:bg-primary-hover text-white font-body text-xs font-bold shadow-md shadow-primary/20 disabled:opacity-50 transition-all cursor-pointer"
                   >
                     {aiSaving ? (
                       <>

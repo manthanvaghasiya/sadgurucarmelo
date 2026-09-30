@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Calculator, ShieldCheck, Info } from 'lucide-react';
 import WhatsAppIcon from './WhatsAppIcon';
+import { buildWhatsAppUrl } from '../utils/whatsapp';
 
 export default function EmiCalculator({ carPrice = 500000, carTitle = 'this vehicle' }) {
   const [downPaymentPercent, setDownPaymentPercent] = useState(20);
@@ -256,7 +257,7 @@ Please guide me with the loan approval process.`
           </div>
 
           <a
-            href={`https://wa.me/919913634447?text=${whatsappMessage}`}
+            href={buildWhatsAppUrl(whatsappMessage)}
             target="_blank"
             rel="noopener noreferrer"
             className="w-full sm:w-auto px-6 py-3 rounded-xl bg-[#25D366] hover:bg-[#20bd5a] text-white font-bold text-xs flex items-center justify-center gap-2 transition-all shadow-md shrink-0"
