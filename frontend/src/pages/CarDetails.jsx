@@ -47,6 +47,7 @@ export default function CarDetails() {
     const [touchEnd, setTouchEnd] = useState(null);
     const [viewMode, setViewMode] = useState('standard'); // 'standard' or '360'
     const [isSendingImages, setIsSendingImages] = useState(false);
+    const [showAllFeatures, setShowAllFeatures] = useState(false);
 
     const whatsappUrl = car ? getCarWhatsAppLink(car) : '#';
 
@@ -1127,11 +1128,16 @@ export default function CarDetails() {
                             {/* Key Features */}
                             {(car.features || []).length > 0 && (
                                 <div>
-                                    <h3 className="font-heading font-bold text-base sm:text-lg text-slate-900 mb-2.5 border-l-3 border-primary pl-2.5">
-                                        Key Highlights & Features
-                                    </h3>
+                                    <div className="flex items-center justify-between mb-2.5">
+                                        <h3 className="font-heading font-bold text-base sm:text-lg text-slate-900 border-l-3 border-primary pl-2.5">
+                                            Key Highlights & Features
+                                        </h3>
+                                        <span className="text-[11px] font-bold text-slate-400 font-heading">
+                                            {car.features.length} Features
+                                        </span>
+                                    </div>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-2 font-body text-xs sm:text-sm">
-                                        {(car.features || []).map((f, i) => {
+                                        {(showAllFeatures ? (car.features || []) : (car.features || []).slice(0, 8)).map((f, i) => {
                                             const featureStr = String(f || '');
                                             const hasColon = featureStr.includes(':');
 
@@ -1159,6 +1165,20 @@ export default function CarDetails() {
                                             );
                                         })}
                                     </div>
+
+                                    {(car.features || []).length > 8 && (
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowAllFeatures(!showAllFeatures)}
+                                            className="mt-3.5 w-full py-2.5 px-4 rounded-xl bg-slate-100 hover:bg-slate-200/80 text-slate-800 font-body font-bold text-xs flex items-center justify-center gap-1.5 transition-all active:scale-98 border border-slate-200/70"
+                                        >
+                                            <span>
+                                                {showAllFeatures
+                                                    ? 'ઓછા ફીચર્સ જુઓ · Show Fewer Features ↑'
+                                                    : `બધા ${(car.features || []).length} ફીચર્સ જુઓ · View All ${(car.features || []).length} Features (+${(car.features || []).length - 8} more) ↓`}
+                                            </span>
+                                        </button>
+                                    )}
                                 </div>
                             )}
 
@@ -1180,8 +1200,8 @@ export default function CarDetails() {
                         </div>
                     </div>
 
-                    {/* ── RIGHT COLUMN: Pricing HUD + Dealership + EMI Calculator (Desktop Only: col 3) ── */}
-                    <div className="hidden lg:flex lg:col-span-1 flex-col gap-3.5">
+                    {/* ── RIGHT COLUMN: Pricing HUD + Dealership + EMI Calculator (Desktop Only: col 3, sticky) ── */}
+                    <div className="hidden lg:flex lg:col-span-1 flex-col gap-3.5 sticky top-20 self-start">
                         {renderPricingCard()}
                         {renderDealershipCard()}
                         <EmiCalculator
@@ -1189,6 +1209,31 @@ export default function CarDetails() {
                             carTitle={`${car.make || ''} ${car.model || 'Car'} (${car.year || ''})`}
                             isSidebar={true}
                         />
+
+                        {/* Dealership Assurance Badge Card */}
+                        <div className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-2xl p-4 text-white shadow-sm border border-slate-700/50">
+                            <span className="text-[10px] font-heading font-bold text-amber-400 uppercase tracking-widest block mb-2">
+                                સદગુરુ શોરૂમ ભરોસો · Sadguru Assurance
+                            </span>
+                            <div className="grid grid-cols-2 gap-2 text-[11px] font-body">
+                                <div className="flex items-center gap-1.5 text-slate-200">
+                                    <ShieldCheck className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                                    <span>120-Point ટેસ્ટ</span>
+                                </div>
+                                <div className="flex items-center gap-1.5 text-slate-200">
+                                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                                    <span>જેન્યુઈન KM</span>
+                                </div>
+                                <div className="flex items-center gap-1.5 text-slate-200">
+                                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                                    <span>નોન-એક્સિડેન્ટલ</span>
+                                </div>
+                                <div className="flex items-center gap-1.5 text-slate-200">
+                                    <ShieldCheck className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                                    <span>RTO ટ્રાન્સફર</span>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                 </div>
