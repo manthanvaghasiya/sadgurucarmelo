@@ -263,9 +263,9 @@ export default function Home() {
                   ) : (
                     <>
                       {displayedCars.map((car) => (
-                        <div key={car._id} className="w-[78vw] max-w-[285px] snap-start shrink-0 flex flex-col">
+                        <div key={car._id || car.id} className="w-[78vw] max-w-[285px] snap-start shrink-0 flex flex-col">
                           <CarCard
-                            id={car._id}
+                            id={car._id || car.id}
                             image={car.image}
                             title={`${car.make} ${car.model} (${car.year})`}
                             price={car.price >= 100000 ? `₹${(car.price / 100000).toFixed(2)} Lakhs` : `₹${(car.price || 0).toLocaleString('en-IN')}`}
@@ -330,9 +330,9 @@ export default function Home() {
                   ))
                 ) : (
                   displayedCars.map((car) => (
-                    <div key={car._id} className="car-card-premium">
+                    <div key={car._id || car.id} className="car-card-premium">
                       <CarCard
-                        id={car._id}
+                        id={car._id || car.id}
                         image={car.image}
                         title={`${car.make} ${car.model} (${car.year})`}
                         price={car.price >= 100000 ? `₹${(car.price / 100000).toFixed(2)} Lakhs` : `₹${(car.price || 0).toLocaleString('en-IN')}`}
@@ -377,9 +377,9 @@ export default function Home() {
                 </div>
               ) : (
                 displayedCars.map((car) => (
-                  <div key={car._id} className="car-card-premium">
+                  <div key={car._id || car.id} className="car-card-premium">
                     <CarCard
-                      id={car._id}
+                      id={car._id || car.id}
                       image={car.image}
                       title={`${car.make} ${car.model} (${car.year})`}
                       price={car.price >= 100000 ? `₹${(car.price / 100000).toFixed(2)} Lakhs` : `₹${(car.price || 0).toLocaleString('en-IN')}`}
