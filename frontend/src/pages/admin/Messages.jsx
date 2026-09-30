@@ -52,6 +52,20 @@ export default function Messages() {
     );
   }
 
+  const typeList = ['All', ...Array.from(new Set(messages.map(m => m.type || 'General')))];
+
+  const getTypeBadge = (type) => {
+    switch (type) {
+      case 'Buy Car': return 'bg-emerald-100 text-emerald-800 border-emerald-200';
+      case 'Sell Car': return 'bg-amber-100 text-amber-800 border-amber-200';
+      case 'Exchange': return 'bg-purple-100 text-purple-800 border-purple-200';
+      case 'Finance': return 'bg-blue-100 text-blue-800 border-blue-200';
+      case 'Test Drive': return 'bg-rose-100 text-rose-800 border-rose-200';
+      case 'Notify': return 'bg-indigo-100 text-indigo-800 border-indigo-200';
+      default: return 'bg-gray-100 text-gray-700 border-gray-200';
+    }
+  };
+
   return (
     <div className="max-w-7xl mx-auto space-y-6 animate-fade-in">
       <div className="flex flex-col gap-2">
@@ -63,23 +77,26 @@ export default function Messages() {
         </p>
       </div>
 
-      <div className="flex gap-4 border-b border-gray-200 overflow-x-auto -mx-1 px-1">
-        {['All', 'Contact Us', 'Notify'].map((type) => (
+      <div className="flex gap-2 sm:gap-4 border-b border-gray-200 overflow-x-auto -mx-1 px-1 py-1">
+        {typeList.map((type) => (
           <button
             key={type}
             onClick={() => setFilterType(type)}
-            className={`pb-2 px-1 text-sm font-semibold transition-colors border-b-2 ${filterType === type
-                ? 'border-primary text-primary'
-                : 'border-transparent text-gray-500 hover:text-gray-700'
+            className={`pb-2 px-3 py-1 rounded-lg text-xs sm:text-sm font-semibold transition-all whitespace-nowrap ${filterType === type
+                ? 'bg-primary text-white shadow-sm'
+                : 'bg-gray-100 hover:bg-gray-200 text-gray-600'
               }`}
           >
             {type}
+            <span className="ml-1.5 opacity-75 font-mono text-xs">
+              ({type === 'All' ? messages.length : messages.filter(m => (m.type || 'General') === type).length})
+            </span>
           </button>
         ))}
       </div>
 
       <div className="bg-surface rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-        {messages.filter(m => filterType === 'All' || m.type === filterType || (!m.type && filterType === 'Contact Us')).length === 0 ? (
+        {messages.filter(m => filterType === 'All' || (m.type || 'General') === filterType).length === 0 ? (
           <div className="p-12 text-center flex flex-col items-center">
             <Mail className="w-16 h-16 text-gray-300 mb-4" />
             <h3 className="font-heading font-bold text-xl text-text mb-2">No messages yet</h3>
@@ -87,7 +104,7 @@ export default function Messages() {
           </div>
         ) : (
           <div className="divide-y divide-gray-100">
-            {messages.filter(m => filterType === 'All' || m.type === filterType || (!m.type && filterType === 'Contact Us')).map((msg) => (
+            {messages.filter(m => filterType === 'All' || (m.type || 'General') === filterType).map((msg) => (
               <div
                 key={msg._id}
                 className={`p-4 sm:p-6 transition-colors hover:bg-gray-50/50 flex flex-col md:flex-row gap-4 sm:gap-6 ${msg.status === 'Unread' ? 'bg-primary/5' : ''}`}
@@ -95,22 +112,15 @@ export default function Messages() {
                 {/* Left: Message details */}
                 <div className="flex-1 space-y-4">
                   <div className="flex items-start justify-between">
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-3 flex-wrap">
                       {msg.status === 'Unread' && (
                         <span className="w-2.5 h-2.5 rounded-full bg-accent animate-pulse" title="Unread"></span>
                       )}
                       <h3 className={`font-heading text-lg ${msg.status === 'Unread' ? 'font-bold' : 'font-semibold text-text/90'}`}>
                         {msg.name}
-                        {msg.type === 'Notify' && (
-                          <span className="ml-3 text-xs font-bold px-2 py-1 bg-blue-100 text-blue-700 rounded-md">
-                            Notify
-                          </span>
-                        )}
-                        {(!msg.type || msg.type === 'Contact Us') && (
-                          <span className="ml-3 text-xs font-bold px-2 py-1 bg-gray-100 text-gray-700 rounded-md">
-                            Contact Us
-                          </span>
-                        )}
+                        <span className={`ml-2.5 text-xs font-bold px-2.5 py-0.5 rounded-full border ${getTypeBadge(msg.type || 'General')}`}>
+                          {msg.type || 'General'}
+                        </span>
                       </h3>
                       <span className="text-xs font-body text-text-muted px-2 py-1 bg-gray-100 rounded-md">
                         {new Date(msg.createdAt).toLocaleString()}

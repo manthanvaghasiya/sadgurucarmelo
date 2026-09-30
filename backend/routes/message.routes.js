@@ -16,7 +16,13 @@ router.post('/', async (req, res, next) => {
       return res.status(400).json({ success: false, message: 'Name, contact info, and message are required' });
     }
 
-    const newMessage = await Message.create({ name, email, phone, message, type });
+    const newMessage = await Message.create({
+      name: name?.trim(),
+      email: email?.trim() || undefined,
+      phone: phone?.trim(),
+      message: message?.trim(),
+      type: type?.trim() || 'General',
+    });
 
     // ── Webhook: Forward lead to n8n / automation (fire-and-forget) ──
     if (process.env.N8N_WEBHOOK_URL) {

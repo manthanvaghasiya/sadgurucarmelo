@@ -24,8 +24,8 @@ const messageSchema = new mongoose.Schema(
     },
     type: {
       type: String,
-      enum: ['Contact Us', 'Notify'],
-      default: 'Contact Us',
+      default: 'General',
+      trim: true,
     },
   },
   { timestamps: true }
