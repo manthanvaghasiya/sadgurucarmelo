@@ -171,6 +171,36 @@ class ErrorBoundary extends React.Component {
               </button>
             </div>
 
+            {/* Development Error Details */}
+            {import.meta.env?.DEV && this.state.error && (
+              <details style={{
+                marginTop: '1.25rem',
+                textAlign: 'left',
+                background: '#fef2f2',
+                border: '1px solid #fecaca',
+                borderRadius: '0.75rem',
+                padding: '0.75rem 1rem',
+                fontSize: '0.75rem',
+                color: '#991b1b',
+              }}>
+                <summary style={{ fontWeight: '700', cursor: 'pointer', marginBottom: '0.5rem' }}>
+                  🛠️ Developer Diagnostics: {this.state.error?.message || 'Error details'}
+                </summary>
+                <pre style={{
+                  whiteSpace: 'pre-wrap',
+                  wordBreak: 'break-all',
+                  fontFamily: 'monospace',
+                  fontSize: '0.7rem',
+                  lineHeight: '1.4',
+                  margin: 0,
+                  maxHeight: '180px',
+                  overflowY: 'auto',
+                }}>
+                  {this.state.error?.stack || String(this.state.error)}
+                </pre>
+              </details>
+            )}
+
             {/* Dealership Hotline Support */}
             <div style={{
               marginTop: '1.75rem',
