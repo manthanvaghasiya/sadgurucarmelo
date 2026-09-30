@@ -1,24 +1,66 @@
+import dotenv from 'dotenv';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import multer from 'multer';
 import crypto from 'crypto';
 
-// ── ImageKit Configuration Check ──
-export const isImageKitConfigured = Boolean(
-  process.env.IMAGEKIT_PUBLIC_KEY?.trim() &&
-  process.env.IMAGEKIT_PRIVATE_KEY?.trim() &&
-  process.env.IMAGEKIT_URL_ENDPOINT?.trim()
-);
+// Ensure environment variables are loaded regardless of ESM import hoisting
+dotenv.config();
+if (!process.env.IMAGEKIT_PRIVATE_KEY && !process.env.CLOUDINARY_API_KEY) {
+  try {
+    const currentDir = path.dirname(fileURLToPath(import.meta.url));
+    dotenv.config({ path: path.join(currentDir, '../.env') });
+    dotenv.config({ path: path.join(currentDir, '../../.env') });
+  } catch {}
+}
+
+// ── ImageKit Configuration Check & Sanitizer ──
+export function getImageKitConfig() {
+  const publicKey = (process.env.IMAGEKIT_PUBLIC_KEY || '').trim().replace(/[\r\n]+/g, '');
+  const privateKey = (process.env.IMAGEKIT_PRIVATE_KEY || '').trim().replace(/[\r\n]+/g, '');
+  const urlEndpoint = (process.env.IMAGEKIT_URL_ENDPOINT || '').trim().replace(/[\r\n]+/g, '').replace(/\/+$/, '');
+  const isConfigured = Boolean(publicKey && privateKey && urlEndpoint);
+  return { publicKey, privateKey, urlEndpoint, isConfigured };
+}
+
+export function checkImageKitConfigured() {
+  return getImageKitConfig().isConfigured;
+}
+
+export function checkR2Configured() {
+  return Boolean(
+    process.env.R2_ACCOUNT_ID?.trim() &&
+    process.env.R2_ACCESS_KEY_ID?.trim() &&
+    process.env.R2_SECRET_ACCESS_KEY?.trim() &&
+    process.env.R2_BUCKET_NAME?.trim()
+  );
+}
+
+export function checkCloudinaryConfigured() {
+  return Boolean(
+    process.env.CLOUDINARY_CLOUD_NAME?.trim() &&
+    process.env.CLOUDINARY_API_KEY?.trim() &&
+    process.env.CLOUDINARY_API_SECRET?.trim()
+  );
+}
+
+// Backwards-compatible exports (evaluated dynamically when called or accessed)
+export const isImageKitConfigured = checkImageKitConfigured();
+export const isR2Configured = checkR2Configured();
+export const isCloudinaryConfigured = checkCloudinaryConfigured();
 
 // ── Initialize ImageKit Client (Lazy) ──
 let _imagekitInstance = null;
 export async function getImageKitClient() {
-  if (!isImageKitConfigured) return null;
+  const config = getImageKitConfig();
+  if (!config.isConfigured) return null;
   if (_imagekitInstance) return _imagekitInstance;
   try {
     const { default: ImageKit } = await import('imagekit');
     _imagekitInstance = new ImageKit({
-      publicKey: process.env.IMAGEKIT_PUBLIC_KEY.trim(),
-      privateKey: process.env.IMAGEKIT_PRIVATE_KEY.trim(),
-      urlEndpoint: process.env.IMAGEKIT_URL_ENDPOINT.trim(),
+      publicKey: config.publicKey,
+      privateKey: config.privateKey,
+      urlEndpoint: config.urlEndpoint,
     });
     return _imagekitInstance;
   } catch (err) {
@@ -28,27 +70,19 @@ export async function getImageKitClient() {
 }
 export const imagekitClient = null; // Backwards-compatible export
 
-// ── Cloudflare R2 Configuration Check ──
-export const isR2Configured = Boolean(
-  process.env.R2_ACCOUNT_ID &&
-  process.env.R2_ACCESS_KEY_ID &&
-  process.env.R2_SECRET_ACCESS_KEY &&
-  process.env.R2_BUCKET_NAME
-);
-
 // ── Initialize R2 S3 Client (Lazy) ──
 let _r2Instance = null;
 export async function getR2Client() {
-  if (!isR2Configured) return null;
+  if (!checkR2Configured()) return null;
   if (_r2Instance) return _r2Instance;
   try {
     const { S3Client } = await import('@aws-sdk/client-s3');
     _r2Instance = new S3Client({
       region: 'auto',
-      endpoint: `https://${process.env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
+      endpoint: `https://${process.env.R2_ACCOUNT_ID.trim()}.r2.cloudflarestorage.com`,
       credentials: {
-        accessKeyId: process.env.R2_ACCESS_KEY_ID,
-        secretAccessKey: process.env.R2_SECRET_ACCESS_KEY,
+        accessKeyId: process.env.R2_ACCESS_KEY_ID.trim(),
+        secretAccessKey: process.env.R2_SECRET_ACCESS_KEY.trim(),
       },
     });
     return _r2Instance;
@@ -288,23 +322,90 @@ export async function deleteFromR2(keyOrUrl) {
 }
 
 /**
+ * Upload an image buffer to Cloudinary with Sharp compression.
+ *
+ * @param {Buffer} buffer - File buffer
+ * @param {string} originalName - Original file name
+ * @param {string} [folder='sadguru_cars'] - Target folder in Cloudinary
+ * @returns {Promise<{url: string, key: string, path: string, filename: string, thumbnail_url: string}>}
+ */
+export async function uploadToCloudinary(buffer, originalName = 'photo.jpg', folder = 'sadguru_cars') {
+  if (!checkCloudinaryConfigured()) {
+    throw new Error('Cloudinary is not configured. Missing Cloudinary credentials.');
+  }
+
+  const { v2: cloudinary } = await import('cloudinary');
+  cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME.trim().replace(/[\r\n]+/g, ''),
+    api_key: process.env.CLOUDINARY_API_KEY.trim().replace(/[\r\n]+/g, ''),
+    api_secret: process.env.CLOUDINARY_API_SECRET.trim().replace(/[\r\n]+/g, ''),
+  });
+
+  const compressedBuffer = await optimizeImageBuffer(buffer, originalName);
+
+  return new Promise((resolve, reject) => {
+    const uploadStream = cloudinary.uploader.upload_stream(
+      {
+        folder,
+        resource_type: 'image',
+        format: 'webp',
+      },
+      (error, result) => {
+        if (error) return reject(error);
+        resolve({
+          url: result.secure_url,
+          key: result.public_id,
+          path: result.secure_url,
+          filename: result.public_id,
+          thumbnail_url: result.secure_url,
+        });
+      }
+    );
+    uploadStream.end(compressedBuffer);
+  });
+}
+
+/**
  * Universal media uploader:
- * 1. Prefers ImageKit when configured
- * 2. Uses Cloudflare R2 when configured
- * 3. Falls back with an informative error
+ * 1. Prefers ImageKit when configured (20 GB Free Cloud CDN)
+ * 2. Falls back to Cloudflare R2 when configured
+ * 3. Falls back to Cloudinary when configured
  *
  * @param {Buffer} buffer
  * @param {string} originalName
  * @param {string} [folder]
  */
 export async function uploadMedia(buffer, originalName = 'photo.jpg', folder = 'inventory') {
-  if (isImageKitConfigured) {
-    return await uploadToImageKit(buffer, originalName, folder.startsWith('/') ? folder : `/${folder}`);
+  // 1. Primary: ImageKit
+  if (checkImageKitConfigured()) {
+    try {
+      return await uploadToImageKit(buffer, originalName, folder.startsWith('/') ? folder : `/${folder}`);
+    } catch (err) {
+      console.warn('⚠️ ImageKit upload failed, attempting fallback storage provider:', err.message);
+      // Fall through to R2 or Cloudinary
+    }
   }
-  if (isR2Configured) {
-    return await uploadBufferToR2(buffer, originalName, folder.replace(/^\/+/, ''));
+
+  // 2. Standby: Cloudflare R2
+  if (checkR2Configured()) {
+    try {
+      return await uploadBufferToR2(buffer, originalName, folder.replace(/^\/+/, ''));
+    } catch (err) {
+      console.warn('⚠️ Cloudflare R2 upload failed, attempting fallback storage provider:', err.message);
+      // Fall through to Cloudinary
+    }
   }
-  throw new Error('No cloud storage provider configured. Please set ImageKit or Cloudflare R2 environment variables.');
+
+  // 3. Standby: Cloudinary
+  if (checkCloudinaryConfigured()) {
+    try {
+      return await uploadToCloudinary(buffer, originalName, folder === 'inventory' ? 'sadguru_cars' : folder);
+    } catch (err) {
+      console.error('⚠️ Cloudinary fallback upload failed:', err.message);
+    }
+  }
+
+  throw new Error('No cloud storage provider configured or reachable. Please check ImageKit or Cloudinary environment variables.');
 }
 
 /**
@@ -318,7 +419,7 @@ export async function deleteMedia(urlOrKeyOrId) {
   if (!urlOrKeyOrId || typeof urlOrKeyOrId !== 'string') return;
 
   // 1. ImageKit
-  if (urlOrKeyOrId.includes('ik.imagekit.io') || (isImageKitConfigured && !urlOrKeyOrId.includes('/'))) {
+  if (urlOrKeyOrId.includes('ik.imagekit.io') || (checkImageKitConfigured() && !urlOrKeyOrId.includes('/'))) {
     return await deleteFromImageKit(urlOrKeyOrId);
   }
 
@@ -346,9 +447,9 @@ export async function deleteMedia(urlOrKeyOrId) {
   }
 
   // If unknown, delete from ImageKit
-  if (isImageKitConfigured) {
+  if (checkImageKitConfigured()) {
     await deleteFromImageKit(urlOrKeyOrId);
-  } else if (isR2Configured) {
+  } else if (checkR2Configured()) {
     await deleteFromR2(urlOrKeyOrId);
   }
 }
