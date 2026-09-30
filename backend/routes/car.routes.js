@@ -209,6 +209,120 @@ const handleUpload = (req, res, next) => {
   });
 };
 
+// ── Helper to normalize and sanitize car payload before Mongoose persistence ──
+export function normalizeCarPayload(raw) {
+  const data = { ...raw };
+
+  // Remove string literal 'undefined' or 'null' from any field
+  for (const key of Object.keys(data)) {
+    if (data[key] === 'undefined' || data[key] === 'null') {
+      delete data[key];
+    }
+  }
+
+  // 1. Core text fields
+  if (data.make) data.make = String(data.make).trim();
+  if (data.model) data.model = String(data.model).trim();
+  if (data.variant) data.variant = String(data.variant).trim();
+  if (data.color) data.color = String(data.color).trim();
+  if (data.registration) data.registration = String(data.registration).trim();
+  if (data.bodyType) data.bodyType = String(data.bodyType).trim();
+  if (data.description) data.description = String(data.description).trim();
+
+  // 2. Year fields: extract clean 4-digit number to avoid Mongoose CastError on strings like '2019-12'
+  if (data.manufacturingYear) {
+    const match = String(data.manufacturingYear).match(/\b(19\d\d|20\d\d)\b/);
+    data.manufacturingYear = match ? parseInt(match[1], 10) : undefined;
+  } else {
+    delete data.manufacturingYear;
+  }
+
+  if (data.registerYear) {
+    const match = String(data.registerYear).match(/\b(19\d\d|20\d\d)\b/);
+    data.registerYear = match ? parseInt(match[1], 10) : undefined;
+  } else {
+    delete data.registerYear;
+  }
+
+  if (data.year) {
+    const match = String(data.year).match(/\b(19\d\d|20\d\d)\b/);
+    data.year = match ? parseInt(match[1], 10) : (data.manufacturingYear || data.registerYear);
+  } else if (data.manufacturingYear || data.registerYear) {
+    data.year = data.manufacturingYear || data.registerYear;
+  }
+
+  // 3. Price & Kilometers: strip non-numeric characters and cast to Number
+  if (data.price !== undefined && data.price !== null && data.price !== '') {
+    const cleanPrice = Number(String(data.price).replace(/[^0-9.]/g, ''));
+    data.price = !isNaN(cleanPrice) ? cleanPrice : 0;
+  } else {
+    delete data.price;
+  }
+
+  if (data.kms !== undefined && data.kms !== null && data.kms !== '') {
+    const cleanKms = Number(String(data.kms).replace(/[^0-9.]/g, ''));
+    data.kms = !isNaN(cleanKms) ? cleanKms : 0;
+  } else {
+    delete data.kms;
+  }
+
+  // 4. Fuel type: normalize to Mongoose enum ['Petrol', 'Diesel', 'CNG', 'Electric', 'Hybrid']
+  if (data.fuelType) {
+    const ft = String(data.fuelType).trim().toLowerCase();
+    if (ft.includes('diesel')) data.fuelType = 'Diesel';
+    else if (ft.includes('petrol')) data.fuelType = 'Petrol';
+    else if (ft.includes('cng')) data.fuelType = 'CNG';
+    else if (ft.includes('electric') || ft.includes('ev')) data.fuelType = 'Electric';
+    else if (ft.includes('hybrid')) data.fuelType = 'Hybrid';
+    else data.fuelType = 'Petrol';
+  }
+
+  // 5. Transmission: normalize to Mongoose enum ['Manual', 'Automatic']
+  if (data.transmission) {
+    const tr = String(data.transmission).trim().toLowerCase();
+    data.transmission = tr.includes('auto') ? 'Automatic' : 'Manual';
+  }
+
+  // 6. Ownership: normalize to Mongoose enum ['1st Owner', '2nd Owner', '3rd Owner', '4th Owner+', 'Unregistered']
+  if (data.owner) {
+    const ow = String(data.owner).trim().toLowerCase();
+    if (ow.includes('1') || ow.includes('first')) data.owner = '1st Owner';
+    else if (ow.includes('2') || ow.includes('second')) data.owner = '2nd Owner';
+    else if (ow.includes('3') || ow.includes('third')) data.owner = '3rd Owner';
+    else if (ow.includes('4') || ow.includes('fourth')) data.owner = '4th Owner+';
+    else if (ow.includes('unreg')) data.owner = 'Unregistered';
+    else data.owner = '1st Owner';
+  }
+
+  // 7. Cylinders: Number or undefined (avoid empty string or 'undefined' string)
+  if (data.cylinders !== undefined && data.cylinders !== null && data.cylinders !== '') {
+    const cyl = parseInt(String(data.cylinders).replace(/\D/g, ''), 10);
+    data.cylinders = !isNaN(cyl) ? cyl : undefined;
+  } else {
+    delete data.cylinders;
+  }
+
+  // 8. Booleans
+  if (data.loanAvailable !== undefined) {
+    data.loanAvailable = String(data.loanAvailable) === 'true' || data.loanAvailable === true;
+  }
+  if (data.isKmGenuine !== undefined) {
+    data.isKmGenuine = String(data.isKmGenuine) === 'true' || data.isKmGenuine === true;
+  }
+
+  // 9. Status
+  if (data.status) {
+    const st = String(data.status).trim();
+    if (['Available', 'Coming Soon', 'Draft'].includes(st)) {
+      data.status = st;
+    } else {
+      data.status = 'Available';
+    }
+  }
+
+  return data;
+}
+
 // ═══════════════════════════════════════════════
 //  POST /api/cars — Add new car (Admin)
 // ═══════════════════════════════════════════════
@@ -261,7 +375,8 @@ router.post('/', protect, admin, handleUpload, async (req, res) => {
       carData.images = [{ url: carData.image }];
     }
 
-    const car = await Car.create(carData);
+    const cleanCarData = normalizeCarPayload(carData);
+    const car = await Car.create(cleanCarData);
     
     // Auto-Invalidate global Cache so public site updates instantly!
     carCache.flushAll();
@@ -272,7 +387,10 @@ router.post('/', protect, admin, handleUpload, async (req, res) => {
     res.status(201).json({ success: true, data: car });
   } catch (error) {
     console.error('Create car error:', error);
-    res.status(400).json({ success: false, message: error.message });
+    const validationMessage = error.errors 
+      ? Object.values(error.errors).map(e => e.message).join(', ') 
+      : error.message;
+    res.status(400).json({ success: false, message: validationMessage || 'Failed to create car listing' });
   }
 });
 
@@ -373,7 +491,8 @@ router.put('/:id', protect, admin, handleUpload, async (req, res) => {
       }
     }
 
-    const car = await Car.findByIdAndUpdate(req.params.id, updateData, {
+    const cleanUpdateData = normalizeCarPayload(updateData);
+    const car = await Car.findByIdAndUpdate(req.params.id, cleanUpdateData, {
       new: true,
       runValidators: true,
     });
@@ -382,7 +501,11 @@ router.put('/:id', protect, admin, handleUpload, async (req, res) => {
     
     res.json({ success: true, data: car });
   } catch (error) {
-    res.status(400).json({ success: false, message: error.message });
+    console.error('Update car error:', error);
+    const validationMessage = error.errors 
+      ? Object.values(error.errors).map(e => e.message).join(', ') 
+      : error.message;
+    res.status(400).json({ success: false, message: validationMessage || 'Failed to update car listing' });
   }
 });
 

@@ -44,7 +44,7 @@ router.post('/parse-car', protect, async (req, res) => {
           "model": "Car model in Title Case, e.g. 'Seltos', 'Creta', 'Brezza', 'Harrier', 'City', 'Innova Crysta', 'Swift'",
           "variant": "Variant / trim level, e.g. 'HTX', 'SX (O)', 'ZXi+', 'XZ+', 'ZX'",
           "manufacturingYear": "Manufacturing year as 4-digit number string, e.g. '2019'",
-          "registerYear": "Registration year/month, e.g. '2019-12' or '2019'",
+          "registerYear": "Registration year as 4-digit number string, e.g. '2019' (if text says 2019-12, return '2019')",
           "price": "Price as pure numbers without commas or currency symbol, e.g. '1070000' (from 10,70,000/-)",
           "kmDriven": "Kilometers driven as pure numbers, e.g. '72000' (from 72,000)",
           "fuelType": "One of: 'Petrol', 'Diesel', 'CNG', 'Electric', 'Hybrid'",
@@ -89,12 +89,18 @@ router.post('/parse-car', protect, async (req, res) => {
     const parsed = JSON.parse(rawJson);
 
     // Merge AI output with heuristic fallback to ensure all critical fields are guaranteed
+    const rawMfgYear = String(parsed.manufacturingYear || fallback.manufacturingYear || '');
+    const cleanMfgYear = (rawMfgYear.match(/\b(19\d\d|20\d\d)\b/) || [])[1] || rawMfgYear;
+
+    const rawRegYear = String(parsed.registerYear || fallback.registerYear || '');
+    const cleanRegYear = (rawRegYear.match(/\b(19\d\d|20\d\d)\b/) || [])[1] || rawRegYear;
+
     const finalData = {
       make: parsed.make || fallback.make || '',
       model: parsed.model || fallback.model || '',
       variant: parsed.variant || fallback.variant || '',
-      manufacturingYear: parsed.manufacturingYear || fallback.manufacturingYear || '',
-      registerYear: parsed.registerYear || fallback.registerYear || '',
+      manufacturingYear: cleanMfgYear,
+      registerYear: cleanRegYear,
       price: parsed.price || fallback.price || '',
       kmDriven: parsed.kmDriven || fallback.kmDriven || '',
       fuelType: parsed.fuelType || fallback.fuelType || 'Petrol',

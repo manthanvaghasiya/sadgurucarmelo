@@ -648,29 +648,44 @@ export default function EditCar() {
       formData.append('make', data.make);
       formData.append('model', data.model);
       if (data.manufacturingYear) {
-        formData.append('manufacturingYear', data.manufacturingYear);
-        formData.append('year', data.manufacturingYear); // Legacy fallback
+        const cleanMfg = (String(data.manufacturingYear).match(/\b(19\d\d|20\d\d)\b/) || [])[1] || data.manufacturingYear;
+        formData.append('manufacturingYear', cleanMfg);
+        formData.append('year', cleanMfg); // Legacy fallback
       }
-      if (data.registerYear) formData.append('registerYear', data.registerYear);
-      if (data.price) formData.append('price', String(data.price).replace(/,/g, ''));
-      if (data.kmDriven) formData.append('kms', String(data.kmDriven).replace(/,/g, ''));
+      if (data.registerYear) {
+        const cleanReg = (String(data.registerYear).match(/\b(19\d\d|20\d\d)\b/) || [])[1] || data.registerYear;
+        formData.append('registerYear', cleanReg);
+      }
+      if (data.price) formData.append('price', String(data.price).replace(/[^0-9.]/g, ''));
+      if (data.kmDriven) formData.append('kms', String(data.kmDriven).replace(/[^0-9.]/g, ''));
       if (data.fuelType) formData.append('fuelType', data.fuelType);
       if (data.transmission) formData.append('transmission', data.transmission);
-      if (data.ownership) formData.append('owner', data.ownership);
-      formData.append('bodyType', data.bodyType);
+      if (data.ownership) {
+        const normOwner = data.ownership.includes('1') ? '1st Owner'
+          : data.ownership.includes('2') ? '2nd Owner'
+          : data.ownership.includes('3') ? '3rd Owner'
+          : data.ownership.includes('4') ? '4th Owner+'
+          : data.ownership.toLowerCase().includes('unreg') ? 'Unregistered'
+          : data.ownership;
+        formData.append('owner', normOwner);
+      }
+      if (data.bodyType) formData.append('bodyType', data.bodyType);
       if (data.variant) formData.append('variant', data.variant);
-      formData.append('color', data.color);
-      formData.append('registration', data.registration);
-      formData.append('description', data.description);
-      formData.append('status', data.status);
-      formData.append('airConditioner', data.airConditioner);
-      formData.append('powerWindows', data.powerWindows);
-      formData.append('sunroof', data.sunroof);
-      formData.append('parkingSensors', data.parkingSensors);
-      formData.append('displacement', data.displacement);
-      formData.append('maxPower', data.maxPower);
-      formData.append('driveType', data.driveType);
-      formData.append('cylinders', data.cylinders);
+      if (data.color) formData.append('color', data.color);
+      if (data.registration) formData.append('registration', data.registration);
+      if (data.description) formData.append('description', data.description);
+      formData.append('status', data.status || 'Available');
+
+      if (data.airConditioner) formData.append('airConditioner', data.airConditioner);
+      if (data.powerWindows) formData.append('powerWindows', data.powerWindows);
+      if (data.sunroof) formData.append('sunroof', data.sunroof);
+      if (data.parkingSensors) formData.append('parkingSensors', data.parkingSensors);
+      if (data.displacement) formData.append('displacement', data.displacement);
+      if (data.maxPower) formData.append('maxPower', data.maxPower);
+      if (data.driveType) formData.append('driveType', data.driveType);
+      if (data.cylinders && String(data.cylinders).trim() && !isNaN(parseInt(data.cylinders, 10))) {
+        formData.append('cylinders', parseInt(data.cylinders, 10));
+      }
       
       // Add spin images from state (array of URLs) - Loop through to avoid .join(',') as per critical backend requirement
       if (spinImages && spinImages.length > 0) {
@@ -728,7 +743,7 @@ export default function EditCar() {
       await toast.promise(updateCar(id, formData), {
         loading: 'Updating vehicle...',
         success: 'Vehicle updated successfully!',
-        error: 'Failed to update vehicle.',
+        error: (err) => err.response?.data?.message || err.message || 'Failed to update vehicle. Please try again.',
       });
 
       navigate('/admin/inventory');

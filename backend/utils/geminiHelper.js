@@ -553,6 +553,18 @@ export function getAutomotiveSpecs(make, model, variant, fuelType) {
   };
 }
 
+// ── Smart Ownership Normalizer ──
+export function normalizeOwnership(val) {
+  if (!val) return '1st Owner';
+  const s = String(val).toLowerCase();
+  if (s.includes('1') || s.includes('first')) return '1st Owner';
+  if (s.includes('2') || s.includes('second')) return '2nd Owner';
+  if (s.includes('3') || s.includes('third')) return '3rd Owner';
+  if (s.includes('4') || s.includes('fourth')) return '4th Owner+';
+  if (s.includes('unreg')) return 'Unregistered';
+  return '1st Owner';
+}
+
 // ── Smart Regex / Heuristic Fallback Parser ──
 // Extracts dealer WhatsApp message patterns instantly if no Gemini key or offline
 export function heuristicParseCar(rawText) {
@@ -611,14 +623,10 @@ export function heuristicParseCar(rawText) {
     } else if (label.includes('reg') && !label.includes('year')) {
       data.registration = value.toUpperCase();
     } else if (label.includes('year') || label.includes('mfg')) {
-      if (value.includes('-') || value.includes('/')) {
-        const parts = value.split(/[-/]/);
-        data.manufacturingYear = parts[0];
-        data.registerYear = value;
-      } else {
-        data.manufacturingYear = value;
-        data.registerYear = value;
-      }
+      const match = value.match(/\b(19\d\d|20\d\d)\b/);
+      const cleanYear = match ? match[1] : value;
+      data.manufacturingYear = cleanYear;
+      data.registerYear = cleanYear;
     } else if (label.includes('trans') || label.includes('gear')) {
       data.transmission = value.toLowerCase().includes('auto') ? 'Automatic' : 'Manual';
     } else if (label.includes('owner')) {
