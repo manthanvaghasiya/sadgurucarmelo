@@ -34,10 +34,9 @@ async function getImageKitUsage(totalImages = 0) {
   if (privateKey) {
     try {
       const nowD = new Date();
-      const startOfMonth = new Date(nowD.getFullYear(), nowD.getMonth(), 1);
-      const startStr = startOfMonth.toISOString().slice(0, 10);
-      const tomorrow = new Date(nowD.getTime() + 24 * 60 * 60 * 1000);
-      const endStr = tomorrow.toISOString().slice(0, 10);
+      const endStr = nowD.toISOString().slice(0, 10);
+      const startD = new Date(nowD.getTime() - 28 * 24 * 60 * 60 * 1000);
+      const startStr = startD.toISOString().slice(0, 10);
 
       const authHeader = 'Basic ' + Buffer.from(privateKey + ':').toString('base64');
       const response = await fetch(`https://api.imagekit.io/v1/accounts/usage?startDate=${startStr}&endDate=${endStr}`, {
@@ -49,10 +48,10 @@ async function getImageKitUsage(totalImages = 0) {
 
       if (response.ok) {
         const data = await response.json();
-        const sBytes = data?.usage?.storage?.used || data?.storageBytes || 0;
-        const bBytes = data?.usage?.bandwidth?.used || data?.bandwidthBytes || 0;
-        if (sBytes > 0) storageUsedBytes = sBytes;
-        if (bBytes > 0) bandwidthUsedBytes = bBytes;
+        const sBytes = (data?.mediaLibraryStorageBytes || 0) + (data?.originalCacheStorageBytes || 0) || data?.storageBytes || data?.usage?.storage?.used || 0;
+        const bBytes = data?.bandwidthBytes ?? data?.usage?.bandwidth?.used ?? 0;
+        storageUsedBytes = sBytes;
+        bandwidthUsedBytes = bBytes;
         apiSuccess = true;
       }
     } catch (e) {
