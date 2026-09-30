@@ -97,7 +97,7 @@ export default function SystemStorageHealth() {
     setSimulateWarning(false);
     try {
       sessionStorage.setItem('imagekit_alert_dismissed', 'true');
-    } catch {}
+    } catch { }
   };
 
   const getBarColor = (percent) => {
@@ -183,11 +183,10 @@ export default function SystemStorageHealth() {
                 setShowModalManual(true);
               }
             }}
-            className={`flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 px-3 py-2 min-h-[38px] rounded-xl font-body text-xs font-semibold border transition-all active:scale-95 ${
-              simulateWarning
+            className={`flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 px-3 py-2 min-h-[38px] rounded-xl font-body text-xs font-semibold border transition-all active:scale-95 ${simulateWarning
                 ? 'bg-red-50 text-red-700 border-red-200 ring-2 ring-red-400/30'
                 : 'bg-background hover:bg-gray-50 text-text-muted hover:text-text border-gray-200'
-            }`}
+              }`}
             title="Toggle 80% Warning Modal to inspect developer client preview"
           >
             <Beaker className={`w-3.5 h-3.5 ${simulateWarning ? 'text-red-500' : 'text-primary'}`} />
@@ -263,19 +262,17 @@ export default function SystemStorageHealth() {
         </div>
 
         {/* 2. ImageKit Storage (Media Assets) */}
-        <div className={`bg-background/60 rounded-xl p-4 border flex flex-col justify-between transition-all ${
-          storagePercent >= 80 ? 'border-red-300 ring-1 ring-red-400/30' : 'border-gray-100/80'
-        }`}>
+        <div className={`bg-background/60 rounded-xl p-4 border flex flex-col justify-between transition-all ${storagePercent >= 80 ? 'border-red-300 ring-1 ring-red-400/30' : 'border-gray-100/80'
+          }`}>
           <div>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
-                  storagePercent >= 80
+                <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${storagePercent >= 80
                     ? 'bg-red-500/15 text-red-600'
                     : storagePercent >= 60
                       ? 'bg-amber-500/15 text-amber-600'
                       : 'bg-indigo-500/10 text-indigo-600'
-                }`}>
+                  }`}>
                   <HardDrive className="w-4 h-4" />
                 </div>
                 <div>
@@ -283,11 +280,10 @@ export default function SystemStorageHealth() {
                   <p className="font-body text-[11px] text-text-muted">Media CDN (20 GB Free)</p>
                 </div>
               </div>
-              <span className={`text-[11px] font-bold px-2 py-0.5 rounded-full ring-1 ${
-                imagekit?.configured
+              <span className={`text-[11px] font-bold px-2 py-0.5 rounded-full ring-1 ${imagekit?.configured
                   ? getBadgeColor(storagePercent)
                   : 'bg-amber-50 text-amber-600 ring-amber-500/20'
-              }`}>
+                }`}>
                 {imagekit?.configured ? 'Connected' : 'Setup Required'}
               </span>
             </div>
@@ -311,13 +307,12 @@ export default function SystemStorageHealth() {
 
               <div className="flex items-center justify-between text-[11px] text-text-muted mt-1.5">
                 <span>{loading ? '—' : `${imagekit?.totalImages || 0} Photos Hosted`}</span>
-                <span className={`font-semibold font-mono ${
-                  storagePercent >= 80
+                <span className={`font-semibold font-mono ${storagePercent >= 80
                     ? 'text-red-600 font-bold animate-pulse'
                     : storagePercent >= 60
                       ? 'text-amber-600'
                       : 'text-indigo-600'
-                }`}>
+                  }`}>
                   {loading ? '—' : `${storagePercent}% full`}
                 </span>
               </div>
@@ -326,19 +321,17 @@ export default function SystemStorageHealth() {
         </div>
 
         {/* 3. ImageKit Bandwidth (Monthly Data Egress) */}
-        <div className={`bg-background/60 rounded-xl p-4 border flex flex-col justify-between transition-all ${
-          bandwidthPercent >= 80 ? 'border-red-300 ring-1 ring-red-400/30' : 'border-gray-100/80'
-        }`}>
+        <div className={`bg-background/60 rounded-xl p-4 border flex flex-col justify-between transition-all ${bandwidthPercent >= 80 ? 'border-red-300 ring-1 ring-red-400/30' : 'border-gray-100/80'
+          }`}>
           <div>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
-                  bandwidthPercent >= 80
+                <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${bandwidthPercent >= 80
                     ? 'bg-red-500/15 text-red-600'
                     : bandwidthPercent >= 60
                       ? 'bg-amber-500/15 text-amber-600'
                       : 'bg-cyan-500/10 text-cyan-600'
-                }`}>
+                  }`}>
                   <Activity className="w-4 h-4" />
                 </div>
                 <div>
@@ -370,13 +363,12 @@ export default function SystemStorageHealth() {
 
               <div className="flex items-center justify-between text-[11px] text-text-muted mt-1.5">
                 <span>Monthly Rolling Cycle</span>
-                <span className={`font-semibold font-mono ${
-                  bandwidthPercent >= 80
+                <span className={`font-semibold font-mono ${bandwidthPercent >= 80
                     ? 'text-red-600 font-bold animate-pulse'
                     : bandwidthPercent >= 60
                       ? 'text-amber-600'
                       : 'text-cyan-600'
-                }`}>
+                  }`}>
                   {loading ? '—' : `${bandwidthPercent}% full`}
                 </span>
               </div>
