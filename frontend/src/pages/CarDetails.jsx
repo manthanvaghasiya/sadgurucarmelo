@@ -713,6 +713,11 @@ export default function CarDetails() {
         </div>
     );
 
+    // SEO / AEO / GEO Schema Variables
+    const pageTitle = `Used ${car.make || 'Certified'} ${car.model || 'Car'} ${car.year ? car.year : ''} for Sale in Surat | Sadguru Car Surat`;
+    const priceFormatted = typeof car.price === 'number' ? `₹${car.price.toLocaleString('en-IN')}` : (car.price || 'Best Price');
+    const pageDescription = `Certified pre-owned ${car.make || ''} ${car.model || ''} (${car.year || ''}) available for sale at Sadguru Car Surat. Price: ${priceFormatted}. ${car.fuelType || ''}, ${car.transmission || ''}, ${typeof car.kms === 'number' ? `${car.kms.toLocaleString('en-IN')} KM` : (car.kms || '')}. Verified with 120-point inspection, loan/EMI available. Visit Varachha, Surat, Gujarat.`;
+
     return (
         <div className="relative bg-gradient-to-b from-slate-50/70 via-white to-slate-50/50 min-h-screen py-5 sm:py-7 px-3.5 sm:px-6 lg:px-8 pb-24 lg:pb-12 overflow-hidden">
             {/* ── SEO, AEO (Answer Engine), and GEO (Generative Engine Optimization) Structured Metadata ── */}
