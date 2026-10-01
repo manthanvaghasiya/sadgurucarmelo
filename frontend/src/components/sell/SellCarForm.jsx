@@ -4,7 +4,7 @@
  * supporting client-side image compression, brand quick-pills, and instant quote dispatch.
  */
 
-import React from 'react';
+import React, { useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Car,
@@ -17,6 +17,9 @@ import {
   Clock,
   Sparkles,
   Loader2,
+  Camera,
+  Images,
+  Share2,
 } from 'lucide-react';
 import WhatsAppIcon from '../WhatsAppIcon';
 import { POPULAR_BRANDS, FUEL_TYPES, TRANSMISSIONS } from '../../data/sellCarData';
@@ -39,6 +42,14 @@ export default function SellCarForm({
 }) {
   const currentYear = new Date().getFullYear();
   const yearOptions = Array.from({ length: 25 }, (_, i) => currentYear - i);
+  const cameraInputRef = useRef(null);
+  const galleryInputRef = useRef(null);
+
+  const triggerHaptic = () => {
+    if (typeof window !== 'undefined' && 'vibrate' in navigator) {
+      try { navigator.vibrate(10); } catch (_) {}
+    }
+  };
 
   return (
     <section
@@ -203,7 +214,9 @@ export default function SellCarForm({
                     કિલોમીટર ચાલેલી (KM Driven)
                   </label>
                   <input
-                    type="number"
+                    type="text"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
                     name="kmDriven"
                     placeholder="દા.ત. 45000"
                     value={formData.kmDriven}
@@ -277,7 +290,56 @@ export default function SellCarForm({
                 </span>
               </div>
 
-              {/* Upload Dropzone */}
+              {/* Hidden Native Mobile File Inputs */}
+              <input
+                ref={cameraInputRef}
+                type="file"
+                accept="image/*"
+                capture="environment"
+                onChange={handlePhotoSelect}
+                disabled={photos.length >= 10 || compressing}
+                className="hidden"
+              />
+              <input
+                ref={galleryInputRef}
+                type="file"
+                multiple
+                accept="image/*"
+                onChange={handlePhotoSelect}
+                disabled={photos.length >= 10 || compressing}
+                className="hidden"
+              />
+
+              {/* ── Native Mobile Camera & Gallery Dual Action Bar ── */}
+              <div className="grid grid-cols-2 gap-3 mb-3.5 sm:hidden">
+                <button
+                  type="button"
+                  onClick={() => {
+                    triggerHaptic();
+                    cameraInputRef.current?.click();
+                  }}
+                  disabled={photos.length >= 10 || compressing}
+                  className="flex items-center justify-center gap-2 py-3 px-3 rounded-2xl bg-slate-950 text-white font-heading font-black text-xs shadow-md active:scale-95 transition-all disabled:opacity-50"
+                >
+                  <Camera className="w-4 h-4 text-brand-orange" />
+                  <span>કેમેરા (Take Photo)</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    triggerHaptic();
+                    galleryInputRef.current?.click();
+                  }}
+                  disabled={photos.length >= 10 || compressing}
+                  className="flex items-center justify-center gap-2 py-3 px-3 rounded-2xl bg-white border border-slate-300 text-slate-800 font-heading font-black text-xs shadow-sm active:scale-95 transition-all disabled:opacity-50"
+                >
+                  <Images className="w-4 h-4 text-brand-orange" />
+                  <span>ગેલેરી (From Gallery)</span>
+                </button>
+              </div>
+
+              {/* Upload Dropzone (Desktop & Tablet) */}
               <div className="relative border-2 border-dashed border-slate-300 hover:border-brand-orange rounded-2xl p-6 sm:p-8 text-center transition-all cursor-pointer bg-white hover:bg-amber-50/20 group">
                 <input
                   type="file"
@@ -346,7 +408,9 @@ export default function SellCarForm({
                     અપેક્ષિત વેચાણ કિંમત (₹ Expected Price)
                   </label>
                   <input
-                    type="number"
+                    type="text"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
                     name="expectedPrice"
                     placeholder="દા.ત. 550000"
                     value={formData.expectedPrice}
@@ -407,6 +471,7 @@ export default function SellCarForm({
                   </label>
                   <input
                     type="tel"
+                    inputMode="tel"
                     name="phone"
                     required
                     placeholder="દા.ત. 9898558222"
@@ -432,30 +497,45 @@ export default function SellCarForm({
               </div>
             </div>
 
-            {/* Bottom Submit Bar */}
-            <div className="pt-6 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-4">
+            {/* Bottom Submit Bar with Quick WhatsApp Sharing */}
+            <div className="pt-6 border-t border-slate-200 flex flex-col gap-4">
               <div className="flex items-center gap-2 text-xs text-slate-500 font-medium">
                 <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
                 <span>તમારી માહિતી 100% સુરક્ષિત અને ગુપ્ત રહેશે. No Spam Guarantee.</span>
               </div>
 
-              <button
-                type="submit"
-                disabled={isSubmitting || compressing}
-                className="w-full sm:w-auto px-10 py-4 rounded-2xl bg-gradient-to-r from-brand-orange via-amber-500 to-yellow-500 text-white font-heading font-black text-sm sm:text-base shadow-lg shadow-brand-orange/25 hover:shadow-brand-orange/40 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
-              >
-                {isSubmitting ? (
-                  <>
-                    <Loader2 className="w-5 h-5 animate-spin" />
-                    <span>સબમિટ થઈ રહ્યું છે...</span>
-                  </>
-                ) : (
-                  <>
-                    <span>ત્વરિત માર્કેટ વેલ્યુ મેળવો</span>
-                    <span>→</span>
-                  </>
-                )}
-              </button>
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-3.5">
+                {/* Single-Click Share via WhatsApp Floating/Quick Button */}
+                <a
+                  href={buildWhatsAppUrl(
+                    `નમસ્તે સદગુરુ કાર મેળો, હું મારી કાર વેચવા માગું છું:\n- બ્રાન્ડ: ${formData.carBrand || 'ઉલ્લેખ નથી'}\n- મોડેલ: ${formData.carModel || 'ઉલ્લેખ નથી'}\n- વર્ષ: ${formData.year || ''}\n- કિમી: ${formData.kmDriven || ''}\n- અપેક્ષિત કિંમત: ₹${formData.expectedPrice || ''}\n- માલિકનું નામ: ${formData.ownerName || ''}\nકૃપા કરીને શ્રેષ્ઠ માર્કેટ વેલ્યુ જણાવશો.`
+                  )}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-4 rounded-2xl bg-[#25D366] text-white font-heading font-black text-sm shadow-md active:scale-95 transition-all"
+                >
+                  <WhatsAppIcon className="w-4 h-4" />
+                  <span>WhatsApp પર વિગતો મોકલો</span>
+                </a>
+
+                <button
+                  type="submit"
+                  disabled={isSubmitting || compressing}
+                  className="w-full sm:w-auto px-8 py-4 rounded-2xl bg-gradient-to-r from-brand-orange via-amber-500 to-yellow-500 text-white font-heading font-black text-sm sm:text-base shadow-lg shadow-brand-orange/25 active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                >
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                      <span>સબમિટ થઈ રહ્યું છે...</span>
+                    </>
+                  ) : (
+                    <>
+                      <span>ત્વરિત માર્કેટ વેલ્યુ મેળવો</span>
+                      <span>→</span>
+                    </>
+                  )}
+                </button>
+              </div>
             </div>
           </form>
         )}

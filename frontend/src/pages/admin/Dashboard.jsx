@@ -177,14 +177,14 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* ── Stats Row (4 Columns matching Hari Ram Motors) ── */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5">
+      {/* ── Stats Row (Swipeable Carousel on Mobile, Grid on Desktop) ── */}
+      <div className="flex overflow-x-auto snap-x snap-mandatory scrollbar-none gap-3 pb-2 -mx-4 px-4 sm:mx-0 sm:px-0 sm:grid sm:grid-cols-2 lg:grid-cols-4">
         {statsData.map((stat) => {
           const Icon = stat.icon;
           return (
             <div
               key={stat.id}
-              className={`relative overflow-hidden bg-surface rounded-2xl border border-gray-100 p-4 sm:p-5 hover:-translate-y-1 transition-all duration-300 ${stat.glow || ''}`}
+              className={`min-w-[155px] flex-1 sm:min-w-0 snap-start relative overflow-hidden bg-surface rounded-2xl border border-gray-100 p-4 sm:p-5 hover:-translate-y-1 transition-all duration-300 shadow-sm ${stat.glow || ''}`}
             >
               <div className="flex items-start justify-between mb-3">
                 <div className={`w-10 h-10 sm:w-11 sm:h-11 ${stat.iconBg} rounded-xl flex items-center justify-center transition-transform hover:scale-105`}>

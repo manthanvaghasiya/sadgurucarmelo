@@ -91,6 +91,21 @@
   -webkit-tap-highlight-color: transparent;
 }
 
+/* Touch device ergonomics & sticky hover suppression */
+@media (hover: none) and (pointer: coarse) {
+  a, button, [role="button"], input[type="button"], input[type="submit"] {
+    -webkit-touch-callout: none;
+    touch-action: manipulation;
+  }
+
+  /* Prevent persistent sticky hover styles after tapping on touchscreens */
+  button:hover:not(:active),
+  a:hover:not(:active) {
+    transform: none !important;
+    box-shadow: inherit;
+  }
+}
+
 @supports (-webkit-touch-callout: none) {
   /* iOS Safari & PWA smooth momentum scroll */
   body {

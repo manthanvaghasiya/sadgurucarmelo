@@ -1,20 +1,14 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Home, Car, Users, Phone, BadgeDollarSign } from 'lucide-react';
-
-const navItems = [
-  { name: 'Home', path: '/', icon: Home },
-  { name: 'Catalog', path: '/inventory', icon: Car, badge: 'Live' },
-  { name: 'Sell Car', path: '/sell-your-car', icon: BadgeDollarSign },
-  { name: 'About', path: '/about', icon: Users },
-  { name: 'Contact', path: '/contact', icon: Phone },
-];
+import { Home, BadgeDollarSign, Compass, User } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 
 export default function MobileBottomNav() {
   const location = useLocation();
+  const { user } = useAuth();
 
-  // Hide on Car Details (it has its own native sticky action bar), admin panel, and login
+  // Hide on Car Details (it has its own native sticky action bar) and login page
   if (
     location.pathname.startsWith('/car-details') ||
     location.pathname.startsWith('/admin') ||
@@ -23,9 +17,24 @@ export default function MobileBottomNav() {
     return null;
   }
 
+  const navItems = [
+    { name: 'Home', path: '/', icon: Home },
+    { name: 'Sell Car', path: '/sell-your-car', icon: BadgeDollarSign, badge: 'Free' },
+    { name: 'Track Deal', path: '/inventory', icon: Compass, badge: 'Cars' },
+    { name: user ? 'Admin' : 'Profile', path: user ? '/admin' : '/login', icon: User },
+  ];
+
   const isActive = (path) => {
     if (path === '/') return location.pathname === '/';
     return location.pathname.startsWith(path);
+  };
+
+  const handleTabClick = () => {
+    if (typeof window !== 'undefined' && 'vibrate' in navigator) {
+      try {
+        navigator.vibrate(12);
+      } catch (_) {}
+    }
   };
 
   return (
@@ -37,7 +46,7 @@ export default function MobileBottomNav() {
     >
       <nav
         aria-label="Mobile Bottom App Bar"
-        className="pointer-events-auto w-full max-w-[390px] bg-white/92 dark:bg-slate-900/92 backdrop-blur-2xl border border-slate-200/80 dark:border-white/10 shadow-[0_14px_38px_rgba(15,23,42,0.14)] rounded-[2rem] p-1.5 flex items-center justify-between relative select-none"
+        className="pointer-events-auto w-full max-w-[390px] bg-white/92 backdrop-blur-2xl border border-slate-200/80 shadow-[0_14px_38px_rgba(15,23,42,0.14)] rounded-[2rem] p-1.5 flex items-center justify-between relative select-none"
       >
         {navItems.map((item) => {
           const active = isActive(item.path);
@@ -47,15 +56,16 @@ export default function MobileBottomNav() {
             <Link
               key={item.name}
               to={item.path}
+              onClick={handleTabClick}
               className={`relative flex-1 flex flex-col items-center justify-center py-2 px-1 rounded-2xl transition-all duration-200 active:scale-90 ${
                 active ? 'text-brand-orange' : 'text-slate-500 hover:text-slate-800'
               }`}
             >
-              {/* Active Tab Liquid Pill Background (Flutter/iOS style) */}
+              {/* Active Tab Liquid Pill Background (iOS/Flutter style) */}
               {active && (
                 <motion.div
                   layoutId="mobileNavActivePill"
-                  className="absolute inset-0 bg-orange-50/90 dark:bg-brand-orange/15 rounded-2xl border border-brand-orange/25 -z-10 shadow-2xs"
+                  className="absolute inset-0 bg-orange-50/90 rounded-2xl border border-brand-orange/25 -z-10 shadow-2xs"
                   transition={{ type: 'spring', stiffness: 420, damping: 32 }}
                 />
               )}
@@ -70,7 +80,7 @@ export default function MobileBottomNav() {
 
                 {/* Micro live badge */}
                 {item.badge && !active && (
-                  <span className="absolute -top-1 -right-2 px-1 py-0.2 rounded-full bg-emerald-500 text-white text-[7px] font-black uppercase tracking-tight shadow-xs">
+                  <span className="absolute -top-1 -right-2 px-1 py-0.2 rounded-full bg-brand-orange text-white text-[7px] font-black uppercase tracking-tight shadow-xs">
                     {item.badge}
                   </span>
                 )}

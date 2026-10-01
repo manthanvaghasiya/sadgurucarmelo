@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import axiosInstance from '../../api/axiosConfig';
 import toast from 'react-hot-toast';
 import {
@@ -16,9 +17,14 @@ import {
   CheckCircle2,
   Clock,
   Eye,
-  X
+  X,
+  Archive,
+  Check,
+  RotateCcw,
+  Sparkles,
 } from 'lucide-react';
 import WhatsAppIcon from '../../components/WhatsAppIcon';
+import PhotoInspectionModal from '../../components/admin/PhotoInspectionModal';
 
 const STATUS_OPTIONS = ['Pending', 'Reviewed', 'Contacted', 'Closed'];
 
@@ -27,7 +33,7 @@ export default function SellRequests() {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('All');
   const [search, setSearch] = useState('');
-  const [selectedPhoto, setSelectedPhoto] = useState(null);
+  const [inspectionModal, setInspectionModal] = useState({ isOpen: false, photos: [], index: 0 });
 
   useEffect(() => {
     fetchRequests();
@@ -168,6 +174,12 @@ export default function SellRequests() {
         })}
       </div>
 
+      {/* Mobile Swipe Gesture Helper Hint */}
+      <div className="flex sm:hidden items-center justify-center gap-2 py-2 px-3 bg-brand-orange/10 border border-brand-orange/20 rounded-xl text-[11px] font-heading font-bold text-slate-700">
+        <Sparkles className="w-3.5 h-3.5 text-brand-orange shrink-0" />
+        <span>Swipe right to Review 👉 · 👈 Swipe left to Archive</span>
+      </div>
+
       {/* Content List */}
       {loading ? (
         <div className="flex items-center justify-center min-h-[300px]">
@@ -190,183 +202,204 @@ export default function SellRequests() {
           {filteredRequests.map((req) => (
             <div
               key={req._id}
-              className="bg-white rounded-2xl p-5 sm:p-6 shadow-sm border border-slate-100 hover:shadow-md transition-shadow flex flex-col lg:flex-row gap-6 justify-between items-start"
+              className="relative rounded-2xl overflow-hidden shadow-sm border border-slate-200/90 bg-slate-100"
             >
-              {/* Left Column: Car & Customer details */}
-              <div className="flex-1 space-y-4">
-                {/* Header Row */}
-                <div className="flex flex-wrap items-center gap-3">
-                  <h3 className="font-heading font-bold text-xl text-slate-900">
-                    {req.carBrand} {req.carModel} {req.year ? `(${req.year})` : ''}
-                  </h3>
-                  <span
-                    className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold border ${getStatusBadge(
-                      req.status
-                    )}`}
-                  >
-                    {req.status}
-                  </span>
-                  <span className="text-xs text-slate-400 font-medium">
-                    Submitted: {new Date(req.createdAt).toLocaleDateString('en-IN', {
-                      day: 'numeric',
-                      month: 'short',
-                      year: 'numeric',
-                      hour: '2-digit',
-                      minute: '2-digit',
-                    })}
-                  </span>
+              {/* Background Swipe Actions Indicator */}
+              <div className="absolute inset-0 flex items-center justify-between px-6 pointer-events-none select-none">
+                <div className="flex items-center gap-2 text-emerald-600 font-heading font-black text-xs">
+                  <CheckCircle2 className="w-5 h-5 text-emerald-500" />
+                  <span>Mark Reviewed</span>
                 </div>
-
-                {/* Specs Chips */}
-                <div className="flex flex-wrap gap-3 text-xs font-semibold text-slate-600">
-                  {req.kmDriven && (
-                    <span className="inline-flex items-center gap-1 bg-slate-50 px-2.5 py-1.5 rounded-lg border border-slate-100">
-                      <Gauge className="w-3.5 h-3.5 text-slate-400" />
-                      {Number(req.kmDriven).toLocaleString('en-IN')} KM
-                    </span>
-                  )}
-                  {req.fuelType && (
-                    <span className="inline-flex items-center gap-1 bg-slate-50 px-2.5 py-1.5 rounded-lg border border-slate-100">
-                      <Fuel className="w-3.5 h-3.5 text-slate-400" />
-                      {req.fuelType}
-                    </span>
-                  )}
-                  {req.transmission && (
-                    <span className="inline-flex items-center gap-1 bg-slate-50 px-2.5 py-1.5 rounded-lg border border-slate-100">
-                      <Settings2 className="w-3.5 h-3.5 text-slate-400" />
-                      {req.transmission}
-                    </span>
-                  )}
-                  {req.expectedPrice && (
-                    <span className="inline-flex items-center gap-1 bg-amber-50 text-amber-800 px-2.5 py-1.5 rounded-lg border border-amber-100 font-bold">
-                      <IndianRupee className="w-3.5 h-3.5" />
-                      Expected: ₹{Number(req.expectedPrice).toLocaleString('en-IN')}
-                    </span>
-                  )}
+                <div className="flex items-center gap-2 text-amber-600 font-heading font-black text-xs">
+                  <span>Close / Archive</span>
+                  <Archive className="w-5 h-5 text-amber-500" />
                 </div>
+              </div>
 
-                {/* Notes */}
-                {req.notes && (
-                  <p className="text-xs text-slate-600 bg-slate-50 p-3 rounded-xl border border-slate-100">
-                    <strong className="text-slate-800">Owner Notes:</strong> {req.notes}
-                  </p>
-                )}
-
-                {/* Photos Strip */}
-                {req.photos && req.photos.length > 0 && (
-                  <div>
-                    <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
-                      Car Photos ({req.photos.length})
-                    </p>
-                    <div className="flex flex-wrap gap-2.5">
-                      {req.photos.map((photo, pIdx) => (
-                        <div
-                          key={pIdx}
-                          onClick={() => setSelectedPhoto(photo.url)}
-                          className="relative w-20 h-14 rounded-lg overflow-hidden border border-slate-200 cursor-pointer group shrink-0"
-                        >
-                          <img
-                            src={photo.url}
-                            alt="Car"
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform"
-                          />
-                          <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white">
-                            <Eye className="w-4 h-4" />
-                          </div>
-                        </div>
-                      ))}
-                    </div>
+              {/* Draggable Card Surface */}
+              <motion.div
+                drag="x"
+                dragConstraints={{ left: 0, right: 0 }}
+                dragElastic={0.3}
+                onDragEnd={(_, info) => {
+                  if (info.offset.x > 80) {
+                    handleStatusChange(req._id, req.status === 'Pending' ? 'Reviewed' : 'Contacted');
+                  } else if (info.offset.x < -80) {
+                    handleStatusChange(req._id, 'Closed');
+                  }
+                }}
+                className="bg-white p-5 sm:p-6 flex flex-col lg:flex-row gap-6 justify-between items-start relative z-10 transition-colors"
+              >
+                {/* Left Column: Car & Customer details */}
+                <div className="flex-1 space-y-4 w-full">
+                  {/* Header Row */}
+                  <div className="flex flex-wrap items-center gap-2.5 sm:gap-3">
+                    <h3 className="font-heading font-bold text-lg sm:text-xl text-slate-900">
+                      {req.carBrand} {req.carModel} {req.year ? `(${req.year})` : ''}
+                    </h3>
+                    <span
+                      className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold border ${getStatusBadge(
+                        req.status
+                      )}`}
+                    >
+                      {req.status}
+                    </span>
+                    <span className="text-[11px] sm:text-xs text-slate-400 font-medium">
+                      {new Date(req.createdAt).toLocaleDateString('en-IN', {
+                        day: 'numeric',
+                        month: 'short',
+                        year: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit',
+                      })}
+                    </span>
                   </div>
-                )}
-              </div>
 
-              {/* Right Column: Customer Info & Actions */}
-              <div className="w-full lg:w-72 shrink-0 bg-slate-50 p-4 rounded-xl border border-slate-100 space-y-4">
-                <div>
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">
-                    Customer Info
-                  </p>
-                  <p className="font-bold text-slate-900 text-sm">{req.ownerName}</p>
-                  <p className="text-xs text-slate-600 mt-0.5">{req.phone}</p>
-                  {req.email && <p className="text-xs text-slate-500 truncate">{req.email}</p>}
+                  {/* Specs Chips */}
+                  <div className="flex flex-wrap gap-2 sm:gap-3 text-xs font-semibold text-slate-600">
+                    {req.kmDriven && (
+                      <span className="inline-flex items-center gap-1 bg-slate-50 px-2.5 py-1.5 rounded-lg border border-slate-100">
+                        <Gauge className="w-3.5 h-3.5 text-slate-400" />
+                        {Number(req.kmDriven).toLocaleString('en-IN')} KM
+                      </span>
+                    )}
+                    {req.fuelType && (
+                      <span className="inline-flex items-center gap-1 bg-slate-50 px-2.5 py-1.5 rounded-lg border border-slate-100">
+                        <Fuel className="w-3.5 h-3.5 text-slate-400" />
+                        {req.fuelType}
+                      </span>
+                    )}
+                    {req.transmission && (
+                      <span className="inline-flex items-center gap-1 bg-slate-50 px-2.5 py-1.5 rounded-lg border border-slate-100">
+                        <Settings2 className="w-3.5 h-3.5 text-slate-400" />
+                        {req.transmission}
+                      </span>
+                    )}
+                    {req.expectedPrice && (
+                      <span className="inline-flex items-center gap-1 bg-amber-50 text-amber-800 px-2.5 py-1.5 rounded-lg border border-amber-100 font-bold">
+                        <IndianRupee className="w-3.5 h-3.5" />
+                        Expected: ₹{Number(req.expectedPrice).toLocaleString('en-IN')}
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Notes */}
+                  {req.notes && (
+                    <p className="text-xs text-slate-600 bg-slate-50 p-3 rounded-xl border border-slate-100">
+                      <strong className="text-slate-800">Owner Notes:</strong> {req.notes}
+                    </p>
+                  )}
+
+                  {/* Photos Strip with Inspection Trigger */}
+                  {req.photos && req.photos.length > 0 && (
+                    <div>
+                      <div className="flex items-center justify-between mb-2">
+                        <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+                          Car Photos ({req.photos.length}) — Tap for Pinch-to-Zoom
+                        </p>
+                      </div>
+                      <div className="flex flex-wrap gap-2.5">
+                        {req.photos.map((photo, pIdx) => (
+                          <div
+                            key={pIdx}
+                            onClick={() =>
+                              setInspectionModal({
+                                isOpen: true,
+                                photos: req.photos,
+                                index: pIdx,
+                              })
+                            }
+                            className="relative w-20 h-14 rounded-lg overflow-hidden border border-slate-200 cursor-pointer group shrink-0 active:scale-95 transition-transform"
+                          >
+                            <img
+                              src={photo.url}
+                              alt="Car"
+                              className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                            />
+                            <div className="absolute inset-0 bg-black/35 flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-opacity">
+                              <Eye className="w-4 h-4" />
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
 
-                {/* Quick Action Buttons */}
-                <div className="grid grid-cols-2 gap-2">
-                  <a
-                    href={`tel:${req.phone}`}
-                    className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg bg-slate-900 text-white font-bold text-xs hover:bg-slate-800 transition-colors"
-                  >
-                    <Phone className="w-3.5 h-3.5" />
-                    Call
-                  </a>
-                  <a
-                    href={`https://wa.me/91${req.phone.replace(/\D/g, '')}?text=${encodeURIComponent(
-                      `Hello ${req.ownerName}, regarding your sell request for ${req.carBrand} ${req.carModel} at Sadguru Car Melo:`
-                    )}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg bg-[#25D366] text-white font-bold text-xs hover:bg-[#20bd5a] transition-colors"
-                  >
-                    <WhatsAppIcon className="w-3.5 h-3.5" />
-                    WhatsApp
-                  </a>
-                </div>
+                {/* Right Column: Customer Info & Actions */}
+                <div className="w-full lg:w-72 shrink-0 bg-slate-50 p-4 rounded-xl border border-slate-100 space-y-4">
+                  <div>
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">
+                      Customer Info
+                    </p>
+                    <p className="font-bold text-slate-900 text-sm">{req.ownerName}</p>
+                    <p className="text-xs text-slate-600 mt-0.5">{req.phone}</p>
+                    {req.email && <p className="text-xs text-slate-500 truncate">{req.email}</p>}
+                  </div>
 
-                {/* Status Dropdown */}
-                <div>
-                  <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">
-                    Update Status
-                  </label>
-                  <select
-                    value={req.status}
-                    onChange={(e) => handleStatusChange(req._id, e.target.value)}
-                    className="w-full px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-xs font-bold text-slate-700 focus:outline-none focus:ring-2 focus:ring-brand-orange/30"
-                  >
-                    {STATUS_OPTIONS.map((st) => (
-                      <option key={st} value={st}>
-                        {st}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+                  {/* Quick Action Buttons */}
+                  <div className="grid grid-cols-2 gap-2">
+                    <a
+                      href={`tel:${req.phone}`}
+                      className="flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl bg-slate-900 text-white font-heading font-bold text-xs active:scale-95 transition-transform"
+                    >
+                      <Phone className="w-3.5 h-3.5" />
+                      <span>Call</span>
+                    </a>
+                    <a
+                      href={`https://wa.me/91${req.phone.replace(/\D/g, '')}?text=${encodeURIComponent(
+                        `Hello ${req.ownerName}, regarding your sell request for ${req.carBrand} ${req.carModel} at Sadguru Car Melo:`
+                      )}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl bg-[#25D366] text-white font-heading font-bold text-xs active:scale-95 transition-transform"
+                    >
+                      <WhatsAppIcon className="w-3.5 h-3.5" />
+                      <span>WhatsApp</span>
+                    </a>
+                  </div>
 
-                {/* Delete */}
-                <button
-                  type="button"
-                  onClick={() => handleDelete(req._id)}
-                  className="w-full text-xs font-semibold text-red-600 hover:text-red-700 flex items-center justify-center gap-1.5 pt-2 border-t border-slate-200"
-                >
-                  <Trash2 className="w-3.5 h-3.5" />
-                  Delete Request
-                </button>
-              </div>
+                  {/* Status Dropdown */}
+                  <div>
+                    <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">
+                      Update Status
+                    </label>
+                    <select
+                      value={req.status}
+                      onChange={(e) => handleStatusChange(req._id, e.target.value)}
+                      className="w-full px-3 py-2 rounded-xl bg-white border border-slate-200 text-xs font-bold text-slate-700 focus:outline-none focus:ring-2 focus:ring-brand-orange/30"
+                    >
+                      {STATUS_OPTIONS.map((st) => (
+                        <option key={st} value={st}>
+                          {st}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* Delete */}
+                  <button
+                    type="button"
+                    onClick={() => handleDelete(req._id)}
+                    className="w-full text-xs font-semibold text-red-600 hover:text-red-700 flex items-center justify-center gap-1.5 pt-2 border-t border-slate-200 active:scale-95 transition-transform"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                    <span>Delete Request</span>
+                  </button>
+                </div>
+              </motion.div>
             </div>
           ))}
         </div>
       )}
 
-      {/* Full-size Photo Preview Modal */}
-      {selectedPhoto && (
-        <div
-          className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4 backdrop-blur-sm"
-          onClick={() => setSelectedPhoto(null)}
-        >
-          <div className="relative max-w-4xl max-h-[90vh] bg-black rounded-2xl overflow-hidden shadow-2xl">
-            <button
-              onClick={() => setSelectedPhoto(null)}
-              className="absolute top-4 right-4 w-10 h-10 bg-white/20 hover:bg-white/40 text-white rounded-full flex items-center justify-center z-10 transition-colors"
-            >
-              <X className="w-6 h-6" />
-            </button>
-            <img
-              src={selectedPhoto}
-              alt="Full Preview"
-              className="w-full h-full object-contain max-h-[85vh]"
-            />
-          </div>
-        </div>
-      )}
+      {/* ── Mobile-Optimized Pinch-to-Zoom Inspection Modal ── */}
+      <PhotoInspectionModal
+        photos={inspectionModal.photos}
+        initialIndex={inspectionModal.index}
+        isOpen={inspectionModal.isOpen}
+        onClose={() => setInspectionModal({ isOpen: false, photos: [], index: 0 })}
+      />
     </div>
   );
 }
