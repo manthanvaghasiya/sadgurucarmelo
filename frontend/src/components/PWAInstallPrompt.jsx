@@ -20,6 +20,10 @@ export default function PWAInstallPrompt() {
       return;
     }
 
+    if (sessionStorage.getItem('pwa_prompt_dismissed')) {
+      return;
+    }
+
     // Detect if already installed
     const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
 
@@ -36,13 +40,15 @@ export default function PWAInstallPrompt() {
       } else {
         // Show iOS prompt after 3 seconds for regular users
         timeoutRef.current = setTimeout(() => {
-          setIsVisible(true);
+          if (!sessionStorage.getItem('pwa_prompt_dismissed')) {
+            setIsVisible(true);
+          }
         }, 3000);
       }
     }
 
     // Check if the event was already captured by index.html script
-    if (window.deferredPWAInstallPrompt) {
+    if (window.deferredPWAInstallPrompt && !isLoginPage && !sessionStorage.getItem('pwa_prompt_dismissed')) {
       setDeferredPrompt(window.deferredPWAInstallPrompt);
       setIsVisible(true);
     }
@@ -51,13 +57,13 @@ export default function PWAInstallPrompt() {
       e.preventDefault();
       window.deferredPWAInstallPrompt = e;
       setDeferredPrompt(e);
-      if (!isLoginPage) {
+      if (!isLoginPage && !sessionStorage.getItem('pwa_prompt_dismissed')) {
         setIsVisible(true);
       }
     };
 
     const handleEarlyPrompt = (e) => {
-      if (e.detail && !isLoginPage) {
+      if (e.detail && !isLoginPage && !sessionStorage.getItem('pwa_prompt_dismissed')) {
         setDeferredPrompt(e.detail);
         setIsVisible(true);
       }
@@ -107,17 +113,11 @@ export default function PWAInstallPrompt() {
 
   const handleDismiss = () => {
     setIsVisible(false);
-    // Re-show after exactly 2 minutes
-    timeoutRef.current = setTimeout(() => {
-      if (isIOS) {
-        setIsVisible(true);
-      } else {
-        setDeferredPrompt((prev) => {
-          if (prev) setIsVisible(true);
-          return prev;
-        });
-      }
-    }, 120000);
+    try {
+      sessionStorage.setItem('pwa_prompt_dismissed', 'true');
+    } catch {
+      // ignore
+    }
   };
 
   return (
