@@ -4,30 +4,34 @@ import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import { useAuth } from '../context/AuthContext';
 import { Eye, EyeOff, Lock, User, ArrowRight, Home } from 'lucide-react';
+import axiosInstance from '../api/axiosConfig';
 
 export default function Login() {
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm();
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
-  const { login } = useAuth(); // Assume login is exported from AuthContext
+  const { login } = useAuth();
 
   const onSubmit = async (data) => {
     try {
-      const { default: axiosInstance } = await import('../api/axiosConfig');
-      // Backend auth endpoint expects 'email'
+      const normalizedEmail = (data.email || '').trim().toLowerCase();
       const response = await axiosInstance.post('/auth/login', {
-        email: data.email,
+        email: normalizedEmail,
         password: data.password
       });
 
       const token = response.data.token || response.data.data?.token;
       if (token) {
         localStorage.setItem('token', token);
+        axiosInstance.defaults.headers.common['Authorization'] = `Bearer ${token}`;
       }
       const userData = { ...(response.data.data || {}), token };
+      if (userData) {
+        localStorage.setItem('user', JSON.stringify(userData));
+      }
       login(userData);
       toast.success('Welcome to the Dashboard!');
-      navigate('/admin');
+      navigate('/admin', { replace: true });
     } catch (error) {
       toast.error(error.response?.data?.message || 'Invalid Credentials. Please try again.');
     }

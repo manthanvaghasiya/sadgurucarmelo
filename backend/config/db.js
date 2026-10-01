@@ -19,7 +19,9 @@ const connectDB = async () => {
     while (mongoose.connection.readyState === 2) {
       await new Promise((r) => setTimeout(r, 50));
     }
-    return mongoose.connection;
+    if (mongoose.connection.readyState === 1) {
+      return mongoose.connection;
+    }
   }
 
   try {

@@ -28,8 +28,10 @@ router.post('/login', async (req, res) => {
       });
     }
 
+    const normalizedEmail = (email || '').trim().toLowerCase();
+
     // Find user and explicitly select the password field
-    const user = await User.findOne({ email }).select('+password');
+    const user = await User.findOne({ email: normalizedEmail }).select('+password');
 
     if (!user) {
       return res.status(401).json({

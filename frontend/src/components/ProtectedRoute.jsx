@@ -16,13 +16,22 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
     );
   }
 
-  // 2. Only AFTER loading is finished, if there is no user, kick them to Home.
-  if (!user) {
-    return <Navigate to="/" state={{ from: location }} replace />;
+  // 2. Synchronous check: if React state is still updating, check localStorage immediately
+  const effectiveUser = user || (() => {
+    try {
+      const saved = localStorage.getItem('user');
+      return saved ? JSON.parse(saved) : null;
+    } catch {
+      return null;
+    }
+  })();
+
+  if (!effectiveUser) {
+    return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
   // 3. Role-based security check
-  if (allowedRoles && !allowedRoles.includes(user.role)) {
+  if (allowedRoles && !allowedRoles.includes(effectiveUser.role)) {
     return <Navigate to="/admin" replace />;
   }
 
