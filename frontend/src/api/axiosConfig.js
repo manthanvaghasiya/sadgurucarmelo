@@ -1,8 +1,16 @@
 import axios from 'axios';
 import toast from 'react-hot-toast';
 
+const isBrowser = typeof window !== 'undefined';
+const isLocalhost = isBrowser && (
+  window.location.hostname === 'localhost' ||
+  window.location.hostname === '127.0.0.1' ||
+  window.location.hostname === '0.0.0.0'
+);
+
 const cleanEnvUrl = import.meta.env.VITE_API_URL ? import.meta.env.VITE_API_URL.replace(/\/+$/, '') : '';
-const fallbackURL = import.meta.env.PROD ? '/api/' : 'http://localhost:5000/api/';
+// On any remote host (e.g. sadgurucarsurat.com or vercel.app), always use relative '/api/'.
+const fallbackURL = (isBrowser && !isLocalhost) || import.meta.env.PROD ? '/api/' : 'http://localhost:5000/api/';
 const finalBaseURL = cleanEnvUrl 
   ? (cleanEnvUrl.endsWith('/api') ? `${cleanEnvUrl}/` : `${cleanEnvUrl}/api/`)
   : fallbackURL;
