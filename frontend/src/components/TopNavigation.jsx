@@ -36,11 +36,11 @@ export default function TopNavigation() {
         paddingTop: 'env(safe-area-inset-top, 0px)',
       }}
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-14 md:h-20">
 
           {/* Logo / Branding */}
-          <Link to="/" className="flex items-center gap-2.5 sm:gap-3 group active:scale-98 transition-transform shrink-0">
+          <Link to="/" className="flex items-center gap-2 sm:gap-3 group active:scale-98 transition-transform shrink-0">
             <img
               src="/logo.png"
               alt="Sadguru Car Surat"
@@ -77,12 +77,12 @@ export default function TopNavigation() {
 
           {/* Action CTAs (Call on mobile, Call + WhatsApp on sm+) */}
           <div className="flex items-center gap-2 sm:gap-3 shrink-0">
-            {/* Mobile Call Button (Always visible) */}
+            {/* Call Button (Always visible) */}
             <a
               href={telLink}
               onClick={handleCallClick}
               aria-label="Call Sadguru Car Surat Dealership"
-              className="w-10 h-10 md:w-auto md:px-5 md:py-2.5 rounded-full md:rounded-xl bg-brand-orange hover:bg-orange-600 text-white flex items-center justify-center gap-2 font-heading font-bold text-sm shadow-md shadow-brand-orange/25 active:scale-90 transition-all select-none shrink-0"
+              className="w-9 h-9 sm:w-10 sm:h-10 md:w-auto md:px-5 md:py-2.5 rounded-full md:rounded-xl bg-brand-orange hover:bg-orange-600 text-white flex items-center justify-center gap-2 font-heading font-bold text-sm shadow-md shadow-brand-orange/25 active:scale-90 transition-all select-none shrink-0"
             >
               <PhoneCall className="w-4 h-4 stroke-[2.3]" />
               <span className="hidden md:inline">Call Us</span>
@@ -94,7 +94,7 @@ export default function TopNavigation() {
               target="_blank"
               rel="noopener noreferrer"
               aria-label="Chat with Sadguru Car Surat on WhatsApp"
-              className="hidden sm:flex w-10 h-10 md:w-auto md:px-5 md:py-2.5 rounded-full md:rounded-xl border-2 border-[#25D366] text-[#25D366] hover:bg-[#25D366] hover:text-white items-center justify-center gap-2 font-heading font-bold text-sm active:scale-90 transition-all select-none shrink-0"
+              className="hidden sm:flex w-9 h-9 sm:w-10 sm:h-10 md:w-auto md:px-5 md:py-2.5 rounded-full md:rounded-xl border-2 border-[#25D366] text-[#25D366] hover:bg-[#25D366] hover:text-white items-center justify-center gap-2 font-heading font-bold text-sm active:scale-90 transition-all select-none shrink-0"
             >
               <WhatsAppIcon className="w-4 h-4 fill-current" />
               <span className="hidden md:inline">WhatsApp</span>
