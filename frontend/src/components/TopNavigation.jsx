@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import { Phone } from 'lucide-react';
+import { PhoneCall } from 'lucide-react';
 import WhatsAppIcon from './WhatsAppIcon';
 import { useCompare } from '../context/CompareContext';
 import { useDealershipContact } from '../context/DealershipContactContext';
@@ -8,6 +8,14 @@ export default function TopNavigation() {
   const location = useLocation();
   const { compareCars } = useCompare();
   const { telLink, getWhatsAppLink } = useDealershipContact();
+
+  const handleCallClick = () => {
+    if (typeof window !== 'undefined' && 'vibrate' in navigator) {
+      try {
+        navigator.vibrate(12);
+      } catch (_) {}
+    }
+  };
 
   const navLinks = [
     { name: 'Home', path: '/' },
@@ -67,23 +75,38 @@ export default function TopNavigation() {
             ))}
           </nav>
 
-          {/* Desktop Call-to-Actions */}
-          <div className="flex items-center gap-2 md:gap-4">
-
+          {/* Action CTAs (Call & WhatsApp) */}
+          <div className="flex items-center gap-1.5 sm:gap-2 md:gap-3">
+            {/* High-Converting Mobile-First Call CTA */}
             <a
               href={telLink}
-              className="bg-accent hover:bg-accent-hover text-white p-2.5 md:px-6 md:py-2.5 rounded-lg md:rounded-lg font-body font-bold text-sm flex items-center gap-2 transition-all shadow-md shadow-accent/20 active:scale-95"
+              onClick={handleCallClick}
+              aria-label="Call Sadguru Car Surat Dealership"
+              className="relative group overflow-hidden bg-gradient-to-r from-amber-500 via-orange-500 to-brand-orange hover:brightness-110 active:brightness-95 text-white h-9 md:h-10 px-3 md:px-5 rounded-full font-heading font-bold text-xs md:text-sm flex items-center gap-1.5 md:gap-2 shadow-[0_3px_12px_rgba(245,148,35,0.38)] hover:shadow-[0_4px_16px_rgba(245,148,35,0.5)] active:scale-95 transition-all select-none"
             >
-              <Phone className="w-5 h-5 md:w-4 md:h-4 fill-current" />
-              <span className="hidden md:inline">Call Me</span>
+              {/* Phone Icon with ringing animation and live beacon dot */}
+              <span className="relative flex items-center justify-center">
+                <PhoneCall className="w-4 h-4 md:w-4 md:h-4 stroke-[2.4] animate-phone-ring transition-transform" />
+                {/* Micro live beacon dot */}
+                <span className="absolute -top-1 -right-1 flex h-2 w-2 pointer-events-none">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75" />
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400 border border-white/60" />
+                </span>
+              </span>
+
+              <span className="tracking-wide">Call</span>
+              <span className="hidden md:inline font-normal opacity-90">Us</span>
             </a>
+
+            {/* Matching WhatsApp CTA */}
             <a
               href={getWhatsAppLink('Hello Sadguru Car Melo, I would like to inquire about certified cars.')}
               target="_blank"
               rel="noopener noreferrer"
-              className="border-2 border-[#25D366] text-[#25D366] hover:bg-[#25D366] hover:text-white p-2 md:px-5 md:py-2.5 rounded-lg font-body font-bold text-sm flex items-center gap-2 transition-colors"
+              aria-label="Chat with Sadguru Car Surat on WhatsApp"
+              className="h-9 md:h-10 w-9 md:w-auto md:px-4 rounded-full border border-emerald-500/40 bg-emerald-50/80 hover:bg-[#25D366] text-[#25D366] hover:text-white flex items-center justify-center gap-1.5 font-heading font-bold text-xs md:text-sm transition-all shadow-xs hover:shadow-emerald-500/20 active:scale-95 select-none"
             >
-              <WhatsAppIcon className="w-5 h-5 md:w-4 md:h-4" />
+              <WhatsAppIcon className="w-4 h-4 md:w-4 md:h-4 fill-current transition-transform group-hover:scale-110" />
               <span className="hidden md:inline">WhatsApp</span>
             </a>
           </div>
