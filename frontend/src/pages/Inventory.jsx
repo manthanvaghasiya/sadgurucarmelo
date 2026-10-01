@@ -130,8 +130,8 @@ export default function Inventory() {
       </Helmet>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
-        {/* Breadcrumbs */}
-        <nav className="flex mb-3 sm:mb-4" aria-label="Breadcrumb">
+        {/* Breadcrumbs (Hidden on Mobile View) */}
+        <nav className="hidden md:flex mb-3 sm:mb-4" aria-label="Breadcrumb">
           <ol className="flex items-center space-x-2 font-body text-[12px] sm:text-[13px] font-medium text-text-muted">
             <li><a href="/" className="hover:text-primary transition-colors">Home</a></li>
             <li><span className="text-gray-300">/</span></li>
@@ -142,28 +142,16 @@ export default function Inventory() {
         </nav>
 
         {/* Page Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4 sm:mb-8">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3 sm:mb-8">
           <div className="flex flex-col">
             <h1 className="font-heading font-medium text-2xl sm:text-[38px] text-primary leading-tight tracking-tight">
               Explore Verified Cars
             </h1>
-            <div className="flex items-center gap-3 mt-1.5 lg:hidden">
-              <div className="flex items-center gap-1.5 bg-red-50 px-2.5 py-0.5 rounded-full border border-red-100">
-                <span className="relative flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75" />
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-red-600" />
-                </span>
-                <span className="text-[10px] font-black text-red-600 uppercase tracking-wider leading-none">Live Lot</span>
-              </div>
-              <span className="text-text-muted text-xs font-medium">
-                150+ cars ready in Surat
-              </span>
-            </div>
           </div>
         </div>
 
-        {/* ── MOBILE QUICK CATEGORY & FILTER DOCK (Native Flutter app feel) ── */}
-        <div className="lg:hidden mb-5 space-y-2.5">
+        {/* ── MOBILE FILTER DOCK (Native Flutter app feel) ── */}
+        <div className="lg:hidden mb-4">
           <div className="flex items-center justify-between gap-2">
             <button
               onClick={() => setIsFilterOpen(true)}
@@ -186,36 +174,6 @@ export default function Inventory() {
                 Clear ({activeFilterCount})
               </button>
             )}
-          </div>
-
-          {/* Quick Body Type Horizontal Snapping Chips */}
-          <div className="mobile-app-snap-reel flex gap-2 pb-1 -mx-1 px-1">
-            {['All', 'SUV', 'Sedan', 'Hatchback'].map((type) => {
-              const isSelected = type === 'All' ? !filters.bodyType : filters.bodyType === type;
-              return (
-                <button
-                  key={type}
-                  type="button"
-                  onClick={() => {
-                    if (type === 'All') {
-                      setFilters(prev => ({ ...prev, bodyType: '' }));
-                    } else {
-                      setFilters(prev => ({ ...prev, bodyType: prev.bodyType === type ? '' : type }));
-                    }
-                  }}
-                  className={`snap-start shrink-0 px-3.5 py-1.5 rounded-xl text-xs font-heading font-bold transition-all active:scale-95 flex items-center gap-1.5 shadow-2xs ${
-                    isSelected
-                      ? 'bg-slate-900 text-white shadow-xs'
-                      : 'bg-white text-slate-600 border border-slate-200/80 hover:bg-slate-50'
-                  }`}
-                >
-                  <span>{type}</span>
-                  {isSelected && type !== 'All' && (
-                    <span className="w-1.5 h-1.5 rounded-full bg-brand-orange" />
-                  )}
-                </button>
-              );
-            })}
           </div>
         </div>
 
