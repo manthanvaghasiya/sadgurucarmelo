@@ -52,6 +52,7 @@ export default function Footer() {
                 { name: 'Browse Inventory', path: '/inventory' },
                 { name: 'Sell Your Car', path: '/sell-your-car' },
                 { name: 'Compare Cars', path: '/compare' },
+                { name: 'Install App (PWA)', path: '/install' },
                 { name: 'About Our Mission', path: '/about' },
                 { name: 'Contact Support', path: '/contact' }
               ].map((link) => (

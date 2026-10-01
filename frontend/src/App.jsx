@@ -20,6 +20,7 @@ const SellYourCar = lazy(() => import('./pages/SellYourCar'));
 const CompareCars = lazy(() => import('./pages/CompareCars'));
 
 const UnifiedLogin = lazy(() => import('./pages/Login'));
+const InstallApp = lazy(() => import('./pages/InstallApp'));
 
 // Admin Panel Imports
 const AdminLayout = lazy(() => import('./components/admin/AdminLayout'));
@@ -84,6 +85,7 @@ function App() {
                             <Route path="/compare" element={<CompareCars />} />
                             <Route path="/about" element={<AboutPage />} />
                             <Route path="/contact" element={<Contact />} />
+                            <Route path="/install" element={<InstallApp />} />
                             <Route path="/car-details/:id" element={<CarDetails />} />
                           </Routes>
                         </Suspense>
