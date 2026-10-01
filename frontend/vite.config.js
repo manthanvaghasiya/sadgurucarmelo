@@ -11,7 +11,51 @@ export default defineConfig({
     VitePWA({
       registerType: 'autoUpdate',
       devOptions: {
-        enabled: false, // Disabled to prevent Failed to load module script error
+        enabled: false,
+      },
+      workbox: {
+        globPatterns: ['**/*.{js,css,html,ico,svg,webmanifest}', '**/icon-*.png', '**/sadgurulogo*.png'],
+        maximumFileSizeToCacheInBytes: 4 * 1024 * 1024,
+        navigateFallback: '/index.html',
+        // CRITICAL: Strictly bypass Service Worker for all API endpoints and backend routes
+        navigateFallbackDenylist: [/^\/api\//, /^\/api$/, /^\/sitemap\.xml/, /^\/robots\.txt/],
+        runtimeCaching: [
+          {
+            // All API routes strictly use NetworkOnly - never intercept, buffer, or cache authentication
+            urlPattern: ({ url }) => url.pathname.startsWith('/api/'),
+            handler: 'NetworkOnly',
+            method: 'POST',
+          },
+          {
+            urlPattern: ({ url }) => url.pathname.startsWith('/api/'),
+            handler: 'NetworkOnly',
+            method: 'GET',
+          },
+          {
+            urlPattern: ({ url }) => url.pathname.startsWith('/api/'),
+            handler: 'NetworkOnly',
+            method: 'PUT',
+          },
+          {
+            urlPattern: ({ url }) => url.pathname.startsWith('/api/'),
+            handler: 'NetworkOnly',
+            method: 'DELETE',
+          },
+          {
+            urlPattern: ({ request }) => request.destination === 'style' || request.destination === 'font',
+            handler: 'StaleWhileRevalidate',
+            options: {
+              cacheName: 'static-assets',
+              expiration: {
+                maxEntries: 40,
+                maxAgeSeconds: 60 * 60 * 24 * 30, // 30 Days
+              },
+            },
+          },
+        ],
+        skipWaiting: true,
+        clientsClaim: true,
+        cleanupOutdatedCaches: true,
       },
       manifest: {
         name: 'Sadguru Car Melo',
@@ -41,7 +85,10 @@ export default defineConfig({
       }
     })
   ],
+  define: {
+    'process.env.NODE_ENV': JSON.stringify('production'),
+  },
   esbuild: {
-    drop: process.env.NODE_ENV === 'production' ? ['console', 'debugger'] : [],
+    drop: ['console', 'debugger'],
   },
 })

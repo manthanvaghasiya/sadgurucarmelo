@@ -10,9 +10,16 @@ export default function PWAInstallPrompt() {
   const timeoutRef = useRef(null);
 
   const location = useLocation();
-  const isAdminRoute = location.pathname.startsWith('/login') || location.pathname.startsWith('/admin');
+  const isLoginPage = location.pathname === '/login';
+  const isAdminRoute = isLoginPage || location.pathname.startsWith('/admin');
 
   useEffect(() => {
+    // Never show install overlay on the login page to avoid interrupting authentication
+    if (isLoginPage) {
+      setIsVisible(false);
+      return;
+    }
+
     // Detect if already installed
     const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
 
@@ -44,7 +51,16 @@ export default function PWAInstallPrompt() {
       e.preventDefault();
       window.deferredPWAInstallPrompt = e;
       setDeferredPrompt(e);
-      setIsVisible(true);
+      if (!isLoginPage) {
+        setIsVisible(true);
+      }
+    };
+
+    const handleEarlyPrompt = (e) => {
+      if (e.detail && !isLoginPage) {
+        setDeferredPrompt(e.detail);
+        setIsVisible(true);
+      }
     };
 
     const handleAppInstalled = () => {
@@ -63,10 +79,12 @@ export default function PWAInstallPrompt() {
     };
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    window.addEventListener('pwa-prompt-available', handleEarlyPrompt);
     window.addEventListener('appinstalled', handleAppInstalled);
 
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+      window.removeEventListener('pwa-prompt-available', handleEarlyPrompt);
       window.removeEventListener('appinstalled', handleAppInstalled);
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
     };

@@ -55,12 +55,27 @@
   <meta name="twitter:description" content="Buy, sell, or exchange certified pre-owned cars. 150+ verified vehicles." />
   <meta name="twitter:image" content="https://sadgurucarsurat.com/og-image.jpg" />
 
-  <!-- Catch PWA Install Prompt Early -->
+  <!-- Silence React DevTools download hint in production -->
+  <script>
+    if (typeof window !== 'undefined' && !window.__REACT_DEVTOOLS_GLOBAL_HOOK__) {
+      window.__REACT_DEVTOOLS_GLOBAL_HOOK__ = {
+        isDisabled: true,
+        supportsFiber: true,
+        inject: function() {},
+        onCommitFiberRoot: function() {},
+        onCommitFiberUnmount: function() {}
+      };
+    }
+  </script>
+
+  <!-- Catch PWA Install Prompt Early for UI Binding -->
   <script>
     window.deferredPWAInstallPrompt = null;
     window.addEventListener('beforeinstallprompt', function(e) {
+      // Store event for custom install button UI without triggering browser unprompted warnings
       e.preventDefault();
       window.deferredPWAInstallPrompt = e;
+      window.dispatchEvent(new CustomEvent('pwa-prompt-available', { detail: e }));
     });
   </script>
 
