@@ -313,7 +313,7 @@ export function normalizeCarPayload(raw) {
   // 9. Status
   if (data.status) {
     const st = String(data.status).trim();
-    if (['Available', 'Coming Soon', 'Draft'].includes(st)) {
+    if (['Available', 'Coming Soon', 'Draft', 'Sold'].includes(st)) {
       data.status = st;
     } else {
       data.status = 'Available';
@@ -559,6 +559,179 @@ router.patch('/:id/toggle-featured', protect, admin, async (req, res) => {
     
     res.json({ success: true, data: car });
   } catch (error) {
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+});
+
+// ── Helper to safely extract URL string from string or { url } object ──
+const getMediaUrl = (item) => {
+  if (!item) return '';
+  if (typeof item === 'string') return item;
+  if (typeof item === 'object' && item.url) return item.url;
+  return '';
+};
+
+// ── Purge Extra Photos Function (Keeps ONLY 1st photo, deletes 9-10 others) ──
+export async function purgeExtraCarPhotos(carDoc) {
+  if (!carDoc) return null;
+
+  const allImages = Array.isArray(carDoc.images) ? carDoc.images : [];
+  const spinImgs = Array.isArray(carDoc.spinImages) ? carDoc.spinImages : [];
+
+  // Primary photo is the first photo or carDoc.image
+  const primaryItem = allImages.length > 0 ? allImages[0] : carDoc.image;
+  const primaryUrl = getMediaUrl(primaryItem);
+
+  // Extra photos to permanently delete from cloud storage (ImageKit / R2 / Cloudinary)
+  const extraImages = allImages.slice(1);
+  const urlsToDelete = [
+    ...extraImages.map(getMediaUrl),
+    ...spinImgs.map(getMediaUrl),
+    carDoc.vr360Image ? getMediaUrl(carDoc.vr360Image) : ''
+  ].filter((u) => u && u !== primaryUrl);
+
+  const uniqueUrlsToDelete = [...new Set(urlsToDelete)];
+  console.log(`🧹 Purging ${uniqueUrlsToDelete.length} extra photos for sold car: ${carDoc.title || carDoc._id}`);
+
+  for (const url of uniqueUrlsToDelete) {
+    try {
+      await deleteMedia(url);
+    } catch (err) {
+      console.warn(`Failed to delete media ${url}:`, err.message);
+    }
+  }
+
+  // Update car in MongoDB to keep ONLY the single primary photo
+  carDoc.image = primaryUrl;
+  carDoc.images = primaryItem ? [primaryItem] : [];
+  carDoc.spinImages = [];
+  carDoc.vr360Image = '';
+  carDoc.photosPurged = true;
+  carDoc.photosPurgedAt = new Date();
+  await carDoc.save();
+
+  return carDoc;
+}
+
+// ── Automated 24-Hour Sold Photos Cleanup Engine ──
+export async function process24HourSoldPhotosCleanup() {
+  try {
+    const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+
+    const expiredSoldCars = await Car.find({
+      status: 'Sold',
+      photosPurged: { $ne: true },
+      soldAt: { $lte: twentyFourHoursAgo },
+    });
+
+    if (expiredSoldCars.length > 0) {
+      console.log(`⏰ Found ${expiredSoldCars.length} sold cars with expired 24h grace period. Starting storage photo purge...`);
+      for (const car of expiredSoldCars) {
+        await purgeExtraCarPhotos(car);
+      }
+      carCache.flushAll();
+      console.log(`✅ 24-hour sold photo cleanup completed.`);
+    }
+  } catch (err) {
+    console.error('Error during 24-hour sold photo cleanup:', err);
+  }
+}
+
+// ═══════════════════════════════════════════════
+//  POST /api/cars/:id/mark-sold — Mark car as Sold with 24h Grace Period (Admin)
+// ═══════════════════════════════════════════════
+router.post('/:id/mark-sold', protect, admin, async (req, res) => {
+  try {
+    const car = await Car.findById(req.params.id);
+    if (!car) {
+      return res.status(404).json({ success: false, message: 'Vehicle not found' });
+    }
+
+    const { purgeImmediately } = req.body || {};
+
+    car.status = 'Sold';
+    car.soldAt = new Date();
+    car.isFeaturedOnHome = false; // Remove from home page featured list
+
+    if (purgeImmediately) {
+      await purgeExtraCarPhotos(car);
+    } else {
+      car.photosPurged = false;
+      await car.save();
+    }
+
+    carCache.flushAll();
+
+    res.json({
+      success: true,
+      message: purgeImmediately
+        ? 'Vehicle marked as Sold and extra photos purged from cloud storage.'
+        : 'Vehicle marked as Sold! 24-hour safety grace period has started.',
+      data: car,
+    });
+  } catch (error) {
+    console.error('Mark as sold error:', error);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+});
+
+// ═══════════════════════════════════════════════
+//  POST /api/cars/:id/revert-sold — Undo Sold and restore to Available (Admin)
+// ═══════════════════════════════════════════════
+router.post('/:id/revert-sold', protect, admin, async (req, res) => {
+  try {
+    const car = await Car.findById(req.params.id);
+    if (!car) {
+      return res.status(404).json({ success: false, message: 'Vehicle not found' });
+    }
+
+    car.status = 'Available';
+    car.soldAt = null;
+    await car.save();
+
+    carCache.flushAll();
+
+    res.json({
+      success: true,
+      message: car.photosPurged
+        ? 'Vehicle restored to Available. Note: Extra photos were already purged.'
+        : 'Vehicle restored to Available with all photos intact!',
+      data: car,
+    });
+  } catch (error) {
+    console.error('Revert sold error:', error);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+});
+
+// ═══════════════════════════════════════════════
+//  POST /api/cars/:id/purge-photos — Manually purge extra photos now (Admin)
+// ═══════════════════════════════════════════════
+router.post('/:id/purge-photos', protect, admin, async (req, res) => {
+  try {
+    const car = await Car.findById(req.params.id);
+    if (!car) {
+      return res.status(404).json({ success: false, message: 'Vehicle not found' });
+    }
+
+    if (car.status !== 'Sold') {
+      return res.status(400).json({ success: false, message: 'Only sold vehicles can have photos purged.' });
+    }
+
+    if (car.photosPurged) {
+      return res.status(400).json({ success: false, message: 'Extra photos have already been purged for this vehicle.' });
+    }
+
+    await purgeExtraCarPhotos(car);
+    carCache.flushAll();
+
+    res.json({
+      success: true,
+      message: 'Extra photos purged from cloud storage. Primary photo retained.',
+      data: car,
+    });
+  } catch (error) {
+    console.error('Purge photos error:', error);
     res.status(500).json({ success: false, message: 'Server error' });
   }
 });

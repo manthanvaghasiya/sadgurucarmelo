@@ -108,8 +108,88 @@ export function CarProvider({ children }) {
     }
   };
 
+  // ── Mark Car As Sold (Starts 24h grace period or purges immediately) ──
+  const markCarAsSold = async (id, options = {}) => {
+    // Optimistic UI update
+    setCars((prevCars) =>
+      prevCars.map((car) =>
+        (car._id || car.id) === id
+          ? { ...car, status: 'Sold', soldAt: new Date().toISOString(), photosPurged: options.purgeImmediately || false }
+          : car
+      )
+    );
+
+    try {
+      const response = await axiosInstance.post(`/cars/${id}/mark-sold`, options);
+      const updatedCar = response.data?.data;
+      if (updatedCar) {
+        setCars((prevCars) =>
+          prevCars.map((car) => ((car._id || car.id) === id ? updatedCar : car))
+        );
+      }
+      return response.data;
+    } catch (err) {
+      fetchCars();
+      throw err;
+    }
+  };
+
+  // ── Revert Car Sold status back to Available ──
+  const revertCarSold = async (id) => {
+    setCars((prevCars) =>
+      prevCars.map((car) =>
+        (car._id || car.id) === id
+          ? { ...car, status: 'Available', soldAt: null }
+          : car
+      )
+    );
+
+    try {
+      const response = await axiosInstance.post(`/cars/${id}/revert-sold`);
+      const updatedCar = response.data?.data;
+      if (updatedCar) {
+        setCars((prevCars) =>
+          prevCars.map((car) => ((car._id || car.id) === id ? updatedCar : car))
+        );
+      }
+      return response.data;
+    } catch (err) {
+      fetchCars();
+      throw err;
+    }
+  };
+
+  // ── Manually Purge Extra Photos Now (Bypass 24h timer) ──
+  const purgeCarPhotos = async (id) => {
+    try {
+      const response = await axiosInstance.post(`/cars/${id}/purge-photos`);
+      const updatedCar = response.data?.data;
+      if (updatedCar) {
+        setCars((prevCars) =>
+          prevCars.map((car) => ((car._id || car.id) === id ? updatedCar : car))
+        );
+      }
+      return response.data;
+    } catch (err) {
+      fetchCars();
+      throw err;
+    }
+  };
+
   return (
-    <CarContext.Provider value={{ cars, isLoading, error, fetchCars, addCar, updateCar, deleteCar, toggleFeatured }}>
+    <CarContext.Provider value={{
+      cars,
+      isLoading,
+      error,
+      fetchCars,
+      addCar,
+      updateCar,
+      deleteCar,
+      toggleFeatured,
+      markCarAsSold,
+      revertCarSold,
+      purgeCarPhotos,
+    }}>
       {children}
     </CarContext.Provider>
   );

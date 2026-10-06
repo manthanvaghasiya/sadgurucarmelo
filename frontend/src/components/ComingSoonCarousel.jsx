@@ -22,7 +22,6 @@ import {
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useCars } from '../context/CarContext';
-import { FALLBACK_SHOWCASE } from '../data/showcaseData';
 import { getOptimizedUrl } from '../utils/imageUtils';
 import WhatsAppIcon from './WhatsAppIcon';
 import axiosInstance from '../api/axiosConfig';
@@ -746,9 +745,9 @@ export default function ComingSoonCarousel({ noPadding = false, className = '' }
   const [formData, setFormData] = useState({ name: '', phone: '', note: '' });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Extract all Coming Soon cars from inventory, or fallback to curated models
+  // Extract all Coming Soon cars from inventory (strictly real database stock)
   const displayCars = useMemo(() => {
-    const list = (cars || []).filter((c) => {
+    return (cars || []).filter((c) => {
       if (!c || !c.image) return false;
       const status = (c.status || '').trim().toLowerCase();
       return (
@@ -758,11 +757,6 @@ export default function ComingSoonCarousel({ noPadding = false, className = '' }
         c.isComingSoon === true
       );
     });
-
-    if (list.length > 0) {
-      return list;
-    }
-    return FALLBACK_SHOWCASE;
   }, [cars]);
 
   // Keep index within bounds
@@ -846,7 +840,7 @@ export default function ComingSoonCarousel({ noPadding = false, className = '' }
     }
   };
 
-  if (!activeCar) return null;
+  if (displayCars.length === 0 || !activeCar) return null;
 
   // Render one of the 3 top-level poster designs based on index!
   const renderPosterTemplate = (car, index) => {

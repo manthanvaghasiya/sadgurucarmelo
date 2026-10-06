@@ -15,3 +15,11 @@ temp_sidebar.js
 # Build output
 dist/
 .vercel
+
+# Experimental Instagram gallery files (not for live push)
+frontend/src/components/InstagramGallery.jsx
+frontend/src/data/instagramData.js
+frontend/public/instagram_avatar.png
+frontend/public/instagram_official_avatar.png
+frontend/public/post_thumb_*.jpg
+frontend/public/reel_thumb_*.jpg

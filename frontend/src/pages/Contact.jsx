@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { Sparkles, ShieldCheck, Award, Users, CheckCircle2, ChevronRight, Home as HomeIcon } from 'lucide-react';
+import { Sparkles, ShieldCheck, Award, Users, CheckCircle2, ChevronRight, Home as HomeIcon, MapPin, Send } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { useDealershipContact } from '../context/DealershipContactContext';
@@ -11,6 +11,8 @@ import ContactFaqSection from '../components/contact/ContactFaqSection';
 
 export default function Contact() {
   const { phone, address } = useDealershipContact();
+  // Mobile-only segmented tab state: 'hub' | 'form'
+  const [activeMobileView, setActiveMobileView] = useState('hub');
 
   return (
     <div className="bg-gradient-to-b from-slate-50 via-white to-slate-50 min-h-screen py-8 sm:py-12 lg:py-16 px-4 sm:px-6 lg:px-8 overflow-x-hidden relative">
@@ -80,16 +82,56 @@ export default function Contact() {
           <ContactChannelCards />
         </motion.div>
 
-        {/* ── 3. Main Split Grid (Inquiry Form + Live Map & Facilities Hub) ── */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-stretch">
-          {/* Left Column (5 Cols on LG): Send Inquiry Form */}
-          <div className="lg:col-span-5 w-full flex flex-col">
-            <ContactInquiryForm />
+        {/* ── 3. Main Section: Mobile Tab Switcher vs Desktop Side-by-Side ── */}
+        <div>
+          {/* Mobile-Only Segmented Controller (Reduces ~1,800px vertical clutter on phones) */}
+          <div className="lg:hidden flex items-center p-1 bg-slate-200/80 backdrop-blur-sm rounded-2xl mb-5 border border-slate-300/80 shadow-2xs max-w-md mx-auto w-full">
+            <button
+              type="button"
+              onClick={() => setActiveMobileView('hub')}
+              className={`flex-1 py-2.5 px-3 rounded-xl font-heading font-black text-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                activeMobileView === 'hub'
+                  ? 'bg-slate-900 text-white shadow-sm'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              <MapPin className={`w-3.5 h-3.5 ${activeMobileView === 'hub' ? 'text-brand-orange' : 'text-slate-400'}`} />
+              <span>📍 શોરૂમ લોકેશન & નકશો</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveMobileView('form')}
+              className={`flex-1 py-2.5 px-3 rounded-xl font-heading font-black text-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                activeMobileView === 'form'
+                  ? 'bg-slate-900 text-white shadow-sm'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              <Send className={`w-3.5 h-3.5 ${activeMobileView === 'form' ? 'text-brand-orange' : 'text-slate-400'}`} />
+              <span>✍️ ઇન્ક્વાયરી મોકલો</span>
+            </button>
           </div>
 
-          {/* Right Column (7 Cols on LG): Live Map, Facilities & Navigation */}
-          <div className="lg:col-span-7 w-full flex flex-col">
-            <ContactShowroomHub />
+          {/* Mobile-Only Active Card View */}
+          <div className="lg:hidden">
+            {activeMobileView === 'hub' ? (
+              <ContactShowroomHub />
+            ) : (
+              <ContactInquiryForm />
+            )}
+          </div>
+
+          {/* Desktop-Only Side-by-Side 12-Column Grid (100% Untouched on Laptop) */}
+          <div className="hidden lg:grid lg:grid-cols-12 gap-8 lg:gap-10 items-stretch">
+            {/* Left Column (5 Cols on LG): Send Inquiry Form */}
+            <div className="lg:col-span-5 w-full flex flex-col">
+              <ContactInquiryForm />
+            </div>
+
+            {/* Right Column (7 Cols on LG): Live Map, Facilities & Navigation */}
+            <div className="lg:col-span-7 w-full flex flex-col">
+              <ContactShowroomHub />
+            </div>
           </div>
         </div>
 

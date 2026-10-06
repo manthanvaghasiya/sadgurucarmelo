@@ -52,7 +52,7 @@ function mongoSanitize() {
 
 // Route imports
 import authRoutes from './routes/auth.routes.js';
-import carRoutes from './routes/car.routes.js';
+import carRoutes, { process24HourSoldPhotosCleanup } from './routes/car.routes.js';
 import messageRoutes from './routes/message.routes.js';
 import promoPosterRoutes from './routes/promoPoster.routes.js';
 import happyCustomerRoutes from './routes/happyCustomer.routes.js';
@@ -67,8 +67,13 @@ import uploadRoutes from './routes/upload.routes.js';
 // ── Load env variables ──
 // (done automatically via 'dotenv/config' at top)
 
-// ── Connect to MongoDB ──
-connectDB().catch((err) => console.error('Initial DB connection attempt:', err.message));
+// ── Connect to MongoDB & Start 24-Hour Sold Photos Purge Schedule ──
+connectDB().then(() => {
+  process24HourSoldPhotosCleanup().catch((err) => console.warn('Initial 24h photo cleanup check:', err.message));
+  setInterval(() => {
+    process24HourSoldPhotosCleanup().catch((err) => console.warn('Recurring 24h photo cleanup error:', err.message));
+  }, 60 * 60 * 1000);
+}).catch((err) => console.error('Initial DB connection attempt:', err.message));
 
 // ── Initialize Express ──
 const app = express();
@@ -77,10 +82,16 @@ const app = express();
 // REQUIRED for express-rate-limit to work securely on Render/Vercel
 app.set('trust proxy', 1);
 
-// ── Ensure DB Connection for Serverless Invocations ──
+// ── Ensure DB Connection & Opportunistic Cleanup for Serverless Invocations ──
+let lastServerlessCleanup = 0;
 app.use(async (_req, _res, next) => {
   try {
     await connectDB();
+    const now = Date.now();
+    if (now - lastServerlessCleanup > 60 * 60 * 1000) {
+      lastServerlessCleanup = now;
+      process24HourSoldPhotosCleanup().catch(() => {});
+    }
   } catch (err) {
     console.error('Database connection middleware error:', err.message);
   }

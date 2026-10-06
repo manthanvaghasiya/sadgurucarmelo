@@ -13,30 +13,30 @@ export default function Inventory() {
 
   const { cars } = useCars();
 
-  // Only use 'Available' cars for filter options — exclude 'Coming Soon', 'Sold', etc.
-  const availableCars = useMemo(() => {
-    return cars.filter(c => c.status === 'Available');
+  // Include Available and Sold cars for showroom inventory options
+  const activeStockCars = useMemo(() => {
+    return cars.filter(c => c.status === 'Available' || c.status === 'Sold');
   }, [cars]);
 
   const availableBrands = useMemo(() => {
-    return [...new Set(availableCars.map(c => c.make))].filter(Boolean).sort();
-  }, [availableCars]);
+    return [...new Set(activeStockCars.map(c => c.make))].filter(Boolean).sort();
+  }, [activeStockCars]);
 
   const availableFuels = useMemo(() => {
-    return [...new Set(availableCars.map(c => c.fuelType))].filter(Boolean).sort();
-  }, [availableCars]);
+    return [...new Set(activeStockCars.map(c => c.fuelType))].filter(Boolean).sort();
+  }, [activeStockCars]);
 
   const availableBodyTypes = useMemo(() => {
-    return [...new Set(availableCars.map(c => c.bodyType))].filter(Boolean).sort();
-  }, [availableCars]);
+    return [...new Set(activeStockCars.map(c => c.bodyType))].filter(Boolean).sort();
+  }, [activeStockCars]);
 
   const priceRangeBounds = useMemo(() => {
-    if (!availableCars || availableCars.length === 0) return [0, 5000000];
-    const prices = availableCars.map(c => Number(c.price)).filter(p => !isNaN(p));
+    if (!activeStockCars || activeStockCars.length === 0) return [0, 5000000];
+    const prices = activeStockCars.map(c => Number(c.price)).filter(p => !isNaN(p));
     // Provide a default fallback if price maps fail
     if (prices.length === 0) return [0, 5000000];
     return [Math.min(...prices), Math.max(...prices)];
-  }, [availableCars]);
+  }, [activeStockCars]);
 
   // Initialize filters from URL query params (from Home page search)
   const [filters, setFilters] = useState(() => {
@@ -150,32 +150,6 @@ export default function Inventory() {
           </div>
         </div>
 
-        {/* ── MOBILE FILTER DOCK (Native Flutter app feel) ── */}
-        <div className="lg:hidden mb-4">
-          <div className="flex items-center justify-between gap-2">
-            <button
-              onClick={() => setIsFilterOpen(true)}
-              className="flex-1 flex items-center justify-center gap-2 bg-white text-primary border border-slate-200/90 py-2.5 px-4 rounded-xl font-heading font-black text-xs shadow-xs active:scale-[0.98] transition-all"
-            >
-              <SlidersHorizontal className="w-3.5 h-3.5 text-brand-orange" />
-              <span>Filters &amp; Search</span>
-              {activeFilterCount > 0 && (
-                <span className="w-5 h-5 rounded-full bg-brand-orange text-white text-[10px] font-black flex items-center justify-center shadow-xs">
-                  {activeFilterCount}
-                </span>
-              )}
-            </button>
-
-            {activeFilterCount > 0 && (
-              <button
-                onClick={() => setFilters({ makes: [], fuelType: '', bodyType: '', budget: null })}
-                className="px-3 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-heading font-bold transition-all active:scale-95 shrink-0"
-              >
-                Clear ({activeFilterCount})
-              </button>
-            )}
-          </div>
-        </div>
 
         {/* ── FLOATING MOBILE FILTER PILL (Appears on scroll for 1-tap filtering) ── */}
         <div

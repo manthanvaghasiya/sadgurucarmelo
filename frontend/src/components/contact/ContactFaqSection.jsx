@@ -36,6 +36,7 @@ const CONTACT_FAQS = [
 
 export default function ContactFaqSection() {
   const [openIndex, setOpenIndex] = useState(0);
+  const [showAllMobile, setShowAllMobile] = useState(false);
 
   return (
     <div className="bg-white rounded-3xl p-6 sm:p-8 lg:p-10 border border-slate-100 shadow-xl shadow-slate-200/40">
@@ -54,10 +55,13 @@ export default function ContactFaqSection() {
       <div className="max-w-3xl mx-auto space-y-3">
         {CONTACT_FAQS.map((faq, idx) => {
           const isOpen = openIndex === idx;
+          const isHiddenOnMobile = !showAllMobile && idx >= 3;
           return (
             <div
               key={idx}
               className={`rounded-2xl border transition-all duration-300 overflow-hidden ${
+                isHiddenOnMobile ? 'hidden sm:block' : 'block'
+              } ${
                 isOpen
                   ? 'border-brand-orange/40 bg-amber-50/20 shadow-sm'
                   : 'border-slate-200/80 bg-slate-50/50 hover:bg-slate-50 hover:border-slate-300'
@@ -101,6 +105,20 @@ export default function ContactFaqSection() {
             </div>
           );
         })}
+
+        {/* Mobile View More Button (Desktop keeps all visible) */}
+        {!showAllMobile && (
+          <div className="sm:hidden text-center pt-2">
+            <button
+              type="button"
+              onClick={() => setShowAllMobile(true)}
+              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-800 font-heading font-bold text-xs border border-slate-200 shadow-2xs active:scale-95 transition-all"
+            >
+              <span>વધુ સવાલો જુઓ · View More FAQs ({CONTACT_FAQS.length - 3})</span>
+              <ChevronDown className="w-3.5 h-3.5 text-brand-orange" />
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

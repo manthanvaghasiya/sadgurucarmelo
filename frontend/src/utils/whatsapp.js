@@ -35,11 +35,17 @@ export const getGeneralWhatsAppLink = () => {
  */
 export const getCarWhatsAppLink = (car) => {
   const phone = getActiveWhatsAppNumber();
-  const title = car.title || `${car.make} ${car.model} ${car.year}`;
+  const title = car.title || `${car.make || ''} ${car.model || ''} ${car.year || ''}`.trim() || 'Vehicle';
   const priceFormatted =
     typeof car.price === 'number'
       ? `₹${car.price.toLocaleString('en-IN')}`
       : car.price;
+
+  const isSold = String(car.status || '').toLowerCase() === 'sold';
+  if (isSold) {
+    const message = `નમસ્તે Sadguru Car Surat, મેં તમારી વેબસાઇટ પર આ વેચાઈ ગયેલી કાર ${title} જોઈ. શું આના જેવી સમાન બીજી કાર તમારી પાસે ઉપલબ્ધ છે? / Hello, I saw that ${title} is sold. Do you have a similar car available?`;
+    return `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
+  }
 
   const message = `Hello Sadguru Car Surat, I am interested in the ${title} priced at ${priceFormatted}. Is it still available?`;
   return `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;

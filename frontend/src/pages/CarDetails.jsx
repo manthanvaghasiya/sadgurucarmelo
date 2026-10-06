@@ -48,6 +48,7 @@ export default function CarDetails() {
     const [viewMode, setViewMode] = useState('standard'); // 'standard' or '360'
     const [isSendingImages, setIsSendingImages] = useState(false);
     const [showAllFeatures, setShowAllFeatures] = useState(false);
+    const [mobileDetailTab, setMobileDetailTab] = useState('specs'); // 'specs', 'emi', 'dealer'
 
     const whatsappUrl = car ? getCarWhatsAppLink(car) : '#';
 
@@ -524,165 +525,198 @@ export default function CarDetails() {
     }
 
     // Render helper for Pricing HUD and Primary CTAs (reused seamlessly in desktop sidebar & mobile flow)
-    const renderPricingCard = () => (
-        <div className="bg-surface rounded-2xl shadow-sm border border-slate-200/80 p-4 sm:p-5">
-            <div className="flex justify-between items-start mb-2.5">
-                <span className="font-heading font-bold text-[10px] sm:text-[11px] text-slate-400 tracking-widest uppercase">{car.registration || 'UNREGISTERED'}</span>
-                <div className="flex items-center gap-1">
-                    {(car.badges || ['CERTIFIED']).map((b) => (
-                        <span key={b} className="bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-0.5 rounded text-[9px] font-heading font-bold uppercase tracking-wider flex items-center gap-0.5">
-                            <CheckCircle2 className="w-2.5 h-2.5 text-emerald-600" />
-                            {typeof b === 'string' ? b.toUpperCase() : b}
-                        </span>
-                    ))}
-                </div>
-            </div>
+    const renderPricingCard = () => {
+        const isSold = String(car.status || '').toLowerCase() === 'sold';
 
-            <div className="mb-2">
-                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Special Offer Price</span>
-                <h2 className="font-heading font-black text-3xl sm:text-4xl text-brand-orange leading-none tracking-tight">
-                    {typeof car.price === 'number' ? `₹${car.price.toLocaleString('en-IN')}` : (car.price ? `₹${car.price}` : 'કિંમત માટે સંપર્ક કરો')}
-                </h2>
-            </div>
-
-            <p className="font-body text-[11px] text-slate-400 mb-3">
-                Last verified: {car.updatedAt && !isNaN(new Date(car.updatedAt).getTime()) ? new Date(car.updatedAt).toLocaleDateString() : new Date().toLocaleDateString()} · Surat Dealership
-            </p>
-
-            {car.loanAvailable && (
-                <div className="flex items-center gap-2 mb-3.5 px-3 py-2 bg-blue-50/70 border border-blue-100 rounded-xl text-blue-700">
-                    <ShieldCheck className="w-4 h-4 text-blue-600 shrink-0" />
-                    <div className="flex flex-col min-w-0">
-                        <span className="font-heading text-[9px] font-bold uppercase tracking-widest text-blue-500 leading-tight">Financing Support</span>
-                        <span className="font-body text-xs font-bold leading-tight truncate">Car Loan / Easy EMI Available</span>
-                    </div>
-                </div>
-            )}
-
-            {/* Core 6 Specs Grid */}
-            <div className="grid grid-cols-2 gap-2.5 mb-4">
-                <div className="flex items-center gap-2.5 p-2 bg-slate-50/80 rounded-xl border border-slate-100">
-                    <div className="w-8 h-8 shrink-0 rounded-lg bg-white shadow-2xs flex items-center justify-center text-primary">
-                        <Fuel className="w-4 h-4 stroke-[2]" />
-                    </div>
-                    <div className="flex flex-col min-w-0">
-                        <span className="font-heading text-[9px] uppercase tracking-wider text-slate-400">Fuel</span>
-                        <span className="font-body font-bold text-xs text-slate-800 truncate">{car.fuelType || 'N/A'}</span>
-                    </div>
-                </div>
-
-                <div className="flex items-center gap-2.5 p-2 bg-slate-50/80 rounded-xl border border-slate-100">
-                    <div className="w-8 h-8 shrink-0 rounded-lg bg-white shadow-2xs flex items-center justify-center text-primary">
-                        <Settings2 className="w-4 h-4 stroke-[2]" />
-                    </div>
-                    <div className="flex flex-col min-w-0">
-                        <span className="font-heading text-[9px] uppercase tracking-wider text-slate-400">Transmission</span>
-                        <span className="font-body font-bold text-xs text-slate-800 truncate">{car.transmission || 'N/A'}</span>
-                    </div>
-                </div>
-
-                <div className="flex items-center gap-2.5 p-2 bg-slate-50/80 rounded-xl border border-slate-100">
-                    <div className="w-8 h-8 shrink-0 rounded-lg bg-white shadow-2xs flex items-center justify-center text-primary">
-                        <User className="w-4 h-4 stroke-[2]" />
-                    </div>
-                    <div className="flex flex-col min-w-0">
-                        <span className="font-heading text-[9px] uppercase tracking-wider text-slate-400">Owner</span>
-                        <span className="font-body font-bold text-xs text-slate-800 truncate">{car.owner || '1st Owner'}</span>
-                    </div>
-                </div>
-
-                <div className="flex items-center gap-2.5 p-2 bg-slate-50/80 rounded-xl border border-slate-100">
-                    <div className="w-8 h-8 shrink-0 rounded-lg bg-white shadow-2xs flex items-center justify-center text-primary">
-                        <Gauge className="w-4 h-4 stroke-[2]" />
-                    </div>
-                    <div className="flex flex-col min-w-0">
-                        <div className="flex items-center gap-1">
-                            <span className="font-heading text-[9px] uppercase tracking-wider text-slate-400">KMs</span>
-                            {car.isKmGenuine && (
-                                <span className="text-emerald-700 bg-emerald-100 px-1 py-0.2 rounded text-[7px] font-bold uppercase leading-none">
-                                    Genuine
+        return (
+            <div className="bg-surface rounded-2xl shadow-sm border border-slate-200/80 p-4 sm:p-5">
+                <div className="flex justify-between items-start mb-2.5">
+                    <span className="font-heading font-bold text-[10px] sm:text-[11px] text-slate-400 tracking-widest uppercase">{car.registration || 'UNREGISTERED'}</span>
+                    <div className="flex items-center gap-1">
+                        {isSold ? (
+                            <span className="bg-rose-50 text-rose-700 border border-rose-200 px-2.5 py-0.5 rounded text-[9px] font-heading font-bold uppercase tracking-wider flex items-center gap-1">
+                                🔴 SOLD OUT · વેચાઈ ગઈ
+                            </span>
+                        ) : (
+                            (car.badges || ['CERTIFIED']).map((b) => (
+                                <span key={b} className="bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-0.5 rounded text-[9px] font-heading font-bold uppercase tracking-wider flex items-center gap-0.5">
+                                    <CheckCircle2 className="w-2.5 h-2.5 text-emerald-600" />
+                                    {typeof b === 'string' ? b.toUpperCase() : b}
                                 </span>
-                            )}
-                        </div>
-                        <span className="font-body font-bold text-xs text-slate-800 truncate">
-                            {typeof car.kms === 'number' ? `${car.kms.toLocaleString('en-IN')} KM` : (car.kms ? `${car.kms} KM` : 'N/A')}
-                        </span>
+                            ))
+                        )}
                     </div>
                 </div>
 
-                <div className="flex items-center gap-2.5 p-2 bg-slate-50/80 rounded-xl border border-slate-100">
-                    <div className="w-8 h-8 shrink-0 rounded-lg bg-white shadow-2xs flex items-center justify-center text-primary">
-                        <Tag className="w-4 h-4 stroke-[2]" />
-                    </div>
-                    <div className="flex flex-col min-w-0">
-                        <span className="font-heading text-[9px] uppercase tracking-wider text-slate-400">Body</span>
-                        <span className="font-body font-bold text-xs text-slate-800 truncate">{car.bodyType || 'N/A'}</span>
-                    </div>
-                </div>
-
-                <div className="flex items-center gap-2.5 p-2 bg-slate-50/80 rounded-xl border border-slate-100">
-                    <div className="w-8 h-8 shrink-0 rounded-lg bg-white shadow-2xs flex items-center justify-center text-primary">
-                        <Palette className="w-4 h-4 stroke-[2]" />
-                    </div>
-                    <div className="flex flex-col min-w-0">
-                        <span className="font-heading text-[9px] uppercase tracking-wider text-slate-400">Color</span>
-                        <span className="font-body font-bold text-xs text-slate-800 truncate">{car.color || 'N/A'}</span>
-                    </div>
-                </div>
-            </div>
-
-            {/* Primary CTAs */}
-            <div className="flex flex-col gap-2.5">
-                <a
-                    href={whatsappUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="w-full flex items-center justify-center gap-2 bg-[#25D366] hover:bg-[#20bd5a] text-white py-3 px-5 rounded-xl font-body font-bold text-sm shadow-md shadow-green-500/20 active:scale-98 transition-all"
-                >
-                    <WhatsAppIcon className="w-4 h-4" />
-                    <span>WhatsApp પર વાત કરો · Chat</span>
-                </a>
-
-                <button
-                    type="button"
-                    id="btn-car-detail-add-compare"
-                    onClick={() => toggleCompare(car)}
-                    className={`w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl font-body font-bold text-xs border transition-all active:scale-98 ${
-                        isInCompare(car._id || car.id)
-                            ? 'bg-brand-orange text-white border-brand-orange shadow-xs'
-                            : 'bg-white hover:bg-slate-50 text-slate-800 border-slate-200 shadow-2xs'
-                    }`}
-                >
-                    <ArrowLeftRight className="w-3.5 h-3.5" />
-                    <span>
-                        {isInCompare(car._id || car.id)
-                            ? `✓ સરખામણીમાં ઉમેરેલ છે · In Compare`
-                            : `બીજી કાર સાથે સરખાવો · Add to Compare (${compareCount}/3)`}
+                <div className="mb-2">
+                    <span className={`text-[10px] font-bold uppercase tracking-wider block ${isSold ? 'text-rose-600' : 'text-slate-400'}`}>
+                        {isSold ? 'Deal Closed · વેચાઈ ગઈ છે' : 'Special Offer Price'}
                     </span>
-                </button>
+                    {isSold ? (
+                        <div className="flex items-baseline gap-2 pt-0.5">
+                            <h2 className="font-heading font-black text-2xl sm:text-3xl text-rose-600 leading-none tracking-tight">
+                                SOLD OUT
+                            </h2>
+                            <span className="font-heading font-bold text-sm sm:text-base text-slate-400 line-through">
+                                {typeof car.price === 'number' ? `₹${car.price.toLocaleString('en-IN')}` : (car.price ? `₹${car.price}` : '')}
+                            </span>
+                        </div>
+                    ) : (
+                        <h2 className="font-heading font-black text-3xl sm:text-4xl text-brand-orange leading-none tracking-tight">
+                            {typeof car.price === 'number' ? `₹${car.price.toLocaleString('en-IN')}` : (car.price ? `₹${car.price}` : 'કિંમત માટે સંપર્ક કરો')}
+                        </h2>
+                    )}
+                </div>
 
-                {isInCompare(car._id || car.id) && (
-                    <Link
-                        to="/compare"
-                        id="link-car-detail-view-compare"
-                        className="w-full flex items-center justify-center gap-2 py-2 rounded-xl font-body font-bold text-xs bg-slate-900 text-white hover:bg-slate-800 transition-all shadow-xs"
-                    >
-                        <ArrowLeftRight className="w-3.5 h-3.5 text-amber-400" />
-                        <span>સરખામણી જુઓ · View Compare ({compareCount} cars) →</span>
-                    </Link>
+                <p className="font-body text-[11px] text-slate-400 mb-3">
+                    {isSold ? 'Delivered by Sadguru Car Surat' : `Last verified: ${car.updatedAt && !isNaN(new Date(car.updatedAt).getTime()) ? new Date(car.updatedAt).toLocaleDateString() : new Date().toLocaleDateString()} · Surat Dealership`}
+                </p>
+
+                {car.loanAvailable && !isSold && (
+                    <div className="flex items-center gap-2 mb-3.5 px-3 py-2 bg-blue-50/70 border border-blue-100 rounded-xl text-blue-700">
+                        <ShieldCheck className="w-4 h-4 text-blue-600 shrink-0" />
+                        <div className="flex flex-col min-w-0">
+                            <span className="font-heading text-[9px] font-bold uppercase tracking-widest text-blue-500 leading-tight">Financing Support</span>
+                            <span className="font-body text-xs font-bold leading-tight truncate">Car Loan / Easy EMI Available</span>
+                        </div>
+                    </div>
                 )}
 
-                <button
-                    type="button"
-                    onClick={handleDownloadAllImages}
-                    className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl font-body font-bold text-xs bg-slate-900 hover:bg-slate-800 text-white shadow-xs active:scale-98 transition-all"
-                >
-                    <Download className="w-3.5 h-3.5 text-amber-400" />
-                    <span>બધા ફોટા ડાઉનલોડ કરો · Save All Photos ({rawImages.length > 0 ? rawImages.length : 1})</span>
-                </button>
+                {/* Core 6 Specs Grid */}
+                <div className="grid grid-cols-2 gap-2.5 mb-4">
+                    <div className="flex items-center gap-2.5 p-2 bg-slate-50/80 rounded-xl border border-slate-100">
+                        <div className="w-8 h-8 shrink-0 rounded-lg bg-white shadow-2xs flex items-center justify-center text-primary">
+                            <Fuel className="w-4 h-4 stroke-[2]" />
+                        </div>
+                        <div className="flex flex-col min-w-0">
+                            <span className="font-heading text-[9px] uppercase tracking-wider text-slate-400">Fuel</span>
+                            <span className="font-body font-bold text-xs text-slate-800 truncate">{car.fuelType || 'N/A'}</span>
+                        </div>
+                    </div>
+
+                    <div className="flex items-center gap-2.5 p-2 bg-slate-50/80 rounded-xl border border-slate-100">
+                        <div className="w-8 h-8 shrink-0 rounded-lg bg-white shadow-2xs flex items-center justify-center text-primary">
+                            <Settings2 className="w-4 h-4 stroke-[2]" />
+                        </div>
+                        <div className="flex flex-col min-w-0">
+                            <span className="font-heading text-[9px] uppercase tracking-wider text-slate-400">Transmission</span>
+                            <span className="font-body font-bold text-xs text-slate-800 truncate">{car.transmission || 'N/A'}</span>
+                        </div>
+                    </div>
+
+                    <div className="flex items-center gap-2.5 p-2 bg-slate-50/80 rounded-xl border border-slate-100">
+                        <div className="w-8 h-8 shrink-0 rounded-lg bg-white shadow-2xs flex items-center justify-center text-primary">
+                            <User className="w-4 h-4 stroke-[2]" />
+                        </div>
+                        <div className="flex flex-col min-w-0">
+                            <span className="font-heading text-[9px] uppercase tracking-wider text-slate-400">Owner</span>
+                            <span className="font-body font-bold text-xs text-slate-800 truncate">{car.owner || '1st Owner'}</span>
+                        </div>
+                    </div>
+
+                    <div className="flex items-center gap-2.5 p-2 bg-slate-50/80 rounded-xl border border-slate-100">
+                        <div className="w-8 h-8 shrink-0 rounded-lg bg-white shadow-2xs flex items-center justify-center text-primary">
+                            <Gauge className="w-4 h-4 stroke-[2]" />
+                        </div>
+                        <div className="flex flex-col min-w-0">
+                            <div className="flex items-center gap-1">
+                                <span className="font-heading text-[9px] uppercase tracking-wider text-slate-400">KMs</span>
+                                {car.isKmGenuine && (
+                                    <span className="text-emerald-700 bg-emerald-100 px-1 py-0.2 rounded text-[7px] font-bold uppercase leading-none">
+                                        Genuine
+                                    </span>
+                                )}
+                            </div>
+                            <span className="font-body font-bold text-xs text-slate-800 truncate">
+                                {typeof car.kms === 'number' ? `${car.kms.toLocaleString('en-IN')} KM` : (car.kms ? `${car.kms} KM` : 'N/A')}
+                            </span>
+                        </div>
+                    </div>
+
+                    <div className="flex items-center gap-2.5 p-2 bg-slate-50/80 rounded-xl border border-slate-100">
+                        <div className="w-8 h-8 shrink-0 rounded-lg bg-white shadow-2xs flex items-center justify-center text-primary">
+                            <Tag className="w-4 h-4 stroke-[2]" />
+                        </div>
+                        <div className="flex flex-col min-w-0">
+                            <span className="font-heading text-[9px] uppercase tracking-wider text-slate-400">Body</span>
+                            <span className="font-body font-bold text-xs text-slate-800 truncate">{car.bodyType || 'N/A'}</span>
+                        </div>
+                    </div>
+
+                    <div className="flex items-center gap-2.5 p-2 bg-slate-50/80 rounded-xl border border-slate-100">
+                        <div className="w-8 h-8 shrink-0 rounded-lg bg-white shadow-2xs flex items-center justify-center text-primary">
+                            <Palette className="w-4 h-4 stroke-[2]" />
+                        </div>
+                        <div className="flex flex-col min-w-0">
+                            <span className="font-heading text-[9px] uppercase tracking-wider text-slate-400">Color</span>
+                            <span className="font-body font-bold text-xs text-slate-800 truncate">{car.color || 'N/A'}</span>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Primary CTAs */}
+                <div className="flex flex-col gap-2.5">
+                    <a
+                        href={whatsappUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={`w-full flex items-center justify-center gap-2 py-3 px-5 rounded-xl font-body font-bold text-sm shadow-md transition-all active:scale-98 ${
+                            isSold
+                                ? 'bg-slate-900 hover:bg-slate-800 text-white shadow-slate-900/20'
+                                : 'bg-[#25D366] hover:bg-[#20bd5a] text-white shadow-green-500/20'
+                        }`}
+                    >
+                        <WhatsAppIcon className="w-4 h-4" />
+                        <span>
+                            {isSold
+                                ? 'આના જેવી બીજી કાર શોધો · Inquire Similar Cars'
+                                : 'WhatsApp પર વાત કરો · Chat'}
+                        </span>
+                    </a>
+
+                    {!isSold && (
+                        <button
+                            type="button"
+                            id="btn-car-detail-add-compare"
+                            onClick={() => toggleCompare(car)}
+                            className={`w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl font-body font-bold text-xs border transition-all active:scale-98 ${
+                                isInCompare(car._id || car.id)
+                                    ? 'bg-brand-orange text-white border-brand-orange shadow-xs'
+                                    : 'bg-white hover:bg-slate-50 text-slate-800 border-slate-200 shadow-2xs'
+                            }`}
+                        >
+                            <ArrowLeftRight className="w-3.5 h-3.5" />
+                            <span>
+                                {isInCompare(car._id || car.id)
+                                    ? `✓ સરખામણીમાં ઉમેરેલ છે · In Compare`
+                                    : `બીજી કાર સાથે સરખાવો · Add to Compare (${compareCount}/3)`}
+                            </span>
+                        </button>
+                    )}
+
+                    {!isSold && isInCompare(car._id || car.id) && (
+                        <Link
+                            to="/compare"
+                            id="link-car-detail-view-compare"
+                            className="w-full flex items-center justify-center gap-2 py-2 rounded-xl font-body font-bold text-xs bg-slate-900 text-white hover:bg-slate-800 transition-all shadow-xs"
+                        >
+                            <ArrowLeftRight className="w-3.5 h-3.5 text-amber-400" />
+                            <span>સરખામણી જુઓ · View Compare ({compareCount} cars) →</span>
+                        </Link>
+                    )}
+
+                    <button
+                        type="button"
+                        onClick={handleDownloadAllImages}
+                        className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl font-body font-bold text-xs bg-slate-900 hover:bg-slate-800 text-white shadow-xs active:scale-98 transition-all"
+                    >
+                        <Download className="w-3.5 h-3.5 text-amber-400" />
+                        <span>બધા ફોટા ડાઉનલોડ કરો · Save Photos ({rawImages.length > 0 ? rawImages.length : 1})</span>
+                    </button>
+                </div>
             </div>
-        </div>
-    );
+        );
+    };
 
     // Render helper for Dealership Trust and Location card
     const renderDealershipCard = () => (
@@ -817,6 +851,34 @@ export default function CarDetails() {
                         </div>
                     </div>
                 </div>
+
+                {/* ════ Sold Vehicle Notice Banner ════ */}
+                {String(car.status || '').toLowerCase() === 'sold' && (
+                    <div className="mb-5 p-4 sm:p-5 rounded-2xl bg-rose-50/90 border border-rose-200/90 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm animate-[fadeScale_200ms_ease-out]">
+                        <div className="flex items-center gap-3.5">
+                            <div className="w-11 h-11 rounded-2xl bg-rose-600 text-white flex items-center justify-center shrink-0 font-heading font-black text-xs uppercase tracking-wider shadow-sm shadow-rose-600/30">
+                                SOLD
+                            </div>
+                            <div>
+                                <h3 className="font-heading font-bold text-sm sm:text-base text-rose-950">
+                                    આ કાર સફળતાપૂર્વક વેચાઈ ગઈ છે · Successfully Delivered to Customer
+                                </h3>
+                                <p className="font-body text-xs text-rose-800/80 mt-0.5 max-w-2xl">
+                                    This vehicle has found a new home. Looking for a similar model? Our Surat dealership can source and 120-point inspect one for you!
+                                </p>
+                            </div>
+                        </div>
+                        <a
+                            href={whatsappUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-heading font-bold shadow-md shadow-rose-600/20 transition-all shrink-0 active:scale-95 whitespace-nowrap"
+                        >
+                            <WhatsAppIcon className="w-4 h-4" />
+                            <span>સમાન કાર શોધો · Find Similar</span>
+                        </a>
+                    </div>
+                )}
 
                 {/* ════ Main Showroom 2-Column Responsive Layout ════ */}
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 lg:gap-6 items-start">
@@ -1041,8 +1103,32 @@ export default function CarDetails() {
                             {renderPricingCard()}
                         </div>
 
-                        {/* 3. Detailed Specifications (Directly below Gallery on Desktop with ZERO gap!) */}
-                        <div className="flex flex-col gap-4 sm:gap-5 bg-surface p-4 sm:p-5 rounded-2xl shadow-sm border border-slate-200/80">
+                        {/* ── MOBILE DETAIL TAB SWITCHER (NATIVE PWA LUXURY FEEL) ── */}
+                        <div className="block lg:hidden mt-2 mb-1">
+                            <div className="flex items-center p-1 bg-slate-100/90 rounded-2xl border border-slate-200/80 shadow-inner">
+                                {[
+                                    { id: 'specs', label: '📋 ફીચર્સ · Specs' },
+                                    { id: 'emi', label: '💰 EMI કેલ્ક્યુલેટર' },
+                                    { id: 'dealer', label: '🏢 શોરૂમ · Dealership' },
+                                ].map((tab) => (
+                                    <button
+                                        key={tab.id}
+                                        type="button"
+                                        onClick={() => setMobileDetailTab(tab.id)}
+                                        className={`flex-1 py-2 px-1 text-center rounded-xl text-xs font-heading font-black transition-all cursor-pointer ${
+                                            mobileDetailTab === tab.id
+                                                ? 'bg-white text-slate-950 shadow-xs'
+                                                : 'text-slate-600 hover:text-slate-900'
+                                        }`}
+                                    >
+                                        {tab.label}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* 3. Detailed Specifications (Directly below Gallery on Desktop; tab-filtered on mobile) */}
+                        <div className={`flex flex-col gap-4 sm:gap-5 bg-surface p-4 sm:p-5 rounded-2xl shadow-sm border border-slate-200/80 ${mobileDetailTab !== 'specs' ? 'hidden lg:flex' : ''}`}>
                             {/* Comfort Features */}
                             {(car.airConditioner || car.powerWindows || car.sunroof || car.parkingSensors) && (
                                 <div>
@@ -1133,7 +1219,7 @@ export default function CarDetails() {
                                             Key Highlights & Features
                                         </h3>
                                         <span className="text-[11px] font-bold text-slate-400 font-heading">
-                                            {car.features.length} Features
+                                             {car.features.length} Features
                                         </span>
                                     </div>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-2 font-body text-xs sm:text-sm">
@@ -1189,14 +1275,45 @@ export default function CarDetails() {
                             )}
                         </div>
 
-                        {/* 4. Mobile Only: EMI Calculator & Dealership Card */}
+                        {/* 4. Mobile Only: EMI Calculator & Dealership Card (Filtered by selected tab) */}
                         <div className="block lg:hidden flex flex-col gap-3.5">
-                            <EmiCalculator
-                                carPrice={typeof car.price === 'number' ? car.price : (Number(car.price) || 500000)}
-                                carTitle={`${car.make || ''} ${car.model || 'Car'} (${car.year || ''})`}
-                                isSidebar={false}
-                            />
-                            {renderDealershipCard()}
+                            {mobileDetailTab === 'emi' && (
+                                <div className="animate-[fadeScale_200ms_ease-out]">
+                                    <EmiCalculator
+                                        carPrice={typeof car.price === 'number' ? car.price : (Number(car.price) || 500000)}
+                                        carTitle={`${car.make || ''} ${car.model || 'Car'} (${car.year || ''})`}
+                                        isSidebar={false}
+                                    />
+                                </div>
+                            )}
+                            {mobileDetailTab === 'dealer' && (
+                                <div className="animate-[fadeScale_200ms_ease-out] flex flex-col gap-3.5">
+                                    {renderDealershipCard()}
+                                    <div className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-2xl p-4 text-white shadow-sm border border-slate-700/50">
+                                        <span className="text-[10px] font-heading font-bold text-amber-400 uppercase tracking-widest block mb-2">
+                                            સદગુરુ શોરૂમ ભરોસો · Sadguru Assurance
+                                        </span>
+                                        <div className="grid grid-cols-2 gap-2 text-[11px] font-body">
+                                            <div className="flex items-center gap-1.5 text-slate-200">
+                                                <ShieldCheck className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                                                <span>120-Point ટેસ્ટ</span>
+                                            </div>
+                                            <div className="flex items-center gap-1.5 text-slate-200">
+                                                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                                                <span>જેન્યુઈન KM</span>
+                                            </div>
+                                            <div className="flex items-center gap-1.5 text-slate-200">
+                                                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                                                <span>નોન-એક્સિડેન્ટલ</span>
+                                            </div>
+                                            <div className="flex items-center gap-1.5 text-slate-200">
+                                                <ShieldCheck className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                                                <span>RTO ટ્રાન્સફર</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     </div>
 

@@ -126,17 +126,17 @@ export default function AboutLegacySection() {
             </div>
           </motion.div>
 
-          {/* 3 Core Trust Badges */}
-          <motion.div variants={FADE_IN_UP} className="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-3">
+          {/* 3 Core Trust Badges (Horizontal Snap Shelf on Mobile, Grid on Desktop) */}
+          <motion.div variants={FADE_IN_UP} className="mt-6 flex overflow-x-auto sm:grid sm:grid-cols-3 gap-2.5 sm:gap-3 no-scrollbar snap-x pb-1 sm:pb-0">
             {CORE_TRUST_ITEMS.map((item, index) => {
               const IconComponent = item.icon;
               return (
                 <div
                   key={index}
-                  className="flex items-center gap-2.5 p-3 rounded-xl bg-slate-50 border border-slate-200"
+                  className="flex items-center gap-2.5 p-3 rounded-xl bg-slate-50 border border-slate-200 shrink-0 snap-center min-w-[170px] sm:min-w-0"
                 >
                   <IconComponent className={`w-5 h-5 ${item.iconColor} shrink-0`} />
-                  <span className="text-xs font-heading font-black text-slate-800">
+                  <span className="text-xs font-heading font-black text-slate-800 whitespace-nowrap sm:whitespace-normal">
                     {item.title}
                   </span>
                 </div>

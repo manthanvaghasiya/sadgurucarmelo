@@ -24,7 +24,8 @@ export default function CarCard({
   const { toggleCompare, isInCompare } = useCompare();
   const whatsappUrl = getCarWhatsAppLink({ title, price });
   const isCompared = isInCompare(id);
-  const isComingSoon = (status || '').toLowerCase().includes('soon');
+  const isSold = String(status || '').toLowerCase() === 'sold';
+  const isComingSoon = !isSold && (status || '').toLowerCase().includes('soon');
 
   // Permanently remove Peti-pack and normalize badges
   const visibleBadges = (badges || []).filter(
@@ -88,8 +89,9 @@ export default function CarCard({
   return (
     <div
       onClick={handleCardClick}
-      className={`car-card-glass rounded-2xl overflow-hidden group hover:shadow-lg transition-all duration-300 flex flex-col h-full cursor-pointer ${isCompared ? 'ring-2 ring-brand-orange shadow-brand-orange/10' : ''
-        }`}
+      className={`car-card-glass rounded-2xl overflow-hidden group hover:shadow-lg transition-all duration-300 flex flex-col h-full cursor-pointer ${
+        isCompared ? 'ring-2 ring-brand-orange shadow-brand-orange/10' : ''
+      } ${isSold ? 'opacity-95 hover:opacity-100 ring-1 ring-rose-500/20' : ''}`}
     >
 
       {/* Image Container with Badges */}
@@ -98,12 +100,28 @@ export default function CarCard({
           src={image}
           alt={title}
           width={500}
-          className="group-hover:scale-105 transition-transform duration-500"
+          className={`transition-transform duration-500 ${
+            isSold ? 'grayscale-[20%] group-hover:scale-105' : 'group-hover:scale-105'
+          }`}
           aspectRatio="aspect-[4/3]"
         />
 
+        {/* Sold Dark Glass Center Overlay */}
+        {isSold && (
+          <div className="absolute inset-0 bg-slate-950/30 backdrop-blur-[0.5px] pointer-events-none z-5 flex items-center justify-center">
+            <span className="px-3.5 py-1.5 rounded-full bg-slate-900/90 backdrop-blur-md text-white font-heading font-black text-[10px] sm:text-xs tracking-widest border border-white/20 uppercase shadow-lg">
+              DELIVERED
+            </span>
+          </div>
+        )}
+
         {/* Top Badges (Side-by-side horizontal row) */}
         <div className="absolute top-2 left-2 sm:top-3 sm:left-3 flex flex-row flex-wrap items-center gap-1 sm:gap-1.5 z-10 max-w-[85%] pointer-events-none">
+          {isSold && (
+            <span className="premium-badge text-[8px] sm:text-[10px] font-heading font-black uppercase tracking-wider px-2 py-0.5 sm:px-2.5 sm:py-1 rounded shadow-md bg-gradient-to-r from-rose-600 to-red-600 text-white flex items-center gap-1 ring-1 ring-white/50">
+              🔴 SOLD OUT · વેચાઈ ગઈ
+            </span>
+          )}
           {isComingSoon && (
             <span className="premium-badge text-[8px] sm:text-[10px] font-heading font-black uppercase tracking-wider px-1.5 py-0.5 sm:px-2.5 sm:py-1 rounded shadow-sm bg-gradient-to-r from-brand-orange to-amber-500 text-white flex items-center gap-1 ring-1 ring-white/40">
               ✨ COMING SOON
@@ -115,7 +133,7 @@ export default function CarCard({
               In Compare
             </span>
           )}
-          {visibleBadges.map((badge, index) => {
+          {!isSold && visibleBadges.map((badge, index) => {
             const isCert = badge.toUpperCase() === 'CERTIFIED';
             return (
               <span
@@ -139,16 +157,19 @@ export default function CarCard({
           >
             <Download className="w-3.5 h-3.5 stroke-[2.5]" />
           </button>
-          <button
-            onClick={handleCompareToggle}
-            className={`w-8 h-8 rounded-full flex items-center justify-center transition-all shadow-md active:scale-90 ${isCompared
-                ? 'bg-brand-orange text-white scale-110 ring-2 ring-white shadow-brand-orange/40'
-                : 'bg-white/85 hover:bg-white text-slate-700 hover:text-brand-orange'
+          {!isSold && (
+            <button
+              onClick={handleCompareToggle}
+              className={`w-8 h-8 rounded-full flex items-center justify-center transition-all shadow-md active:scale-90 ${
+                isCompared
+                  ? 'bg-brand-orange text-white scale-110 ring-2 ring-white shadow-brand-orange/40'
+                  : 'bg-white/85 hover:bg-white text-slate-700 hover:text-brand-orange'
               }`}
-            title={isCompared ? 'સરખામણીમાંથી દૂર કરો · Remove from Compare' : 'સરખામણીમાં ઉમેરો · Add to Compare'}
-          >
-            <ArrowLeftRight className="w-3.5 h-3.5 stroke-[2.5]" />
-          </button>
+              title={isCompared ? 'સરખામણીમાંથી દૂર કરો · Remove from Compare' : 'સરખામણીમાં ઉમેરો · Add to Compare'}
+            >
+              <ArrowLeftRight className="w-3.5 h-3.5 stroke-[2.5]" />
+            </button>
+          )}
         </div>
       </div>
 
@@ -161,9 +182,20 @@ export default function CarCard({
             {title}
           </h3>
           <div className="flex items-center justify-between gap-1 pt-0.5 min-w-0">
-            <p className="car-price-highlight font-heading font-black text-sm sm:text-2xl text-accent transition-all duration-300 truncate">
-              {price}
-            </p>
+            {isSold ? (
+              <div className="flex items-baseline gap-1.5 min-w-0">
+                <span className="font-heading font-black text-xs sm:text-base text-rose-600 truncate">
+                  SOLD OUT
+                </span>
+                <span className="font-heading font-medium text-[11px] sm:text-xs text-text-muted/60 line-through truncate">
+                  {price}
+                </span>
+              </div>
+            ) : (
+              <p className="car-price-highlight font-heading font-black text-sm sm:text-2xl text-accent transition-all duration-300 truncate">
+                {price}
+              </p>
+            )}
 
             {/* Mobile Action Buttons (Right side of car price) */}
             <div className="flex sm:hidden items-center gap-1 shrink-0">
@@ -218,12 +250,25 @@ export default function CarCard({
           <Link
             to={`/car-details/${id}`}
             onClick={(e) => e.stopPropagation()}
-            className="car-action-btn flex-1 h-8 sm:h-10 px-2 sm:px-3 rounded-lg sm:rounded-xl border border-primary/25 bg-primary/5 hover:bg-primary text-primary hover:text-white font-body font-bold text-[11px] sm:text-xs flex items-center justify-center gap-1 sm:gap-1.5 transition-all duration-300 shadow-2xs active:scale-95 group/btn whitespace-nowrap min-w-0"
+            className={`car-action-btn flex-1 h-8 sm:h-10 px-2 sm:px-3 rounded-lg sm:rounded-xl border font-body font-bold text-[11px] sm:text-xs flex items-center justify-center gap-1 sm:gap-1.5 transition-all duration-300 shadow-2xs active:scale-95 group/btn whitespace-nowrap min-w-0 ${
+              isSold
+                ? 'border-rose-200 bg-rose-50/60 hover:bg-rose-600 text-rose-700 hover:text-white'
+                : 'border-primary/25 bg-primary/5 hover:bg-primary text-primary hover:text-white'
+            }`}
           >
-            <Eye className="w-3.5 h-3.5 sm:w-4 sm:h-4 transition-transform group-hover/btn:scale-110 shrink-0 text-primary group-hover/btn:text-white" />
+            <Eye className="w-3.5 h-3.5 sm:w-4 sm:h-4 transition-transform group-hover/btn:scale-110 shrink-0" />
             <span className="tracking-wide">
-              <span className="sm:hidden">View</span>
-              <span className="hidden sm:inline">View Details</span>
+              {isSold ? (
+                <>
+                  <span className="sm:hidden">Details</span>
+                  <span className="hidden sm:inline">Sold Details</span>
+                </>
+              ) : (
+                <>
+                  <span className="sm:hidden">View</span>
+                  <span className="hidden sm:inline">View Details</span>
+                </>
+              )}
             </span>
           </Link>
           <a
@@ -231,12 +276,18 @@ export default function CarCard({
             target="_blank"
             rel="noopener noreferrer"
             onClick={(e) => e.stopPropagation()}
-            className="car-action-btn h-8 w-8 sm:h-10 sm:w-auto p-0 sm:px-3.5 rounded-lg sm:rounded-xl bg-[#25D366] hover:bg-[#20bd5a] text-white flex items-center justify-center gap-1.5 font-body font-bold text-xs transition-all duration-300 shadow-sm shadow-green-500/25 active:scale-90 shrink-0"
-            title="Chat on WhatsApp"
-            aria-label="Chat on WhatsApp"
+            className={`car-action-btn h-8 w-8 sm:h-10 sm:w-auto p-0 sm:px-3.5 rounded-lg sm:rounded-xl text-white flex items-center justify-center gap-1.5 font-body font-bold text-xs transition-all duration-300 shadow-sm active:scale-90 shrink-0 ${
+              isSold
+                ? 'bg-slate-800 hover:bg-slate-900 shadow-slate-900/20'
+                : 'bg-[#25D366] hover:bg-[#20bd5a] shadow-green-500/25'
+            }`}
+            title={isSold ? 'Inquire for Similar Available Cars' : 'Chat on WhatsApp'}
+            aria-label={isSold ? 'Inquire for Similar Cars' : 'Chat on WhatsApp'}
           >
             <WhatsAppIcon className="w-4 h-4 sm:w-4 sm:h-4 shrink-0" />
-            <span className="hidden sm:inline tracking-wider font-semibold">WhatsApp</span>
+            <span className="hidden sm:inline tracking-wider font-semibold">
+              {isSold ? 'Similar Cars' : 'WhatsApp'}
+            </span>
           </a>
         </div>
       </div>

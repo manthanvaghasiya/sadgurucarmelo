@@ -129,10 +129,22 @@ const carSchema = new mongoose.Schema(
     status: {
       type: String,
       enum: {
-        values: ['Available', 'Coming Soon', 'Draft'],
+        values: ['Available', 'Coming Soon', 'Sold', 'Draft'],
         message: '{VALUE} is not a valid status',
       },
       default: 'Available',
+    },
+    soldAt: {
+      type: Date,
+      default: null,
+    },
+    photosPurged: {
+      type: Boolean,
+      default: false,
+    },
+    photosPurgedAt: {
+      type: Date,
+      default: null,
     },
     loanAvailable: {
       type: Boolean,

@@ -10,14 +10,14 @@ export default function Footer() {
   const { phone, email, address, telLink, mailLink } = useDealershipContact();
 
   return (
-    <footer className="bg-[#0A0A0A] text-gray-400 pt-20 pb-10 border-t border-white/5 selection:bg-primary/30">
+    <footer className="bg-[#0A0A0A] text-gray-400 pt-12 pb-24 md:pt-20 md:pb-10 border-t border-white/5 selection:bg-primary/30">
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
 
         {/* Main Footer Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 lg:gap-8 mb-16">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 md:gap-12 lg:gap-8 mb-10 md:mb-16">
 
           {/* 1. Brand Identity */}
-          <div className="space-y-6">
+          <div className="space-y-4 sm:space-y-6">
             <Link to="/" className="inline-flex flex-col items-start gap-3 group">
               <img
                 src="/logo-removebg-preview.png"
@@ -31,23 +31,23 @@ export default function Footer() {
                 <div className="h-0.5 w-0 group-hover:w-full bg-accent transition-all duration-500 mt-1 shadow-[0_0_8px_rgba(37,211,102,0.4)]"></div>
               </div>
             </Link>
-            <p className="font-body text-sm leading-relaxed pr-4">
+            <p className="font-body text-xs sm:text-sm leading-relaxed pr-4">
               Elevating Surat's pre-owned car experience since 2012.
               We deal in certified luxury and premium vehicles with 100% transparency.
             </p>
-            <div className="pt-2">
+            <div className="pt-1 sm:pt-2">
               <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-[10px] font-bold uppercase tracking-widest text-accent shadow-inner">
                 Certified Dealer
               </div>
             </div>
           </div>
 
-          {/* 2. Quick Navigation */}
-          <div className="space-y-7">
+          {/* 2. Quick Navigation (2-column on mobile to reduce vertical height, vertical list on desktop) */}
+          <div className="space-y-4 sm:space-y-7">
             <h3 className="font-heading font-bold text-[11px] text-white uppercase tracking-[0.2em] opacity-50">
               Quick Navigation
             </h3>
-            <ul className="space-y-4 font-body text-sm">
+            <ul className="grid grid-cols-2 gap-x-4 gap-y-2.5 sm:block sm:space-y-4 font-body text-xs sm:text-sm">
               {[
                 { name: 'Browse Inventory', path: '/inventory' },
                 { name: 'Sell Your Car', path: '/sell-your-car' },
@@ -59,10 +59,10 @@ export default function Footer() {
                 <li key={link.name}>
                   <Link
                     to={link.path}
-                    className="flex items-center gap-3 hover:text-white transition-all group w-fit"
+                    className="flex items-center gap-2 sm:gap-3 hover:text-white transition-all group w-fit"
                   >
-                    <ChevronRight className="w-4 h-4 text-primary group-hover:translate-x-1 transition-transform" />
-                    <span className="group-hover:translate-x-0.5 transition-transform duration-300">{link.name}</span>
+                    <ChevronRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-primary group-hover:translate-x-1 transition-transform shrink-0" />
+                    <span className="group-hover:translate-x-0.5 transition-transform duration-300 leading-snug">{link.name}</span>
                   </Link>
                 </li>
               ))}
@@ -126,7 +126,7 @@ export default function Footer() {
 
               {/* Instagram Card */}
               <a
-                href="https://www.instagram.com/sadguru_car_surat?igsh=azEwNzN2eG9hOG5y"
+                href="https://www.instagram.com/sadguru_car_surat?utm_source=ig_web_button_share_sheet&stkn=ZDNlZDc0MzIxNw=="
                 target="_blank"
                 rel="noopener noreferrer"
                 className="group flex items-center justify-between p-2.5 rounded-xl bg-white/[0.04] border border-white/[0.05] hover:bg-white/[0.08] hover:border-pink-500/40 transition-all duration-500"

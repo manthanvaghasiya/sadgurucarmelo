@@ -602,7 +602,6 @@ export default function Home() {
         <HappyCustomers />
 
 
-
       </div>
     </div>
   );

@@ -33,7 +33,7 @@ export default function CompareQuickAddDeck({
         </span>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="flex sm:grid sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 overflow-x-auto sm:overflow-visible pb-3 sm:pb-0 scrollbar-none snap-x -mx-4 px-4 sm:mx-0 sm:px-0">
         {availableCars.slice(0, 8).map((car) => {
           const carId = car._id || car.id;
           const img = car.image || (car.images && car.images[0]) || '';
@@ -43,7 +43,7 @@ export default function CompareQuickAddDeck({
             <motion.div
               key={carId}
               whileHover={{ y: -3, transition: { duration: 0.2 } }}
-              className="bg-white rounded-2xl p-3.5 border border-slate-200/90 shadow-xs hover:shadow-md transition-all flex flex-col justify-between group"
+              className="w-[230px] sm:w-auto shrink-0 snap-start bg-white rounded-2xl p-3 sm:p-3.5 border border-slate-200/90 shadow-xs hover:shadow-md transition-all flex flex-col justify-between group"
             >
               <div>
                 {/* Thumbnail */}

@@ -24,6 +24,7 @@ export default function CompareMatrixTable({
   onOpenSelector,
   whatsappMessage,
 }) {
+  const [mobileCategory, setMobileCategory] = React.useState('all');
   const colCount = compareCars.length + emptySlotsCount;
 
   return (
@@ -257,16 +258,16 @@ export default function CompareMatrixTable({
 
       {/* WhatsApp Advisor Banner */}
       {compareCars.length >= 2 && (
-        <div className="p-4 sm:p-6 bg-emerald-50/80 border-b border-emerald-200/80 flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-[#25D366] text-white flex items-center justify-center shrink-0 shadow-xs">
-              <WhatsAppIcon className="w-5 h-5" />
+        <div className="p-3 sm:p-5 bg-emerald-50/80 border-b border-emerald-200/80 flex flex-col sm:flex-row items-center justify-between gap-2.5 sm:gap-3 text-center sm:text-left">
+          <div className="flex items-center gap-2.5 sm:gap-3">
+            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-[#25D366] text-white flex items-center justify-center shrink-0 shadow-xs">
+              <WhatsAppIcon className="w-4 h-4 sm:w-5 sm:h-5" />
             </div>
-            <div>
-              <p className="font-heading font-black text-slate-900 text-xs sm:text-sm">
-                ગાડી પસંદ કરવામાં અસમંજસ છે? સદગુરુ કાર એક્સપર્ટની સલાહ લો!
+            <div className="text-left">
+              <p className="font-heading font-black text-slate-900 text-xs sm:text-sm leading-tight">
+                અસમંજસ છે? સદગુરુ એક્સપર્ટની સલાહ લો!
               </p>
-              <p className="text-[11px] sm:text-xs text-slate-600 font-body">
+              <p className="text-[11px] sm:text-xs text-slate-600 font-body hidden sm:block">
                 આ {compareCars.length} મોડેલમાંથી તમારા બજેટ અને વપરાશ મુજબ કઈ ગાડી શ્રેષ્ઠ રહેશે તે WhatsApp પર પૂછો.
               </p>
             </div>
@@ -275,10 +276,10 @@ export default function CompareMatrixTable({
             href={buildWhatsAppUrl(whatsappMessage)}
             target="_blank"
             rel="noopener noreferrer"
-            className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-[#25D366] hover:bg-[#20bd5a] text-white font-heading font-black text-xs flex items-center justify-center gap-2 shadow-xs shrink-0 active:scale-95 transition-all"
+            className="w-full sm:w-auto px-4 py-2 sm:px-5 sm:py-2.5 rounded-xl bg-[#25D366] hover:bg-[#20bd5a] text-white font-heading font-black text-xs flex items-center justify-center gap-1.5 shadow-xs shrink-0 active:scale-95 transition-all"
           >
-            <WhatsAppIcon className="w-4 h-4" />
-            <span>એક્સપર્ટ સલાહ · Consult</span>
+            <WhatsAppIcon className="w-3.5 h-3.5" />
+            <span>WhatsApp એક્સપર્ટ સલાહ</span>
           </a>
         </div>
       )}
@@ -286,11 +287,43 @@ export default function CompareMatrixTable({
       {/* ══════════════════════════════════════════════════════════════
           4. SPECIFICATION ROWS: NATIVE MOBILE VIEW (SIDE-BY-SIDE SPLIT)
           ══════════════════════════════════════════════════════════════ */}
-      <div className="md:hidden divide-y divide-slate-100 p-3">
-        {comparisonRows.map((cat, catIdx) => (
-          <div key={`mob-cat-${catIdx}`} className="py-4 first:pt-1 last:pb-2">
+      <div className="md:hidden p-3">
+        {/* Mobile Category Segmented Pill Bar */}
+        <div className="flex items-center gap-1.5 overflow-x-auto pb-2.5 scrollbar-none snap-x">
+          <button
+            type="button"
+            onClick={() => setMobileCategory('all')}
+            className={`px-3 py-1.5 rounded-xl text-xs font-heading font-black transition-all shrink-0 snap-start active:scale-95 cursor-pointer ${
+              mobileCategory === 'all'
+                ? 'bg-slate-950 text-white shadow-xs'
+                : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+            }`}
+          >
+            બધી વિગતો · All ({comparisonRows.reduce((acc, c) => acc + c.items.length, 0)})
+          </button>
+          {comparisonRows.map((cat, idx) => (
+            <button
+              key={idx}
+              type="button"
+              onClick={() => setMobileCategory(String(idx))}
+              className={`px-3 py-1.5 rounded-xl text-xs font-heading font-black transition-all shrink-0 snap-start active:scale-95 cursor-pointer ${
+                mobileCategory === String(idx)
+                  ? 'bg-brand-orange text-white shadow-xs'
+                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+              }`}
+            >
+              {cat.category.split('·')[0].trim()}
+            </button>
+          ))}
+        </div>
+
+        <div className="divide-y divide-slate-100">
+        {comparisonRows
+          .filter((_, catIdx) => mobileCategory === 'all' || mobileCategory === String(catIdx))
+          .map((cat, catIdx) => (
+          <div key={`mob-cat-${catIdx}`} className="py-3 first:pt-1 last:pb-1">
             {/* Category Header */}
-            <h3 className="font-heading font-black text-xs text-brand-orange uppercase tracking-wider mb-3 pb-1 border-b border-amber-500/20 flex items-center gap-1.5">
+            <h3 className="font-heading font-black text-xs text-brand-orange uppercase tracking-wider mb-2.5 pb-1 border-b border-amber-500/20 flex items-center gap-1.5">
               <Sparkles className="w-3 h-3" />
               <span>{cat.category}</span>
             </h3>
@@ -360,6 +393,7 @@ export default function CompareMatrixTable({
             </div>
           </div>
         ))}
+        </div>
       </div>
 
       {/* ══════════════════════════════════════════════════════════════

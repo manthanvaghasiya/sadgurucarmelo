@@ -144,17 +144,17 @@ export default function AboutPromiseSection({
           onOpenModal={(pillar) => onOpenModal(pillar)}
         />
 
-        {/* 5-Badge Reassurance Ribbon */}
-        <div className="mt-10 pt-6 border-t border-slate-200/60 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 text-center">
+        {/* 5-Badge Reassurance Ribbon (Horizontal Snap Carousel on Mobile, Full Grid on Desktop) */}
+        <div className="mt-8 sm:mt-10 pt-5 sm:pt-6 border-t border-slate-200/60 flex overflow-x-auto sm:grid sm:grid-cols-3 lg:grid-cols-5 gap-2.5 sm:gap-3 text-center no-scrollbar snap-x pb-2 sm:pb-0">
           {REASSURANCE_BADGES.map((badge, idx) => {
             const BadgeIcon = badge.icon;
             return (
               <div
                 key={idx}
-                className={`p-3.5 rounded-2xl bg-white border border-slate-200/90 shadow-xs flex items-center justify-center gap-2 ${badge.wrapperClass}`}
+                className={`p-3 sm:p-3.5 rounded-2xl bg-white border border-slate-200/90 shadow-xs flex items-center justify-center gap-2 shrink-0 snap-center min-w-[155px] sm:min-w-0 ${badge.wrapperClass}`}
               >
                 <BadgeIcon className={`w-4 h-4 ${badge.color} shrink-0`} />
-                <span className="text-xs font-heading font-black text-slate-800">
+                <span className="text-xs font-heading font-black text-slate-800 whitespace-nowrap sm:whitespace-normal">
                   {badge.text}
                 </span>
               </div>

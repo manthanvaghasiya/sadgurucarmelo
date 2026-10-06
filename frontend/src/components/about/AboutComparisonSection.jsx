@@ -5,8 +5,8 @@
  */
 
 // External dependencies
-import React from 'react';
-import { Compass, X as LucideX, CheckCircle } from 'lucide-react';
+import React, { useState } from 'react';
+import { Compass, X as LucideX, CheckCircle, ShieldCheck } from 'lucide-react';
 
 // Constants
 const BROKER_RISKS = [
@@ -59,14 +59,17 @@ const SADGURU_ADVANTAGES = [
  * About Comparison Section Component
  */
 export default function AboutComparisonSection() {
+  // Mobile-only segmented tab state: 'sadguru' | 'broker'
+  const [mobileTab, setMobileTab] = useState('sadguru');
+
   return (
-    <section className="py-16 sm:py-20 md:py-24 px-4 sm:px-6 lg:px-8 bg-[#F8FAFC] relative overflow-hidden border-b border-slate-100">
+    <section className="py-12 sm:py-20 md:py-24 px-4 sm:px-6 lg:px-8 bg-[#F8FAFC] relative overflow-hidden border-b border-slate-100">
       {/* Subtle Ambient Radial Lighting */}
       <div className="absolute top-0 right-1/4 w-[600px] h-[350px] bg-gradient-to-br from-amber-100/20 to-transparent rounded-full blur-[130px] pointer-events-none" />
 
       <div className="max-w-6xl mx-auto relative z-10">
         {/* Section Header */}
-        <div className="text-center max-w-3xl mx-auto mb-10 sm:mb-12">
+        <div className="text-center max-w-3xl mx-auto mb-8 sm:mb-12">
           <span className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-brand-orange/10 border border-brand-orange/20 text-brand-orange font-heading font-bold text-xs uppercase tracking-widest mb-3.5 shadow-xs">
             <Compass className="w-3.5 h-3.5 text-brand-orange" /> શા માટે સદગુરુ કાર મેળો? · THE UNFAIR ADVANTAGE
           </span>
@@ -76,13 +79,111 @@ export default function AboutComparisonSection() {
               સદગુરુ વેરિફાઇડ કાર
             </span>
           </h2>
-          <p className="mt-3.5 text-sm sm:text-base text-slate-600 font-medium leading-relaxed font-body">
+          <p className="mt-2.5 sm:mt-3.5 text-xs sm:text-base text-slate-600 font-medium leading-relaxed font-body">
             સુરતમાં વપરાયેલી કાર લેતી વખતે ગ્રાહકો સાથે થતી સામાન્ય છેતરપિંડીઓથી બચો. જુઓ અમારો સ્પષ્ટ તફાવત:
           </p>
         </div>
 
-        {/* Comparison Matrix Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8 items-stretch">
+        {/* ── MOBILE VIEW: Luxury Segmented Toggle (Reduces 60% vertical sprawl on phone) ── */}
+        <div className="md:hidden">
+          {/* Segmented Switcher Bar */}
+          <div className="flex items-center p-1 bg-slate-200/80 backdrop-blur-sm rounded-2xl mb-4 border border-slate-300/80 shadow-2xs">
+            <button
+              type="button"
+              onClick={() => setMobileTab('sadguru')}
+              className={`flex-1 py-2.5 px-3 rounded-xl font-heading font-black text-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                mobileTab === 'sadguru'
+                  ? 'bg-slate-950 text-white shadow-sm'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              <CheckCircle className={`w-3.5 h-3.5 ${mobileTab === 'sadguru' ? 'text-brand-orange' : 'text-slate-400'}`} />
+              <span>સદગુરુ વેરિફાઇડ</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setMobileTab('broker')}
+              className={`flex-1 py-2.5 px-3 rounded-xl font-heading font-black text-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                mobileTab === 'broker'
+                  ? 'bg-red-600 text-white shadow-sm'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              <LucideX className={`w-3.5 h-3.5 ${mobileTab === 'broker' ? 'text-white' : 'text-red-500'}`} />
+              <span>સામાન્ય બ્રોકર જોખમ</span>
+            </button>
+          </div>
+
+          {/* Active Mobile Card */}
+          {mobileTab === 'sadguru' ? (
+            <div className="bg-white p-5 rounded-2xl border-2 border-brand-orange/60 shadow-[0_12px_32px_rgba(245,148,35,0.14)] relative overflow-hidden flex flex-col justify-between">
+              <div className="absolute top-0 inset-x-0 h-1.5 bg-gradient-to-r from-brand-orange via-amber-400 to-yellow-400" />
+              <div>
+                <div className="flex items-center justify-between mb-3.5">
+                  <span className="text-[11px] font-heading font-black text-slate-950 uppercase tracking-wider bg-gradient-to-r from-brand-orange to-amber-400 px-2.5 py-0.5 rounded-full shadow-xs">
+                    સદગુરુ કાર મેળો
+                  </span>
+                  <span className="text-[11px] text-brand-orange font-black">100% Certified</span>
+                </div>
+                <h3 className="text-base font-heading font-black text-slate-900 mb-4 leading-snug">
+                  સંપૂર્ણ સુરક્ષા, ગેરંટી અને શાંતિ (Peace of Mind)
+                </h3>
+
+                <ul className="space-y-3 text-xs text-slate-700">
+                  {SADGURU_ADVANTAGES.map((advantage, index) => (
+                    <li key={index} className="flex items-start gap-2.5">
+                      <CheckCircle className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                      <span>
+                        <b className="text-slate-900">{advantage.title}</b> {advantage.detail}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              <div className="mt-5 pt-3 border-t border-slate-100 text-center">
+                <span className="text-[11px] font-bold text-brand-orange">
+                  ✅ 100% સેફ ડીલિંગ અને સુરતના 5,000+ પરિવારોનો વિશ્વાસ
+                </span>
+              </div>
+            </div>
+          ) : (
+            <div className="bg-red-50/70 p-5 rounded-2xl border border-red-200 shadow-sm relative overflow-hidden flex flex-col justify-between">
+              <div className="absolute top-0 inset-x-0 h-1.5 bg-red-400" />
+              <div>
+                <div className="flex items-center justify-between mb-3.5">
+                  <span className="text-[11px] font-heading font-black text-red-600 uppercase tracking-wider bg-red-100 px-2.5 py-0.5 rounded-full border border-red-200">
+                    સામાન્ય બજાર / બ્રોકર
+                  </span>
+                  <span className="text-[11px] text-slate-500 font-bold">Unorganized</span>
+                </div>
+                <h3 className="text-base font-heading font-black text-slate-900 mb-4 leading-snug">
+                  અનિશ્ચિતતા અને ઊંચા જોખમો
+                </h3>
+
+                <ul className="space-y-3 text-xs text-slate-600">
+                  {BROKER_RISKS.map((risk, index) => (
+                    <li key={index} className="flex items-start gap-2.5">
+                      <LucideX className="w-4 h-4 text-red-500 shrink-0 mt-0.5" />
+                      <span>
+                        <b className="text-slate-800">{risk.title}</b> {risk.detail}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              <div className="mt-5 pt-3 border-t border-red-200/60 text-center">
+                <span className="text-[11px] font-semibold text-red-600">
+                  ❌ ગ્રાહક માટે માનસિક તણાવ અને નાણાકીય જોખમ
+                </span>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* ── DESKTOP VIEW: Full Side-by-Side 2-Column Grid (100% Untouched on Laptop) ── */}
+        <div className="hidden md:grid md:grid-cols-2 gap-6 lg:gap-8 items-stretch">
           {/* Card 1: Traditional Broker */}
           <div className="bg-red-50/50 p-6 sm:p-8 rounded-3xl border border-red-200 shadow-sm relative overflow-hidden flex flex-col justify-between">
             <div className="absolute top-0 inset-x-0 h-1.5 bg-red-400" />

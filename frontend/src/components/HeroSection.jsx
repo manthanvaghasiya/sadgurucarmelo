@@ -14,8 +14,6 @@ import WhatsAppIcon from './WhatsAppIcon';
 import axiosInstance from '../api/axiosConfig';
 import toast from 'react-hot-toast';
 
-import { FALLBACK_SHOWCASE } from '../data/showcaseData';
-
 // Dynamic Brand Logo SVG Renderer
 const renderBrandLogo = (make = '') => {
   const m = (make || '').toLowerCase();
@@ -86,6 +84,17 @@ const renderBrandLogo = (make = '') => {
 // Feature Flag: Toggle between "Explore Cars" CTA (default) and "Book Test Drive" CTA (for future re-activation)
 const SHOW_TEST_DRIVE_CTA = false;
 
+// Safe image extractor
+const getCarImage = (car) => {
+  if (!car) return '';
+  if (typeof car.image === 'string' && car.image) return car.image;
+  if (Array.isArray(car.images) && car.images.length > 0) {
+    const first = car.images[0];
+    return typeof first === 'string' ? first : (first?.url || '');
+  }
+  return '';
+};
+
 export default function HeroSection() {
   const navigate = useNavigate();
   const { cars } = useCars();
@@ -97,11 +106,12 @@ export default function HeroSection() {
   const [formData, setFormData] = useState({ name: '', phone: '' });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Filter cars to ONLY display Coming Soon vehicles in this showcase
-  const displayCars = useMemo(() => {
-    // 1. Extract only Coming Soon inventory vehicles
-    const comingSoonList = (cars || []).filter(c => {
-      if (!c.image) return false;
+  // Extract ONLY real Coming Soon vehicles from the inventory
+  const comingSoonCars = useMemo(() => {
+    return (cars || []).filter((c) => {
+      if (!c) return false;
+      const hasImg = Boolean(c.image || (Array.isArray(c.images) && c.images.length > 0));
+      if (!hasImg) return false;
       const status = (c.status || '').trim().toLowerCase();
       return (
         status === 'coming soon' ||
@@ -110,23 +120,19 @@ export default function HeroSection() {
         c.isComingSoon === true
       );
     });
-
-    if (comingSoonList.length > 0) {
-      return comingSoonList;
-    }
-
-    // 2. If no Coming Soon cars exist in database yet, fallback to curated Coming Soon models
-    return FALLBACK_SHOWCASE;
   }, [cars]);
+
+  const hasComingSoon = comingSoonCars.length > 0;
+  const displayCars = comingSoonCars;
 
   // Ensure currentCarIndex is in bounds
   useEffect(() => {
-    if (currentCarIndex >= displayCars.length) {
+    if (displayCars.length > 0 && currentCarIndex >= displayCars.length) {
       setCurrentCarIndex(0);
     }
   }, [displayCars.length, currentCarIndex]);
 
-  // Auto-slide every 6.5 seconds
+  // Auto-slide every 6.5 seconds when multiple coming soon cars exist
   useEffect(() => {
     if (displayCars.length <= 1) return;
     const interval = setInterval(() => {
@@ -135,7 +141,7 @@ export default function HeroSection() {
     return () => clearInterval(interval);
   }, [displayCars.length]);
 
-  const activeCar = displayCars[currentCarIndex] || displayCars[0] || FALLBACK_SHOWCASE[0];
+  const activeCar = hasComingSoon ? (displayCars[currentCarIndex] || displayCars[0]) : null;
 
   const formatPrice = (price) => {
     return price >= 100000
@@ -189,7 +195,7 @@ export default function HeroSection() {
     : buildWhatsAppUrl('Hello Sadguru Car Surat, I am interested in your upcoming verified cars.');
 
   return (
-    <section className="relative w-full bg-gradient-to-b from-[#f8fafc] via-[#ffffff] to-[#f8fafc] overflow-hidden pt-5 sm:pt-6 lg:pt-8 pb-8 sm:pb-10 lg:pb-12">
+    <section className={`relative w-full bg-gradient-to-b from-[#f8fafc] via-[#ffffff] to-[#f8fafc] overflow-hidden pt-5 sm:pt-6 lg:pt-8 ${hasComingSoon ? 'pb-8 sm:pb-10 lg:pb-12' : 'pb-8 sm:pb-12 lg:pb-14'}`}>
 
       {/* ═══════════════════════════════════════════════════════════════════
           BACKGROUND AMBIENT TEXTURE & GLOW
@@ -209,7 +215,7 @@ export default function HeroSection() {
         {/* ═══════════════════════════════════════════════════════════════════
             1. TOP HEADLINE & COMPACT DUAL ACTION CTAs
             ═══════════════════════════════════════════════════════════════════ */}
-        <div className="text-center max-w-3xl mx-auto mb-6 lg:mb-8">
+        <div className={`text-center max-w-3xl mx-auto ${hasComingSoon ? 'mb-6 lg:mb-8' : 'mb-2 sm:mb-4'}`}>
           {/* Top Pill */}
           <motion.div
             initial={{ opacity: 0, y: -12 }}
@@ -327,14 +333,42 @@ export default function HeroSection() {
               </div>
             )}
           </motion.div>
+
+          {/* Sleek Trust Highlights Strip — Shown cleanly when no Coming Soon car is available */}
+          {!hasComingSoon && (
+            <motion.div
+              initial={{ opacity: 0, y: 14 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.3 }}
+              className="mt-8 sm:mt-10 flex flex-wrap items-center justify-center gap-3 sm:gap-6 pt-6 border-t border-slate-200/60 max-w-2xl mx-auto"
+            >
+              <div className="flex items-center gap-1.5 text-xs sm:text-sm font-heading font-bold text-slate-700">
+                <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
+                <span>120+ પોઈન્ટ ઈન્સ્પેક્શન</span>
+              </div>
+              <div className="flex items-center gap-1.5 text-xs sm:text-sm font-heading font-bold text-slate-700">
+                <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
+                <span>100% જેન્યુઇન KM</span>
+              </div>
+              <div className="flex items-center gap-1.5 text-xs sm:text-sm font-heading font-bold text-slate-700">
+                <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
+                <span>સરળ બેંક લોન સહાય</span>
+              </div>
+              <div className="flex items-center gap-1.5 text-xs sm:text-sm font-heading font-bold text-slate-700">
+                <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
+                <span>100% ફ્રી RTO ટ્રાન્સફર</span>
+              </div>
+            </motion.div>
+          )}
         </div>
 
 
         {/* ═══════════════════════════════════════════════════════════════════
             2. THE AUTOMOTIVE TELEMETRY SHOWCASE:
-               Left Side (Specs & Brand) — Center Arc (Clean Car HUD) — Right Side (Performance & Trust)
+               Only rendered when real Coming Soon cars exist in inventory
             ═══════════════════════════════════════════════════════════════════ */}
-        <div className="relative w-full max-w-[1180px] mx-auto mt-2 sm:mt-4">
+        {hasComingSoon && activeCar && (
+          <div className="relative w-full max-w-[1180px] mx-auto mt-2 sm:mt-4">
 
           {/* SVG CIRCUIT TRACER WIRES (Desktop Only) */}
           <div className="hidden xl:block absolute inset-0 pointer-events-none z-0">
@@ -517,7 +551,7 @@ export default function HeroSection() {
                           <motion.img
                             animate={{ y: [0, -6, 0] }}
                             transition={{ repeat: Infinity, duration: 4.5, ease: 'easeInOut' }}
-                            src={getOptimizedUrl(activeCar.image, 1000)}
+                            src={getOptimizedUrl(getCarImage(activeCar), 1000)}
                             alt={`${activeCar.make} ${activeCar.model}`}
                             className="w-full max-h-[215px] sm:max-h-[265px] md:max-h-[295px] object-contain drop-shadow-[0_16px_28px_rgba(15,23,42,0.22)] select-none hover:scale-105 transition-transform duration-500"
                           />
@@ -756,13 +790,14 @@ export default function HeroSection() {
 
           </div>
         </div>
+        )}
 
       </div>
 
       {/* ═══════════════════════════════════════════════════════════════════
           TEST DRIVE BOOKING MODAL
           ═══════════════════════════════════════════════════════════════════ */}
-      {showModal && (
+      {hasComingSoon && activeCar && showModal && (
         <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm px-4 pb-20 sm:p-4 animate-fade-in" onClick={() => setShowModal(false)}>
           <div className="bg-white rounded-3xl sm:rounded-2xl w-full max-w-md overflow-hidden shadow-2xl animate-scale-in" onClick={(e) => e.stopPropagation()}>
             <div className="p-5 border-b border-gray-100 flex justify-between items-center bg-slate-50">
@@ -777,7 +812,7 @@ export default function HeroSection() {
             <form onSubmit={handleTestDriveSubmit} className="p-6 space-y-4 font-body">
               {activeCar && (
                 <div className="bg-slate-50 p-3 rounded-xl border border-slate-100 flex items-center gap-3">
-                  <img src={getOptimizedUrl(activeCar.image, 200)} alt={activeCar.model} className="w-16 h-12 object-contain" />
+                  <img src={getOptimizedUrl(getCarImage(activeCar), 200)} alt={activeCar.model} className="w-16 h-12 object-contain" />
                   <div>
                     <p className="text-xs font-bold text-slate-800">{activeCar.make} {activeCar.model}</p>
                     <p className="text-xs font-semibold text-brand-orange">{formatPrice(activeCar.price)}</p>
